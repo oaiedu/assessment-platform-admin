@@ -1,15 +1,15 @@
 <template>
-    <v-container 
+    <v-container
         class="fill-height"
-        fluid> 
-        <v-row>    
-            <v-flex xs12 sm6 offset-sm3>    
+        fluid>
+        <v-row>
+            <v-flex xs12 sm6 offset-sm3>
                 <v-card>
                     <v-card-text>
                         <v-container>
-                            <form @submit.prevent="onSignup">
+                            <v-form @submit.prevent="onSignup">
                                 <v-row>
-                                    <v-flex xs12>    
+                                    <v-flex xs12>
                                         <v-text-field
                                             name="email"
                                             label="Mail"
@@ -51,7 +51,7 @@
                                         </v-btn>
                                     </v-flex>
                                 </v-row>
-                            </form>
+                            </v-form>
                         </v-container>
                     </v-card-text>
                 </v-card>
@@ -61,22 +61,33 @@
 </template>
 
 <script>
-    export default {
-        data () {
-            return {
-                email: '',
-                password: '',
-                confirmPassword: ''
-            }
-        },
-        computed: {
-            comparePassword () {
-                return this.password != this.confirmPassword ? 'Passwords do not match' : ''
-            }
-        },
-        methods: {
-            onSignup(){
-            }
-        }
+export default {
+  data () {
+    return {
+      email: '',
+      password: '',
+      confirmPassword: ''
     }
+  },
+  computed: {
+    comparePassword () {
+      return this.password !== this.confirmPassword ? 'Passwords do not match' : ''
+    },
+    user () {
+      return this.$store.getters.user
+    }
+  },
+  watch: {
+    user (value) {
+      if (value !== null & value !== undefined) {
+          this.$router.push('/')
+      }
+    }
+  },
+  methods: {
+    onSignup () {
+      this.$store.dispatch('signUserUp', {email: this.email, password: this.password})
+    }
+  }
+}
 </script>

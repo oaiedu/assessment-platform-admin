@@ -1,13 +1,15 @@
 <template>
-    <v-container fluid> 
-        <v-row align="center">    
-            <v-flex xs12 sm6 offset-sm3>    
+    <v-container
+        class="fill-height"
+        fluid>
+        <v-row>
+            <v-flex xs12 sm6 offset-sm3>
                 <v-card>
                     <v-card-text>
                         <v-container>
-                            <form>
+                            <v-form @submit.prevent="onSignin">
                                 <v-row>
-                                    <v-flex xs12>    
+                                    <v-flex xs12>
                                         <v-text-field
                                             name="email"
                                             label="Mail"
@@ -37,7 +39,7 @@
                                         </v-btn>
                                     </v-flex>
                                 </v-row>
-                            </form>
+                            </v-form>
                         </v-container>
                     </v-card-text>
                 </v-card>
@@ -47,4 +49,29 @@
 </template>
 
 <script>
+export default {
+  data () {
+    return {
+      email: '',
+      password: ''
+    }
+  },
+  computed: {
+    user () {
+      return this.$store.getters.user
+    }
+  },
+  watch: {
+    user (value) {
+      if (value !== null & value !== undefined) {
+          this.$router.push('/')
+      }
+    }
+  },
+  methods: {
+    onSignin () {
+      this.$store.dispatch('signUserIn', {email: this.email, password: this.password})
+    }
+  }
+}
 </script>

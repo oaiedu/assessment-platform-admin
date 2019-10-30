@@ -5,15 +5,16 @@
       absolute>
       <v-content>
         <v-container fluid>
-          <router-link to="/newquestion" tag="span">
-            <v-btn
-              text>
-              <v-icon left>
-                mdi-pencil
-              </v-icon>
-              Manage Questions
+          <v-list>
+            <v-btn 
+              text
+              v-for="item in drawerItems"
+              :key="item.title"
+              :to="item.link">
+              <v-icon>{{ item.icon }}</v-icon>
+              {{ item.title }}
             </v-btn>
-          </router-link>
+          </v-list>
         </v-container>
       </v-content>
     </v-navigation-drawer>
@@ -26,32 +27,24 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>PWR Quiz Generator</v-toolbar-title>
       <v-spacer></v-spacer>
-      <router-link to="/profile" tag="span">
-        <v-flex xs12 sm6 offset-sm3>  
-          <v-btn
-            text>
-            <v-icon left>mdi-account
-            </v-icon>
-            Profile
-          </v-btn>
-        </v-flex>
-      </router-link>
-      <router-link to="/signup" tag="span">
-        <v-flex xs12 sm6 offset-sm3>
-          <v-btn
-            text>
-            Sign Up
-          </v-btn>
-        </v-flex>
-      </router-link>
-      <router-link to="/signin" tag="span">
-        <v-flex xs12 sm6 offset-sm3>  
-          <v-btn
-            text>
-            Sign In
-          </v-btn>
-        </v-flex>
-      </router-link>
+        <v-btn
+          text
+          v-for="item in menuItems"
+          :key="item.title"
+          :to="item.link">
+          <v-icon left>{{ item.icon }}
+          </v-icon>
+          {{ item.title }}
+        </v-btn>
+        <v-btn
+          v-if="userIsAuthenticated()"
+          text
+          @click="onLogout">
+          <v-icon left>
+            mdi-logout-variant
+          </v-icon>
+          Log Out
+        </v-btn>
     </v-app-bar>
     <v-content>
       <v-container fluid>
@@ -68,6 +61,37 @@ export default {
   },
   data: () => ({
     drawer: null
-  })
+  }),
+  computed: {
+    drawerItems () {
+      let drawerItems = []
+      if (this.userIsAuthenticated()) {
+        drawerItems = [
+          {icon: 'mdi-pencil', title: 'Manage Questions', link: '/newquestion'}
+        ]
+      }
+      return drawerItems
+    },
+    menuItems () {
+      let menuItems = [
+        {icon: 'mdi-account-plus', title: 'Sign Up', link: '/signup'},
+        {icon: 'mdi-login-variant', title: 'Log In', link: '/signin'}
+      ]
+      if (this.userIsAuthenticated()) {
+        menuItems = [
+          {icon: 'mdi-account', title: 'Profile', link: '/profile'}
+        ]
+      }
+      return menuItems
+    },
+  },
+  methods: {
+    userIsAuthenticated () {
+      return this.$store.getters.user !== null && this.$store.getters.user !== undefined
+    },
+    onLogout () {
+      this.$store.dispatch('logout')
+    }
+  }
 }
 </script>
