@@ -8,18 +8,18 @@
                     <v-card>
                         <v-card-text>
                             <v-container>
-                                <form>
+                                <form @submit.prevent="onCreateQuestion">
                                     <v-row>
                                         <v-flex xs12>
                                             <v-text-field
-                                                name="assunto"
-                                                label="Assunto"
-                                                id="assunto"
-                                                v-model="assunto"
+                                                name="id"
+                                                label="ID"
+                                                id="id"
+                                                v-model="id"
                                                 required>
                                             </v-text-field>
                                         </v-flex>
-                                    </v-row> 
+                                    </v-row>
                                     <v-row>
                                         <v-flex xs12>
                                             <v-text-field
@@ -34,12 +34,34 @@
                                     <v-row>
                                         <v-flex xs12>
                                             <v-text-field
-                                                name="id"
-                                                label="ID"
-                                                id="id"
-                                                v-model="id"
+                                                name="conhecimentoPWR"
+                                                label="Conhecimento PWR"
+                                                id="conhecimentoPWR"
+                                                v-model="conhecimentoPWR"
                                                 required>
                                             </v-text-field>
+                                        </v-flex>
+                                    </v-row>
+                                    <v-row>
+                                        <v-flex xs12>
+                                            <v-text-field
+                                                name="conhecimentoBWR"
+                                                label="Conhecimento BWR"
+                                                id="conhecimentoBWR"
+                                                v-model="conhecimentoBWR"
+                                                required>
+                                            </v-text-field>
+                                        </v-flex>
+                                    </v-row>
+                                    <v-row>
+                                        <v-flex xs12>
+                                            <v-select
+                                            :items="items"
+                                            name="assunto"
+                                            id="assunto"
+                                            v-model="assunto"
+                                            solo
+                                            ></v-select>
                                         </v-flex>
                                     </v-row>
                                     <v-row>
@@ -48,11 +70,20 @@
                                                 <p>Questão</p>
                                                 <v-textarea
                                                     outlined
-                                                    filled>
+                                                    filled
+                                                    name="description"
+                                                    id="description"
+                                                    v-model="description">
                                                 </v-textarea>
                                             </v-container>
                                         </v-flex>
                                     </v-row>
+                                    <v-btn
+                                        class="primary"
+                                        :disabled="!formIsValid"
+                                        type="submit">
+                                        Create Question
+                                    </v-btn>
                                 </form>
                             </v-container>
                         </v-card-text>
@@ -61,3 +92,59 @@
             </v-row>
         </v-container>
 </template>
+
+<script>
+  export default {
+    data () {
+      return {
+        description: '',
+        id: '',
+        assunto: '',
+        conhecimento: '',
+        conhecimentoPWR: '',
+        conhecimentoBWR: '',
+        items: [ 
+            'Teoria do Reator',
+            'Termodinâmica',
+            'Instrumentação e Controle',
+            'Válvulas e Bombas',
+            'Eletricidade',
+            'Mecânica dos Fluidos',
+            'Tratamento Qúimico Refrigerante',
+            'Análise Integrada',
+            'Instrumentação Nuclear',
+            'Física Nuclear',
+            'Transferência de Calor',
+            'Materiais'
+        ]
+      }
+    },
+    computed: {
+      formIsValid () {
+        return this.id !== '' &&
+          this.description !== '' &&
+          this.conhecimento !== '' &&
+          this.conhecimentoPWR !== '' &&
+          this.conhecimentoBWR !== '' &&
+          this.assunto !== ''
+      }
+    },
+    methods: {
+      onCreateQuestion () {
+        if (!this.formIsValid) {
+          return
+        }
+        const questionData = {
+          id: this.id,
+          assunto: this.assunto,
+          description: this.description,
+          conhecimento: this.conhecimento,
+          conhecimentoPWR: this.conhecimentoPWR,
+          conhecimentoBWR: this.conhecimentoBWR
+        }
+        this.$store.dispatch('createQuestion', questionData)
+        this.$router.push('/questions')
+      }
+    }
+  }
+</script>

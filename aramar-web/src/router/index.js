@@ -4,6 +4,7 @@ import SignUp from '@/components/User/SignUp.vue'
 import SignIn from '@/components/User/SignIn.vue'
 import Profile from '@/components/User/Profile.vue'
 import NewQuestion from '@/components/Questions/NewQuestion.vue'
+import Questions from '@/components/Questions/Questions.vue'
 
 Vue.use(VueRouter)
 
@@ -27,6 +28,11 @@ const routes = [
     path: '/newquestion',
     component: NewQuestion,
     name: 'newquestion'
+  },
+  {
+    path: '/questions',
+    component: Questions,
+    name: 'questions'
   }
 ]
 

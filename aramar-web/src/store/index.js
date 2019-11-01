@@ -6,11 +6,15 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    loadedQuestions: [],
     user: null
   },
   mutations: {
     setUser (state, payload) {
       state.user = payload
+    },
+    setQuestions (state, payload) {
+      state.question = payload
     }
   },
   actions: {
@@ -50,6 +54,30 @@ export default new Vuex.Store({
     logout ({commit}) {
       firebase.auth().signOut()
       commit('setUser', null)
+    },
+    createQuestion ({commit}, payload) {
+      const db = firebase.firestore()
+      const question = {
+        id: payload.id,
+        description: payload.description,
+        assunto: payload.assunto,
+        conhecimento: payload.conhecimento,
+        conhecimentoPWR: payload.conhecimentoPWR,
+        conhecimentoBWR: payload.conhecimentoBWR
+      }
+      db.collection("questions").doc(question.id).set({
+        description: question.description,
+        assunto: question.assunto,
+        conhecimento: question.conhecimento,
+        conhecimentoPWR: question.conhecimentoPWR,
+        conhecimentoBWR: question.conhecimentoBWR
+        })
+        .then(function() {
+            console.log("Sucess!!!")
+        })
+        .catch(function(error) {
+            console.error("Error writing document: ", error);
+        });
     }
   },
   getters: {

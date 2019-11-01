@@ -67,7 +67,7 @@ export default {
       let drawerItems = []
       if (this.userIsAuthenticated()) {
         drawerItems = [
-          {icon: 'mdi-pencil', title: 'Manage Questions', link: '/newquestion'}
+          {icon: 'mdi-pencil', title: 'Manage Questions', link: '/questions'}
         ]
       }
       return drawerItems
@@ -91,6 +91,7 @@ export default {
     },
     onLogout () {
       this.$store.dispatch('logout')
+      this.$router.push('/')
     }
   }
 }
