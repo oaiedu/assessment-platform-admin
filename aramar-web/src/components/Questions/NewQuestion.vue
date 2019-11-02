@@ -60,6 +60,7 @@
                                             name="assunto"
                                             id="assunto"
                                             v-model="assunto"
+                                            label="Disciplina"
                                             solo
                                             ></v-select>
                                         </v-flex>
@@ -75,6 +76,43 @@
                                                     id="description"
                                                     v-model="description">
                                                 </v-textarea>
+                                            </v-container>
+                                        </v-flex>
+                                    </v-row>
+                                    <v-row>
+                                        <v-flex xs12>
+                                             <v-container fluid>   
+                                                <p>Respostas</p>
+                                                <v-radio-group v-model="teste">
+                                                  <v-row>
+                                                      <v-radio
+                                                      value="radio-1">
+                                                      </v-radio>
+                                                      <v-text-field v-model="respostas[0].text">
+                                                      </v-text-field>
+                                                  </v-row>
+                                                  <v-row>
+                                                      <v-radio
+                                                      value="radio-2">
+                                                      </v-radio>
+                                                      <v-text-field v-model="respostas[1].text">
+                                                      </v-text-field>
+                                                  </v-row>
+                                                  <v-row>
+                                                      <v-radio
+                                                      value="radio-3">
+                                                      </v-radio>
+                                                      <v-text-field v-model="respostas[2].text">
+                                                      </v-text-field>
+                                                  </v-row>
+                                                  <v-row>
+                                                      <v-radio
+                                                      value="radio-4">
+                                                      </v-radio>
+                                                      <v-text-field v-model="respostas[3].text">
+                                                      </v-text-field>
+                                                  </v-row>
+                                                </v-radio-group>
                                             </v-container>
                                         </v-flex>
                                     </v-row>
@@ -97,12 +135,20 @@
   export default {
     data () {
       return {
+        radios: 'aaaa',
+        teste: null,
         description: '',
         id: '',
         assunto: '',
         conhecimento: '',
         conhecimentoPWR: '',
         conhecimentoBWR: '',
+        respostas: [
+          { text: '', ansId: 'radio-1', value: false },
+          { text: '', ansId: 'radio-2', value: false },
+          { text: '', ansId: 'radio-3', value: false },
+          { text: '', ansId: 'radio-4', value: false }
+        ],
         items: [ 
             'Teoria do Reator',
             'Termodinâmica',
@@ -121,12 +167,27 @@
     },
     computed: {
       formIsValid () {
+        console.log(this.teste)
         return this.id !== '' &&
           this.description !== '' &&
           this.conhecimento !== '' &&
           this.conhecimentoPWR !== '' &&
           this.conhecimentoBWR !== '' &&
           this.assunto !== ''
+      }
+    },
+    watch:{
+      teste(val){
+        this.radios=val
+        this.respostas.forEach(element => {
+          if(element.ansId===val){
+            element.value=true
+          }
+          else{
+            element.value=false
+          }
+        
+        });
       }
     },
     methods: {
@@ -140,7 +201,8 @@
           description: this.description,
           conhecimento: this.conhecimento,
           conhecimentoPWR: this.conhecimentoPWR,
-          conhecimentoBWR: this.conhecimentoBWR
+          conhecimentoBWR: this.conhecimentoBWR,
+          respostas: this.respostas
         }
         this.$store.dispatch('createQuestion', questionData)
         this.$router.push('/questions')

@@ -63,17 +63,19 @@ export default new Vuex.Store({
         assunto: payload.assunto,
         conhecimento: payload.conhecimento,
         conhecimentoPWR: payload.conhecimentoPWR,
-        conhecimentoBWR: payload.conhecimentoBWR
+        conhecimentoBWR: payload.conhecimentoBWR,
+        respostas: payload.respostas
       }
       db.collection("questions").doc(question.id).set({
         description: question.description,
         assunto: question.assunto,
         conhecimento: question.conhecimento,
         conhecimentoPWR: question.conhecimentoPWR,
-        conhecimentoBWR: question.conhecimentoBWR
+        conhecimentoBWR: question.conhecimentoBWR,
+        respostas: question.respostas
         })
         .then(function() {
-            console.log("Sucess!!!")
+            console.log("Success")
         })
         .catch(function(error) {
             console.error("Error writing document: ", error);
