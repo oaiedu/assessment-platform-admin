@@ -2,6 +2,11 @@
     <v-container
         class="fill-height"
         fluid>
+        <v-row v-if="error">
+            <v-flex xs 12 sm6 offset-sm3>
+                <app-alert @dismiss="onDismissed" :text="error.message"></app-alert>
+            </v-flex>
+        </v-row
         <v-row>
             <v-flex xs12 sm6 offset-sm3>
                 <v-card>
@@ -34,8 +39,11 @@
                                 </v-row>
                                 <v-row>
                                     <v-flex xs12>
-                                        <v-btn type="submit">
+                                        <v-btn type="submit" :disabled="loading" :loading="loading">
                                             Sign In
+                                            <span class="custom-loader">
+                                                <v-icon light></v-icon>
+                                            </span>
                                         </v-btn>
                                     </v-flex>
                                 </v-row>
@@ -59,6 +67,12 @@ export default {
   computed: {
     user () {
       return this.$store.getters.user
+    },
+    error () {
+        return this.$store.getters.error
+    },
+    loading () {
+        return this.$store.getters.loading
     }
   },
   watch: {
@@ -71,6 +85,10 @@ export default {
   methods: {
     onSignin () {
       this.$store.dispatch('signUserIn', {email: this.email, password: this.password})
+    },
+    onDismissed () {
+        console.log('Dismissed Alert!')
+        this.$store.dispatch('clearError')
     }
   }
 }
