@@ -102,6 +102,9 @@ export default new Vuex.Store({
             console.error("Error writing document: ", error);
         });
     },
+    autoSignIn ({commit}, payload) {
+      commit('setUser', {id: payload.uid})
+    },
     clearError ({commit}) {
       commit('clearError')
     }
