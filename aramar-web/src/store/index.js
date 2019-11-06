@@ -77,22 +77,23 @@ export default new Vuex.Store({
       commit('setUser', null)
     },
     createQuestion ({commit}, payload) {
+      console.log(payload)
       const db = firebase.firestore()
       const question = {
         id: payload.id,
         description: payload.description,
         assunto: payload.assunto,
-        conhecimento: payload.conhecimento,
-        conhecimentoPWR: payload.conhecimentoPWR,
-        conhecimentoBWR: payload.conhecimentoBWR,
+        knowledge: payload.knowledge,
+        knowledgePWR: payload.knowledgePWR,
+        knowledgeBWR: payload.knowledgeBWR,
         respostas: payload.respostas
       }
       db.collection("questions").doc(question.id).set({
         description: question.description,
         assunto: question.assunto,
-        conhecimento: question.conhecimento,
-        conhecimentoPWR: question.conhecimentoPWR,
-        conhecimentoBWR: question.conhecimentoBWR,
+        knowledge: question.knowledge,
+        knowledgePWR: question.knowledgePWR,
+        knowledgeBWR: question.knowledgeBWR,
         respostas: question.respostas
         })
         .then(function() {
