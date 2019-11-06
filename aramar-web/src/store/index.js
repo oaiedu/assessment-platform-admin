@@ -81,20 +81,20 @@ export default new Vuex.Store({
       const db = firebase.firestore()
       const question = {
         id: payload.id,
-        description: payload.description,
-        assunto: payload.assunto,
+        questionDescription: payload.questionDescription,
+        subject: payload.subject,
         knowledge: payload.knowledge,
         knowledgePWR: payload.knowledgePWR,
         knowledgeBWR: payload.knowledgeBWR,
-        respostas: payload.respostas
+        answers: payload.answers
       }
       db.collection("questions").doc(question.id).set({
-        description: question.description,
-        assunto: question.assunto,
+        questionDescription: question.questionDescription,
+        subject: question.subject,
         knowledge: question.knowledge,
         knowledgePWR: question.knowledgePWR,
         knowledgeBWR: question.knowledgeBWR,
-        respostas: question.respostas
+        answers: question.answers
         })
         .then(function() {
             console.log("Success")

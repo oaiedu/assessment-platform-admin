@@ -48,9 +48,9 @@
                   <v-flex xs12>
                     <v-select
                       :items="items"
-                      name="assunto"
-                      id="assunto"
-                      v-model="assunto"
+                      name="subject"
+                      id="subject"
+                      v-model="subject"
                       label="Disciplina"
                       solo
                     ></v-select>
@@ -63,9 +63,9 @@
                       <v-textarea
                         outlined
                         filled
-                        name="description"
-                        id="description"
-                        v-model="description"
+                        name="questionDescription"
+                        id="questionDescription"
+                        v-model="questionDescription"
                       ></v-textarea>
                     </v-container>
                   </v-flex>
@@ -73,22 +73,23 @@
                 <v-row>
                   <v-flex xs12>
                     <v-container fluid>
-                      <p>Respostas</p>
+                      <p>answers</p>
                       <v-switch v-model="multipleAnswer" label="Multiple"></v-switch>
                       <v-radio-group v-if="!multipleAnswer" v-model="teste">
-                        <v-row v-for="item in respostas" :key="item.ansId">
+                        <v-row v-for="item in answers" :key="item.ansId">
                           <v-radio :value="item.ansId"></v-radio>
                           <v-text-field v-model="item.text"></v-text-field>
                         </v-row>
                       </v-radio-group>
                       <v-radio-group v-else v-model="teste">
-                        <v-row v-for="item in respostas" :key="item.ansId">
+                        <v-row v-for="item in answers" :key="item.ansId">
                           <v-radio :value="items.ansId"></v-radio>
-                          <v-col v-for="potato in item.text" :key="potato.title">
-                            <v-text-field v-model="potato.batata"></v-text-field>
+                          <v-col v-for="answerItem in item.text" :key="answerItem.title">
+                            <v-text-field v-model="answerItem.answerDescription"></v-text-field>
                           </v-col>
                         </v-row>
                       </v-radio-group>
+                      {{ answers }}
                     </v-container>
                   </v-flex>
                 </v-row>
@@ -109,15 +110,15 @@ export default {
       teste: null,
       radios: "aaaa",
       multipleAnswer: false,
-      respostas: [
+      answers: [
         { text: "", ansId: "radio-1", value: false },
         { text: "", ansId: "radio-2", value: false },
         { text: "", ansId: "radio-3", value: false },
         { text: "", ansId: "radio-4", value: false }
       ],
-      description: "",
+      questionDescription: "",
       id: "",
-      assunto: "",
+      subject: "",
       knowledge: "",
       knowledgePWR: "",
       knowledgeBWR: "",
@@ -142,11 +143,11 @@ export default {
       console.log(this.teste);
       return (
         this.id !== "" &&
-        this.description !== "" &&
+        this.questionDescription !== "" &&
         this.knowledge !== "" &&
         this.knowledgePWR !== "" &&
         this.knowledgeBWR !== "" &&
-        this.assunto !== ""
+        this.subject !== ""
       );
     }
   },
@@ -154,15 +155,15 @@ export default {
     multipleAnswer(val) {
       console.log("hey")
       if(!val){
-        this.respostas.forEach((element) => {
+        this.answers.forEach((element) => {
           element.text = ""
         })
       }
       else{
-        this.respostas.forEach((element) => {
+        this.answers.forEach((element) => {
         let aux = []
         for(var i = 0; i < 3; i++){
-          aux.push({title: `${i}`, batata: ""})
+          aux.push({title: `${i}`, answerDescription: ""})
         }
           element.text = aux
         })
@@ -170,7 +171,7 @@ export default {
     },
     teste(val) {
       this.radios = val;
-      this.respostas.forEach(element => {
+      this.answers.forEach(element => {
         if (element.ansId === val) {
           element.value = true;
         } else {
@@ -186,12 +187,12 @@ export default {
       }
       const questionData = {
         id: this.id,
-        assunto: this.assunto,
-        description: this.description,
+        subject: this.subject,
+        questionDescription: this.questionDescription,
         knowledge: this.knowledge,
         knowledgePWR: this.knowledgePWR,
         knowledgeBWR: this.knowledgeBWR,
-        respostas: this.respostas
+        answers: this.answers
       };
       this.$store.dispatch("createQuestion", questionData);
       this.$router.push("/questions");
