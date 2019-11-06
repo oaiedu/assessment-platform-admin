@@ -82,19 +82,19 @@ export default new Vuex.Store({
       const question = {
         id: payload.id,
         questionDescription: payload.questionDescription,
-        subject: payload.subject,
+        assunto: payload.assunto,
         knowledge: payload.knowledge,
         knowledgePWR: payload.knowledgePWR,
         knowledgeBWR: payload.knowledgeBWR,
-        answers: payload.answers
+        respostas: payload.respostas
       }
       db.collection("questions").doc(question.id).set({
         questionDescription: question.questionDescription,
-        subject: question.subject,
+        assunto: question.assunto,
         knowledge: question.knowledge,
         knowledgePWR: question.knowledgePWR,
         knowledgeBWR: question.knowledgeBWR,
-        answers: question.answers
+        respostas: question.respostas
         })
         .then(function() {
             console.log("Success")
