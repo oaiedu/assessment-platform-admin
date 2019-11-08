@@ -6,7 +6,7 @@
             <v-flex xs 12 sm6 offset-sm3>
                 <app-alert @dismiss="onDismissed" :text="error.message"></app-alert>
             </v-flex>
-        </v-row
+        </v-row>
         <v-row>
             <v-flex xs12 sm6 offset-sm3>
                 <v-card>

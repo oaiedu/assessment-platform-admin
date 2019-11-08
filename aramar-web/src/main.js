@@ -32,5 +32,8 @@ new Vue({
         this.$store.dispatch('autoSignIn', user )
       } 
     })
+    console.log("AAAAAA")
+    this.$store.dispatch('loadedQuestions')
+    console.log(this.$store.state.loadedQuestions)
   }
 }).$mount('#app')

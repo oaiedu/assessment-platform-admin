@@ -8,7 +8,7 @@
               <form @submit.prevent="onCreateQuestion">
                 <v-row>
                   <v-flex xs12>
-                    <v-text-field name="id" label="ID" id="id" v-model="id" required></v-text-field>
+                    <v-text-field name="id" label="ID" id="id" v-model="id" :placeholder="current.id" required></v-text-field>
                   </v-flex>
                 </v-row>
                 <v-row>
@@ -18,6 +18,7 @@
                       label="Conhecimento"
                       id="knowledge"
                       v-model="knowledge"
+                      :placeholder="current.data.knowledge"
                       required
                     ></v-text-field>
                   </v-flex>
@@ -29,6 +30,7 @@
                       label="Conhecimento PWR"
                       id="knowledgePWR"
                       v-model="knowledgePWR"
+                      :placeholder="current.data.knowledgePWR"
                       required
                     ></v-text-field>
                   </v-flex>
@@ -40,6 +42,7 @@
                       label="Conhecimento BWR"
                       id="knowledgeBWR"
                       v-model="knowledgeBWR"
+                      :placeholder="current.data.knowledgeBWR"
                       required
                     ></v-text-field>
                   </v-flex>
@@ -51,6 +54,7 @@
                       name="subject"
                       id="subject"
                       v-model="subject"
+                      :placeholder="current.data.subject"
                       label="Disciplina"
                       solo
                     ></v-select>
@@ -66,6 +70,7 @@
                         name="questionDescription"
                         id="questionDescription"
                         v-model="questionDescription"
+                        :placeholder="current.data.questionDescription"
                       ></v-textarea>
                     </v-container>
                   </v-flex>
@@ -167,7 +172,8 @@ export default {
         this.knowledgeBWR !== "" &&
         this.subject !== ""
       );
-    }
+    },
+    current: ({$store, $route}) => $store.getters.findQuestionById($route.params.id)
   },
   watch: {
     multipleAnswer(val) {
@@ -236,6 +242,9 @@ export default {
       };
       this.$store.dispatch("createQuestion", questionData);
       this.$router.push("/questions");
+    },
+    oldQuestion() {
+      const oldQuestionData = this.$store.getters.findQuestionById()
     }
   }
 };

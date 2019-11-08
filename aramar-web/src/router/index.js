@@ -5,6 +5,8 @@ import SignIn from '@/components/User/SignIn.vue'
 import Profile from '@/components/User/Profile.vue'
 import NewQuestion from '@/components/Questions/NewQuestion.vue'
 import Questions from '@/components/Questions/Questions.vue'
+import EditQuestion from '@/components/Questions/EditQuestion.vue'
+
 import AuthGuard from './auth-guard'
 
 Vue.use(VueRouter)
@@ -30,6 +32,12 @@ const routes = [
     path: '/newquestion',
     component: NewQuestion,
     name: 'newquestion',
+    beforeEnter: AuthGuard
+  },
+  {
+    path: '/editquestions/:id',
+    component: EditQuestion,
+    name: 'editquestions',
     beforeEnter: AuthGuard
   },
   {

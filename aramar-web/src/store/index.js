@@ -9,27 +9,45 @@ export default new Vuex.Store({
     loadedQuestions: [],
     user: null,
     loading: false,
-    error: null
+    error: null,
+    deleteQuestionId: null
   },
   mutations: {
-    setUser (state, payload) {
+    setLoadedQuestions(state, payload) {
+      state.loadedQuestions = payload
+    },
+    setUser(state, payload) {
       state.user = payload
     },
-    setQuestions (state, payload) {
-      state.question = payload
+    setDeletedQuestion(state, payload) {
+      state.deleteQuestionId = payload
     },
-    setLoading (state, payload) {
+    createQuestion(state, payload) {
+      state.loadedQuestions.push(payload)
+    },
+    setLoading(state, payload) {
       state.loading = payload
     },
-    setError (state, payload) {
+    setError(state, payload) {
       state.error = payload
     },
-    clearError (state, payload) {
+    clearError(state, payload) {
       state.error = null
     }
   },
   actions: {
-    signUserUp ( {commit}, payload ) {
+    loadedQuestions({ commit }) {
+      commit('setLoading', true)
+      const db = firebase.firestore()
+      let questions = []
+      db.collection("questions").get().then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          questions.push(Object.assign({id: doc.id, data: doc.data()}))
+        })
+      })
+      commit('setLoadedQuestions', questions)
+    },
+    signUserUp({ commit }, payload) {
       commit('setLoading', true)
       commit('clearError')
       firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
@@ -39,11 +57,11 @@ export default new Vuex.Store({
             const newUser = {
               id: user.uid
             }
-            commit('setUser',newUser)
+            commit('setUser', newUser)
             console.log('sucess')
           }
         )
-        .catch (
+        .catch(
           error => {
             commit('setLoading', false)
             commit('setError', error)
@@ -51,7 +69,18 @@ export default new Vuex.Store({
           }
         )
     },
-    signUserIn ({commit}, payload) {
+    deleteQuestion({commit}, payload) {
+      const db = firebase.firestore()
+      const id = payload
+      db.collection("questions").doc(id).delete()
+      .then(function () {
+        console.log("Document successfully deleted!")
+      })
+      .catch(function (error) {
+        console.error("Error removing document: ", error);
+      });
+    },
+    signUserIn({ commit }, payload) {
       commit('setLoading', true)
       commit('clearError')
       firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
@@ -61,10 +90,10 @@ export default new Vuex.Store({
             const newUser = {
               id: user.uid
             }
-            commit('setUser',newUser)
+            commit('setUser', newUser)
           }
         )
-        .catch (
+        .catch(
           error => {
             commit('setLoading', false)
             commit('setError', error)
@@ -72,54 +101,57 @@ export default new Vuex.Store({
           }
         )
     },
-    logout ({commit}) {
+    logout({ commit }) {
       firebase.auth().signOut()
       commit('setUser', null)
     },
-    createQuestion ({commit}, payload) {
-      console.log(payload)
+    createQuestion({ commit }, payload) {
       const db = firebase.firestore()
       const question = {
         id: payload.id,
         questionDescription: payload.questionDescription,
-        assunto: payload.assunto,
+        subject: payload.subject,
         knowledge: payload.knowledge,
         knowledgePWR: payload.knowledgePWR,
         knowledgeBWR: payload.knowledgeBWR,
-        respostas: payload.respostas
+        answers: payload.answers
       }
       db.collection("questions").doc(question.id).set({
         questionDescription: question.questionDescription,
-        assunto: question.assunto,
+        subject: question.subject,
         knowledge: question.knowledge,
         knowledgePWR: question.knowledgePWR,
         knowledgeBWR: question.knowledgeBWR,
-        respostas: question.respostas
+        answers: question.answers
+      })
+        .then(function () {
+          console.log("Success")
         })
-        .then(function() {
-            console.log("Success")
-        })
-        .catch(function(error) {
-            console.error("Error writing document: ", error);
+        .catch(function (error) {
+          console.error("Error writing document: ", error);
         });
     },
-    autoSignIn ({commit}, payload) {
-      commit('setUser', {id: payload.uid})
+    autoSignIn({ commit }, payload) {
+      commit('setUser', { id: payload.uid })
     },
-    clearError ({commit}) {
+    clearError({ commit }) {
       commit('clearError')
     }
   },
   getters: {
-    user (state) {
+    user(state) {
       return state.user
     },
-    loading (state) {
+    loading(state) {
       return state.loading
     },
-    error (state) {
+    error(state) {
       return state.error
-    }
+    },
+    loadedQuestions(state) {
+      return state.loadedQuestions
+    },
+    findQuestionById: state => id => state.loadedQuestions.find(question => question.id === id)
   },
   modules: {
   }
