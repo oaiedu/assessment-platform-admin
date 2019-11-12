@@ -46,6 +46,7 @@ export default new Vuex.Store({
         })
       })
       commit('setLoadedQuestions', questions)
+      commit('setLoading', false)
     },
     signUserUp({ commit }, payload) {
       commit('setLoading', true)
@@ -136,6 +137,9 @@ export default new Vuex.Store({
     },
     clearError({ commit }) {
       commit('clearError')
+    },
+    clearLoading({commit}){
+      commit('setLoading', false)
     }
   },
   getters: {

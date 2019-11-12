@@ -5,11 +5,13 @@ import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
 import AlertCmp from './components/Shared/Alert.vue'
+import Combined from './components/Shared/Combined'
 
 
 Vue.config.productionTip = false
 
 Vue.component('app-alert', AlertCmp)
+Vue.component('Combined', Combined)
 
 new Vue({
   router,
@@ -32,7 +34,6 @@ new Vue({
         this.$store.dispatch('autoSignIn', user )
       } 
     })
-    console.log("AAAAAA")
     this.$store.dispatch('loadedQuestions')
     console.log(this.$store.state.loadedQuestions)
   }

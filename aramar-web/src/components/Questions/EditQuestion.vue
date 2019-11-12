@@ -16,7 +16,7 @@
                     <v-text-field
                       name="knowledge"
                       label="Conhecimento"
-                      id="knowledge"
+                      id="knowledge"localhost
                       v-model="knowledge"
                       :placeholder="current.data.knowledge"
                       required
