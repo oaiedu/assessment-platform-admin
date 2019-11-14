@@ -1,16 +1,6 @@
 <template>
   <v-container>
-    <v-row>
-      <v-col>
-        <editor v-model="content" @change="parseText"/>
-      </v-col>
-      <v-col>
-        <v-row v-for="(t, index) in text" v-bind:key="index">
-          <viewer :value="t.value" v-if="t.tag == 'text'"/>
-          <markdown-it-vue class="md-body" :content="t.value" v-else/>
-        </v-row>
-      </v-col>
-    </v-row>
+      <editor v-model="content" @change="parseText"/>
   </v-container>
 </template>
 
@@ -41,16 +31,16 @@ export default {
       if(result==null)
         result = []
       splitted.forEach((item, index) => {
-        console.log('index ' + index)
         this.text.push({"tag":"text","value":item})
         if(index<(splitted.length+result.length-2) && result!=null)
           this.text.push({"tag":"math","value":result[index]})
       })
-      console.log(this.text)
+      console.log("bbb", this.text)
+      this.$emit("inputData",this.text[0].value)
     }
   },
   data: () => ({
-    content: 'aaaa',
+    content: "",
     text: [],
   })
 };

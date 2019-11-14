@@ -3,15 +3,15 @@
         <v-stepper v-model="e1">
             
             <v-stepper-header>
-                <v-stepper-step editable :complete="e1 > 1" step="1">Name of step 1</v-stepper-step>
+                <v-stepper-step editable :complete="e1 > 1" step="1"></v-stepper-step>
 
                 <v-divider></v-divider>
 
-                <v-stepper-step editable :complete="e1 > 2" step="2">Name of step 2</v-stepper-step>
+                <v-stepper-step editable :complete="e1 > 2" step="2"></v-stepper-step>
 
                 <v-divider></v-divider>
 
-                <v-stepper-step editable step="3">Name of step 3</v-stepper-step>
+                <v-stepper-step editable step="3"></v-stepper-step>
             </v-stepper-header>
 
             <v-stepper-items>
@@ -77,9 +77,7 @@
 
                 <v-stepper-content step="2">
                     <v-container>
-                        <Combined 
-                            v-model="questionDescription"
-                        ></Combined>
+                        <Combined @inputData="updateData"></Combined>
                         
                         <v-btn
                             color="primary"
@@ -137,7 +135,6 @@
                                 >
                                 <v-text-field v-model="answerItem.answerDescription"></v-text-field>
                                 </v-col>
-                                {{item}}
                             </v-row>
                         </v-radio-group>
 
@@ -157,6 +154,7 @@
 export default {
   data() {
     return {
+      questionDescription: "",
       e1: 0,
       test: null,
       columns: null,
@@ -169,7 +167,6 @@ export default {
         { text: "", ansId: "radio-3", value: false },
         { text: "", ansId: "radio-4", value: false }
       ],
-      questionDescription: "",
       id: "",
       subject: "",
       knowledge: "",
@@ -189,7 +186,8 @@ export default {
         "Transferência de Calor",
         "Materiais"
       ],
-      columnItems: [2, 3, 4, 5]
+      columnItems: [2, 3, 4, 5],
+      batatinha: "aaaaaa"
     };
   },
   computed: {
@@ -255,6 +253,10 @@ export default {
     }
   },
   methods: {
+    updateData (variable) {
+      console.log("!!!",variable)
+      this.questionDescription = variable
+    },
     onCreateQuestion() {
       if (!this.formIsValid) {
         return;
