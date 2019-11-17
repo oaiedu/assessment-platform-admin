@@ -118,12 +118,12 @@ export default new Vuex.Store({
         answers: payload.answers
       }
       db.collection("questions").doc(question.id).set({
-        questionDescription: question.questionDescription,
-        subject: question.subject,
-        knowledge: question.knowledge,
-        knowledgePWR: question.knowledgePWR,
-        knowledgeBWR: question.knowledgeBWR,
-        answers: question.answers
+        PERGUNTA: question.questionDescription,
+        DISCIPLINA: question.subject,
+        CONHECIMENTO: question.knowledge,
+        RELEVANCIA_OR: question.knowledgePWR,
+        RELEVANCIA_OSR: question.knowledgeBWR,
+        RESPOSTAS: question.answers
       })
         .then(function () {
           console.log("Success")

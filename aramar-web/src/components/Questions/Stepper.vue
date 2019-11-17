@@ -1,8 +1,11 @@
 <template>
-    <form @submit.prevent="onCreateQuestion">
-        <v-stepper v-model="e1">
-            
-            <v-stepper-header>
+  <v-container>
+    <v-row>
+      <v-col>
+        <v-card>
+          <form @submit.prevent="onCreateQuestion">
+            <v-stepper v-model="e1">
+              <v-stepper-header>
                 <v-stepper-step editable :complete="e1 > 1" step="1"></v-stepper-step>
 
                 <v-divider></v-divider>
@@ -12,146 +15,150 @@
                 <v-divider></v-divider>
 
                 <v-stepper-step editable step="3"></v-stepper-step>
-            </v-stepper-header>
+              </v-stepper-header>
 
-            <v-stepper-items>
+              <v-stepper-items>
                 <v-stepper-content step="1">
-                    <v-container>
-                        <v-row>
-                            <v-text-field 
-                                name="id" 
-                                label="ID" 
-                                id="id" 
-                                v-model="id" 
-                                required
-                            ></v-text-field>
-                        </v-row>
+                  <v-container>
+                    <v-row>
+                      <v-text-field name="id" label="IQ" id="id" v-model="id" required></v-text-field>
+                    </v-row>
 
-                        <v-row>
-                            <v-text-field
-                                name="knowledge"
-                                label="Conhecimento"
-                                id="knowledge"
-                                v-model="knowledge"
-                                required
-                            ></v-text-field>
-                        </v-row>
+                    <v-row>
+                      <v-text-field
+                        name="knowledge"
+                        label="Conhecimento"
+                        id="knowledge"
+                        v-model="knowledge"
+                        required
+                      ></v-text-field>
+                    </v-row>
 
-                        <v-row>
-                            <v-text-field
-                                name="knowledgePWR"
-                                label="Conhecimento PWR"
-                                id="knowledgePWR"
-                                v-model="knowledgePWR"
-                                required
-                            ></v-text-field>
-                        </v-row>
+                    <v-row>
+                      <v-text-field
+                        name="knowledgePWR"
+                        label="Relevância OR"
+                        id="knowledgePWR"
+                        v-model="knowledgePWR"
+                        required
+                      ></v-text-field>
+                    </v-row>
 
-                        <v-row>
-                            <v-text-field
-                                name="knowledgeBWR"
-                                label="Conhecimento BWR"
-                                id="knowledgeBWR"
-                                v-model="knowledgeBWR"
-                                required
-                            ></v-text-field>
-                        </v-row>
+                    <v-row>
+                      <v-text-field
+                        name="knowledgeBWR"
+                        label="Relevância OSR"
+                        id="knowledgeBWR"
+                        v-model="knowledgeBWR"
+                        required
+                      ></v-text-field>
+                    </v-row>
 
-                        <v-row>
-                            <v-select
-                                :items="subjectItems"
-                                name="subject"
-                                id="subject"
-                                v-model="subject"
-                                label="Disciplina"
-                                solo
-                            ></v-select>
-                        </v-row>
-                        
-                        <v-btn
-                            color="primary"
-                            @click="e1 = 2"
-                        >Continue</v-btn>
-                    </v-container>
+                    <v-row>
+                      <v-select
+                        :items="subjectItems"
+                        name="subject"
+                        id="subject"
+                        v-model="subject"
+                        label="Disciplina"
+                        solo
+                      ></v-select>
+                    </v-row>
+
+                    <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
+                  </v-container>
                 </v-stepper-content>
 
                 <v-stepper-content step="2">
-                    <v-container>
-                        <Combined @inputData="updateData"></Combined>
-                        
-                        <v-btn
-                            color="primary"
-                            @click="e1 = 3"
-                        >Continue</v-btn>
-                    </v-container>
+                  <v-container>
+                    <Combined @inputData="updateData"></Combined>
+
+                    <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
+                  </v-container>
                 </v-stepper-content>
 
                 <v-stepper-content step="3">
-                    <v-container>
-                        <h3>Respostas</h3>
+                  <v-container>
+                    <h3>Respostas</h3>
 
-                        <v-row>
-                            <v-col>
-                                <v-switch 
-                                    v-model="multipleAnswer" 
-                                    label="Multiple"
-                                ></v-switch>
-                            </v-col>
-                            
-                            <v-col v-if="multipleAnswer">
-                                <v-select
-                                    :items="columnItems"
-                                    v-model="columns"
-                                    label="Número de Colunas"
-                                    solo
-                                ></v-select>
-                            </v-col>
-                        </v-row>
+                    <v-row>
+                      <v-col>
+                        <v-switch v-model="multipleAnswer" label="Multiple"></v-switch>
+                      </v-col>
 
-                        <v-content v-if="!multipleAnswer"> 
-                            <v-row v-for="item in answers" :key="item.ansId">
-                                <v-radio-group  v-model="test">
-                                    <v-radio :value="item.ansId"></v-radio>
-                                </v-radio-group>
-                                
-                                <v-text-field name="text field" id="text field" v-model="item.text" required></v-text-field>
-                            </v-row>
-                        </v-content>
+                      <v-col v-if="multipleAnswer">
+                        <v-select :items="columnItems" v-model="columns" label="Número de Colunas" solo></v-select>
+                      </v-col>
+                    </v-row>
 
-                        <v-radio-group v-else v-model="test">
-                            <v-row>
-                                <v-col v-for="i in columns" :key="i">
-                                    <v-text-field v-model="auxTitle[i-1]"></v-text-field>
-                                </v-col>
-                            </v-row>
-
-                            <v-row v-for="item in answers" :key="item.ansId">
-                                <v-col>    
-                                    <v-radio :value="item.ansId"></v-radio>
-                                </v-col>
-                                <v-col 
-                                    v-for="answerItem in item.text" 
-                                    :key="answerItem.ansId"
-                                >
-                                <v-text-field v-model="answerItem.answerDescription"></v-text-field>
-                                </v-col>
-                            </v-row>
+                    <v-content v-if="!multipleAnswer">
+                      <v-row v-for="item in answers" :key="item.ansId">
+                        <v-radio-group v-model="test">
+                          <v-radio :value="item.ansId"></v-radio>
                         </v-radio-group>
 
-                        <v-btn 
-                            class="primary" 
-                            :disabled="!formIsValid" 
-                            type="submit"
-                        >Create Question</v-btn>
-                    </v-container>
+                        <v-text-field name="text field" id="text field" v-model="item.text" required></v-text-field>
+                      </v-row>
+                    </v-content>
+
+                    <v-radio-group v-else v-model="test">
+                      <v-row>
+                        <v-col v-for="i in columns" :key="i">
+                          <v-text-field v-model="auxTitle[i-1]"></v-text-field>
+                        </v-col>
+                      </v-row>
+
+                      <v-row v-for="item in answers" :key="item.ansId">
+                        <v-col>
+                          <v-radio :value="item.ansId"></v-radio>
+                        </v-col>
+                        <v-col v-for="answerItem in item.text" :key="answerItem.ansId">
+                          <v-text-field v-model="answerItem.answerDescription"></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-radio-group>
+
+                    <v-btn class="primary" :disabled="!formIsValid" type="submit">Create Question</v-btn>
+                  </v-container>
                 </v-stepper-content>
-            </v-stepper-items>
-        </v-stepper>
-    </form>
+              </v-stepper-items>
+            </v-stepper>
+          </form>
+        </v-card>
+      </v-col>
+
+      <v-col>
+        <v-card fill>
+          <v-card-title>
+
+            Preview
+          </v-card-title>
+          <v-card-text v-if="!multipleAnswer">
+            ASSUNTO: {{subject}}<br>
+            CONHECIMENTO: {{knowledge}} [{{knowledgePWR}}/{{knowledgeBWR}}]<br>
+            IQ: {{id}}<br><br>
+            {{questionDescription}}<br><br>
+            A - {{answers[0].text}}<br>
+            B - {{answers[1].text}}<br>
+            C - {{answers[2].text}}<br>
+            D - {{answers[3].text}}<br>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+import 'tui-editor/dist/tui-editor.css';
+import 'tui-editor/dist/tui-editor-contents.css';
+import 'codemirror/lib/codemirror.css';
+import { Viewer } from '@toast-ui/vue-editor'
+
 export default {
+  components: [
+    Viewer
+  ],
   data() {
     return {
       questionDescription: "",
@@ -253,9 +260,9 @@ export default {
     }
   },
   methods: {
-    updateData (variable) {
-      console.log("!!!",variable)
-      this.questionDescription = variable
+    updateData(variable) {
+      console.log("!!!", variable);
+      this.questionDescription = variable;
     },
     onCreateQuestion() {
       if (!this.formIsValid) {

@@ -1,12 +1,16 @@
 <template>
-  <Stepper></Stepper>
+  <v-row>
+    <Stepper></Stepper>
+  </v-row>
 </template>
 
 <script>
 import Stepper from './Stepper'
+import Preview from './Preview'
 export default {
   components: {
-    Stepper
+    Stepper,
+    Preview
   }
 }
 </script>
