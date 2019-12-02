@@ -4,7 +4,7 @@
       v-model="drawer"
       absolute>
       <v-content>
-        <v-container fluid>
+        <v-container>
           <v-list>
             <v-btn 
               text
@@ -12,7 +12,7 @@
               :key="item.title"
               :to="item.link">
               <v-icon>{{ item.icon }}</v-icon>
-              {{ item.title }}
+                {{ item.title }}
             </v-btn>
           </v-list>
         </v-container>
@@ -67,7 +67,8 @@ export default {
       let drawerItems = []
       if (this.userIsAuthenticated()) {
         drawerItems = [
-          {icon: 'mdi-settings', title: 'Manage Questions', link: '/questions'}
+          {icon: 'mdi-settings', title: 'Manage Questions', link: '/questions'},
+          {icon: 'mdi-file-multiple-outline', title: ' Manage Tests', link: '/tests'}
         ]
       }
       return drawerItems

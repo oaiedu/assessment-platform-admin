@@ -6,6 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    loadedTests: [],
     loadedQuestions: [],
     user: null,
     loading: false,
@@ -15,6 +16,9 @@ export default new Vuex.Store({
   mutations: {
     setLoadedQuestions(state, payload) {
       state.loadedQuestions = payload
+    },
+    setLoadedTests(state,payload){
+      state.loadedTests = payload
     },
     setUser(state, payload) {
       state.user = payload
@@ -46,6 +50,18 @@ export default new Vuex.Store({
         })
       })
       commit('setLoadedQuestions', questions)
+      commit('setLoading', false)
+    },
+    loadedTests({ commit }) {
+      commit('setLoading', true)
+      const db = firebase.firestore()
+      let tests = []
+      db.collection("tests").get().then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          tests.push(Object.assign({id: doc.id, data: doc.data()}))
+        })
+      })
+      commit('setLoadedTests', tests)
       commit('setLoading', false)
     },
     signUserUp({ commit }, payload) {
@@ -106,6 +122,23 @@ export default new Vuex.Store({
       firebase.auth().signOut()
       commit('setUser', null)
     },
+    createTest({ commit }, payload) {
+      const db = firebase.firestore()
+      const test = {
+        name: payload.name,
+        questions: payload.questions
+      }
+      db.collection("tests").doc().set({
+        TITULO: test.name,
+        PERGUNTAS: test.questions
+      })
+      .then(function () {
+        console.log("Success")
+      })
+      .catch(function (error) {
+        console.error("Error writing document: ", error);
+      });
+    },
     createQuestion({ commit }, payload) {
       const db = firebase.firestore()
       const question = {
@@ -154,6 +187,9 @@ export default new Vuex.Store({
     },
     loadedQuestions(state) {
       return state.loadedQuestions
+    },
+    loadedTests(state) {
+      return state.loadedTests
     },
     findQuestionById: state => id => state.loadedQuestions.find(question => question.id === id)
   },
