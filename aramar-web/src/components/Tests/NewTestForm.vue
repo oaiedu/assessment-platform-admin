@@ -1,103 +1,105 @@
 <template>
-  <v-app>
-    <v-form @submit.prevent="onCreateTest">
-      <v-text-field
-        filled
-        dense
-        label="Test Name"
-        single-line
-        hide-details
-        rounded
-        v-model="testName"
-      ></v-text-field>
-      <v-container>
-        <v-container fluid>
-          <v-card>
-            <v-container>
-              <v-text-field
-                v-model="search"
-                filled
-                rounded
-                dense
-                append-icon="mdi-magnify"
-                label="Search for IQ"
-                single-line
-                hide-details
-              ></v-text-field>
-            </v-container>
+  <v-card>
+    <v-container>
+      <v-form @submit.prevent="onCreateTest">
+        <v-text-field
+          filled
+          dense
+          label="Test Name"
+          single-line
+          hide-details
+          rounded
+          v-model="testName"
+        ></v-text-field>
+        <v-container>
+          <v-container fluid>
+            <v-card>
+              <v-container>
+                <v-text-field
+                  v-model="search"
+                  filled
+                  rounded
+                  dense
+                  append-icon="mdi-magnify"
+                  label="Search for IQ"
+                  single-line
+                  hide-details
+                ></v-text-field>
+              </v-container>
 
-            <v-col>
-              <v-menu close-on-click offset-x transition="slide-x-transition">
-                <template v-slot:activator="{ on }">
-                  <v-btn v-on="on" fab small color="ligh purple">
-                    <v-icon>mdi-playlist-plus</v-icon>
-                  </v-btn>
-                </template>
+              <v-col>
+                <v-menu close-on-click offset-x transition="slide-x-transition">
+                  <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" fab small color="ligh purple">
+                      <v-icon>mdi-playlist-plus</v-icon>
+                    </v-btn>
+                  </template>
 
-                <v-list>
-                  <v-list-item v-for="(item,i) in items" :key="item" @click="selections(i)">
-                    <v-list-item-title>{{ item }}</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-col>
+                  <v-list>
+                    <v-list-item v-for="(item,i) in items" :key="item" @click="selections(i)">
+                      <v-list-item-title>{{ item }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </v-col>
 
-            <v-container>
-              <v-row>
-                <v-chip
-                  v-for="(tag,i) in selectedSubjects"
-                  :key="tag"
-                  class="ma-2"
-                  close
-                  @click:close="removeSelections(i)"
-                >{{ tag }}</v-chip>
-              </v-row>
-            </v-container>
-          </v-card>
+              <v-container>
+                <v-row>
+                  <v-chip
+                    v-for="(tag,i) in selectedSubjects"
+                    :key="tag"
+                    class="ma-2"
+                    close
+                    @click:close="removeSelections(i)"
+                  >{{ tag }}</v-chip>
+                </v-row>
+              </v-container>
+            </v-card>
+          </v-container>
+
+          <v-container fluid>
+            <v-card v-if="selectedSubjects.length == 0 ">
+              <v-data-table
+                v-model="selectedQuestions"
+                :headers="headers"
+                :items="questions"
+                :page.sync="page"
+                :items-per-page="itemsPerPage"
+                :search="search"
+                show-select
+                item-key="id"
+                hide-default-footer
+                class="elevation-1"
+                @page-count="pageCount = $event"
+              ></v-data-table>
+            </v-card>
+
+            <v-card v-else>
+              <v-data-table
+                v-model="selectedQuestions"
+                :headers="headers"
+                :items="showedQuestions"
+                :page.sync="page"
+                :items-per-page="itemsPerPage"
+                :search="search"
+                show-select
+                item-key="id"
+                hide-default-footer
+                class="elevation-1"
+                @page-count="pageCount = $event"
+              ></v-data-table>
+            </v-card>
+          </v-container>
+
+          <v-btn class="primary" type="submit">Create Test</v-btn>
+
+          <div class="text-center pt-2">
+            <v-pagination v-model="page" :length="pageCount"></v-pagination>
+          </div>
         </v-container>
-
-        <v-container fluid>
-          <v-card v-if="selectedSubjects.length == 0 ">
-            <v-data-table
-              v-model="selectedQuestions"
-              :headers="headers"
-              :items="questions"
-              :page.sync="page"
-              :items-per-page="itemsPerPage"
-              :search="search"
-              show-select
-              item-key="id"
-              hide-default-footer
-              class="elevation-1"
-              @page-count="pageCount = $event"
-            ></v-data-table>
-          </v-card>
-
-          <v-card v-else>
-            <v-data-table
-              v-model="selectedQuestions"
-              :headers="headers"
-              :items="showedQuestions"
-              :page.sync="page"
-              :items-per-page="itemsPerPage"
-              :search="search"
-              show-select
-              item-key="id"
-              hide-default-footer
-              class="elevation-1"
-              @page-count="pageCount = $event"
-            ></v-data-table>
-          </v-card>
-        </v-container>
-
-        <v-btn class="primary" type="submit">Create Test</v-btn>
-
-        <div class="text-center pt-2">
-          <v-pagination v-model="page" :length="pageCount"></v-pagination>
-        </div>
-      </v-container>
-    </v-form>
-  </v-app>
+      </v-form>
+    </v-container>
+  </v-card>
 </template>
 
 <script>

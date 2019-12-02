@@ -34,7 +34,13 @@
 
           <v-container>
             <v-row>
-              <v-chip v-for="(tag,i) in selected" :key="tag" class="ma-2" close @click:close="removeSelections(i)">{{ tag }}</v-chip>
+              <v-chip
+                v-for="(tag,i) in selected"
+                :key="tag"
+                class="ma-2"
+                close
+                @click:close="removeSelections(i)"
+              >{{ tag }}</v-chip>
             </v-row>
           </v-container>
         </v-card>
@@ -68,9 +74,13 @@
         </v-card>
       </v-container>
 
-      <v-btn fixed dark fab bottom right color="cyan" to="/newquestion">
+      <v-btn fixed dark fab bottom right color="cyan" @click.stop="dialog = true">
         <v-icon>mdi-plus</v-icon>
       </v-btn>
+
+      <v-dialog v-model="dialog">
+        <NewQuestion></NewQuestion>
+      </v-dialog>
 
       <div class="text-center pt-2">
         <v-pagination v-model="page" :length="pageCount"></v-pagination>
@@ -80,10 +90,15 @@
 </template>
 
 <script>
+import NewQuestion from "./NewQuestion";
 export default {
+  components: {
+    NewQuestion
+  },
   data() {
     return {
       selected: [],
+      dialog: false,
       items: [
         "Teoria do Reator",
         "Termodinâmica",
@@ -122,45 +137,41 @@ export default {
     }
   },
   watch: {
-    selected(val){
+    selected(val) {
       this.questions.forEach(element => {
-        for(let i = 0; i < this.selected.length; i++){
-          if(element.data.DISCIPLINA == this.selected[i]){
-            let aux = true
-            for(let k = 0; k < this.showedQuestions.length; k++){
-              if(element === this.showedQuestions[k])
-              aux = false
+        for (let i = 0; i < this.selected.length; i++) {
+          if (element.data.DISCIPLINA == this.selected[i]) {
+            let aux = true;
+            for (let k = 0; k < this.showedQuestions.length; k++) {
+              if (element === this.showedQuestions[k]) aux = false;
             }
-            if(aux == true)
-              this.showedQuestions.push(element)
+            if (aux == true) this.showedQuestions.push(element);
           }
         }
-      })
+      });
     }
   },
   methods: {
-    removeSelections(i){
-      let aux = this.showedQuestions.length
+    removeSelections(i) {
+      let aux = this.showedQuestions.length;
 
-      for(let j = 0; j < aux; j++){
-        if(this.showedQuestions[j].data.DISCIPLINA == this.selected[i]){
-          this.showedQuestions.splice(j,1)
-          j --
-          aux --
+      for (let j = 0; j < aux; j++) {
+        if (this.showedQuestions[j].data.DISCIPLINA == this.selected[i]) {
+          this.showedQuestions.splice(j, 1);
+          j--;
+          aux--;
         }
       }
 
-      this.selected.splice(i,1)
+      this.selected.splice(i, 1);
     },
     selections(i) {
-      let aux = false
-      for(let j = 0; j < this.selected.length; j++){
-        if(this.items[i] == this.selected[j])
-          aux = true
+      let aux = false;
+      for (let j = 0; j < this.selected.length; j++) {
+        if (this.items[i] == this.selected[j]) aux = true;
       }
 
-      if(aux == false)
-        this.selected.push(this.items[i]);
+      if (aux == false) this.selected.push(this.items[i]);
     },
     deleteQuestion(id) {
       console.log("hey", id);

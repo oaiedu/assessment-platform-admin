@@ -35,6 +35,7 @@ new Vue({
       } 
     })
     this.$store.dispatch('loadedQuestions')
+    this.$store.dispatch('loadedTests')
     console.log(this.$store.state.loadedQuestions)
   }
 }).$mount('#app')

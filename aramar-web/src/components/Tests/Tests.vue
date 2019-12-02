@@ -17,7 +17,7 @@
     </v-btn>
 
     <v-dialog v-model="dialog">
-        <NewTest></NewTest>
+      <NewTest></NewTest>
     </v-dialog>
 
     <div class="text-center pt-2">

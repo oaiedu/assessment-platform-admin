@@ -1,7 +1,5 @@
 <template>
-  <v-row>
-    <Stepper></Stepper>
-  </v-row>
+  <Stepper></Stepper>
 </template>
 
 <script>

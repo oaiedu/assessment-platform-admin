@@ -1,224 +1,226 @@
 
 <template>
-  <v-container>
-    <v-row>
-      <v-col>
-        <v-card>
-          <form @submit.prevent="onCreateQuestion">
-            <v-stepper v-model="e1">
-              <v-stepper-header>
-                <v-stepper-step editable :complete="e1 > 1" step="1"></v-stepper-step>
+  <v-card>
+    <v-container>
+      <v-row>
+        <v-col>
+          <v-card>
+            <form @submit.prevent="onCreateQuestion">
+              <v-stepper v-model="e1">
+                <v-stepper-header>
+                  <v-stepper-step editable :complete="e1 > 1" step="1"></v-stepper-step>
 
-                <v-divider></v-divider>
+                  <v-divider></v-divider>
 
-                <v-stepper-step editable :complete="e1 > 2" step="2"></v-stepper-step>
+                  <v-stepper-step editable :complete="e1 > 2" step="2"></v-stepper-step>
 
-                <v-divider></v-divider>
+                  <v-divider></v-divider>
 
-                <v-stepper-step editable step="3"></v-stepper-step>
-              </v-stepper-header>
+                  <v-stepper-step editable step="3"></v-stepper-step>
+                </v-stepper-header>
 
-              <v-stepper-items>
-                <v-stepper-content step="1">
-                  <v-container>
-                    <v-row>
-                      <v-text-field name="id" label="IQ" id="id" v-model="id" required></v-text-field>
-                    </v-row>
+                <v-stepper-items>
+                  <v-stepper-content step="1">
+                    <v-container>
+                      <v-row>
+                        <v-text-field name="id" label="IQ" id="id" v-model="id" required></v-text-field>
+                      </v-row>
 
-                    <v-row>
-                      <v-text-field
-                        name="knowledge"
-                        label="Conhecimento"
-                        id="knowledge"
-                        v-model="knowledge"
-                        required
-                      ></v-text-field>
-                    </v-row>
+                      <v-row>
+                        <v-text-field
+                          name="knowledge"
+                          label="Conhecimento"
+                          id="knowledge"
+                          v-model="knowledge"
+                          required
+                        ></v-text-field>
+                      </v-row>
 
-                    <v-row>
-                      <v-text-field
-                        name="knowledgePWR"
-                        label="Relevância OR"
-                        id="knowledgePWR"
-                        v-model="knowledgePWR"
-                        required
-                      ></v-text-field>
-                    </v-row>
+                      <v-row>
+                        <v-text-field
+                          name="knowledgePWR"
+                          label="Relevância OR"
+                          id="knowledgePWR"
+                          v-model="knowledgePWR"
+                          required
+                        ></v-text-field>
+                      </v-row>
 
-                    <v-row>
-                      <v-text-field
-                        name="knowledgeBWR"
-                        label="Relevância OSR"
-                        id="knowledgeBWR"
-                        v-model="knowledgeBWR"
-                        required
-                      ></v-text-field>
-                    </v-row>
+                      <v-row>
+                        <v-text-field
+                          name="knowledgeBWR"
+                          label="Relevância OSR"
+                          id="knowledgeBWR"
+                          v-model="knowledgeBWR"
+                          required
+                        ></v-text-field>
+                      </v-row>
 
-                    <v-row>
-                      <v-select
-                        :items="subjectItems"
-                        name="subject"
-                        id="subject"
-                        v-model="subject"
-                        label="Disciplina"
-                        solo
-                      ></v-select>
-                    </v-row>
+                      <v-row>
+                        <v-select
+                          :items="subjectItems"
+                          name="subject"
+                          id="subject"
+                          v-model="subject"
+                          label="Disciplina"
+                          solo
+                        ></v-select>
+                      </v-row>
 
-                    <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
-                  </v-container>
-                </v-stepper-content>
+                      <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
+                    </v-container>
+                  </v-stepper-content>
 
-                <v-stepper-content step="2">
-                  <v-container>
-                    <Combined @inputData="updateData"></Combined>
+                  <v-stepper-content step="2">
+                    <v-container>
+                      <Combined @inputData="updateData"></Combined>
 
-                    <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
-                  </v-container>
-                </v-stepper-content>
+                      <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
+                    </v-container>
+                  </v-stepper-content>
 
-                <v-stepper-content step="3">
-                  <v-container>
-                    <v-row>
-                      <v-container>
-                        Colunas
-                        <v-btn
-                          @click="increaseColumns"
-                          class="mx-2"
-                          fab
-                          dark
-                          x-small
-                          color="primary"
-                        >
-                          <v-icon dark>mdi-plus</v-icon>
-                        </v-btn>
-
-                        <v-btn
-                          @click="decreaseColumns"
-                          class="mx-2"
-                          fab
-                          dark
-                          x-small
-                          color="primary"
-                        >
-                          <v-icon dark>mdi-minus</v-icon>
-                        </v-btn>
-                      </v-container>
-                    </v-row>
-
-                    <v-row justify="end" v-if="confirmTitle">
-                      <v-col cols="1"></v-col>
-                      <v-col v-for="i in number" :key="i">
-                        <v-text-field outlined v-model="auxTitle[i-1]"></v-text-field>
-                      </v-col>
-                    </v-row>
-
-                    <v-row v-for="item in answers" :key="item.ansId">
-                      <v-col cols="12" md="1" sm="1" xs="1">
-                        <v-radio-group v-model="test">
-                          <v-radio :value="item.ansId"></v-radio>
-                        </v-radio-group>
-                      </v-col>
-
-                      <!-- <v-combobox
-                        v-model="item.text.answerDescription"
-                        :items="items"
-                        chips
-                        clearable
-                        multiple
-                        solo
-                      >
-                        <template v-slot:selection="{ attrs, item, select, selected }">
-                          <v-chip
-                            v-bind="attrs"
-                            :input-value="selected"
-                            close
-                            @click="select"
-                            @click:close="remove(item)"
+                  <v-stepper-content step="3">
+                    <v-container>
+                      <v-row>
+                        <v-container>
+                          Colunas
+                          <v-btn
+                            @click="increaseColumns"
+                            class="mx-2"
+                            fab
+                            dark
+                            x-small
+                            color="primary"
                           >
-                            <strong>{{ item }}</strong>&nbsp;
-                          </v-chip>
-                        </template>
-                      </v-combobox> -->
-                      <v-col v-for="answerItem in item.text" :key="answerItem">
-                        <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
-                      </v-col>
-                    </v-row>
-                    <v-btn class="primary" :disabled="!formIsValid" type="submit">Create Question</v-btn>
-                  </v-container>
-                </v-stepper-content>
-              </v-stepper-items>
-            </v-stepper>
-          </form>
-        </v-card>
-      </v-col>
+                            <v-icon dark>mdi-plus</v-icon>
+                          </v-btn>
 
-      <v-col>
-        <v-card fill>
-          <v-card-title>Preview</v-card-title>
-          <v-card-text>
-            ASSUNTO: {{subject}}
-            <br />
-            CONHECIMENTO: {{knowledge}} [{{knowledgePWR}}/{{knowledgeBWR}}]
-            <br />
-            IQ: {{id}}
-            <br />
-            <br />
-            {{questionDescription}}
-            <br />
+                          <v-btn
+                            @click="decreaseColumns"
+                            class="mx-2"
+                            fab
+                            dark
+                            x-small
+                            color="primary"
+                          >
+                            <v-icon dark>mdi-minus</v-icon>
+                          </v-btn>
+                        </v-container>
+                      </v-row>
 
-            <v-row>
-              <v-col cols="2"></v-col>
-              <v-col v-for="item in answers[0].text" :key="item" cols="2">
-                {{ item.title }}
-              </v-col>
-            </v-row>
+                      <v-row justify="end" v-if="confirmTitle">
+                        <v-col cols="1"></v-col>
+                        <v-col v-for="i in number" :key="i">
+                          <v-text-field outlined v-model="auxTitle[i-1]"></v-text-field>
+                        </v-col>
+                      </v-row>
 
-            <v-row>
-              <v-col cols="2"> 
-                A - 
-              </v-col>
-              <v-col v-for="item in answers[0].text" :key="item" cols="2">
-                {{ item.answerDescription }}
-              </v-col>
-            </v-row>
-            <br />
+                      <v-row v-for="item in answers" :key="item.ansId">
+                        <v-col cols="12" md="1" sm="1" xs="1">
+                          <v-radio-group v-model="test">
+                            <v-radio :value="item.ansId"></v-radio>
+                          </v-radio-group>
+                        </v-col>
 
-            <v-row>
-              <v-col cols="2"> 
-                B - 
-              </v-col>
-              <v-col v-for="item in answers[1].text" :key="item" cols="2">
-                {{ item.answerDescription }}
-              </v-col>
-            </v-row>
-            <br />
+                        <!-- <v-combobox
+                          v-model="item.text.answerDescription"
+                          :items="items"
+                          chips
+                          clearable
+                          multiple
+                          solo
+                        >
+                          <template v-slot:selection="{ attrs, item, select, selected }">
+                            <v-chip
+                              v-bind="attrs"
+                              :input-value="selected"
+                              close
+                              @click="select"
+                              @click:close="remove(item)"
+                            >
+                              <strong>{{ item }}</strong>&nbsp;
+                            </v-chip>
+                          </template>
+                        </v-combobox> -->
+                        <v-col v-for="answerItem in item.text" :key="answerItem">
+                          <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
+                        </v-col>
+                      </v-row>
+                      <v-btn class="primary" :disabled="!formIsValid" type="submit">Create Question</v-btn>
+                    </v-container>
+                  </v-stepper-content>
+                </v-stepper-items>
+              </v-stepper>
+            </form>
+          </v-card>
+        </v-col>
 
-            <v-row>
-              <v-col cols="2"> 
-                C - 
-              </v-col>
-              <v-col v-for="item in answers[2].text" :key="item" cols="2">
-                {{ item.answerDescription }}
-              </v-col>
-            </v-row>
-            <br />
+        <v-col>
+          <v-card fill>
+            <v-card-title>Preview</v-card-title>
+            <v-card-text>
+              ASSUNTO: {{subject}}
+              <br />
+              CONHECIMENTO: {{knowledge}} [{{knowledgePWR}}/{{knowledgeBWR}}]
+              <br />
+              IQ: {{id}}
+              <br />
+              <br />
+              {{questionDescription}}
+              <br />
 
-            <v-row>
-              <v-col cols="2"> 
-                D - 
-              </v-col>
-              <v-col v-for="item in answers[3].text" :key="item" cols="2">
-                {{ item.answerDescription }}
-              </v-col>
-            </v-row>
-            <br />
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+              <v-row>
+                <v-col cols="2"></v-col>
+                <v-col v-for="item in answers[0].text" :key="item" cols="2">
+                  {{ item.title }}
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="2"> 
+                  A - 
+                </v-col>
+                <v-col v-for="item in answers[0].text" :key="item" cols="2">
+                  {{ item.answerDescription }}
+                </v-col>
+              </v-row>
+              <br />
+
+              <v-row>
+                <v-col cols="2"> 
+                  B - 
+                </v-col>
+                <v-col v-for="item in answers[1].text" :key="item" cols="2">
+                  {{ item.answerDescription }}
+                </v-col>
+              </v-row>
+              <br />
+
+              <v-row>
+                <v-col cols="2"> 
+                  C - 
+                </v-col>
+                <v-col v-for="item in answers[2].text" :key="item" cols="2">
+                  {{ item.answerDescription }}
+                </v-col>
+              </v-row>
+              <br />
+
+              <v-row>
+                <v-col cols="2"> 
+                  D - 
+                </v-col>
+                <v-col v-for="item in answers[3].text" :key="item" cols="2">
+                  {{ item.answerDescription }}
+                </v-col>
+              </v-row>
+              <br />
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-card>
 </template>
 
 <script>
