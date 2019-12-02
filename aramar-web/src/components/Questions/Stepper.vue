@@ -1,3 +1,4 @@
+
 <template>
   <v-container>
     <v-row>
@@ -79,45 +80,71 @@
 
                 <v-stepper-content step="3">
                   <v-container>
-                    <h3>Respostas</h3>
-
                     <v-row>
-                      <v-col>
-                        <v-switch v-model="multipleAnswer" label="Multiple"></v-switch>
-                      </v-col>
+                      <v-container>
+                        Colunas
+                        <v-btn
+                          @click="increaseColumns"
+                          class="mx-2"
+                          fab
+                          dark
+                          x-small
+                          color="primary"
+                        >
+                          <v-icon dark>mdi-plus</v-icon>
+                        </v-btn>
 
-                      <v-col v-if="multipleAnswer">
-                        <v-select :items="columnItems" v-model="columns" label="Número de Colunas" solo></v-select>
+                        <v-btn
+                          @click="decreaseColumns"
+                          class="mx-2"
+                          fab
+                          dark
+                          x-small
+                          color="primary"
+                        >
+                          <v-icon dark>mdi-minus</v-icon>
+                        </v-btn>
+                      </v-container>
+                    </v-row>
+
+                    <v-row justify="end" v-if="confirmTitle">
+                      <v-col cols="1"></v-col>
+                      <v-col v-for="i in number" :key="i">
+                        <v-text-field outlined v-model="auxTitle[i-1]"></v-text-field>
                       </v-col>
                     </v-row>
 
-                    <v-content v-if="!multipleAnswer">
-                      <v-row v-for="item in answers" :key="item.ansId">
+                    <v-row v-for="item in answers" :key="item.ansId">
+                      <v-col cols="12" md="1" sm="1" xs="1">
                         <v-radio-group v-model="test">
                           <v-radio :value="item.ansId"></v-radio>
                         </v-radio-group>
+                      </v-col>
 
-                        <v-text-field name="text field" id="text field" v-model="item.text" required></v-text-field>
-                      </v-row>
-                    </v-content>
-
-                    <v-radio-group v-else v-model="test">
-                      <v-row>
-                        <v-col v-for="i in columns" :key="i">
-                          <v-text-field v-model="auxTitle[i-1]"></v-text-field>
-                        </v-col>
-                      </v-row>
-
-                      <v-row v-for="item in answers" :key="item.ansId">
-                        <v-col>
-                          <v-radio :value="item.ansId"></v-radio>
-                        </v-col>
-                        <v-col v-for="answerItem in item.text" :key="answerItem.ansId">
-                          <v-text-field v-model="answerItem.answerDescription"></v-text-field>
-                        </v-col>
-                      </v-row>
-                    </v-radio-group>
-
+                      <!-- <v-combobox
+                        v-model="item.text.answerDescription"
+                        :items="items"
+                        chips
+                        clearable
+                        multiple
+                        solo
+                      >
+                        <template v-slot:selection="{ attrs, item, select, selected }">
+                          <v-chip
+                            v-bind="attrs"
+                            :input-value="selected"
+                            close
+                            @click="select"
+                            @click:close="remove(item)"
+                          >
+                            <strong>{{ item }}</strong>&nbsp;
+                          </v-chip>
+                        </template>
+                      </v-combobox> -->
+                      <v-col v-for="answerItem in item.text" :key="answerItem">
+                        <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
+                      </v-col>
+                    </v-row>
                     <v-btn class="primary" :disabled="!formIsValid" type="submit">Create Question</v-btn>
                   </v-container>
                 </v-stepper-content>
@@ -129,19 +156,64 @@
 
       <v-col>
         <v-card fill>
-          <v-card-title>
+          <v-card-title>Preview</v-card-title>
+          <v-card-text>
+            ASSUNTO: {{subject}}
+            <br />
+            CONHECIMENTO: {{knowledge}} [{{knowledgePWR}}/{{knowledgeBWR}}]
+            <br />
+            IQ: {{id}}
+            <br />
+            <br />
+            {{questionDescription}}
+            <br />
 
-            Preview
-          </v-card-title>
-          <v-card-text v-if="!multipleAnswer">
-            ASSUNTO: {{subject}}<br>
-            CONHECIMENTO: {{knowledge}} [{{knowledgePWR}}/{{knowledgeBWR}}]<br>
-            IQ: {{id}}<br><br>
-            {{questionDescription}}<br><br>
-            A - {{answers[0].text}}<br>
-            B - {{answers[1].text}}<br>
-            C - {{answers[2].text}}<br>
-            D - {{answers[3].text}}<br>
+            <v-row>
+              <v-col cols="2"></v-col>
+              <v-col v-for="item in answers[0].text" :key="item" cols="2">
+                {{ item.title }}
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="2"> 
+                A - 
+              </v-col>
+              <v-col v-for="item in answers[0].text" :key="item" cols="2">
+                {{ item.answerDescription }}
+              </v-col>
+            </v-row>
+            <br />
+
+            <v-row>
+              <v-col cols="2"> 
+                B - 
+              </v-col>
+              <v-col v-for="item in answers[1].text" :key="item" cols="2">
+                {{ item.answerDescription }}
+              </v-col>
+            </v-row>
+            <br />
+
+            <v-row>
+              <v-col cols="2"> 
+                C - 
+              </v-col>
+              <v-col v-for="item in answers[2].text" :key="item" cols="2">
+                {{ item.answerDescription }}
+              </v-col>
+            </v-row>
+            <br />
+
+            <v-row>
+              <v-col cols="2"> 
+                D - 
+              </v-col>
+              <v-col v-for="item in answers[3].text" :key="item" cols="2">
+                {{ item.answerDescription }}
+              </v-col>
+            </v-row>
+            <br />
           </v-card-text>
         </v-card>
       </v-col>
@@ -150,17 +222,16 @@
 </template>
 
 <script>
-import 'tui-editor/dist/tui-editor.css';
-import 'tui-editor/dist/tui-editor-contents.css';
-import 'codemirror/lib/codemirror.css';
-import { Viewer } from '@toast-ui/vue-editor'
+import "tui-editor/dist/tui-editor.css";
+import "tui-editor/dist/tui-editor-contents.css";
+import "codemirror/lib/codemirror.css";
+import { Viewer } from "@toast-ui/vue-editor";
 
 export default {
-  components: [
-    Viewer
-  ],
+  components: [Viewer],
   data() {
     return {
+      confirmTitle: false,
       questionDescription: "",
       e1: 0,
       test: null,
@@ -168,11 +239,13 @@ export default {
       radios: "aaaa",
       multipleAnswer: false,
       auxTitle: [],
+      chips: [],
+      items: [],
       answers: [
-        { text: "", ansId: "radio-1", value: false },
-        { text: "", ansId: "radio-2", value: false },
-        { text: "", ansId: "radio-3", value: false },
-        { text: "", ansId: "radio-4", value: false }
+        { text: [], ansId: "radio-1", value: false },
+        { text: [], ansId: "radio-2", value: false },
+        { text: [], ansId: "radio-3", value: false },
+        { text: [], ansId: "radio-4", value: false }
       ],
       id: "",
       subject: "",
@@ -193,8 +266,7 @@ export default {
         "Transferência de Calor",
         "Materiais"
       ],
-      columnItems: [2, 3, 4, 5],
-      batatinha: "aaaaaa"
+      number: 0
     };
   },
   computed: {
@@ -224,19 +296,22 @@ export default {
         });
       }
     },
-    columns(val) {
-      console.log(val);
+    number(val) {
       this.answers.forEach(element => {
         let aux = [];
-        for (var i = 0; i < this.columns; i++) {
+        for (var i = 0; i < this.number; i++) {
           aux.push({ title: "", answerDescription: "" });
         }
         element.text = aux;
       });
+      if (this.number > 1)
+        this.confirmTitle = true
+      else 
+        this.confirmTitle = false
     },
     auxTitle(val) {
       this.answers.forEach(element => {
-        for (var i = 0; i < this.columns; i++) {
+        for (var i = 0; i < this.number; i++) {
           element.text[i].title = this.auxTitle[i];
         }
       });
@@ -260,8 +335,13 @@ export default {
     }
   },
   methods: {
+    decreaseColumns() {
+      if (this.number > 1) this.number--;
+    },
+    increaseColumns() {
+      if (this.number < 5) this.number++;
+    },
     updateData(variable) {
-      console.log("!!!", variable);
       this.questionDescription = variable;
     },
     onCreateQuestion() {
@@ -278,7 +358,8 @@ export default {
         answers: this.answers
       };
       this.$store.dispatch("createQuestion", questionData);
-      this.$router.push("/questions");
+      this.$router.push("/questions")
+      this.$store.dispatch("loadedQuestions");
     }
   }
 };
