@@ -15,39 +15,11 @@
               hide-details
             ></v-text-field>
           </v-container>
-
-          <v-col>
-            <v-menu close-on-click offset-x transition="slide-x-transition">
-              <template v-slot:activator="{ on }">
-                <v-btn v-on="on" fab small color="ligh purple">
-                  <v-icon>mdi-playlist-plus</v-icon>
-                </v-btn>
-              </template>
-
-              <v-list>
-                <v-list-item v-for="(item,i) in items" :key="item" @click="selections(i)">
-                  <v-list-item-title>{{ item }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-col>
-
-          <v-container>
-            <v-row>
-              <v-chip
-                v-for="(tag,i) in selected"
-                :key="tag"
-                class="ma-2"
-                close
-                @click:close="removeSelections(i)"
-              >{{ tag }}</v-chip>
-            </v-row>
-          </v-container>
         </v-card>
       </v-container>
 
       <v-container fluid>
-        <v-card v-if="selected.length == 0 ">
+        <v-card>
           <v-data-table
             :headers="headers"
             :items="questions"
@@ -57,48 +29,50 @@
             hide-default-footer
             class="elevation-1"
             @page-count="pageCount = $event"
-          ></v-data-table>
-        </v-card>
-
-        <v-card v-else>
-          <v-data-table
-            :headers="headers"
-            :items="showedQuestions"
-            :page.sync="page"
-            :items-per-page="itemsPerPage"
-            :search="search"
-            hide-default-footer
-            class="elevation-1"
-            @page-count="pageCount = $event"
-          ></v-data-table>
+          >
+            <template v-slot:item.actions="{ item }">
+              <v-icon small class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
+              <v-icon small @click="deleteQuestionSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
+            </template>
+          </v-data-table>
         </v-card>
       </v-container>
 
-      <v-btn fixed dark fab bottom right color="cyan" @click.stop="dialog = true">
+      <v-btn fixed dark fab bottom right color="cyan" @click.stop="dialogNewQuestion= true">
         <v-icon>mdi-plus</v-icon>
       </v-btn>
 
-      <v-dialog v-model="dialog">
-        <NewQuestion></NewQuestion>
+      <v-dialog v-model="dialogNewQuestion">
+        <NewQuestion @closeDialogNew="dialogNewQuestion = false"></NewQuestion>
+      </v-dialog>
+
+      <v-dialog v-model="dialogEditQuestion">
+        <EditQuestion :questions="selectedEdit" @closeDialogEdit="dialogEditQuestion = false"></EditQuestion>
       </v-dialog>
 
       <div class="text-center pt-2">
         <v-pagination v-model="page" :length="pageCount"></v-pagination>
       </div>
+
+      <v-snackbar v-model="deleteQuestionSnackBar" color="black" right top>
+        Você realmente quer deletar esta questão?
+        <v-btn dark color="yellow" text @click="deleteQuestion(deleteSelect.id)">Ok</v-btn>
+        <v-btn dark color="yellow" text @click="deleteQuestionSnackBar = false">Cancelar</v-btn>
+      </v-snackbar>
     </v-container>
   </v-app>
 </template>
 
 <script>
-import NewQuestion from "./NewQuestion";
 export default {
-  components: {
-    NewQuestion
-  },
   data() {
     return {
+      deleteSelect: "",
+      selectedEdit: {},
+      deleteQuestionSnackBar: false,
       selected: [],
-      dialog: false,
+      dialogNewQuestion: false,
+      dialogEditQuestion: false,
       items: [
         "Teoria do Reator",
         "Termodinâmica",
@@ -131,9 +105,6 @@ export default {
   computed: {
     questions() {
       return this.$store.getters.loadedQuestions;
-    },
-    loadQuestions() {
-      this.$store.dispatch("loadedQuestions");
     }
   },
   watch: {
@@ -152,6 +123,14 @@ export default {
     }
   },
   methods: {
+    editQuestions(val){
+      this.selectedEdit = val
+      this.dialogEditQuestion = true
+    },
+    loadQuestions() {
+      console.log("entrou");
+      this.$store.dispatch("loadedQuestions");
+    },
     removeSelections(i) {
       let aux = this.showedQuestions.length;
 
@@ -174,8 +153,10 @@ export default {
       if (aux == false) this.selected.push(this.items[i]);
     },
     deleteQuestion(id) {
-      console.log("hey", id);
+      console.log(id);
       this.$store.dispatch("deleteQuestion", id);
+      this.loadQuestions();
+      this.deleteQuestionSnackBar = false;
     }
   }
 };

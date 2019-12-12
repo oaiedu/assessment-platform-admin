@@ -1,151 +1,230 @@
+
 <template>
-  <v-container class="fill-height" fluid>
-    <v-row align="center">
-      <v-flex xs12 sm6 offset-sm3>
-        <v-card>
-          <v-card-text>
-            <v-container>
-              <form @submit.prevent="onCreateQuestion">
-                <v-row>
-                  <v-flex xs12>
-                    <v-text-field name="id" label="ID" id="id" v-model="id" :placeholder="current.id" required></v-text-field>
-                  </v-flex>
-                </v-row>
-                <v-row>
-                  <v-flex xs12>
-                    <v-text-field
-                      name="knowledge"
-                      label="Conhecimento"
-                      id="knowledge"localhost
-                      v-model="knowledge"
-                      :placeholder="current.data.knowledge"
-                      required
-                    ></v-text-field>
-                  </v-flex>
-                </v-row>
-                <v-row>
-                  <v-flex xs12>
-                    <v-text-field
-                      name="knowledgePWR"
-                      label="Conhecimento PWR"
-                      id="knowledgePWR"
-                      v-model="knowledgePWR"
-                      :placeholder="current.data.knowledgePWR"
-                      required
-                    ></v-text-field>
-                  </v-flex>
-                </v-row>
-                <v-row>
-                  <v-flex xs12>
-                    <v-text-field
-                      name="knowledgeBWR"
-                      label="Conhecimento BWR"
-                      id="knowledgeBWR"
-                      v-model="knowledgeBWR"
-                      :placeholder="current.data.knowledgeBWR"
-                      required
-                    ></v-text-field>
-                  </v-flex>
-                </v-row>
-                <v-row>
-                  <v-flex xs12>
-                    <v-select
-                      :items="items"
-                      name="subject"
-                      id="subject"
-                      v-model="subject"
-                      :placeholder="current.data.subject"
-                      label="Disciplina"
-                      solo
-                    ></v-select>
-                  </v-flex>
-                </v-row>
-                <v-row>
-                  <v-flex xs12>
-                    <v-container fluid>
-                      <p>Questão</p>
-                      <v-textarea
-                        outlined
-                        filled
-                        name="questionDescription"
-                        id="questionDescription"
-                        v-model="questionDescription"
-                        :placeholder="current.data.questionDescription"
-                      ></v-textarea>
-                    </v-container>
-                  </v-flex>
-                </v-row>
-                <v-row>
-                  <v-flex xs12>
-                    <v-container fluid>
-                      <p>Respotas</p>
+  <v-card>
+    <v-container>
+      <v-row>
+        <v-col>
+          <v-card>
+            <form @submit.prevent="onEditQuestion">
+              <v-stepper v-model="e1">
+                <v-stepper-header>
+                  <v-stepper-step editable :complete="e1 > 1" step="1"></v-stepper-step>
+
+                  <v-divider></v-divider>
+
+                  <v-stepper-step editable :complete="e1 > 2" step="2"></v-stepper-step>
+
+                  <v-divider></v-divider>
+
+                  <v-stepper-step editable step="3"></v-stepper-step>
+                </v-stepper-header>
+
+                <v-stepper-items>
+                  <v-stepper-content step="1">
+                    <v-container>
                       <v-row>
-                        <v-col>
-                          <v-switch v-model="multipleAnswer" label="Multiple"></v-switch>
-                        </v-col>
-                        <v-col v-if="multipleAnswer">
-                          <v-select
-                            :items="columnItems"
-                            v-model="columns"
-                            label="Número de Colunas"
-                            solo
-                          ></v-select>
-                        </v-col>
+                        <v-text-field
+                          name="knowledge"
+                          label="Conhecimento"
+                          id="knowledge"
+                          v-model="editedKnowledge"
+                          required
+                        ></v-text-field>
                       </v-row>
-                      <v-radio-group v-if="!multipleAnswer" v-model="test">
-                        <v-row v-for="item in answers" :key="item.ansId">
-                          <v-radio :value="item.ansId"></v-radio>
-                          <v-text-field v-model="item.text"></v-text-field>
-                        </v-row>
-                      </v-radio-group>
-                      <v-radio-group v-else v-model="test">
-                        <v-row>
-                          <v-col v-for="i in columns" :key="i">
-                            <v-text-field v-model="auxTitle[i-1]"></v-text-field>
-                          </v-col>
-                        </v-row>
-                        <v-row v-for="item in answers" :key="item.ansId">
-                          <v-radio :value="item.ansId"></v-radio>
-                          <v-col v-for="answerItem in item.text" :key="answerItem.title">
-                            <v-text-field v-model="answerItem.answerDescription"></v-text-field>
-                          </v-col>
-                        </v-row>
-                      </v-radio-group>
+
+                      <v-row>
+                        <v-text-field
+                          name="knowledgePWR"
+                          label="Relevância OR"
+                          id="knowledgePWR"
+                          v-model="editedKnowledgePWR"
+                          required
+                        ></v-text-field>
+                      </v-row>
+
+                      <v-row>
+                        <v-text-field
+                          name="knowledgeBWR"
+                          label="Relevância OSR"
+                          id="knowledgeBWR"
+                          v-model="editedKnowledgeBWR"
+                          required
+                        ></v-text-field>
+                      </v-row>
+
+                      <v-row>
+                        <v-select
+                          :items="subjectItems"
+                          name="subject"
+                          id="subject"
+                          v-model="editedSubject"
+                          label="Disciplina"
+                          solo
+                        ></v-select>
+                      </v-row>
                     </v-container>
-                  </v-flex>
+                  </v-stepper-content>
+
+                  <v-stepper-content step="2">
+                    <v-container>
+                      <Combined :questionDescription="editedQuestionDescription" @inputData="updateData"></Combined>
+                    </v-container>
+                  </v-stepper-content>
+
+                  <v-stepper-content step="3">
+                    <v-container>
+                      <v-content v-if="confirmTitle">
+                        <v-row justify="end">
+                          <v-col cols="1"></v-col>
+                          <v-col v-for="i in number" :key="i">
+                            <v-text-field outlined v-model="auxTitle[i-1]"></v-text-field>
+                          </v-col>
+                        </v-row>
+                        <v-row v-for="(item, index) in editedAnswers" :key="index">
+                          <v-col cols="12" md="1" sm="1" xs="1">
+                            <v-radio-group v-model="radios">
+                              <v-radio :value="item.ansId"></v-radio>
+                            </v-radio-group>
+                          </v-col>
+                          <v-col v-for="(answerItem, index) in item.text" :key="index">
+                            <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-content>
+
+                      <v-content v-else>
+                        <v-row v-for="(item, index) in editedAnswers" :key="index">
+                          <v-col cols="12" md="1" sm="1" xs="1">
+                            <v-radio-group v-model="radios">
+                              <v-radio :value="item.ansId"></v-radio>
+                            </v-radio-group>
+                          </v-col>
+                          <v-col>
+                            <v-text-field outlined v-model="item.text"></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-content>
+                    </v-container>
+                  </v-stepper-content>
+                </v-stepper-items>
+              </v-stepper>
+            </form>
+          </v-card>
+        </v-col>
+
+        <v-col>
+          <v-card fill>
+            <v-card-title>Preview</v-card-title>
+            <v-card-text>
+              ASSUNTO: {{editedSubject}}
+              <br />
+              CONHECIMENTO: {{editedKnowledge}} [{{editedKnowledgePWR}}/{{editedKnowledgeBWR}}]
+              <br />
+              IQ: {{editedId}}
+              <br />
+              <br />
+              {{editedQuestionDescription}}
+              <br />
+
+              <v-content v-if="confirmTitle">
+                <v-row>
+                  <v-col cols="2"></v-col>
+                  <v-col v-for="(item, index) in editedAnswers[0].text" :key="index" cols="2">{{ item.title }}</v-col>
                 </v-row>
-                <v-btn class="primary" :disabled="!formIsValid" type="submit">Create Question</v-btn>
-              </form>
-            </v-container>
-          </v-card-text>
-        </v-card>
-      </v-flex>
-    </v-row>
-  </v-container>
+
+                <v-row>
+                  <v-col cols="2">A -</v-col>
+                  <v-col
+                    v-for="(item, index) in editedAnswers[0].text"
+                    :key="index"
+                    cols="2"
+                  >{{ item.answerDescription }}</v-col>
+                </v-row>
+                <br />
+
+                <v-row>
+                  <v-col cols="2">B -</v-col>
+                  <v-col
+                    v-for="(item, index) in editedAnswers[1].text"
+                    :key="index"
+                    cols="2"
+                  >{{ item.answerDescription }}</v-col>
+                </v-row>
+                <br />
+
+                <v-row>
+                  <v-col cols="2">C -</v-col>
+                  <v-col
+                    v-for="(item, index) in editedAnswers[2].text"
+                    :key="index"
+                    cols="2"
+                  >{{ item.answerDescription }}</v-col>
+                </v-row>
+                <br />
+
+                <v-row>
+                  <v-col cols="2">D -</v-col>
+                  <v-col
+                    v-for="(item, index) in editedAnswers[3].text"
+                    :key="index"
+                    cols="2"
+                  >{{ item.answerDescription }}</v-col>
+                </v-row>
+              </v-content>
+
+              <v-content v-else v-for="(item, index) in editedAnswers" :key="index">
+                <v-row>
+                  <v-col cols="2">{{ letters[index] }} - </v-col>
+                  <v-col>
+                    {{ item.text }}
+                  </v-col>
+                </v-row>
+              </v-content>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row v-if="e1 == 1">
+        <v-btn color="primary" @click="close()">Cancel</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
+      </v-row>
+      <v-row v-else-if="e1 == 2">
+        <v-btn color="primary" @click="close()">Cancel</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
+      </v-row>
+      <v-row v-else-if="e1 == 3">
+        <v-btn color="primary" @click="close()">Cancel</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="onEditQuestion()">Edit Question</v-btn>
+      </v-row>
+    </v-container>
+  </v-card>
 </template>
 
 <script>
 export default {
+  props: ["questions"],
   data() {
     return {
-      test: null,
-      columns: null,
-      radios: "aaaa",
+      letters: ['A','B','C','D'],
+      confirmTitle: false,
+      editedQuestionDescription: null,
+      e1: 1,
+      radios: null,
+      columns: this.number,
       multipleAnswer: false,
       auxTitle: [],
-      answers: [
-        { text: "", ansId: "radio-1", value: false },
-        { text: "", ansId: "radio-2", value: false },
-        { text: "", ansId: "radio-3", value: false },
-        { text: "", ansId: "radio-4", value: false }
-      ],
-      questionDescription: "",
-      id: "",
-      subject: "",
-      knowledge: "",
-      knowledgePWR: "",
-      knowledgeBWR: "",
-      items: [
+      chips: [],
+      items: [],
+      editedAnswers: [],
+      editedId: null,
+      editedSubject: null,
+      editedKnowledge: null,
+      editedKnowledgePWR: null,
+      editedKnowledgeBWR: null,
+      subjectItems: [
         "Teoria do Reator",
         "Termodinâmica",
         "Instrumentação e Controle",
@@ -159,92 +238,88 @@ export default {
         "Transferência de Calor",
         "Materiais"
       ],
-      columnItems: [2, 3, 4, 5]
+      number: 0
     };
   },
   computed: {
     formIsValid() {
       return (
-        this.id !== "" &&
-        this.questionDescription !== "" &&
-        this.knowledge !== "" &&
-        this.knowledgePWR !== "" &&
-        this.knowledgeBWR !== "" &&
-        this.subject !== ""
+        this.editedId !== "" &&
+        this.editedKnowledge !== "" &&
+        this.editedKnowledgePWR !== "" &&
+        this.editedKnowledgeBWR !== "" &&
+        this.editedSubject !== ""
       );
-    },
-    current: ({$store, $route}) => $store.getters.findQuestionById($route.params.id)
+    }
   },
   watch: {
-    multipleAnswer(val) {
-      if (!val) {
-        this.answers.forEach(element => {
-          element.text = "";
-        });
-      } else {
-        this.answers.forEach(element => {
-          let aux = [];
-          for (var i = 0; i < this.columns; i++) {
-            aux.push({ title: "", answerDescription: "" });
-          }
-          element.text = aux;
-        });
-      }
-    },
-    columns(val) {
-      console.log(val);
-      this.answers.forEach(element => {
-        let aux = [];
-        for (var i = 0; i < this.columns; i++) {
-          aux.push({ title: "", answerDescription: "" });
+    questions(val){
+      this.editedId = val.id
+      this.editedSubject = val.data.DISCIPLINA
+      this.editedKnowledge = val.data.CONHECIMENTO
+      this.editedKnowledgePWR = val.data.RELEVANCIA_OR
+      this.editedKnowledgeBWR = val.data.RELEVANCIA_OSR
+      this.editedAnswers = val.data.RESPOSTAS
+      this.editedQuestionDescription = val.data.PERGUNTA
+
+      if(typeof val.data.RESPOSTAS[0].text == "string")
+        this.number = 1
+      else
+        this.number = val.data.RESPOSTAS[0].text.length
+
+      if (this.number > 1) this.confirmTitle = true;
+      else this.confirmTitle = false;
+
+      if(this.number>1){
+        for(var i = 0; i < this.number; i++){
+          this.auxTitle[i] = val.data.RESPOSTAS[0].text[i].title
         }
-        element.text = aux;
-      });
+      }
+
+      this.editedAnswers.forEach( element => {
+        if(element.value === true)
+          this.radios = element.ansId
+      })
     },
     auxTitle(val) {
-      this.answers.forEach(element => {
-        for (var i = 0; i < this.columns; i++) {
-          element.text[i].title = this.auxTitle[i];
+      this.editedAnswers.forEach(element => {
+        for (var i = 0; i < this.number; i++) {
+          element.text[i].title = val[i];
         }
-      });
+      })
     },
-    test(val) {
-      this.radios = val;
-      console.log("1");
-      this.answers.forEach(element => {
-        console.log("2");
+    radios(val) {
+      this.editedAnswers.forEach(element => {
 
-        if (element.ansId === val) {
-          console.log("3");
-
+        if (element.ansId === val)
           element.value = true;
-        } else {
-          console.log("4");
-
+        
+        else 
           element.value = false;
-        }
       });
     }
   },
   methods: {
-    onCreateQuestion() {
-      if (!this.formIsValid) {
-        return;
-      }
+    updateData(variable) {
+      this.editedQuestionDescription = variable;
+    },
+    onEditQuestion() {
       const questionData = {
-        id: this.id,
-        subject: this.subject,
-        questionDescription: this.questionDescription,
-        knowledge: this.knowledge,
-        knowledgePWR: this.knowledgePWR,
-        knowledgeBWR: this.knowledgeBWR,
-        answers: this.answers
+        id: this.editedId,
+        subject: this.editedSubject,
+        questionDescription: this.editedQuestionDescription,
+        knowledge: this.editedKnowledge,
+        knowledgePWR: this.editedKnowledgePWR,
+        knowledgeBWR: this.editedKnowledgeBWR,
+        answers: this.editedAnswers
       };
       this.$store.dispatch("createQuestion", questionData);
       this.$router.push("/questions");
+      this.$store.dispatch("loadedQuestions");
+      this.close();
     },
-    oldQuestion() {
-      const oldQuestionData = this.$store.getters.findQuestionById()
+    close() {
+      this.$emit("closeDialogEdit");
     }
   }
 };

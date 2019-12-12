@@ -3,12 +3,7 @@
 </template>
 
 <script>
-import Stepper from './Stepper'
-import Preview from './Preview'
 export default {
-  components: {
-    Stepper,
-    Preview
-  }
+  name: 'new-questions'
 }
 </script>

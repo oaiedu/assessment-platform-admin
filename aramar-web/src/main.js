@@ -6,12 +6,18 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 import AlertCmp from './components/Shared/Alert.vue'
 import Combined from './components/Shared/Combined'
+import NewQuestion from './components/Questions/NewQuestion'
+import EditQuestion from './components/Questions/EditQuestion'
+import Stepper from './components/Questions/Stepper'
 
 
 Vue.config.productionTip = false
 
 Vue.component('app-alert', AlertCmp)
 Vue.component('Combined', Combined)
+Vue.component('NewQuestion', NewQuestion)
+Vue.component('EditQuestion', EditQuestion)
+Vue.component('Stepper', Stepper)
 
 new Vue({
   router,

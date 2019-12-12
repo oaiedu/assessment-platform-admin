@@ -16,6 +16,7 @@ import { Editor } from '@toast-ui/vue-editor'
 
 export default {
   name: 'Combined',
+  props: ["questionDescription"],
   components: {
     Editor,
     'viewer': Viewer,
@@ -37,6 +38,12 @@ export default {
       })
       console.log("bbb", this.text)
       this.$emit("inputData",this.text[0].value)
+    }
+  },
+  watch: {
+    questionDescription(val){
+      if(val != '')
+        this.content = val
     }
   },
   data: () => ({

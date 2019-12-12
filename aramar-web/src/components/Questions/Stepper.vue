@@ -67,15 +67,12 @@
                         ></v-select>
                       </v-row>
 
-                      <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
                     </v-container>
                   </v-stepper-content>
 
                   <v-stepper-content step="2">
                     <v-container>
                       <Combined @inputData="updateData"></Combined>
-
-                      <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
                     </v-container>
                   </v-stepper-content>
 
@@ -141,12 +138,11 @@
                               <strong>{{ item }}</strong>&nbsp;
                             </v-chip>
                           </template>
-                        </v-combobox> -->
+                        </v-combobox>-->
                         <v-col v-for="answerItem in item.text" :key="answerItem">
                           <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
                         </v-col>
                       </v-row>
-                      <v-btn class="primary" :disabled="!formIsValid" type="submit">Create Question</v-btn>
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -171,53 +167,66 @@
 
               <v-row>
                 <v-col cols="2"></v-col>
-                <v-col v-for="item in answers[0].text" :key="item" cols="2">
-                  {{ item.title }}
-                </v-col>
+                <v-col v-for="item in answers[0].text" :key="item" cols="2">{{ item.title }}</v-col>
               </v-row>
 
               <v-row>
-                <v-col cols="2"> 
-                  A - 
-                </v-col>
-                <v-col v-for="item in answers[0].text" :key="item" cols="2">
-                  {{ item.answerDescription }}
-                </v-col>
+                <v-col cols="2">A -</v-col>
+                <v-col
+                  v-for="item in answers[0].text"
+                  :key="item"
+                  cols="2"
+                >{{ item.answerDescription }}</v-col>
               </v-row>
               <br />
 
               <v-row>
-                <v-col cols="2"> 
-                  B - 
-                </v-col>
-                <v-col v-for="item in answers[1].text" :key="item" cols="2">
-                  {{ item.answerDescription }}
-                </v-col>
+                <v-col cols="2">B -</v-col>
+                <v-col
+                  v-for="item in answers[1].text"
+                  :key="item"
+                  cols="2"
+                >{{ item.answerDescription }}</v-col>
               </v-row>
               <br />
 
               <v-row>
-                <v-col cols="2"> 
-                  C - 
-                </v-col>
-                <v-col v-for="item in answers[2].text" :key="item" cols="2">
-                  {{ item.answerDescription }}
-                </v-col>
+                <v-col cols="2">C -</v-col>
+                <v-col
+                  v-for="item in answers[2].text"
+                  :key="item"
+                  cols="2"
+                >{{ item.answerDescription }}</v-col>
               </v-row>
               <br />
 
               <v-row>
-                <v-col cols="2"> 
-                  D - 
-                </v-col>
-                <v-col v-for="item in answers[3].text" :key="item" cols="2">
-                  {{ item.answerDescription }}
-                </v-col>
+                <v-col cols="2">D -</v-col>
+                <v-col
+                  v-for="item in answers[3].text"
+                  :key="item"
+                  cols="2"
+                >{{ item.answerDescription }}</v-col>
               </v-row>
               <br />
             </v-card-text>
           </v-card>
         </v-col>
+      </v-row>
+      <v-row v-if="e1 == 1">
+        <v-btn color="primary" @click="close()">Cancel</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
+      </v-row>
+      <v-row v-else-if="e1 == 2">
+        <v-btn color="primary" @click="close()">Cancel</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
+      </v-row>
+      <v-row v-else-if="e1 == 3">
+        <v-btn color="primary" @click="close()">Cancel</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="onCreateQuestion()">Create Question</v-btn>
       </v-row>
     </v-container>
   </v-card>
@@ -235,7 +244,7 @@ export default {
     return {
       confirmTitle: false,
       questionDescription: "",
-      e1: 0,
+      e1: 1,
       test: null,
       columns: null,
       radios: "aaaa",
@@ -283,21 +292,6 @@ export default {
     }
   },
   watch: {
-    multipleAnswer(val) {
-      if (!val) {
-        this.answers.forEach(element => {
-          element.text = "";
-        });
-      } else {
-        this.answers.forEach(element => {
-          let aux = [];
-          for (var i = 0; i < this.columns; i++) {
-            aux.push({ title: "", answerDescription: "" });
-          }
-          element.text = aux;
-        });
-      }
-    },
     number(val) {
       this.answers.forEach(element => {
         let aux = [];
@@ -306,10 +300,8 @@ export default {
         }
         element.text = aux;
       });
-      if (this.number > 1)
-        this.confirmTitle = true
-      else 
-        this.confirmTitle = false
+      if (this.number > 1) this.confirmTitle = true;
+      else this.confirmTitle = false;
     },
     auxTitle(val) {
       this.answers.forEach(element => {
@@ -360,8 +352,12 @@ export default {
         answers: this.answers
       };
       this.$store.dispatch("createQuestion", questionData);
-      this.$router.push("/questions")
+      this.$router.push("/questions");
       this.$store.dispatch("loadedQuestions");
+      this.close()
+    },
+    close() {
+      this.$emit("closeDialogNew");
     }
   }
 };

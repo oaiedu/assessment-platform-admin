@@ -17,7 +17,7 @@ export default new Vuex.Store({
     setLoadedQuestions(state, payload) {
       state.loadedQuestions = payload
     },
-    setLoadedTests(state,payload){
+    setLoadedTests(state, payload) {
       state.loadedTests = payload
     },
     setUser(state, payload) {
@@ -46,7 +46,7 @@ export default new Vuex.Store({
       let questions = []
       db.collection("questions").get().then(querySnapshot => {
         querySnapshot.forEach(doc => {
-          questions.push(Object.assign({id: doc.id, data: doc.data()}))
+          questions.push(Object.assign({ id: doc.id, data: doc.data() }))
         })
       })
       commit('setLoadedQuestions', questions)
@@ -58,7 +58,7 @@ export default new Vuex.Store({
       let tests = []
       db.collection("tests").get().then(querySnapshot => {
         querySnapshot.forEach(doc => {
-          tests.push(Object.assign({id: doc.id, data: doc.data()}))
+          tests.push(Object.assign({ id: doc.id, data: doc.data() }))
         })
       })
       commit('setLoadedTests', tests)
@@ -86,16 +86,16 @@ export default new Vuex.Store({
           }
         )
     },
-    deleteQuestion({commit}, payload) {
+    deleteQuestion({ commit }, payload) {
       const db = firebase.firestore()
       const id = payload
       db.collection("questions").doc(id).delete()
-      .then(function () {
-        console.log("Document successfully deleted!")
-      })
-      .catch(function (error) {
-        console.error("Error removing document: ", error);
-      });
+        .then(function () {
+          console.log("Document successfully deleted!")
+        })
+        .catch(function (error) {
+          console.error("Error removing document: ", error);
+        });
     },
     signUserIn({ commit }, payload) {
       commit('setLoading', true)
@@ -132,12 +132,12 @@ export default new Vuex.Store({
         TITULO: test.name,
         PERGUNTAS: test.questions
       })
-      .then(function () {
-        console.log("Success")
-      })
-      .catch(function (error) {
-        console.error("Error writing document: ", error);
-      });
+        .then(function () {
+          console.log("Success")
+        })
+        .catch(function (error) {
+          console.error("Error writing document: ", error);
+        });
     },
     createQuestion({ commit }, payload) {
       const db = firebase.firestore()
@@ -171,7 +171,7 @@ export default new Vuex.Store({
     clearError({ commit }) {
       commit('clearError')
     },
-    clearLoading({commit}){
+    clearLoading({ commit }) {
       commit('setLoading', false)
     }
   },
