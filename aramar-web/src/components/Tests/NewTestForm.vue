@@ -2,18 +2,54 @@
   <v-card>
     <v-container>
       <v-form @submit.prevent="onCreateTest">
-        <v-text-field
-          filled
-          dense
-          label="Test Name"
-          single-line
-          hide-details
-          rounded
-          v-model="testName"
-        ></v-text-field>
-        <v-container>
-          <v-container fluid>
-            <v-card>
+        <v-row>
+          <v-col>
+            <v-container>
+              <v-row>
+                <v-col>
+                  <v-text-field
+                    filled
+                    dense
+                    label="Test Name"
+                    single-line
+                    hide-details
+                    rounded
+                    v-model="testName"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col>
+                  <v-select
+                    solo
+                    rounded
+                    flat
+                    filled
+                    dense
+                    label="Tipo de prova"
+                    v-model="testType"
+                    :items="types"
+                  ></v-select>
+                </v-col>
+
+                <v-col v-if="testType=='Random Questions'">
+                  <v-text-field
+                    filled
+                    dense
+                    label="Number of Questions"
+                    single-line
+                    hide-details
+                    rounded
+                    v-model="randomQuestionsNumber"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-col>
+
+          <v-col v-if="testType!='Random Questions'">
+            <v-container>
               <v-container>
                 <v-text-field
                   v-model="search"
@@ -27,77 +63,50 @@
                 ></v-text-field>
               </v-container>
 
-              <v-col>
-                <v-menu close-on-click offset-x transition="slide-x-transition">
-                  <template v-slot:activator="{ on }">
-                    <v-btn v-on="on" fab small color="ligh purple">
-                      <v-icon>mdi-playlist-plus</v-icon>
-                    </v-btn>
-                  </template>
-
-                  <v-list>
-                    <v-list-item v-for="(item,i) in items" :key="item" @click="selections(i)">
-                      <v-list-item-title>{{ item }}</v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </v-col>
-
               <v-container>
-                <v-row>
-                  <v-chip
-                    v-for="(tag,i) in selectedSubjects"
-                    :key="tag"
-                    class="ma-2"
-                    close
-                    @click:close="removeSelections(i)"
-                  >{{ tag }}</v-chip>
-                </v-row>
+                <v-card v-if="selectedSubjects.length == 0 ">
+                  <v-data-table
+                    v-model="selectedQuestions"
+                    :headers="headers"
+                    :items="questions"
+                    :page.sync="page"
+                    :items-per-page="itemsPerPage"
+                    :search="search"
+                    show-select
+                    item-key="id"
+                    hide-default-footer
+                    class="elevation-1"
+                    @page-count="pageCount = $event"
+                  ></v-data-table>
+                </v-card>
+
+                <v-card v-else>
+                  <v-data-table
+                    v-model="selectedQuestions"
+                    :headers="headers"
+                    :items="showedQuestions"
+                    :page.sync="page"
+                    :items-per-page="itemsPerPage"
+                    :search="search"
+                    show-select
+                    item-key="id"
+                    hide-default-footer
+                    class="elevation-1"
+                    @page-count="pageCount = $event"
+                  ></v-data-table>
+                </v-card>
               </v-container>
-            </v-card>
-          </v-container>
-
-          <v-container fluid>
-            <v-card v-if="selectedSubjects.length == 0 ">
-              <v-data-table
-                v-model="selectedQuestions"
-                :headers="headers"
-                :items="questions"
-                :page.sync="page"
-                :items-per-page="itemsPerPage"
-                :search="search"
-                show-select
-                item-key="id"
-                hide-default-footer
-                class="elevation-1"
-                @page-count="pageCount = $event"
-              ></v-data-table>
-            </v-card>
-
-            <v-card v-else>
-              <v-data-table
-                v-model="selectedQuestions"
-                :headers="headers"
-                :items="showedQuestions"
-                :page.sync="page"
-                :items-per-page="itemsPerPage"
-                :search="search"
-                show-select
-                item-key="id"
-                hide-default-footer
-                class="elevation-1"
-                @page-count="pageCount = $event"
-              ></v-data-table>
-            </v-card>
-          </v-container>
-
-          <v-btn class="primary" type="submit">Create Test</v-btn>
-
-          <div class="text-center pt-2">
-            <v-pagination v-model="page" :length="pageCount"></v-pagination>
-          </div>
-        </v-container>
+              <div class="text-center pt-2">
+                <v-pagination v-model="page" :length="pageCount"></v-pagination>
+              </div>
+            </v-container>
+          </v-col>
+        </v-row>
       </v-form>
+      <v-row>
+        <v-spacer/>
+        <v-btn class="primary" type="submit">Create Test</v-btn>
+      </v-row>
     </v-container>
   </v-card>
 </template>
@@ -106,6 +115,8 @@
 export default {
   data() {
     return {
+      testType: "",
+      randomQuestionsNumber: null,
       selectedSubjects: [],
       selectedQuestions: [],
       testItems: [],
@@ -123,6 +134,11 @@ export default {
         "Física Nuclear",
         "Transferência de Calor",
         "Materiais"
+      ],
+      types: [
+        "Random Questions",
+        "Selected Questions (Random Answers)",
+        "Selected Questions (Classic Answers)"
       ],
       showedQuestions: [],
       search: "",
@@ -160,9 +176,36 @@ export default {
           }
         }
       });
+    },
+    randomQuestionsNumber(val) {
+      if ( val <= this.questions.length)
+        this.randomSelection(val)
     }
   },
   methods: {
+    randomSelection(i) {
+      this.selectedQuestions = []
+
+      let conf = false
+      let randomizer = 0
+      let aux = ""
+      let j = 0
+
+      for ( j = 0 ; j < i ; j++ ) {
+        do{
+          conf = false
+          randomizer = Math.floor(Math.random() * this.questions.length)
+          aux = this.questions[randomizer]
+          this.selectedQuestions.forEach(element => {
+            if ( element === aux )
+              conf = true
+          })
+        } while ( conf == true );
+        this.selectedQuestions.push(aux);
+      }
+
+      console.log("hey",this.selectedQuestions)
+    },
     removeSelections(i) {
       let aux = this.showedQuestions.length;
 

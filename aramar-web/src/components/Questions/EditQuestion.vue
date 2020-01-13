@@ -314,11 +314,10 @@ export default {
         answers: this.editedAnswers
       };
       this.$store.dispatch("createQuestion", questionData);
-      this.$router.push("/questions");
-      this.$store.dispatch("loadedQuestions");
       this.close();
     },
     close() {
+      this.$store.dispatch("loadedQuestions");
       this.$emit("closeDialogEdit");
     }
   }

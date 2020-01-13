@@ -42,11 +42,11 @@
         <v-icon>mdi-plus</v-icon>
       </v-btn>
 
-      <v-dialog v-model="dialogNewQuestion">
+      <v-dialog v-model="dialogNewQuestion" persistent>
         <NewQuestion @closeDialogNew="dialogNewQuestion = false"></NewQuestion>
       </v-dialog>
 
-      <v-dialog v-model="dialogEditQuestion">
+      <v-dialog v-model="dialogEditQuestion" persistent>
         <EditQuestion :questions="selectedEdit" @closeDialogEdit="dialogEditQuestion = false"></EditQuestion>
       </v-dialog>
 
@@ -128,8 +128,8 @@ export default {
       this.dialogEditQuestion = true
     },
     loadQuestions() {
-      console.log("entrou");
       this.$store.dispatch("loadedQuestions");
+      this.questions();
     },
     removeSelections(i) {
       let aux = this.showedQuestions.length;
@@ -155,8 +155,8 @@ export default {
     deleteQuestion(id) {
       console.log(id);
       this.$store.dispatch("deleteQuestion", id);
-      this.loadQuestions();
       this.deleteQuestionSnackBar = false;
+      this.loadQuestions();
     }
   }
 };

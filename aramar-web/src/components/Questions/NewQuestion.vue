@@ -1,9 +1,15 @@
 <template>
-  <Stepper></Stepper>
+  <Stepper  @closeDialogNew="close"></Stepper>
 </template>
 
 <script>
 export default {
-  name: 'new-questions'
+  name: 'new-questions',
+  methods: {
+    close() {
+      this.$emit("closeDialogNew");
+    }
+  }
 }
 </script>
+

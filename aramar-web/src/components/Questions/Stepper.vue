@@ -66,7 +66,6 @@
                           solo
                         ></v-select>
                       </v-row>
-
                     </v-container>
                   </v-stepper-content>
 
@@ -104,45 +103,37 @@
                           </v-btn>
                         </v-container>
                       </v-row>
+                      <v-content v-if="confirmTitle">
+                        <v-row justify="end">
+                          <v-col cols="1"></v-col>
+                          <v-col v-for="i in number" :key="i">
+                            <v-text-field outlined v-model="auxTitle[i-1]"></v-text-field>
+                          </v-col>
+                        </v-row>
+                        <v-row v-for="(item, index) in answers" :key="index">
+                          <v-col cols="12" md="1" sm="1" xs="1">
+                            <v-radio-group v-model="radios">
+                              <v-radio :value="item.ansId"></v-radio>
+                            </v-radio-group>
+                          </v-col>
+                          <v-col v-for="(answerItem, index) in item.text" :key="index">
+                            <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-content>
 
-                      <v-row justify="end" v-if="confirmTitle">
-                        <v-col cols="1"></v-col>
-                        <v-col v-for="i in number" :key="i">
-                          <v-text-field outlined v-model="auxTitle[i-1]"></v-text-field>
-                        </v-col>
-                      </v-row>
-
-                      <v-row v-for="item in answers" :key="item.ansId">
-                        <v-col cols="12" md="1" sm="1" xs="1">
-                          <v-radio-group v-model="test">
-                            <v-radio :value="item.ansId"></v-radio>
-                          </v-radio-group>
-                        </v-col>
-
-                        <!-- <v-combobox
-                          v-model="item.text.answerDescription"
-                          :items="items"
-                          chips
-                          clearable
-                          multiple
-                          solo
-                        >
-                          <template v-slot:selection="{ attrs, item, select, selected }">
-                            <v-chip
-                              v-bind="attrs"
-                              :input-value="selected"
-                              close
-                              @click="select"
-                              @click:close="remove(item)"
-                            >
-                              <strong>{{ item }}</strong>&nbsp;
-                            </v-chip>
-                          </template>
-                        </v-combobox>-->
-                        <v-col v-for="answerItem in item.text" :key="answerItem">
-                          <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
-                        </v-col>
-                      </v-row>
+                      <v-content v-else>
+                        <v-row v-for="(item, index) in answers" :key="index">
+                          <v-col cols="12" md="1" sm="1" xs="1">
+                            <v-radio-group v-model="radios">
+                              <v-radio :value="item.ansId"></v-radio>
+                            </v-radio-group>
+                          </v-col>
+                          <v-col>
+                            <v-text-field outlined v-model="item.text"></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-content>
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -161,54 +152,65 @@
               <br />
               IQ: {{id}}
               <br />
-              <br />
-              {{questionDescription}}
-              <br />
 
-              <v-row>
-                <v-col cols="2"></v-col>
-                <v-col v-for="item in answers[0].text" :key="item" cols="2">{{ item.title }}</v-col>
-              </v-row>
+              <br/>
+                {{questionDescription}}
+              <br/>
 
-              <v-row>
-                <v-col cols="2">A -</v-col>
-                <v-col
-                  v-for="item in answers[0].text"
-                  :key="item"
-                  cols="2"
-                >{{ item.answerDescription }}</v-col>
-              </v-row>
-              <br />
+              <v-content v-if="confirmTitle">
+                <v-row>
+                  <v-col cols="2"></v-col>
+                  <v-col v-for="(item, index) in answers[0].text" :key="index" cols="2">{{ item.title }}</v-col>
+                </v-row>
 
-              <v-row>
-                <v-col cols="2">B -</v-col>
-                <v-col
-                  v-for="item in answers[1].text"
-                  :key="item"
-                  cols="2"
-                >{{ item.answerDescription }}</v-col>
-              </v-row>
-              <br />
+                <v-row>
+                  <v-col cols="2">A -</v-col>
+                  <v-col
+                    v-for="(item, index) in answers[0].text"
+                    :key="index"
+                    cols="2"
+                  >{{ item.answerDescription }}</v-col>
+                </v-row>
+                <br />
 
-              <v-row>
-                <v-col cols="2">C -</v-col>
-                <v-col
-                  v-for="item in answers[2].text"
-                  :key="item"
-                  cols="2"
-                >{{ item.answerDescription }}</v-col>
-              </v-row>
-              <br />
+                <v-row>
+                  <v-col cols="2">B -</v-col>
+                  <v-col
+                    v-for="(item, index) in answers[1].text"
+                    :key="index"
+                    cols="2"
+                  >{{ item.answerDescription }}</v-col>
+                </v-row>
+                <br />
 
-              <v-row>
-                <v-col cols="2">D -</v-col>
-                <v-col
-                  v-for="item in answers[3].text"
-                  :key="item"
-                  cols="2"
-                >{{ item.answerDescription }}</v-col>
-              </v-row>
-              <br />
+                <v-row>
+                  <v-col cols="2">C -</v-col>
+                  <v-col
+                    v-for="(item, index) in answers[2].text"
+                    :key="index"
+                    cols="2"
+                  >{{ item.answerDescription }}</v-col>
+                </v-row>
+                <br />
+
+                <v-row>
+                  <v-col cols="2">D -</v-col>
+                  <v-col
+                    v-for="(item, index) in answers[3].text"
+                    :key="index"
+                    cols="2"
+                  >{{ item.answerDescription }}</v-col>
+                </v-row>
+              </v-content>
+
+              <v-content v-else v-for="(item, index) in answers" :key="index">
+                <v-row>
+                  <v-col cols="2">{{ letters[index] }} - </v-col>
+                  <v-col>
+                    {{ item.text }}
+                  </v-col>
+                </v-row>
+              </v-content>
             </v-card-text>
           </v-card>
         </v-col>
@@ -239,9 +241,10 @@ import "codemirror/lib/codemirror.css";
 import { Viewer } from "@toast-ui/vue-editor";
 
 export default {
-  components: [Viewer],
+  components: {'viewer': Viewer},
   data() {
     return {
+      letters: ['A','B','C','D'],
       confirmTitle: false,
       questionDescription: "",
       e1: 1,
@@ -253,10 +256,10 @@ export default {
       chips: [],
       items: [],
       answers: [
-        { text: [], ansId: "radio-1", value: false },
-        { text: [], ansId: "radio-2", value: false },
-        { text: [], ansId: "radio-3", value: false },
-        { text: [], ansId: "radio-4", value: false }
+        { text: "", ansId: "radio-1", value: false },
+        { text: "", ansId: "radio-2", value: false },
+        { text: "", ansId: "radio-3", value: false },
+        { text: "", ansId: "radio-4", value: false }
       ],
       id: "",
       subject: "",
@@ -277,7 +280,7 @@ export default {
         "Transferência de Calor",
         "Materiais"
       ],
-      number: 0
+      number: 1
     };
   },
   computed: {
@@ -293,15 +296,22 @@ export default {
   },
   watch: {
     number(val) {
-      this.answers.forEach(element => {
+      if (this.number > 1) { 
+        this.answers.forEach(element => {
         let aux = [];
         for (var i = 0; i < this.number; i++) {
           aux.push({ title: "", answerDescription: "" });
         }
         element.text = aux;
       });
-      if (this.number > 1) this.confirmTitle = true;
-      else this.confirmTitle = false;
+        this.confirmTitle = true;
+      }
+      else {
+        this.answers.forEach(element => {
+          element.text = ""
+        })
+        this.confirmTitle = false;
+      }
     },
     auxTitle(val) {
       this.answers.forEach(element => {
@@ -352,11 +362,50 @@ export default {
         answers: this.answers
       };
       this.$store.dispatch("createQuestion", questionData);
-      this.$router.push("/questions");
       this.$store.dispatch("loadedQuestions");
-      this.close()
+      this.setInitialData();
+      this.close();
+    },
+    setInitialData() {
+      this.confirmTitle = false;
+      this.questionDescription = "";
+      this.e1 = 1;
+      this.test = null;
+      this.columns = null;
+      this.radios = "aaaa";
+      this.multipleAnswer = false;
+      this.auxTitle = [];
+      this.chips = [];
+      this.items = [];
+      this.answers = [
+        { text: [], ansId: "radio-1", value: false },
+        { text: [], ansId: "radio-2", value: false },
+        { text: [], ansId: "radio-3", value: false },
+        { text: [], ansId: "radio-4", value: false }
+      ];
+      this.id = "";
+      this.subject = "";
+      this.knowledge = "";
+      this.knowledgePWR = "";
+      this.knowledgeBWR = "";
+      this.subjectItems = [
+        "Teoria do Reator",
+        "Termodinâmica",
+        "Instrumentação e Controle",
+        "Válvulas e Bombas",
+        "Eletricidade",
+        "Mecânica dos Fluidos",
+        "Tratamento Qúimico Refrigerante",
+        "Análise Integrada",
+        "Instrumentação Nuclear",
+        "Física Nuclear",
+        "Transferência de Calor",
+        "Materiais"
+      ];
+      this.number = 0;
     },
     close() {
+      this.setInitialData();
       this.$emit("closeDialogNew");
     }
   }

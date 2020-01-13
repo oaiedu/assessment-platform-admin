@@ -40,7 +40,7 @@ export default {
       itemsPerPage: 10,
       headers: [
         { text: "Nome", align: "left",  value: "data.TITULO" },
-        { text: "Perguntas", value: "data.PERGUNTAS"}
+        { text: "Tipo", value: "data.PERGUNTAS"}
       ]
     };
   },
