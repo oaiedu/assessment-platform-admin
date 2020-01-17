@@ -8,6 +8,7 @@ import Questions from '@/components/Questions/Questions.vue'
 import EditQuestion from '@/components/Questions/EditQuestion.vue'
 import NewTestForm from '@/components/Tests/NewTestForm.vue'
 import Tests from '@/components/Tests/Tests.vue'
+import HtmlTest from '@/components/Tests/HtmlToPdfTest.vue'
 
 import AuthGuard from './auth-guard'
 
@@ -23,6 +24,11 @@ const routes = [
     path: '/signin',
     component: SignIn,
     name: 'signin'
+  },
+  {
+    path: '/htmltest/:id',
+    component: HtmlTest,
+    name: 'htmltest',
   },
   {
     path: '/profile',

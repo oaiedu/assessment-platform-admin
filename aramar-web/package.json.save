@@ -12,8 +12,6 @@
     "core-js": "^3.3.2",
     "firebase": "^7.2.2",
     "firebase-tools": "^7.6.2",
-    "html2canvas": "^1.0.0-rc.5",
-    "jspdf": "^1.5.3",
     "markdown-it-vue": "^1.0.10",
     "vue": "^2.6.10",
     "vue-froala-wysiwyg": "^3.0.6",

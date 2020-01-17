@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-container>
-      <v-form @submit.prevent="onCreateTest">
+      <v-form @submit.prevent="onCreateTest()">
         <v-row>
           <v-col>
             <v-container>
@@ -102,11 +102,11 @@
             </v-container>
           </v-col>
         </v-row>
+        <v-row>
+          <v-spacer/>
+          <v-btn class="primary" type="submit">Create Test</v-btn>
+        </v-row>
       </v-form>
-      <v-row>
-        <v-spacer/>
-        <v-btn class="primary" type="submit">Create Test</v-btn>
-      </v-row>
     </v-container>
   </v-card>
 </template>
@@ -238,7 +238,6 @@ export default {
       const testData = { name: this.testName, questions: this.testItems };
 
       this.$store.dispatch("createTest", testData);
-      this.$router.push("/questions");
       this.$store.dispatch("loadedTests");
     }
   }

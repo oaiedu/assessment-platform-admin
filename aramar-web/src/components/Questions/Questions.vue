@@ -77,7 +77,7 @@ export default {
         "Teoria do Reator",
         "Termodinâmica",
         "Instrumentação e Controle",
-        "Válvulas e Bombas",
+        "Válvulas e Bombas", 
         "Eletricidade",
         "Mecânica dos Fluidos",
         "Tratamento Qúimico Refrigerante",
