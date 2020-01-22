@@ -71,7 +71,17 @@
 
                   <v-stepper-content step="2">
                     <v-container>
-                      <Combined @inputData="updateData"></Combined>
+                      <v-row>
+                        <Combined @inputData="updateData"></Combined>
+                      </v-row>
+                      <v-row>
+                        <v-file-input
+                          chips
+                          multiple
+                          label="Images"
+                          v-model="images"
+                        />
+                      </v-row>
                     </v-container>
                   </v-stepper-content>
 
@@ -245,6 +255,7 @@ export default {
   data() {
     return {
       letters: ['A','B','C','D'],
+      images: [],
       confirmTitle: false,
       questionDescription: "",
       e1: 1,
@@ -296,7 +307,7 @@ export default {
   },
   watch: {
     number(val) {
-      if (this.number > 1) { 
+      if (this.number > 1) {
         this.answers.forEach(element => {
         let aux = [];
         for (var i = 0; i < this.number; i++) {
@@ -352,6 +363,7 @@ export default {
       if (!this.formIsValid) {
         return;
       }
+
       const questionData = {
         id: this.id,
         subject: this.subject,
@@ -359,8 +371,10 @@ export default {
         knowledge: this.knowledge,
         knowledgePWR: this.knowledgePWR,
         knowledgeBWR: this.knowledgeBWR,
-        answers: this.answers
+        answers: this.answers,
+        images: this.images[0]
       };
+
       this.$store.dispatch("createQuestion", questionData);
       this.$store.dispatch("loadedQuestions");
       this.setInitialData();
@@ -403,8 +417,10 @@ export default {
         "Materiais"
       ];
       this.number = 0;
+      this.images = [];
     },
     close() {
+      console.log("imagem",this.images)
       this.setInitialData();
       this.$emit("closeDialogNew");
     }

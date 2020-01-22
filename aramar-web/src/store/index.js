@@ -52,6 +52,23 @@ export default new Vuex.Store({
       commit('setLoadedQuestions', questions)
       commit('setLoading', false)
     },
+    findImage({commit},payload){
+      var storage = firebase.storage();
+      var pathReference = storage.refFromURL(`gs://pwr-quiz-generator.appspot.com/${payload}`);
+
+      var imageURL =  pathReference.getDownloadURL()
+        .then(function(url) {
+          console.log("URL",url)
+          return url
+        })
+        .catch(function(error) {
+          console.error("Error downloading the image", error)
+        })
+
+          console.log("After Download: ", imageURL)
+
+      return imageURL
+    },
     loadedTests({ commit }) {
       commit('setLoading', true)
       const db = firebase.firestore()
@@ -140,6 +157,18 @@ export default new Vuex.Store({
         });
     },
     createQuestion({ commit }, payload) {
+
+      const storageRef = firebase.storage().ref()
+      const file = payload.images
+      var images = storageRef.child(file.name).put(file)
+        .then(function(snapshot){
+          console.log("Uploaded a file!")
+        })
+        .catch(function(error){
+          console.error("Error uploading file",error)
+        })
+
+
       const db = firebase.firestore()
       const question = {
         id: payload.id,
@@ -148,7 +177,8 @@ export default new Vuex.Store({
         knowledge: payload.knowledge,
         knowledgePWR: payload.knowledgePWR,
         knowledgeBWR: payload.knowledgeBWR,
-        answers: payload.answers
+        answers: payload.answers,
+        images: file.name
       }
       db.collection("questions").doc(question.id).set({
         PERGUNTA: question.questionDescription,
@@ -156,7 +186,8 @@ export default new Vuex.Store({
         CONHECIMENTO: question.knowledge,
         RELEVANCIA_OR: question.knowledgePWR,
         RELEVANCIA_OSR: question.knowledgeBWR,
-        RESPOSTAS: question.answers
+        RESPOSTAS: question.answers,
+        IMAGENS: question.images
       })
         .then(function () {
           console.log("Success")
@@ -179,6 +210,7 @@ export default new Vuex.Store({
     user(state) {
       return state.user
     },
+
     loading(state) {
       return state.loading
     },
