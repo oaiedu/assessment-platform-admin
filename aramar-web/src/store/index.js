@@ -56,18 +56,11 @@ export default new Vuex.Store({
       var storage = firebase.storage();
       var pathReference = storage.refFromURL(`gs://pwr-quiz-generator.appspot.com/${payload}`);
 
-      var imageURL =  pathReference.getDownloadURL()
-        .then(function(url) {
-          console.log("URL",url)
-          return url
-        })
-        .catch(function(error) {
-          console.error("Error downloading the image", error)
-        })
+      // var imageURL = new Promisse(functio(resolve,reject) {
+      //
+      // })
 
-          console.log("After Download: ", imageURL)
-
-      return imageURL
+      return pathReference.getDownloadURL()
     },
     loadedTests({ commit }) {
       commit('setLoading', true)

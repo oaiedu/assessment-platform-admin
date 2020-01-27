@@ -82,6 +82,7 @@
                           v-model="images"
                         />
                       </v-row>
+                      {{images[0]}}
                     </v-container>
                   </v-stepper-content>
 
@@ -256,6 +257,7 @@ export default {
     return {
       letters: ['A','B','C','D'],
       images: [],
+      imageBase64: "",
       confirmTitle: false,
       questionDescription: "",
       e1: 1,
@@ -360,6 +362,14 @@ export default {
       this.questionDescription = variable;
     },
     onCreateQuestion() {
+      this.imageBase64 = (window.URL || window.webkitURL).createObjectURL(this.images[0])
+      var base64Img = require('base64-img')
+      var data = base64Img.requestBase64(this.imageBase64, function(err, res, body) {
+        console.log("deu merda")
+      });
+
+      console.log("URL to Base 64: ", data);
+
       if (!this.formIsValid) {
         return;
       }
@@ -420,7 +430,7 @@ export default {
       this.images = [];
     },
     close() {
-      console.log("imagem",this.images)
+      console.log("imagem",this.images[0])
       this.setInitialData();
       this.$emit("closeDialogNew");
     }

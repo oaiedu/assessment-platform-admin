@@ -77,11 +77,28 @@ IQ: ${element.id}
                 .splitTextToSize(texttohtml,maxLineWidth)
             doc.text(textLines, margin, margin)
 
-            var imageFromStorage = this.$store.dispatch("findImage", element.data.IMAGENS)
-            console.log("Image URL", imageFromStorage())
-            var imageBase64 = doc.getImageFileTypeByImageData(imageFromStorage)
-            console.log("Extracted Image", imageBase64)
-            doc.addImage(imageBase64, 'PNG', 15, 40, 180, 180)
+            this.$store.dispatch("findImage", element.data.IMAGENS).then(function(url) {
+                console.log("image from storage: ",url)
+                if ( typeof url === 'string') {
+                  var base64Img = require('base64-img');
+                  var finalBase64 = base64Img.requestBase64(url, function(err, res, body) {
+                    console.error(err)
+                  });
+                  console.log(url)
+                  doc.addImage(finalBase64,'PNG', 15, 40, 180, 180)
+                }
+                else {
+                  console.log("pinto")
+                }
+              console.log("Image URL: ", url)
+            })
+            .catch(function(error) {
+              console.error("Error downloading the image", error)
+            })
+
+
+
+
 
             texttohtml = `
 A - ${element.data.RESPOSTAS[0].text}
