@@ -8,6 +8,8 @@
 <script>
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
+import * as fontFile from '@/assets/ARIALUNI.TTF'
+
 export default {
     props: ["test"],
     data () {
@@ -27,19 +29,34 @@ export default {
         }
     },
     methods: {
-      generatePdf(i) {
+      generatePdf(){
+
         var pageWidth = 8,
-          	lineHeight = 1.2,
-          	margin = 0.5,
-          	maxLineWidth = pageWidth - margin * 2,
-          	fontSize = 12
+            lineHeight = 1.2,
+            margin = 0.5,
+            maxLineWidth = pageWidth - margin * 2,
+            fontSize = 12
 
         var doc = new jsPDF({
-          		unit: 'in'
-          	})
+          unit: 'in'
+        })
+
+        var fontInBase64 = '',
+            fileName = '',
+            reader = new FileReader()
+
+        
+        // fontInBase64 = reader.result.split(',')[1];
+        // fileName = fontFile.name.replace(/\s+/g, '-');
+        // fileNameWithoutExtension = fileName.split('.')[0],
+        console.log("brabuleta")
+        doc.addFileToVFS("Arial Unicode MS", fontFile);
+        doc.addFont("Arial Unicode MS");
+
+        doc.setFont("Arial Unicode MS");
 
         this.currentTest.forEach( element => {
-          if(element.data.IMAGENS == 'undefined'){
+          if ( typeof element.data.IMAGENS === 'undefined' || element.data.IMAGENS === "" ){
             let texttohtml = `
 ASSUNTO: ${element.data.DISCIPLINA}
 CONHECIMENTO: ${element.data.CONHECIMENTO} [${element.data.RELEVANCIA_OR}/${element.data.RELEVANCIA_OSR}]
@@ -54,12 +71,11 @@ B - ${element.data.RESPOSTAS[1].text}
 C - ${element.data.RESPOSTAS[2].text}
 
 D - ${element.data.RESPOSTAS[3].text}
-              `
-            var textLines = doc
-                .setFontSize(fontSize)
-                .splitTextToSize(texttohtml,maxLineWidth)
+            `
+            let textLines = doc.splitTextToSize(texttohtml,maxLineWidth)
             doc.text(textLines, margin, margin)
-            doc.addPage("a4","p")
+
+            doc.addPage( "a4", "p" )
           }
 
           else {
@@ -71,36 +87,29 @@ IQ: ${element.id}
         ${element.data.PERGUNTA}
 
 
-            `
-            var textLines = doc
-                .setFontSize(fontSize)
-                .splitTextToSize(texttohtml,maxLineWidth)
-            doc.text(textLines, margin, margin)
-
-            this.$store.dispatch("findImage", element.data.IMAGENS).then(function(url) {
-                console.log("image from storage: ",url)
-                if ( typeof url === 'string') {
-                  var base64Img = require('base64-img');
-                  var finalBase64 = base64Img.requestBase64(url, function(err, res, body) {
-                    console.error(err)
-                  });
-                  console.log(url)
-                  doc.addImage(finalBase64,'PNG', 15, 40, 180, 180)
-                }
-                else {
-                  console.log("pinto")
-                }
-              console.log("Image URL: ", url)
-            })
-            .catch(function(error) {
-              console.error("Error downloading the image", error)
-            })
 
 
 
 
 
-            texttohtml = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 A - ${element.data.RESPOSTAS[0].text}
 
 B - ${element.data.RESPOSTAS[1].text}
@@ -109,10 +118,12 @@ C - ${element.data.RESPOSTAS[2].text}
 
 D - ${element.data.RESPOSTAS[3].text}
             `
-            var textLines = doc
-                .setFontSize(fontSize)
-                .splitTextToSize(texttohtml,maxLineWidth)
+            let textLines = doc.splitTextToSize(texttohtml,maxLineWidth)
             doc.text(textLines, margin, margin)
+
+            doc.addImage(element.data.IMAGENS, "JPEG", pageWidth/4, 3.5, 3, 3)
+
+            doc.addPage( "a4", "p" )
           }
         })
 

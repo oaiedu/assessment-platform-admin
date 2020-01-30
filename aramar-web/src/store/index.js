@@ -150,18 +150,6 @@ export default new Vuex.Store({
         });
     },
     createQuestion({ commit }, payload) {
-
-      const storageRef = firebase.storage().ref()
-      const file = payload.images
-      var images = storageRef.child(file.name).put(file)
-        .then(function(snapshot){
-          console.log("Uploaded a file!")
-        })
-        .catch(function(error){
-          console.error("Error uploading file",error)
-        })
-
-
       const db = firebase.firestore()
       const question = {
         id: payload.id,
@@ -171,7 +159,7 @@ export default new Vuex.Store({
         knowledgePWR: payload.knowledgePWR,
         knowledgeBWR: payload.knowledgeBWR,
         answers: payload.answers,
-        images: file.name
+        images: payload.images
       }
       db.collection("questions").doc(question.id).set({
         PERGUNTA: question.questionDescription,

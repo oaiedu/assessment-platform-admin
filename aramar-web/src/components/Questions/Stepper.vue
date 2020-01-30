@@ -78,11 +78,10 @@
                         <v-file-input
                           chips
                           multiple
-                          label="Images"
+                          label="Imagem"
                           v-model="images"
                         />
                       </v-row>
-                      {{images[0]}}
                     </v-container>
                   </v-stepper-content>
 
@@ -257,6 +256,7 @@ export default {
     return {
       letters: ['A','B','C','D'],
       images: [],
+      imagesAsBase64: "",
       imageBase64: "",
       confirmTitle: false,
       questionDescription: "",
@@ -361,19 +361,7 @@ export default {
     updateData(variable) {
       this.questionDescription = variable;
     },
-    onCreateQuestion() {
-      this.imageBase64 = (window.URL || window.webkitURL).createObjectURL(this.images[0])
-      var base64Img = require('base64-img')
-      var data = base64Img.requestBase64(this.imageBase64, function(err, res, body) {
-        console.log("deu merda")
-      });
-
-      console.log("URL to Base 64: ", data);
-
-      if (!this.formIsValid) {
-        return;
-      }
-
+    sendToStore(){
       const questionData = {
         id: this.id,
         subject: this.subject,
@@ -382,13 +370,30 @@ export default {
         knowledgePWR: this.knowledgePWR,
         knowledgeBWR: this.knowledgeBWR,
         answers: this.answers,
-        images: this.images[0]
+        images: this.imagesAsBase64
       };
 
       this.$store.dispatch("createQuestion", questionData);
       this.$store.dispatch("loadedQuestions");
       this.setInitialData();
       this.close();
+    },
+    onCreateQuestion() {
+      if (!this.formIsValid) {
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.readAsDataURL(this.images[0]);
+      reader.onload = ()=> {
+        this.imagesAsBase64 = reader.result
+        console.log("Imagem dentro da Promisse: ",this.imagesAsBase64)
+        this.sendToStore()
+      };
+      reader.onerror = function (error) {
+        console.log('Error: ', error);
+      };
+
     },
     setInitialData() {
       this.confirmTitle = false;
@@ -428,9 +433,9 @@ export default {
       ];
       this.number = 0;
       this.images = [];
+      this.imagesAsBase64 = ""
     },
     close() {
-      console.log("imagem",this.images[0])
       this.setInitialData();
       this.$emit("closeDialogNew");
     }
