@@ -8,7 +8,7 @@
 <script>
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
-import * as fontFile from '@/assets/ARIALUNI.TTF'
+import fontFile from '@/assets/ARIALUNI.TTF'
 
 export default {
     props: ["test"],
@@ -33,7 +33,7 @@ export default {
 
         var pageWidth = 8,
             lineHeight = 1.2,
-            margin = 0.5,
+            margin = 1,
             maxLineWidth = pageWidth - margin * 2,
             fontSize = 12
 
@@ -45,15 +45,21 @@ export default {
             fileName = '',
             reader = new FileReader()
 
-        
-        // fontInBase64 = reader.result.split(',')[1];
-        // fileName = fontFile.name.replace(/\s+/g, '-');
-        // fileNameWithoutExtension = fileName.split('.')[0],
-        console.log("brabuleta")
-        doc.addFileToVFS("Arial Unicode MS", fontFile);
-        doc.addFont("Arial Unicode MS");
-
-        doc.setFont("Arial Unicode MS");
+        //     console.log("fonte: ", fontFile)
+        // // var base64 = require('file-base64');
+        //
+        // // base64.encode('@/assets/ARIALUNI.TTF', function(err, base64String) {
+        // //   console.log("xixizinho")
+        // //   console.log(base64String);
+        // // });
+        // // fontInBase64 = reader.result.split(',')[1];
+        // // fileName = fontFile.name.replace(/\s+/g, '-');
+        // // fileNameWithoutExtension = fileName.split('.')[0],
+        // doc.addFileToVFS("Arial Unicode MS", fontFile);
+        // doc.addFont("Arial Unicode MS");
+        //
+        // doc.setFont("Arial Unicode MS");
+        doc.setFontSize(fontSize)
 
         this.currentTest.forEach( element => {
           if ( typeof element.data.IMAGENS === 'undefined' || element.data.IMAGENS === "" ){
@@ -69,7 +75,7 @@ A - ${element.data.RESPOSTAS[0].text}
 B - ${element.data.RESPOSTAS[1].text}
 
 C - ${element.data.RESPOSTAS[2].text}
-
+1909
 D - ${element.data.RESPOSTAS[3].text}
             `
             let textLines = doc.splitTextToSize(texttohtml,maxLineWidth)
