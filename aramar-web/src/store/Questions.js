@@ -3,7 +3,21 @@ import * as firebase from 'firebase'
 export default {
     state: {
         deleteQuestionId: null,
-        loadedQuestions: []
+        loadedQuestions: [],
+        subjects: [
+            "Teoria do Reator",
+            "Termodinâmica",
+            "Instrumentação e Controle",
+            "Válvulas e Bombas",
+            "Eletricidade",
+            "Mecânica dos Fluidos",
+            "Tratamento Qúimico Refrigerante",
+            "Análise Integrada",
+            "Instrumentação Nuclear",
+            "Física Nuclear",
+            "Transferência de Calor",
+            "Materiais"
+        ]
     },
     mutations: {
         setLoadedQuestions(state, payload) {
@@ -73,5 +87,14 @@ export default {
         loadedQuestions(state) {
             return state.loadedQuestions
         },
+        getNumberOfQuestionBySubject(state, subject) {
+            let counter = 0
+            state.loadedQuestions.forEach(element => {
+                if (element.data.DISCIPLINA === subject)
+                    counter++
+            })
+            return counter
+        },
+        findQuestionById: state => id => state.loadedQuestions.find(question => question.id === id)
     }
 }

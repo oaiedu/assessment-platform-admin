@@ -43,7 +43,6 @@ export default {
     getters: {
         loadedTests(state) {
             return state.loadedTests
-        },
-        findQuestionById: state => id => state.loadedQuestions.find(question => question.id === id)
+        }
     }
 }
