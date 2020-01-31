@@ -9,12 +9,18 @@ import EditQuestion from '@/components/Questions/EditQuestion.vue'
 import NewTestForm from '@/components/Tests/NewTestForm.vue'
 import Tests from '@/components/Tests/Tests.vue'
 import HtmlTest from '@/components/Tests/HtmlToPdfTest.vue'
+import Home from '@/views/Home.vue'
 
 import AuthGuard from './auth-guard'
 
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path:'/',
+    component:Home,
+    name:'home',
+  },
   {
     path: '/signup',
     component: SignUp,
