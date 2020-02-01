@@ -6,6 +6,8 @@ import signUser from './SignUser'
 import logs from './Logs'
 import questions from './Questions'
 import tests from './Tests'
+import layout from './Layout'
+
 
 Vue.use(Vuex)
 
@@ -19,7 +21,8 @@ export default new Vuex.Store({
     signUser,
     logs,
     questions,
-    tests
+    tests,
+    layout
   },
   plugins: [
     vuexPersist.plugin
