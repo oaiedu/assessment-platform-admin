@@ -84,10 +84,16 @@ export default {
         },
     },
     getters: {
+        getSubjects(state){
+          return state.subjects
+        },
+        numberOfQuestions(state){
+          return state.loadedQuestions.length
+        },
         loadedQuestions(state) {
             return state.loadedQuestions
         },
-        getNumberOfQuestionBySubject(state, subject) {
+        getNumberOfQuestionBySubject:(state) => (subject)=>{
             let counter = 0
             state.loadedQuestions.forEach(element => {
                 if (element.data.DISCIPLINA === subject)
