@@ -1,8 +1,7 @@
 <template>
 <div>
-{{categories}}
-{{statistics}}
-{{numberOfQuestions}}
+{{this.$store.state.tests}}
+
   <v-simple-table dense>
     <template v-slot:default>
     <thead class="grey lighten-2" style="height:48px">
