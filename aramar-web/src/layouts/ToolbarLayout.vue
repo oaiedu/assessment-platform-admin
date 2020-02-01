@@ -1,6 +1,25 @@
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" absolute temporary>
+
+    <v-list>
+                <v-list-item class="px-2">
+                  <v-list-item-avatar>
+                    <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
+                  </v-list-item-avatar>
+                </v-list-item>
+
+                <v-list-item link>
+                  <v-list-item-content>
+                    <v-list-item-title class="title">User.name</v-list-item-title>
+                    <v-list-item-subtitle>User.email</v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+
+              <v-divider></v-divider>
+
+
       <v-list nav dense>
         <v-list-item v-for="item in drawerItems" :key="item.title" :to="item.link">
           <v-list-item-icon>
@@ -39,15 +58,20 @@ export default {
     source: String
   },
   data: () => ({
-    drawer: null
+    drawer: null,
   }),
   computed: {
     drawerItems() {
       let drawerItems = [];
       if (this.userIsAuthenticated()) {
         drawerItems = [
+        {
+          icon: "mdi-home",
+          title: " Home",
+          link: "/"
+        },
           {
-            icon: "mdi-settings",
+            icon: "mdi-file-question-outline",
             title: "Manage Questions",
             link: "/questions"
           },

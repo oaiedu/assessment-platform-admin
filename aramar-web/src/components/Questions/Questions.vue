@@ -139,7 +139,6 @@ export default {
     },
     loadQuestions() {
       this.$store.dispatch("loadedQuestions");
-      this.questions();
     },
     removeSelections(i) {
       let aux = this.showedQuestions.length;

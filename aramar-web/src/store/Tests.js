@@ -22,6 +22,19 @@ export default {
             commit('setLoadedTests', tests)
             commit('setLoading', false)
         },
+        deleteTest({ commit }, payload) {
+            const db = firebase.firestore()
+            const id = payload
+            db.collection("tests").doc(id).delete()
+                .then(function () {
+                    console.log("Document successfully deleted!")
+                })
+                .catch(function (error) {
+                    console.error("Error removing document: ", error);
+                });
+        },
+
+
         createTest({ commit }, payload) {
             const db = firebase.firestore()
             const test = {

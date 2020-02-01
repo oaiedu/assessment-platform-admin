@@ -17,7 +17,7 @@
           fab
         >
           <v-icon v-if="fab">mdi-close</v-icon>
-          <v-icon v-else>mdi-account-circle</v-icon>
+          <v-icon v-else>mdi-plus</v-icon>
         </v-btn>
       </template>
       <v-btn
@@ -26,7 +26,7 @@
         small
         color="green"
       >
-        <v-icon>mdi-pencil</v-icon>
+        <v-icon>mdi-file-question-outline</v-icon>
       </v-btn>
       <v-btn
         fab
@@ -34,9 +34,9 @@
         small
         color="indigo"
       >
-        <v-icon>mdi-plus</v-icon>
+        <v-icon>mdi-file-multiple-outline</v-icon>
       </v-btn>
-    
+
     </v-speed-dial>
 </template>
 
