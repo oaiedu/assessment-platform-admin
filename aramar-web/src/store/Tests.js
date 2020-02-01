@@ -26,7 +26,7 @@ export default {
             const db = firebase.firestore()
             const test = {
               title: payload.title,
-              questions: payload.question,
+              questions: payload.questions,
               type: payload.type,
               user: payload.user,
               created: payload.created,
@@ -35,7 +35,7 @@ export default {
             }
             db.collection("tests").doc().set({
               title: test.title,
-              questions: test.question,
+              questions: test.questions,
               type: test.type,
               user: test.user,
               created: test.created,

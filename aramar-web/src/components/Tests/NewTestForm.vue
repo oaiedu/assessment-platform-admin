@@ -241,7 +241,6 @@ export default {
       if (aux == false) this.selectedSubjects.push(this.items[i]);
     },
     onCreateTest() {
-      console.log("hey");
       if(this.testType == "Aleatório")
         this.testType = "random"
 
@@ -256,7 +255,7 @@ export default {
         title: this.testName,
         questions: this.testItems,
         type: this.testType,
-        user: this.$store.getters("user"),
+        user: this.$store.getters.user.id,
         created: Date(),
         edited: "",
         purpose: this.purpose
