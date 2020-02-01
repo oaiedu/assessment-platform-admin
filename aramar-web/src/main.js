@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import * as firebase from 'firebase'
+import VueHtmlToPaper from 'vue-html-to-paper';
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
@@ -9,7 +10,26 @@ import Combined from './components/Shared/Combined'
 import NewQuestion from './components/Questions/NewQuestion'
 import EditQuestion from './components/Questions/EditQuestion'
 import Stepper from './components/Questions/Stepper'
+import DefinitionBlock from './components/Questions/PrintQuestion/Definition'
+import ImageBlock from './components/Questions/PrintQuestion/Image'
+import AnswerBlock from './components/Questions/PrintQuestion/Answers'
+import Body from './components/Questions/PrintQuestion/Body'
 
+
+const options = {
+  name: '_blank',
+  specs: [
+    'fullscreen=yes',
+    'titlebar=yes',
+    'scrollbars=yes'
+  ],
+  styles: [
+    'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
+    'https://unpkg.com/kidlat-css/css/kidlat.css'
+  ]
+}
+
+Vue.use(VueHtmlToPaper, options);
 
 Vue.config.productionTip = false
 
@@ -18,6 +38,10 @@ Vue.component('Combined', Combined)
 Vue.component('NewQuestion', NewQuestion)
 Vue.component('EditQuestion', EditQuestion)
 Vue.component('Stepper', Stepper)
+Vue.component('Body', Body)
+Vue.component('def-block', DefinitionBlock)
+Vue.component('img-block', ImageBlock)
+Vue.component('ans-block', AnswerBlock)
 
 new Vue({
   router,

@@ -33,6 +33,7 @@
             <template v-slot:item.actions="{ item }">
               <v-icon small class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
               <v-icon small @click="deleteQuestionSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
+              <v-icon small class="mr-2" @click="generatePDF(item)">mdi-pdf-box</v-icon>
             </template>
           </v-data-table>
         </v-card>
@@ -48,6 +49,10 @@
 
       <v-dialog v-model="dialogEditQuestion" persistent>
         <EditQuestion :questions="selectedEdit" @closeDialogEdit="dialogEditQuestion = false"></EditQuestion>
+      </v-dialog>
+
+      <v-dialog v-model="dialogPDF">
+        <Body :question="selectedEdit"></Body>
       </v-dialog>
 
       <div class="text-center pt-2">
@@ -73,11 +78,12 @@ export default {
       selected: [],
       dialogNewQuestion: false,
       dialogEditQuestion: false,
+      dialogPDF: false,
       items: [
         "Teoria do Reator",
         "Termodinâmica",
         "Instrumentação e Controle",
-        "Válvulas e Bombas", 
+        "Válvulas e Bombas",
         "Eletricidade",
         "Mecânica dos Fluidos",
         "Tratamento Qúimico Refrigerante",
@@ -126,6 +132,10 @@ export default {
     editQuestions(val){
       this.selectedEdit = val
       this.dialogEditQuestion = true
+    },
+    generatePDF(val){
+      this.selectedEdit = val
+      this.dialogPDF = true
     },
     loadQuestions() {
       this.$store.dispatch("loadedQuestions");

@@ -8,8 +8,8 @@
               <v-row>
                 <v-col>
                   <v-text-field
-                    filled
                     dense
+                    outlined
                     label="Test Name"
                     single-line
                     hide-details
@@ -26,6 +26,7 @@
                     rounded
                     flat
                     filled
+                    outlined
                     dense
                     label="Tipo de prova"
                     v-model="testType"
@@ -33,10 +34,10 @@
                   ></v-select>
                 </v-col>
 
-                <v-col v-if="testType=='Random Questions'">
+                <v-col v-if="testType=='Aleatório'">
                   <v-text-field
-                    filled
                     dense
+                    outlined
                     label="Number of Questions"
                     single-line
                     hide-details
@@ -45,10 +46,20 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
+
+              <v-row>
+                <v-col>
+                  <v-textarea
+                    outlined
+                    v-model="purpose"
+                    label="Propósito"
+                  ></v-textarea>
+                </v-col>
+              </v-row>
             </v-container>
           </v-col>
 
-          <v-col v-if="testType!='Random Questions'">
+          <v-col>
             <v-container>
               <v-container>
                 <v-text-field
@@ -115,12 +126,13 @@
 export default {
   data() {
     return {
-      testType: "",
+      testType: "Aleatório",
       randomQuestionsNumber: null,
       selectedSubjects: [],
       selectedQuestions: [],
       testItems: [],
       testName: "",
+      purpose: "",
       items: [
         "Teoria do Reator",
         "Termodinâmica",
@@ -136,9 +148,8 @@ export default {
         "Materiais"
       ],
       types: [
-        "Random Questions",
-        "Selected Questions (Random Answers)",
-        "Selected Questions (Classic Answers)"
+        "Aleatório",
+        "Selecionado"
       ],
       showedQuestions: [],
       search: "",
@@ -231,11 +242,25 @@ export default {
     },
     onCreateTest() {
       console.log("hey");
+      if(this.testType == "Aleatório")
+        this.testType = "random"
+
+      else
+        this.testType = "selected"
+
       this.selectedQuestions.forEach(element => {
         this.testItems.push(element.id);
       });
 
-      const testData = { name: this.testName, questions: this.testItems };
+      const testData = {
+        title: this.testName,
+        questions: this.testItems,
+        type: this.testType,
+        user: this.$store.getters("user"),
+        created: Date(),
+        edited: "",
+        purpose: this.purpose
+      }
 
       this.$store.dispatch("createTest", testData);
       this.$store.dispatch("loadedTests");

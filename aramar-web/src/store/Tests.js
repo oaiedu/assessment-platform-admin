@@ -25,12 +25,22 @@ export default {
         createTest({ commit }, payload) {
             const db = firebase.firestore()
             const test = {
-                name: payload.name,
-                questions: payload.questions
+              title: payload.title,
+              questions: payload.question,
+              type: payload.type,
+              user: payload.user,
+              created: payload.created,
+              edited: payload.edited,
+              purpose: payload.purpose
             }
             db.collection("tests").doc().set({
-                TITULO: test.name,
-                PERGUNTAS: test.questions
+              title: test.title,
+              questions: test.question,
+              type: test.type,
+              user: test.user,
+              created: test.created,
+              edited: test.edited,
+              purpose: test.purpose
             })
                 .then(function () {
                     console.log("Success")

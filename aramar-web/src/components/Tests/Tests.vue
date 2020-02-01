@@ -53,7 +53,7 @@ export default {
       itemsPerPage: 10,
       selectedTest: null,
       headers: [
-        { text: "Nome", align: "left",  value: "data.TITULO" },
+        { text: "Nome", align: "left",  value: "data.title" },
         { text: "", value: "actions", sortable: false }
       ]
     };
