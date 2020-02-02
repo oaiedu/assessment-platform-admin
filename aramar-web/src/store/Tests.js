@@ -66,6 +66,8 @@ export default {
     getters: {
         loadedTests(state) {
             return state.loadedTests
-        }
+        },
+        findTestById: state => id => state.loadedTests.find(test => test.id === id)
+
     }
 }

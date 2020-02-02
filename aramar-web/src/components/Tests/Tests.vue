@@ -14,6 +14,8 @@
           <v-icon small class="mr-2">mdi-pencil</v-icon>
           <v-icon small @click="deleteTestSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
           <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon>
+          <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon>
+          <router-link :to="{name:'test',params:{testId:item.id}}" replace>Go</router-link>
         </template>
       </v-data-table>
     </v-card>

@@ -1,0 +1,9 @@
+@media print{
+     body{
+     background-color:black !important;
+     }
+     html {
+       background-color: red !important;
+     }
+     
+   }

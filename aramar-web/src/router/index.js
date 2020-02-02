@@ -9,6 +9,8 @@ import EditQuestion from '@/components/Questions/EditQuestion.vue'
 import NewTestForm from '@/components/Tests/NewTestForm.vue'
 import Tests from '@/components/Tests/Tests.vue'
 import HtmlTest from '@/components/Tests/HtmlToPdfTest.vue'
+import PrintTest from '@/components/Tests/PrintTest.vue'
+
 import Home from '@/views/Home.vue'
 
 import AuthGuard from './auth-guard'
@@ -58,6 +60,12 @@ const routes = [
     path: '/tests',
     component: Tests,
     name: 'tests',
+    beforeEnter: AuthGuard
+  },
+  {
+    path: '/test/:testId',
+    component: PrintTest,
+    name: 'test',
     beforeEnter: AuthGuard
   },
   {
