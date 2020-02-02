@@ -256,8 +256,7 @@ export default {
     return {
       letters: ['A','B','C','D'],
       images: [],
-      imagesAsBase64: "",
-      imageBase64: "",
+      imagesAsURL: "",
       confirmTitle: false,
       questionDescription: "",
       e1: 1,
@@ -361,7 +360,16 @@ export default {
     updateData(variable) {
       this.questionDescription = variable;
     },
-    sendToStore(){
+    onCreateQuestion() {
+      if (!this.formIsValid) {
+        return;
+      }
+
+      const imageToUpload = {images: this.images[0]}
+
+      this.$store.dispatch("uploadImage", imageToUpload)
+      this.imagesAsURL = this.$store.dispatch("findImage", this.images[0].name)
+
       const questionData = {
         id: this.id,
         subject: this.subject,
@@ -370,30 +378,25 @@ export default {
         knowledgePWR: this.knowledgePWR,
         knowledgeBWR: this.knowledgeBWR,
         answers: this.answers,
-        images: this.imagesAsBase64
+        images: this.imagesAsURL
       };
+
+      console.log("images: ",this.imagesAsURL)
 
       this.$store.dispatch("createQuestion", questionData);
       this.$store.dispatch("loadedQuestions");
       this.setInitialData();
       this.close();
-    },
-    onCreateQuestion() {
-      if (!this.formIsValid) {
-        return;
-      }
-
-      var reader = new FileReader();
-      reader.readAsDataURL(this.images[0]);
-      reader.onload = ()=> {
-        this.imagesAsBase64 = reader.result
-        console.log("Imagem dentro da Promisse: ",this.imagesAsBase64)
-        this.sendToStore()
-      };
-      reader.onerror = function (error) {
-        console.log('Error: ', error);
-      };
-
+      // var reader = new FileReader();
+      // reader.readAsDataURL(this.images[0]);
+      // reader.onload = ()=> {
+      //   this.imagesAsBase64 = reader.result
+      //   console.log("Imagem dentro da Promisse: ",this.imagesAsBase64)
+      //   this.sendToStore()
+      // };
+      // reader.onerror = function (error) {
+      //   console.log('Error: ', error);
+      // };
     },
     setInitialData() {
       this.confirmTitle = false;

@@ -22,6 +22,23 @@ export default {
             commit('setLoadedTests', tests)
             commit('setLoading', false)
         },
+        findImage({commit},payload){
+            var storage = firebase.storage();
+            var pathReference = storage.refFromURL(`gs://pwr-quiz-generator.appspot.com/${payload}`);
+
+            var imageURL =  pathReference.getDownloadURL()
+              .then(function(url) {
+                console.log("URL",url)
+                return url
+              })
+              .catch(function(error) {
+                console.error("Error downloading the image", error)
+              })
+
+                console.log("After Download: ", imageURL)
+
+            return imageURL
+        },
         deleteTest({ commit }, payload) {
             const db = firebase.firestore()
             const id = payload
@@ -68,6 +85,5 @@ export default {
             return state.loadedTests
         },
         findTestById: state => id => state.loadedTests.find(test => test.id === id)
-
     }
 }

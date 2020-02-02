@@ -54,6 +54,34 @@ export default {
                     console.error("Error removing document: ", error);
                 });
         },
+        findImage({commit},payload) {
+            var storage = firebase.storage();
+            var pathReference = storage.refFromURL(`gs://pwr-quiz-generator.appspot.com/${payload}`);
+
+            var imageURL =  pathReference.getDownloadURL()
+              .then(function(url) {
+                console.log("URL",url)
+                return url
+              })
+              .catch(function(error) {
+                console.error("Error downloading the image", error)
+              })
+
+                console.log("After Download: ", imageURL)
+
+            return imageURL
+        },
+        uploadImage({ commit }, payload) {
+          const storageRef = firebase.storage().ref()
+          const file = payload.images
+          var images = storageRef.child(file.name).put(file)
+            .then(function(snapshot){
+              console.log("Uploaded a file!")
+            })
+            .catch(function(error){
+              console.error("Error uploading file",error)
+            })
+        },
         createQuestion({ commit }, payload) {
             const db = firebase.firestore()
             const question = {
