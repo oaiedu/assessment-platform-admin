@@ -367,8 +367,8 @@ export default {
 
       const imageToUpload = {images: this.images[0]}
 
-      this.$store.dispatch("uploadImage", imageToUpload)
-      this.imagesAsURL = this.$store.dispatch("findImage", this.images[0].name)
+      // this.$store.dispatch("uploadImage", imageToUpload)
+      // this.imagesAsURL = this.$store.dispatch("findImage", this.images[0].name)
 
       const questionData = {
         id: this.id,
@@ -378,10 +378,10 @@ export default {
         knowledgePWR: this.knowledgePWR,
         knowledgeBWR: this.knowledgeBWR,
         answers: this.answers,
-        images: this.imagesAsURL
+        images: this.images[0].name
       };
 
-      console.log("images: ",this.imagesAsURL)
+      // console.log("images: ",this.imagesAsURL)
 
       this.$store.dispatch("createQuestion", questionData);
       this.$store.dispatch("loadedQuestions");

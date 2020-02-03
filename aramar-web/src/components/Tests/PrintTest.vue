@@ -16,9 +16,9 @@
             <br>
             <br>
 
-            <div class="img-container">
+            <!-- <div class="img-container">
             <img src=${question.data.IMAGENS}/>
-            </div>
+            </div> -->
 
             <br>
             <br>
@@ -82,6 +82,25 @@
         </div>
       </div>
 
+      <v-simple-table>
+        <template v-slot:default>
+          <thead>
+            <tr>
+              <th class="text-left">Questão</th>
+              <th class="text-left">IQ</th>
+              <th class="text-left">Resposta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in table" :key="item.question">
+              <td>{{ item.question }}</td>
+              <td>{{ item.iq }}</td>
+              <td>{{ item.answer }}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
+
       <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="toPrint()">
         <v-icon>mdi-plus</v-icon>
       </v-btn>
@@ -136,6 +155,26 @@ export default {
       })
       console.log(questionsAux)
       return questionsAux
+    },
+    table() {
+      var result = []
+
+      for ( let i = 0; i < this.questions.length; i++ ) {
+        let data = { question: "", iq: "", answer: ""}
+        data.question = i+1
+        data.iq = this.questions[i].id
+
+        for( let j = 0; j < 4; j++){
+          if(this.questions[i].data.RESPOSTAS[j].value == true) {
+            data.answer = this.letters[j]
+          }
+        }
+        console.log("data: ",data)
+        result.push(data)
+      }
+      console.log("Resultado: ",result)
+
+      return result
     }
   }
 }
