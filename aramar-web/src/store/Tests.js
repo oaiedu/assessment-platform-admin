@@ -22,7 +22,7 @@ export default {
             commit('setLoadedTests', tests)
             commit('setLoading', false)
         },
-        findImage({commit},payload){
+        findImageTests({commit},payload){
             var storage = firebase.storage();
             var pathReference = storage.refFromURL(`gs://pwr-quiz-generator.appspot.com/${payload}`);
 
@@ -83,6 +83,14 @@ export default {
     getters: {
         loadedTests(state) {
             return state.loadedTests
+        },
+        getNumberOfQuestionBySubjectOnTest:(state) => (subject, questions)=>{
+            let counter = 0
+            questions.forEach(element => {
+                if (element.data.DISCIPLINA === subject)
+                    counter++
+            })
+            return counter
         },
         findTestById: state => id => state.loadedTests.find(test => test.id === id)
     }

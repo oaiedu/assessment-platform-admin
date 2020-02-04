@@ -6,7 +6,7 @@
             <profile />
           </v-col>
           <v-col sm=8>
-            <statistics-questions/>
+            <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
           </v-col>
         </v-row>
 
@@ -28,6 +28,23 @@ export default {
     Fab,
     Profile,
     StatisticsQuestions
+  },
+  computed: {
+    statistics(){
+      let statisticsObj=[]
+      const cat =  this.$store.getters.getSubjects
+      cat.forEach(element=>{
+        console.log(element)
+        const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubject(element)
+        statisticsObj.push({name: element, questions: numberOfQuestions})
+        console.log(numberOfQuestions)
+      })
+      console.log(statisticsObj)
+      return statisticsObj
+    },
+    numberOfQuestions(){
+      return this.$store.getters.numberOfQuestions
+    }
   }
 }
 </script>
