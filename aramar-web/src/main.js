@@ -51,6 +51,7 @@ new Vue({
         this.$store.dispatch('autoSignIn', user )
       }
     })
+    this.$store.dispatch('clearError')
     this.$store.dispatch('loadedQuestions')
     this.$store.dispatch('loadedTests')
     console.log(this.$store.state.loadedQuestions)

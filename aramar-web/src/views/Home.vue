@@ -1,17 +1,25 @@
 <template>
-    <div class="home">
-      <v-container>
-        <v-row no-gutters>
-          <v-col sm=4>
-            <profile />
-          </v-col>
-          <v-col sm=8>
-            <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
-          </v-col>
-        </v-row>
-
-<fab/>
+  <div class="home">
+    <v-container v-if="user != null || user != undefined">
+      <v-row no-gutters>
+        <v-col sm=4>
+          <profile />
+        </v-col>
+        <v-col sm=8>
+          <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
+        </v-col>
+      </v-row>
+      <fab/>
     </v-container>
+
+    <v-row justify="center" align="center" v-else>
+      <v-col class="section-1" cols="9"/>
+      <v-col>
+        <v-container>
+          <SignUser/>
+        </v-container>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -20,16 +28,23 @@
 import Fab from '@/components/Fab.vue'
 import Profile from '@/components/User/Profile.vue'
 import StatisticsQuestions from '@/components/Questions/StatisticsQuestions'
-
+import SignUser from '@/components/SignUser'
 
 export default {
+  data: () => ({
+
+  }),
   name: 'home',
   components: {
     Fab,
     Profile,
-    StatisticsQuestions
+    StatisticsQuestions,
+    SignUser,
   },
   computed: {
+    user () {
+      return this.$store.getters.user
+    },
     statistics(){
       let statisticsObj=[]
       const cat =  this.$store.getters.getSubjects
@@ -48,3 +63,10 @@ export default {
   }
 }
 </script>
+
+<style>
+  .section-1 {
+    height: 94vh;
+    background: url("https://www.defesaaereanaval.com.br/wp-content/uploads/2013/05/aramar-em-foto-da-agc3aancia-brasil.jpg")
+  }
+</style>

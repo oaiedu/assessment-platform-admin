@@ -1,23 +1,22 @@
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" absolute temporary>
+      <v-list>
+        <v-list-item class="px-2">
+          <v-list-item-avatar>
+            <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
+          </v-list-item-avatar>
+        </v-list-item>
 
-    <v-list>
-                <v-list-item class="px-2">
-                  <v-list-item-avatar>
-                    <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
-                  </v-list-item-avatar>
-                </v-list-item>
+        <v-list-item link>
+          <v-list-item-content>
+            <v-list-item-title class="title">User.name</v-list-item-title>
+            <v-list-item-subtitle>User.email</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
 
-                <v-list-item link>
-                  <v-list-item-content>
-                    <v-list-item-title class="title">User.name</v-list-item-title>
-                    <v-list-item-subtitle>User.email</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-
-              <v-divider></v-divider>
+      <v-divider></v-divider>
 
 
       <v-list nav dense>
@@ -44,19 +43,22 @@
         <v-icon left>mdi-logout-variant</v-icon>Log Out
       </v-btn>
     </v-app-bar>
+
     <v-content>
-      <v-container fluid>
-        <router-view></router-view>
-      </v-container>
+      <Error/>
+      <router-view></router-view>
     </v-content>
   </v-app>
 </template>
 
 <script>
+import Error from '../components/Error'
+
 export default {
   props: {
     source: String
   },
+  components: {Error},
   data: () => ({
     drawer: null,
   }),

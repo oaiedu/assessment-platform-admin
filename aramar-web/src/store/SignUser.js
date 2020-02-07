@@ -3,6 +3,8 @@ import * as firebase from 'firebase'
 export default {
     state: {
         user: null,
+        userNamer: null,
+        userProfileImage: null
     },
     mutations: {
         setUser(state, payload) {
@@ -16,21 +18,37 @@ export default {
             firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
                 .then(
                     user => {
+                        console.log("USer: ",user.user.uid)
                         commit('setLoading', false)
                         const newUser = {
-                            id: user.uid
+                            id: user.user.uid
                         }
+                        console.log("user id: ",newUser.id)
+                        const db = firebase.firestore()
+                        db.collection("users").doc(newUser.id).set({
+                          name: "",
+                          profileImages: {}
+                        })
+                          .then( function () {
+                            console.log("Sucess User Firestore")
+                          })
+                          .catch( function (error) {
+                            commit('setLoading', false)
+                            commit('setError', error)
+                            console.error(error)
+                          })
                         commit('setUser', newUser)
-                        console.log('sucess')
+                        console.log('Success Auth')
                     }
                 )
                 .catch(
                     error => {
                         commit('setLoading', false)
                         commit('setError', error)
-                        console.log(error)
+                        console.error(error)
                     }
                 )
+
         },
         signUserIn({ commit }, payload) {
             commit('setLoading', true)

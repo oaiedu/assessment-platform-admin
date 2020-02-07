@@ -7,6 +7,8 @@
 <script>
 import PrintLayout from './layouts/PrintLayout'
 import ToolbarLayout from './layouts/ToolbarLayout'
+import Error from './components/Error'
+
 
 export default {
   computed: {
@@ -15,7 +17,9 @@ export default {
     }
   },
   components: {
+    Error,
     'toolbar-layout': ToolbarLayout,
+    Error,
     'print-layout': PrintLayout
     // define as many layouts you want for the application
   }
