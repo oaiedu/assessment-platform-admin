@@ -54,7 +54,7 @@ export default {
   data: () => ({
     showSignIn: false,
     showSignUp: false,
-    showSignOption: true,
+    showSignOption: true
   }),
   components: {
     SignIn,

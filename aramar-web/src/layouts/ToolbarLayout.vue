@@ -88,8 +88,6 @@ export default {
     },
     menuItems() {
       let menuItems = [
-        { icon: "mdi-account-plus", title: "Sign Up", link: "/signup" },
-        { icon: "mdi-login-variant", title: "Log In", link: "/signin" }
       ];
       if (this.userIsAuthenticated()) {
         menuItems = [
