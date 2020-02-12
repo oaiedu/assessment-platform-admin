@@ -1,8 +1,7 @@
 <template>
   <v-app>
     <v-container>
-      <v-container fluid>
-        <v-card>
+      <v-container>
           <v-container>
             <v-text-field
               v-model="search"
@@ -15,10 +14,9 @@
               hide-details
             ></v-text-field>
           </v-container>
-        </v-card>
       </v-container>
 
-      <v-container fluid>
+      <v-container>
         <v-card>
           <v-data-table
             :headers="headers"

@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <v-container v-if="user != null || user != undefined">
-      <v-row no-gutters>
+      <v-row justify="center">
         <v-col sm=4>
           <profile />
         </v-col>
@@ -26,8 +26,8 @@
 <script>
 // @ is an alias to /src
 import Fab from '@/components/Fab.vue'
-import Profile from '@/components/User/Profile.vue'
 import StatisticsQuestions from '@/components/Questions/StatisticsQuestions'
+import profile from '@/components/DisplayProfile'
 import SignUser from '@/components/SignUser'
 
 export default {
@@ -37,9 +37,9 @@ export default {
   name: 'home',
   components: {
     Fab,
-    Profile,
     StatisticsQuestions,
     SignUser,
+    profile
   },
   computed: {
     user () {

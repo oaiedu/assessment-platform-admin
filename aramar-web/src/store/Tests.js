@@ -50,8 +50,6 @@ export default {
                     console.error("Error removing document: ", error);
                 });
         },
-
-
         createTest({ commit }, payload) {
             const db = firebase.firestore()
             const test = {

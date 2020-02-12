@@ -52,13 +52,15 @@ export default {
             }
             const userInfo = {
               name: "",
-              profileImages: ""
+              profileImages: "",
+              email: payload.email
             }
             console.log("user id: ", newUser.id)
             const db = firebase.firestore()
             db.collection("users").doc(newUser.id).set({
               name: userInfo.name,
-              profileImages: userInfo.profileImages
+              profileImages: userInfo.profileImages,
+              email: userInfo.email
             })
               .then(function () {
                 console.log("Sucess User Firestore")
@@ -93,7 +95,11 @@ export default {
         profileImages: userInfo.profileImages
       })
         .then(function () {
-          commit('setUserInfo', userInfo)
+          commit('setUserInfo', {
+            name: userInfo.name,
+            profileImages: userInfo.profileImages,
+            email: state.userInfo.email
+          })
           console.log("Sucess Update")
         })
         .catch(function (error) {

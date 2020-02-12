@@ -4,14 +4,18 @@
       <v-list>
         <v-list-item class="px-2">
           <v-list-item-avatar>
-            <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
+            <img
+              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+              v-if=" user.profileImages === '' "
+            />
+            <img :src="user.profileImages" v-else />
           </v-list-item-avatar>
         </v-list-item>
 
         <v-list-item link>
           <v-list-item-content>
-            <v-list-item-title class="title">User.name</v-list-item-title>
-            <v-list-item-subtitle>User.email</v-list-item-subtitle>
+            <v-list-item-title class="title">{{user.name}}</v-list-item-title>
+            <v-list-item-subtitle>{{user.email}}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -54,6 +58,7 @@
 <script>
 import Error from '../components/Error'
 
+
 export default {
   props: {
     source: String
@@ -63,6 +68,9 @@ export default {
     drawer: null,
   }),
   computed: {
+    user(){
+      return this.$store.getters.userInfo
+    },
     drawerItems() {
       let drawerItems = [];
       if (this.userIsAuthenticated()) {
@@ -81,6 +89,11 @@ export default {
             icon: "mdi-file-multiple-outline",
             title: " Manage Tests",
             link: "/tests"
+          },
+          {
+            icon: "mdi-account",
+            title: "Profile",
+            link: "/profile"
           }
         ];
       }
@@ -91,7 +104,6 @@ export default {
       ];
       if (this.userIsAuthenticated()) {
         menuItems = [
-          { icon: "mdi-account", title: "Profile", link: "/profile" }
         ];
       }
       return menuItems;

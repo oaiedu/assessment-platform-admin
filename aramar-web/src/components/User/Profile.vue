@@ -82,17 +82,16 @@ export default {
   }),
   computed: {
     user() {
-      return this.$store.getters.userInfo;
-    }
-  },
-  watch: {
-    user(val) {
+      var val = this.$store.getters.userInfo
+
       if ( val.name !== "")
         this.nickName = val.name
 
       if ( val.profileImages !== "")
         this.imagesAsURL = val.profileImages
-    }
+
+      return val;
+    },
   },
   methods: {
     addImage() {
@@ -114,6 +113,7 @@ export default {
         profileImages: this.imagesAsURL
       }
       this.$store.dispatch("updateUser", updateChanges)
+      this.$router.push("/")
     }
   }
 };

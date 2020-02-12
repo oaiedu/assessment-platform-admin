@@ -67,7 +67,24 @@
 
                   <v-stepper-content step="2">
                     <v-container>
-                      <Combined :questionDescription="editedQuestionDescription" @inputData="updateData"></Combined>
+                      <v-row>
+                        <Combined :questionDescription="editedQuestionDescription" @inputData="updateData"></Combined>
+                      </v-row>
+                      <v-row v-if="hasImages">
+                        <v-card-title>Current Image</v-card-title>
+                        <img :src="this.editedImages">
+                      </v-row>
+                      <v-row v-else>
+                        <v-card-title>No Current Image</v-card-title>
+                      </v-row>
+                      <v-row>
+                        <v-file-input
+                          chips
+                          multiple
+                          label="Imagem"
+                          v-model="images"
+                        />
+                      </v-row>
                     </v-container>
                   </v-stepper-content>
 
@@ -120,7 +137,7 @@
               <br />
               CONHECIMENTO: {{editedKnowledge}} [{{editedKnowledgePWR}}/{{editedKnowledgeBWR}}]
               <br />
-              IQ: {{editedId}}
+              IQ: {{this.id}}
               <br />
               <br />
               {{editedQuestionDescription}}
@@ -216,8 +233,10 @@ export default {
       columns: this.number,
       multipleAnswer: false,
       auxTitle: [],
+      editedImages: null,
       chips: [],
       items: [],
+      images: [],
       editedAnswers: [],
       editedId: null,
       editedSubject: null,
@@ -242,6 +261,12 @@ export default {
     };
   },
   computed: {
+    hasImages(){
+      if ( typeof this.questions.data.IMAGENS === 'undefined' || this.questions.data.IMAGENS === '')
+        return false
+      else
+        return true
+    },
     formIsValid() {
       return (
         this.editedId !== "" &&
@@ -250,29 +275,73 @@ export default {
         this.editedKnowledgeBWR !== "" &&
         this.editedSubject !== ""
       );
+    },
+    id(){
+      var aux = this.questions.id
+      this.editedId = aux
+      return aux
     }
+    // editedQuestion() {
+    //   var aux = this.$store.getters.findQuestionById(this.questions)
+    //
+    //   this.editedSubject = aux.data.DISCIPLINA
+    //   this.editedKnowledge = aux.data.CONHECIMENTO
+    //   this.editedKnowledgePWR = aux.data.RELEVANCIA_OR
+    //   this.editedKnowledgeBWR = aux.data.RELEVANCIA_OSR
+    //   this.editedAnswers = aux.data.RESPOSTAS
+    //   this.editedQuestionDescription = aux.data.PERGUNTA
+    //
+    //   if(typeof aux.data.RESPOSTAS[0].text == "string")
+    //     this.number = 1
+    //   else
+    //     this.number = auxdata.RESPOSTAS[0].text.length
+    //
+    //   if (this.number > 1) this.confirmTitle = true;
+    //   else this.confirmTitle = false;
+    //
+    //   if(this.number>1){
+    //     for(var i = 0; i < this.number; i++){
+    //       this.auxTitle[i] = this.questionsdata.RESPOSTAS[0].text[i].title
+    //     }
+    //   }
+    //
+    //   this.editedAnswers.forEach( element => {
+    //     if(element.value === true)
+    //       this.radios = element.ansId
+    //   })
+    //
+    //   return this.questions
+    // }
   },
   watch: {
-    questions(val){
+    questions(val) {
       this.editedId = val.id
-      this.editedSubject = val.data.DISCIPLINA
-      this.editedKnowledge = val.data.CONHECIMENTO
-      this.editedKnowledgePWR = val.data.RELEVANCIA_OR
-      this.editedKnowledgeBWR = val.data.RELEVANCIA_OSR
-      this.editedAnswers = val.data.RESPOSTAS
-      this.editedQuestionDescription = val.data.PERGUNTA
+    },
+    editedId() {
+      this.editedId = this.questions.id
+      this.editedSubject = this.questions.data.DISCIPLINA
+      this.editedKnowledge = this.questions.data.CONHECIMENTO
+      this.editedKnowledgePWR = this.questions.data.RELEVANCIA_OR
+      this.editedKnowledgeBWR = this.questions.data.RELEVANCIA_OSR
+      this.editedAnswers = this.questions.data.RESPOSTAS
+      this.editedQuestionDescription = this.questions.data.PERGUNTA
 
-      if(typeof val.data.RESPOSTAS[0].text == "string")
+      if ( typeof this.questions.data.IMAGENS === 'undefined' || this.questions.data.IMAGENS === '')
+        this.editedImages === ""
+      else
+        this.editedImages = this.questions.data.IMAGENS
+
+      if(typeof this.questions.data.RESPOSTAS[0].text == "string")
         this.number = 1
       else
-        this.number = val.data.RESPOSTAS[0].text.length
+        this.number = this.questions.data.RESPOSTAS[0].text.length
 
       if (this.number > 1) this.confirmTitle = true;
       else this.confirmTitle = false;
 
       if(this.number>1){
         for(var i = 0; i < this.number; i++){
-          this.auxTitle[i] = val.data.RESPOSTAS[0].text[i].title
+          this.auxTitle[i] = this.questions.data.RESPOSTAS[0].text[i].title
         }
       }
 
@@ -293,8 +362,8 @@ export default {
 
         if (element.ansId === val)
           element.value = true;
-        
-        else 
+
+        else
           element.value = false;
       });
     }
@@ -304,17 +373,43 @@ export default {
       this.editedQuestionDescription = variable;
     },
     onEditQuestion() {
-      const questionData = {
-        id: this.editedId,
-        subject: this.editedSubject,
-        questionDescription: this.editedQuestionDescription,
-        knowledge: this.editedKnowledge,
-        knowledgePWR: this.editedKnowledgePWR,
-        knowledgeBWR: this.editedKnowledgeBWR,
-        answers: this.editedAnswers
-      };
-      this.$store.dispatch("createQuestion", questionData);
-      this.close();
+      if ( typeof this.images[0] !== 'undefined') {
+        const imageToUpload = {images: this.images[0]}
+        var URL = this.$store.dispatch("uploadImage", imageToUpload)
+        URL.then(result => {
+          this.editedImages = result
+          console.log("Image as URL: ",this.editedImages)
+          const questionData = {
+            id: this.editedId,
+            subject: this.editedSubject,
+            questionDescription: this.editedQuestionDescription,
+            knowledge: this.editedKnowledge,
+            knowledgePWR: this.editedKnowledgePWR,
+            knowledgeBWR: this.editedKnowledgeBWR,
+            answers: this.editedAnswers,
+            images: this.editedImages
+          };
+
+          this.$store.dispatch("createQuestion", questionData);
+          this.close();
+        })
+      }
+
+      else {
+        const questionData = {
+          id: this.editedId,
+          subject: this.editedSubject,
+          questionDescription: this.editedQuestionDescription,
+          knowledge: this.editedKnowledge,
+          knowledgePWR: this.editedKnowledgePWR,
+          knowledgeBWR: this.editedKnowledgeBWR,
+          answers: this.editedAnswers,
+          images: ""
+        };
+        this.images = []
+        this.$store.dispatch("createQuestion", questionData);
+        this.close();
+      }
     },
     close() {
       this.$store.dispatch("loadedQuestions");

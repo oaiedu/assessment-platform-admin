@@ -1,47 +1,69 @@
 <template>
-  <v-container>
-    <v-card>
-      <v-data-table
-        :headers="headers"
-        :items="tests"
-        :page.sync="page"
-        :items-per-page="itemsPerPage"
-        hide-default-footer
-        class="elevation-1"
-        @page-count="pageCount = $event"
-      >
-        <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2">mdi-pencil</v-icon>
-          <v-icon small @click="deleteTestSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
-          <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon>
-          <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon>
-          <router-link :to="{name:'test',params:{testId:item.id}}" replace>Go</router-link>
-        </template>
-      </v-data-table>
-    </v-card>
+  <v-app>
+    <v-container>
+      <v-container>
+          <v-container>
+            <v-text-field
+              v-model="search"
+              filled
+              rounded
+              dense
+              append-icon="mdi-magnify"
+              label="Search for IQ"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-container>
+      </v-container>
 
-    <v-btn fixed dark fab bottom right color="cyan" @click.stop="dialogNewTest = true">
-      <v-icon>mdi-plus</v-icon>
-    </v-btn>
+      <v-container>
+        <v-card>
+          <v-data-table
+            :headers="headers"
+            :items="tests"
+            :page.sync="page"
+            :items-per-page="itemsPerPage"
+            :search="search"
+            hide-default-footer
+            class="elevation-1"
+            @page-count="pageCount = $event"
+          >
+            <template small v-slot:item.actions="{ item }">
+              <v-icon small class="mr-2">mdi-pencil</v-icon>
+              <v-icon small class="mr-2" @click="deleteTestSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
+              <!-- <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon>
+              <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon> -->
+              <router-link :to="{name:'test',params:{testId:item.id}}" replace>
+                <v-icon small>mdi-pdf-box</v-icon>
+              </router-link>
+            </template>
+          </v-data-table>
+        </v-card>
+      </v-container>
 
-    <v-dialog v-model="dialogNewTest">
-      <NewTest></NewTest>
-    </v-dialog>
+      <v-btn fixed dark fab bottom right color="cyan" @click.stop="dialogNewTest = true">
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
 
-    <v-dialog v-model="dialogHtmlTest">
-      <HtmlTest :test="selectedTest"></HtmlTest>
-    </v-dialog>
+      <v-dialog v-model="dialogNewTest">
+        <NewTest></NewTest>
+      </v-dialog>
 
-    <div class="text-center pt-2">
-      <v-pagination v-model="page" :length="pageCount"></v-pagination>
-    </div>
-    <v-snackbar v-model="deleteTestSnackBar" color="black" right top>
-      Você realmente quer deletar esta pergunta?
-      <v-btn dark color="yellow" text @click="deleteTask(deleteSelect.id)">Ok</v-btn>
-      <v-btn dark color="yellow" text @click="deleteTestSnackBar = false">Cancelar</v-btn>
-    </v-snackbar>
+      <v-dialog v-model="dialogHtmlTest">
+        <HtmlTest :test="selectedTest"></HtmlTest>
+      </v-dialog>
 
-  </v-container>
+      <div class="text-center pt-2">
+        <v-pagination v-model="page" :length="pageCount"></v-pagination>
+      </div>
+      <v-snackbar v-model="deleteTestSnackBar" color="black" right top>
+        Você realmente quer deletar esta prova?
+        <v-btn dark color="yellow" text @click="deleteTest(deleteSelect.id)">Ok</v-btn>
+        <v-btn dark color="yellow" text @click="deleteTestSnackBar = false">Cancelar</v-btn>
+      </v-snackbar>
+
+    </v-container>
+  </v-app>
 </template>
 
 <script>
@@ -54,7 +76,8 @@ export default {
   },
   data() {
     return {
-    deleteTestSnackBar: false,
+      search: "",
+      deleteTestSnackBar: false,
       dialogNewTest: false,
       dialogHtmlTest: false,
       page: 1,
@@ -65,33 +88,28 @@ export default {
         { text: "Nome", align: "left",  value: "data.title" },
         { text: "Questions", align: "left",  value: "data.questions.length" },
         { text: "Type", align: "left",  value: "data.type" },
-        { text: "Actions", value: "actions", sortable: false }
+        { text: "", value: "actions", sortable: false }
       ]
     };
   },
   computed: {
     tests() {
       return this.$store.getters.loadedTests;
-    },
-    loadedTests() {
-      this.$store.dispatch("loadedTests");
     }
-
   },
   methods: {
     generatePdf(item){
       this.selectedTest = item
       this.dialogHtmlTest = true
     },
-    deleteTask(id) {
+    deleteTest(id) {
       this.$store.dispatch("deleteTest", id);
       this.deleteTestSnackBar = false;
       this.loadTests();
     },
     loadTests() {
       this.$store.dispatch("loadedTests");
-    },
-
+    }
   }
 };
 </script>

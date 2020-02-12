@@ -365,6 +365,7 @@ export default {
       //   return;
       // }
 
+    if ( typeof this.images[0] !== 'undefined') {
       const imageToUpload = {images: this.images[0]}
       var URL = this.$store.dispatch("uploadImage", imageToUpload)
       URL.then(result => {
@@ -386,6 +387,25 @@ export default {
         this.setInitialData();
         this.close();
       })
+    }
+
+    else {
+      const questionData = {
+        id: this.id,
+        subject: this.subject,
+        questionDescription: this.questionDescription,
+        knowledge: this.knowledge,
+        knowledgePWR: this.knowledgePWR,
+        knowledgeBWR: this.knowledgeBWR,
+        answers: this.answers,
+        images: ""
+      };
+
+      this.$store.dispatch("createQuestion", questionData);
+      this.$store.dispatch("loadedQuestions");
+      this.setInitialData();
+      this.close();
+    }
 
       // var reader = new FileReader();
       // reader.readAsDataURL(this.images[0]);
