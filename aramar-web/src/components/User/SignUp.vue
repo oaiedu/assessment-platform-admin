@@ -68,6 +68,7 @@ export default {
     },
     loading () {
         return this.$store.getters.loading
+        this.$store.dispatch('clearLoading')
     }
   },
   watch: {

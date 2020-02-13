@@ -1,5 +1,8 @@
 <template>
     <v-speed-dial
+      fixed
+      bottom
+      right
       v-model="fab"
       :top="top"
       :bottom="bottom"

@@ -1,6 +1,17 @@
 
 <template>
   <v-card>
+    <v-toolbar dark color="primary">
+      <v-btn icon dark @click="close()">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn dark text @click="e1 = 2" v-if="e1 == 1">Continue</v-btn>
+        <v-btn dark text @click="e1 = 3" v-if="e1 == 2">Continue</v-btn>
+        <v-btn dark text @click="onCreateQuestion()" v-if="e1 == 3">Create Question</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
     <v-container>
       <v-row>
         <v-col>
@@ -225,21 +236,6 @@
           </v-card>
         </v-col>
       </v-row>
-      <v-row v-if="e1 == 1">
-        <v-btn color="primary" @click="close()">Cancel</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
-      </v-row>
-      <v-row v-else-if="e1 == 2">
-        <v-btn color="primary" @click="close()">Cancel</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
-      </v-row>
-      <v-row v-else-if="e1 == 3">
-        <v-btn color="primary" @click="close()">Cancel</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="onCreateQuestion()">Create Question</v-btn>
-      </v-row>
     </v-container>
   </v-card>
 </template>
@@ -307,6 +303,9 @@ export default {
     }
   },
   watch: {
+    e1(val){
+      console.log(val)
+    },
     number(val) {
       if (this.number > 1) {
         this.answers.forEach(element => {

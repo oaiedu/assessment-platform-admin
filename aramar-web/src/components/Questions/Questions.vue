@@ -29,9 +29,9 @@
             @page-count="pageCount = $event"
           >
             <template v-slot:item.actions="{ item }">
-              <v-icon small class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
-              <v-icon small @click="deleteQuestionSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
-              <v-icon small class="mr-2" @click="generatePDF(item)">mdi-pdf-box</v-icon>
+              <v-icon class="mr-10" @click="generatePDF(item)">mdi-pdf-box</v-icon>
+              <v-icon class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
+              <v-icon @click="deleteQuestionSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
             </template>
           </v-data-table>
         </v-card>
@@ -41,15 +41,15 @@
         <v-icon>mdi-plus</v-icon>
       </v-btn>
 
-      <v-dialog v-model="dialogNewQuestion" persistent>
+      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewQuestion">
         <NewQuestion @closeDialogNew="dialogNewQuestion = false"></NewQuestion>
       </v-dialog>
 
-      <v-dialog v-model="dialogEditQuestion" persistent>
+      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditQuestion">
         <EditQuestion :questions="selectedEdit" @closeDialogEdit="dialogEditQuestion = false"></EditQuestion>
       </v-dialog>
 
-      <v-dialog v-model="dialogPDF">
+      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogPDF">
         <Body :question="selectedEdit"></Body>
       </v-dialog>
 
@@ -102,7 +102,7 @@ export default {
         { text: "Relevância OR", value: "data.RELEVANCIA_OR" },
         { text: "Relevância OSR", value: "data.RELEVANCIA_OSR" },
         { text: "Disciplina", value: "data.DISCIPLINA", sortable: false },
-        { text: "", value: "actions", sortable: false }
+        { text: "Actions", value: "actions", sortable: false }
       ]
     };
   },

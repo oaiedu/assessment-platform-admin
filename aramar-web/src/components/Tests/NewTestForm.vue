@@ -1,132 +1,142 @@
 <template>
   <v-card>
-    <v-container>
-      <v-form @submit.prevent="onCreateTest()">
-        <v-row>
-          <v-col>
-            <v-container>
-              <v-row>
-                <v-col>
-                  <v-text-field
-                    dense
-                    outlined
-                    label="Test Name"
-                    single-line
-                    hide-details
-                    rounded
-                    v-model="testName"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-
-              <v-row>
-                <v-col>
-                  <v-select
-                    solo
-                    rounded
-                    flat
-                    filled
-                    outlined
-                    dense
-                    label="Tipo de prova"
-                    v-model="testType"
-                    :items="types"
-                  ></v-select>
-                </v-col>
-
-                <v-col v-if="testType=='Aleatório'">
-                  <v-text-field
-                    dense
-                    outlined
-                    label="Number of Questions"
-                    single-line
-                    hide-details
-                    rounded
-                    v-model="randomQuestionsNumber"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-
-              <v-row>
-                <v-col>
-                  <v-textarea
-                    outlined
-                    v-model="purpose"
-                    label="Propósito"
-                  ></v-textarea>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-col>
-
-          <v-col>
-            <v-container>
-              <v-container>
+    <v-form ref="formRef" @submit.prevent="onCreateTest()">
+      <v-toolbar dark color="primary">
+        <v-btn icon dark @click="close()">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-spacer></v-spacer>
+          <v-btn dark text type="submit">Create Test</v-btn>
+        </v-toolbar-items>
+      </v-toolbar>
+      <v-row>
+        <v-col>
+          <v-container>
+            <v-row>
+              <v-col>
                 <v-text-field
-                  v-model="search"
-                  filled
+                  solo
                   rounded
+                  flat
+                  filled
+                  outlined
                   dense
-                  append-icon="mdi-magnify"
-                  label="Search for IQ"
-                  single-line
-                  hide-details
+                  :rules="textRule"
+                  required
+                  label="Test Name"
+                  v-model="testName"
                 ></v-text-field>
-              </v-container>
+              </v-col>
+            </v-row>
 
-              <v-container>
-                <v-card v-if="selectedSubjects.length == 0 ">
-                  <v-data-table
-                    v-model="selectedQuestions"
-                    :headers="headers"
-                    :items="questions"
-                    :page.sync="page"
-                    :items-per-page="itemsPerPage"
-                    :search="search"
-                    show-select
-                    item-key="id"
-                    hide-default-footer
-                    class="elevation-1"
-                    @page-count="pageCount = $event"
-                  ></v-data-table>
-                </v-card>
+            <v-row>
+              <v-col>
+                <v-select
+                  solo
+                  rounded
+                  flat
+                  filled
+                  outlined
+                  dense
+                  label="Tipo de prova"
+                  v-model="testType"
+                  :items="types"
+                ></v-select>
+              </v-col>
 
-                <v-card v-else>
-                  <v-data-table
-                    v-model="selectedQuestions"
-                    :headers="headers"
-                    :items="showedQuestions"
-                    :page.sync="page"
-                    :items-per-page="itemsPerPage"
-                    :search="search"
-                    show-select
-                    item-key="id"
-                    hide-default-footer
-                    class="elevation-1"
-                    @page-count="pageCount = $event"
-                  ></v-data-table>
-                </v-card>
-              </v-container>
-              <div class="text-center pt-2">
-                <v-pagination v-model="page" :length="pageCount"></v-pagination>
-              </div>
+              <v-col v-if="testType=='Aleatório'">
+                <v-text-field
+                  dense
+                  outlined
+                  rounded
+                  name="randomQuestionsNumber"
+                  label="Número de Questões"
+                  id="randomQuestionsNumber"
+                  v-model="randomQuestionsNumber"
+                  type="number"
+                  :rules="rule"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col>
+                <v-textarea
+                  outlined
+                  required
+                  :rules="textRule"
+                  v-model="purpose"
+                  label="Propósito"
+                ></v-textarea>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-col>
+
+        <v-col>
+          <v-container>
+            <v-container>
+              <v-text-field
+                v-model="search"
+                filled
+                rounded
+                dense
+                append-icon="mdi-magnify"
+                label="Search for IQ"
+                single-line
+                hide-details
+              ></v-text-field>
             </v-container>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-spacer/>
-          <v-btn class="primary" type="submit">Create Test</v-btn>
-        </v-row>
-      </v-form>
-    </v-container>
+
+            <v-container>
+              <v-card v-if="selectedSubjects.length == 0 ">
+                <v-data-table
+                  v-model="selectedQuestions"
+                  :headers="headers"
+                  :items="questions"
+                  :page.sync="page"
+                  :items-per-page="itemsPerPage"
+                  :search="search"
+                  show-select
+                  item-key="id"
+                  hide-default-footer
+                  class="elevation-1"
+                  @page-count="pageCount = $event"
+                ></v-data-table>
+              </v-card>
+
+              <v-card v-else>
+                <v-data-table
+                  v-model="selectedQuestions"
+                  :headers="headers"
+                  :items="showedQuestions"
+                  :page.sync="page"
+                  :items-per-page="itemsPerPage"
+                  :search="search"
+                  show-select
+                  item-key="id"
+                  hide-default-footer
+                  class="elevation-1"
+                  @page-count="pageCount = $event"
+                ></v-data-table>
+              </v-card>
+            </v-container>
+            <div class="text-center pt-2">
+              <v-pagination v-model="page" :length="pageCount"></v-pagination>
+            </div>
+          </v-container>
+        </v-col>
+      </v-row>
+    </v-form>
   </v-card>
 </template>
 
 <script>
+
 export default {
   data() {
     return {
-      testType: "Aleatório",
+      testType: "Selecionado",
       randomQuestionsNumber: null,
       selectedSubjects: [],
       selectedQuestions: [],
@@ -163,6 +173,14 @@ export default {
         { text: "Relevância OSR", value: "data.RELEVANCIA_OSR" },
         { text: "Disciplina", value: "data.DISCIPLINA", sortable: false },
         { text: "", value: "actions", sortable: false }
+      ],
+      textRule: [
+        v => !!v || 'Necessário'
+      ],
+      rule: [
+        v => (v <= 50) || 'Máximo de 50 questões',
+        v => (v <= this.questions.length) || 'Número de questões inexistente',
+        v => (v >= 0) || 'Apenas números positivos'
       ]
     };
   },
@@ -172,6 +190,9 @@ export default {
     },
     loadQuestions() {
       this.$store.dispatch("loadedQuestions");
+    },
+    checkNumber() {
+      return this.questions.length < this.randomQuestionsNumber ? 'Número de questões não existente' : ''
     }
   },
   watch: {
@@ -194,7 +215,23 @@ export default {
     }
   },
   methods: {
+    close() {
+      this.setInitialData();
+      this.$emit("closeDialogNew");
+    },
+    setInitialData () {
+      this.testType =  "Selecionado",
+      this.randomQuestionsNumber =  null,
+      this.selectedSubjects =  [],
+      this.selectedQuestions =  [],
+      this.testItems =  [],
+      this.testName =  "",
+      this.purpose =  "",
+      this.showedQuestions =  [],
+      this.search =  ""
+    },
     randomSelection(i) {
+      console.log("i: ",i)
       this.selectedQuestions = []
 
       let conf = false
@@ -212,6 +249,7 @@ export default {
               conf = true
           })
         } while ( conf == true );
+
         this.selectedQuestions.push(aux);
       }
 
@@ -241,6 +279,21 @@ export default {
       if (aux == false) this.selectedSubjects.push(this.items[i]);
     },
     onCreateTest() {
+      if(this.$refs.formRef.validate()){
+
+      if (this.randomQuestionsNumber == null && this.testType === "Aleatório") {
+        console.log("AAAAA: ",this.questions.length)
+        if (this.questions.length > 50) {
+          this.randomSelection(50)
+        }
+
+        else {
+          this.randomSelection(this.questions.length)
+        }
+      }
+
+      console.log("selected: ", this.selectedQuestions)
+
       if(this.testType == "Aleatório")
         this.testType = "random"
 
@@ -261,8 +314,11 @@ export default {
         purpose: this.purpose
       }
 
+      this.close()
       this.$store.dispatch("createTest", testData);
       this.$store.dispatch("loadedTests");
+    }
+
     }
   }
 };

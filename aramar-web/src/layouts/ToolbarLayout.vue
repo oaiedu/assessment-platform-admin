@@ -1,42 +1,44 @@
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" absolute temporary>
-      <v-list>
-        <v-list-item class="px-2">
-          <v-list-item-avatar>
-            <img
-              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-              v-if=" user.profileImages === '' "
-            />
-            <img :src="user.profileImages" v-else />
-          </v-list-item-avatar>
-        </v-list-item>
+      <v-content v-if="authUser !== null">
+        <v-list>
+          <v-list-item class="px-2">
+            <v-list-item-avatar>
+              <img
+                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                v-if=" user.profileImages === '' "
+              />
+              <img :src="user.profileImages" v-else />
+            </v-list-item-avatar>
+          </v-list-item>
 
-        <v-list-item link>
-          <v-list-item-content>
-            <v-list-item-title class="title">{{user.name}}</v-list-item-title>
-            <v-list-item-subtitle>{{user.email}}</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
+          <v-list-item link>
+            <v-list-item-content>
+              <v-list-item-title class="title">{{user.name}}</v-list-item-title>
+              <v-list-item-subtitle>{{user.email}}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
 
-      <v-divider></v-divider>
+        <v-divider></v-divider>
 
 
-      <v-list nav dense>
-        <v-list-item v-for="item in drawerItems" :key="item.title" :to="item.link">
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
+        <v-list nav dense>
+          <v-list-item v-for="item in drawerItems" :key="item.title" :to="item.link">
+            <v-list-item-icon>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
 
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-content>
     </v-navigation-drawer>
     <v-app-bar app color="light-blue darken-4" dark dense absolute>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" v-if="authUser !== null"></v-app-bar-nav-icon>
       <v-toolbar-title>PWR Quiz Generator</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn text v-for="item in menuItems" :key="item.title" :to="item.link">
@@ -68,6 +70,9 @@ export default {
     drawer: null,
   }),
   computed: {
+    authUser() {
+      return this.$store.getters.user
+    },
     user(){
       return this.$store.getters.userInfo
     },

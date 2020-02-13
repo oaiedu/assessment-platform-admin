@@ -1,6 +1,17 @@
 
 <template>
   <v-card>
+    <v-toolbar dark color="primary">
+      <v-btn icon dark @click="close()">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn dark text @click="e1 = 2" v-if="e1 == 1">Continue</v-btn>
+        <v-btn dark text @click="e1 = 3" v-if="e1 == 2">Continue</v-btn>
+        <v-btn dark text @click="onEditQuestion()" v-if="e1 == 3">Edit Question</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
     <v-container>
       <v-row>
         <v-col>
@@ -70,13 +81,7 @@
                       <v-row>
                         <Combined :questionDescription="editedQuestionDescription" @inputData="updateData"></Combined>
                       </v-row>
-                      <v-row v-if="hasImages">
-                        <v-card-title>Current Image</v-card-title>
-                        <img :src="this.editedImages">
-                      </v-row>
-                      <v-row v-else>
-                        <v-card-title>No Current Image</v-card-title>
-                      </v-row>
+
                       <v-row>
                         <v-file-input
                           chips
@@ -143,6 +148,10 @@
               {{editedQuestionDescription}}
               <br />
 
+              <v-row justify="center" style="margin-top: 20px" v-if="this.editedImages !== '' || typeof this.editedImages !== 'undefined'">
+                <img style="max-height: 180px" :src="this.editedImages">
+              </v-row>
+
               <v-content v-if="confirmTitle">
                 <v-row>
                   <v-col cols="2"></v-col>
@@ -200,21 +209,6 @@
             </v-card-text>
           </v-card>
         </v-col>
-      </v-row>
-      <v-row v-if="e1 == 1">
-        <v-btn color="primary" @click="close()">Cancel</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
-      </v-row>
-      <v-row v-else-if="e1 == 2">
-        <v-btn color="primary" @click="close()">Cancel</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
-      </v-row>
-      <v-row v-else-if="e1 == 3">
-        <v-btn color="primary" @click="close()">Cancel</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="onEditQuestion()">Edit Question</v-btn>
       </v-row>
     </v-container>
   </v-card>
@@ -327,7 +321,7 @@ export default {
       this.editedQuestionDescription = this.questions.data.PERGUNTA
 
       if ( typeof this.questions.data.IMAGENS === 'undefined' || this.questions.data.IMAGENS === '')
-        this.editedImages === ""
+        this.editedImages = ""
       else
         this.editedImages = this.questions.data.IMAGENS
 

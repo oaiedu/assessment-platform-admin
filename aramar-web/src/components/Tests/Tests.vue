@@ -29,13 +29,13 @@
             @page-count="pageCount = $event"
           >
             <template small v-slot:item.actions="{ item }">
-              <v-icon small class="mr-2">mdi-pencil</v-icon>
-              <v-icon small class="mr-2" @click="deleteTestSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
+              <router-link class="mr-10" style="text-decoration: underline white;" :to="{name:'test',params:{testId:item.id}}" replace>
+                <v-icon>mdi-pdf-box</v-icon>
+              </router-link>
+              <v-icon class="mr-2">mdi-pencil</v-icon>
+              <v-icon @click="deleteTestSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
               <!-- <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon>
               <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon> -->
-              <router-link :to="{name:'test',params:{testId:item.id}}" replace>
-                <v-icon small>mdi-pdf-box</v-icon>
-              </router-link>
             </template>
           </v-data-table>
         </v-card>
@@ -45,11 +45,11 @@
         <v-icon>mdi-plus</v-icon>
       </v-btn>
 
-      <v-dialog v-model="dialogNewTest">
-        <NewTest></NewTest>
+      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewTest">
+        <NewTest @closeDialogNew="dialogNewTest = false"></NewTest>
       </v-dialog>
 
-      <v-dialog v-model="dialogHtmlTest">
+      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogHtmlTest">
         <HtmlTest :test="selectedTest"></HtmlTest>
       </v-dialog>
 
@@ -88,7 +88,7 @@ export default {
         { text: "Nome", align: "left",  value: "data.title" },
         { text: "Questions", align: "left",  value: "data.questions.length" },
         { text: "Type", align: "left",  value: "data.type" },
-        { text: "", value: "actions", sortable: false }
+        { text: "Actions", value: "actions", sortable: false }
       ]
     };
   },

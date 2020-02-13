@@ -77,7 +77,7 @@
               <img :src="question.data.IMAGENS" style="height: 300px;"/>
             </div>
 
-            <v-content v-if="confirmTitle">
+            <v-content v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
               <v-row>
                 <v-col cols="2"></v-col>
                 <v-col v-for="(item, index) in question.data.RESPOSTAS[0].text" :key="index" cols="2">{{ item.title }}</v-col>
@@ -153,7 +153,7 @@
       </v-simple-table>
 
       <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="toPrint()">
-        <v-icon>mdi-plus</v-icon>
+        <v-icon>mdi-file-outline</v-icon>
       </v-btn>
     </div>
   </v-container>
@@ -171,26 +171,8 @@ export default {
       testCreator: "",
       testEditedDate: "",
       letters: ['A','B','C','D'],
-      number: 0,
       testTilte: "",
-      confirmTitle: false,
-    }
-  },
-  watch: {
-    questions(val) {
-      if(typeof val.data.RESPOSTAS[0].text == "string")
-        this.number = 1
-      else
-        this.number = val.data.RESPOSTAS[0].text.length
-
-      if (this.number > 1) this.confirmTitle = true;
-      else this.confirmTitle = false;
-
-      if(this.number>1){
-        for(var i = 0; i < this.number; i++){
-          this.auxTitle[i] = val.data.RESPOSTAS[0].text[i].title
-        }
-      }
+      confirmTitle: false
     }
   },
   methods: {
