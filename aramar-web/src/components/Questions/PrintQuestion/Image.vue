@@ -1,5 +1,5 @@
 <template>
-  <img src="question.data.IMAGENS"/>
+  <img :src="question.data.IMAGENS" style="height: 300px;"/>
 </template>
 
 <script>

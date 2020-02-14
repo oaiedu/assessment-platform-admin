@@ -10,6 +10,7 @@ import NewTestForm from '@/components/Tests/NewTestForm.vue'
 import Tests from '@/components/Tests/Tests.vue'
 import HtmlTest from '@/components/Tests/HtmlToPdfTest.vue'
 import PrintTest from '@/components/Tests/PrintTest.vue'
+import PrintQuestions from '@/components/Questions/PrintQuestion/Body.vue'
 
 import Home from '@/views/Home.vue'
 
@@ -66,6 +67,12 @@ const routes = [
     path: '/test/:testId',
     component: PrintTest,
     name: 'test',
+    beforeEnter: AuthGuard
+  },
+  {
+    path: '/printquestion/:questionId',
+    component: PrintQuestions,
+    name: 'printquestion',
     beforeEnter: AuthGuard
   },
   {

@@ -74,7 +74,7 @@
             <br>
 
             <div class="img-container" v-if="confirmImage(question.data.IMAGENS)">
-              <img :src="question.data.IMAGENS" style="height: 300px;"/>
+              <img :src="question.data.IMAGENS" style="height: 250px;"/>
             </div>
 
             <v-content v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
@@ -267,47 +267,44 @@ export default {
 }
 
 @media print {
- header{
-  display:none !important
- }
+   header{
+    display:none !important
+   }
 
-@page {
-    margin-top: 2cm;
-    margin-bottom: 2cm;
-    margin-left: 2cm;
-    margin-right: 2cm;
-}
+  @page {
+      margin-top: 2cm;
+      margin-bottom: 2cm;
+      margin-left: 2cm;
+      margin-right: 2cm;
+  }
 
-.first-page {
-  page-break-after: always;
-}
-
-.second-page {
-  page-break-after: always;
-}
-
-.third-page {
-  page-break-after: always;
-}
-
-.question-page {
+  .first-page {
     page-break-after: always;
+  }
+
+  .second-page {
+    page-break-after: always;
+  }
+
+  .third-page {
+    page-break-after: always;
+  }
+
+  .question-page {
+      page-break-after: always;
+  }
+
+  .buttonIsHidden {
+      visibility: hidden;
+  }
+
+  .img-container {
+      text-align: center !important;
+  }
+
+
+  p {
+    page-break-inside: avoid;
+  }
 }
-
-.buttonIsHidden {
-    visibility: hidden;
-}
-
-.img-container {
-    text-align: center !important;
-}
-
-
-p {
-  page-break-inside: avoid;
-}
-
-
-}
-
 </style>

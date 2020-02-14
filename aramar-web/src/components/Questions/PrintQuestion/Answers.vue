@@ -46,8 +46,8 @@
       </v-row>
     </v-content>
 
-    <v-content v-else v-for="(item, index) in question.data.RESPOSTAS" :key="index">
-      <v-row>
+    <v-content v-else >
+      <v-row v-for="(item, index) in question.data.RESPOSTAS" :key="index">
         <v-col cols="2">{{ letters[index] }} - </v-col>
         <v-col>
           {{ item.text }}

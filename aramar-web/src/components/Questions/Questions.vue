@@ -29,7 +29,9 @@
             @page-count="pageCount = $event"
           >
             <template v-slot:item.actions="{ item }">
-              <v-icon class="mr-10" @click="generatePDF(item)">mdi-pdf-box</v-icon>
+              <router-link class="mr-10" style="text-decoration: underline white;" :to="{name:'printquestion', params:{questionId:item.id}}" replace>
+                <v-icon>mdi-pdf-box</v-icon>
+              </router-link>
               <v-icon class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
               <v-icon @click="deleteQuestionSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
             </template>
@@ -50,7 +52,7 @@
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogPDF">
-        <Body :question="selectedEdit"></Body>
+        <Body :question="selectedEdit" @closeDialogPrint="dialogPDF = false"></Body>
       </v-dialog>
 
       <div class="text-center pt-2">

@@ -308,7 +308,7 @@ export default {
         title: this.testName,
         questions: this.testItems,
         type: this.testType,
-        user: this.$store.getters.user.id,
+        user: this.$store.getters.userInfo.name,
         created: Date(),
         edited: "",
         purpose: this.purpose
