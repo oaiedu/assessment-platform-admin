@@ -149,7 +149,7 @@
               <br />
 
               <v-row justify="center" style="margin-top: 20px" v-if="this.editedImages !== '' || typeof this.editedImages !== 'undefined'">
-                <img style="max-height: 180px" :src="this.editedImages">
+                <img style="max-height: 250px; max-width: 180px" :src="this.editedImages">
               </v-row>
 
               <v-content v-if="confirmTitle">
@@ -385,6 +385,7 @@ export default {
           };
 
           this.$store.dispatch("createQuestion", questionData);
+          this.$emit("load");
           this.close();
         })
       }
@@ -402,10 +403,12 @@ export default {
         };
         this.images = []
         this.$store.dispatch("createQuestion", questionData);
+        this.$emit("load");
         this.close();
       }
     },
     close() {
+      this.e1 = 1;
       this.$store.dispatch("loadedQuestions");
       this.$emit("closeDialogEdit");
     }

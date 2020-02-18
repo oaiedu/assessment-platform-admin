@@ -1,5 +1,5 @@
 <template>
-  <Stepper  @closeDialogNew="close"></Stepper>
+  <Stepper  @closeDialogNew="close" @load="load()"></Stepper>
 </template>
 
 <script>
@@ -8,6 +8,9 @@ export default {
   methods: {
     close() {
       this.$emit("closeDialogNew");
+    },
+    load() {
+      this.$emit("load")
     }
   }
 }

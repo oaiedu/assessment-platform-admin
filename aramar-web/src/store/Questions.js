@@ -39,15 +39,18 @@ export default {
                 querySnapshot.forEach(doc => {
                     questions.push(Object.assign({ id: doc.id, data: doc.data() }))
                 })
+                commit('setLoadedQuestions', questions)
+                commit('setLoading', false)
             })
-            commit('setLoadedQuestions', questions)
-            commit('setLoading', false)
         },
-        deleteQuestion({ commit }, payload) {
+        deleteQuestion({ commit, dispatch }, payload) {
+            commit('setLoading', true)
             const db = firebase.firestore()
             const id = payload
-            db.collection("questions").doc(id).delete()
-                .then(function () {
+            return db.collection("questions").doc(id).delete()
+                .then( () => {
+                    commit('setLoading', false)
+                    dispatch("loadedQuestions")
                     console.log("Document successfully deleted!")
                 })
                 .catch(function (error) {

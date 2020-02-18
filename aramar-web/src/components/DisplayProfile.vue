@@ -10,7 +10,7 @@
                   <v-avatar size="100">
                     <img
                       src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-                      v-if=" user.profileImages === '' "
+                      v-if=" user.profileImages === '' || user.profileImages === null "
                     />
                     <img :src="user.profileImages" v-else />
                   </v-avatar>

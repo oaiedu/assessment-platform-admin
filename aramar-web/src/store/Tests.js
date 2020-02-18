@@ -18,9 +18,9 @@ export default {
                 querySnapshot.forEach(doc => {
                     tests.push(Object.assign({ id: doc.id, data: doc.data() }))
                 })
+                commit('setLoadedTests', tests)
+                commit('setLoading', false)
             })
-            commit('setLoadedTests', tests)
-            commit('setLoading', false)
         },
         findImageTests({commit},payload){
             var storage = firebase.storage();
@@ -39,11 +39,14 @@ export default {
 
             return imageURL
         },
-        deleteTest({ commit }, payload) {
+        deleteTest({ commit, dispatch }, payload) {
+            commit('setLoading', true)
             const db = firebase.firestore()
             const id = payload
             db.collection("tests").doc(id).delete()
-                .then(function () {
+                .then( () => {
+                    commit('setLoading', false)
+                    dispatch("loadedTests")
                     console.log("Document successfully deleted!")
                 })
                 .catch(function (error) {

@@ -1,5 +1,8 @@
 <template>
-  <v-app>
+  <div>
+    <v-overlay :value="loading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
     <v-container>
       <v-container>
           <v-container>
@@ -63,7 +66,7 @@
       </v-snackbar>
 
     </v-container>
-  </v-app>
+  </div>
 </template>
 
 <script>
@@ -93,6 +96,10 @@ export default {
     };
   },
   computed: {
+    loading () {
+        return this.$store.getters.loading
+        this.$store.dispatch('clearLoading')
+    },
     tests() {
       return this.$store.getters.loadedTests;
     }
@@ -103,12 +110,18 @@ export default {
       this.dialogHtmlTest = true
     },
     deleteTest(id) {
-      this.$store.dispatch("deleteTest", id);
-      this.deleteTestSnackBar = false;
-      this.loadTests();
+      let aux = this.$store.dispatch("deleteTest", id);
+      aux.then(()=>{
+        this.deleteTestSnackBar = false;
+        this.loadTests();
+      })
     },
     loadTests() {
-      this.$store.dispatch("loadedTests");
+      console.log("é mano")
+      let aux = this.$store.dispatch("loadedTests");
+      aux.then(()=>{
+        return aux
+      })
     }
   }
 };

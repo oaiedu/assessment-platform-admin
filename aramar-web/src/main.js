@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
 import * as firebase from 'firebase'
-import VueHtmlToPaper from 'vue-html-to-paper';
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'

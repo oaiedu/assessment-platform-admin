@@ -19,7 +19,6 @@ export default {
   components: {
     Error,
     'toolbar-layout': ToolbarLayout,
-    Error,
     'print-layout': PrintLayout
     // define as many layouts you want for the application
   }

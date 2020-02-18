@@ -1,5 +1,8 @@
 <template>
-  <v-app>
+  <div>
+    <v-overlay :value="loading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
     <v-container>
       <v-container>
           <v-container>
@@ -44,11 +47,11 @@
       </v-btn>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewQuestion">
-        <NewQuestion @closeDialogNew="dialogNewQuestion = false"></NewQuestion>
+        <Stepper  @closeDialogNew="dialogNewQuestion = false" @load="setLoader()"></Stepper>
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditQuestion">
-        <EditQuestion :questions="selectedEdit" @closeDialogEdit="dialogEditQuestion = false"></EditQuestion>
+        <EditQuestion :questions="selectedEdit" @closeDialogEdit="dialogEditQuestion = false" @load="setLoader()"></EditQuestion>
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogPDF">
@@ -65,7 +68,7 @@
         <v-btn dark color="yellow" text @click="deleteQuestionSnackBar = false">Cancelar</v-btn>
       </v-snackbar>
     </v-container>
-  </v-app>
+  </div>
 </template>
 
 <script>
@@ -109,6 +112,10 @@ export default {
     };
   },
   computed: {
+    loading () {
+        return this.$store.getters.loading
+        this.$store.dispatch('clearLoading')
+    },
     questions() {
       return this.$store.getters.loadedQuestions;
     }
@@ -138,7 +145,11 @@ export default {
       this.dialogPDF = true
     },
     loadQuestions() {
-      this.$store.dispatch("loadedQuestions");
+      console.log("é mano")
+      let aux = this.$store.dispatch("loadedQuestions");
+      aux.then(()=>{
+        return aux
+      })
     },
     removeSelections(i) {
       let aux = this.showedQuestions.length;
@@ -153,6 +164,9 @@ export default {
 
       this.selected.splice(i, 1);
     },
+    setLoader(){
+      this.loadQuestions()
+    },
     selections(i) {
       let aux = false;
       for (let j = 0; j < this.selected.length; j++) {
@@ -163,9 +177,11 @@ export default {
     },
     deleteQuestion(id) {
       console.log(id);
-      this.$store.dispatch("deleteQuestion", id);
-      this.deleteQuestionSnackBar = false;
-      this.loadQuestions();
+      let aux = this.$store.dispatch("deleteQuestion", id);
+      aux.then(()=>{
+        this.deleteQuestionSnackBar = false;
+        this.loadQuestions();
+      })
     }
   }
 };

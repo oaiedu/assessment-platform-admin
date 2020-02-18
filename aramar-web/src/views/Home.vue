@@ -45,6 +45,9 @@ export default {
     user () {
       return this.$store.getters.user
     },
+    userInfo () {
+      return this.$store.getters.userInfo
+    },
     statistics(){
       let statisticsObj=[]
       const cat =  this.$store.getters.getSubjects
@@ -66,7 +69,7 @@ export default {
 
 <style>
   .section-1 {
-    height: 94vh;
+    height: 100vh;
     background: url("https://www.defesaaereanaval.com.br/wp-content/uploads/2013/05/aramar-em-foto-da-agc3aancia-brasil.jpg")
   }
 </style>

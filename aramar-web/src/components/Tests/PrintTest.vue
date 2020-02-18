@@ -74,7 +74,7 @@
             <br>
 
             <div class="img-container" v-if="confirmImage(question.data.IMAGENS)">
-              <img :src="question.data.IMAGENS" style="height: 250px;"/>
+              <img :src="question.data.IMAGENS" style="max-height: 250px; max-width: 180px"/>
             </div>
 
             <v-content v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">

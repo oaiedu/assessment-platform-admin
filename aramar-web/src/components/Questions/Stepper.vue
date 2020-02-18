@@ -124,6 +124,7 @@
                           </v-btn>
                         </v-container>
                       </v-row>
+
                       <v-content v-if="confirmTitle">
                         <v-row justify="end">
                           <v-col cols="1"></v-col>
@@ -145,6 +146,7 @@
 
                       <v-content v-else>
                         <v-row v-for="(item, index) in answers" :key="index">
+
                           <v-col cols="12" md="1" sm="1" xs="1">
                             <v-radio-group v-model="radios">
                               <v-radio :value="item.ansId"></v-radio>
@@ -155,6 +157,7 @@
                           </v-col>
                         </v-row>
                       </v-content>
+
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -258,7 +261,7 @@ export default {
       e1: 1,
       test: null,
       columns: null,
-      radios: "aaaa",
+      radios: '',
       multipleAnswer: false,
       auxTitle: [],
       chips: [],
@@ -331,8 +334,7 @@ export default {
         }
       });
     },
-    test(val) {
-      this.radios = val;
+    radios(val) {
       console.log("1");
       this.answers.forEach(element => {
         console.log("2");
@@ -360,9 +362,7 @@ export default {
       this.questionDescription = variable;
     },
     onCreateQuestion() {
-      // if (!this.formIsValid) {
-      //   return;
-      // }
+      console.log("value: ", this.answers[1].value)
 
     if ( typeof this.images[0] !== 'undefined') {
       const imageToUpload = {images: this.images[0]}
@@ -381,10 +381,12 @@ export default {
           images: this.imagesAsURL
         };
 
-        this.$store.dispatch("createQuestion", questionData);
-        this.$store.dispatch("loadedQuestions");
-        this.setInitialData();
-        this.close();
+        let aux = this.$store.dispatch("createQuestion", questionData);
+        aux.then(()=>{
+          this.$emit("load");
+          this.setInitialData();
+          this.close();
+        })
       })
     }
 
@@ -400,10 +402,12 @@ export default {
         images: ""
       };
 
-      this.$store.dispatch("createQuestion", questionData);
-      this.$store.dispatch("loadedQuestions");
-      this.setInitialData();
-      this.close();
+      let aux = this.$store.dispatch("createQuestion", questionData);
+      aux.then(()=>{
+        this.$emit("load");
+        this.setInitialData();
+        this.close();
+      })
     }
 
       // var reader = new FileReader();
