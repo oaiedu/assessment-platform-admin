@@ -118,11 +118,11 @@
                         <v-row v-for="(item, index) in editedAnswers" :key="index">
                           <v-col cols="12" md="1" sm="1" xs="1">
                             <v-radio-group v-model="radios">
-                              <v-radio :value="item.ansId"></v-radio>
+                              <v-radio :value="editedAnswers[index].ansId"></v-radio>
                             </v-radio-group>
                           </v-col>
                           <v-col>
-                            <v-text-field outlined v-model="item.text"></v-text-field>
+                            <v-text-field outlined v-model="editedAnswers[index].text"></v-text-field>
                           </v-col>
                         </v-row>
                       </v-content>
@@ -216,7 +216,7 @@
 
 <script>
 export default {
-  props: ["questions"],
+  props: ["question"],
   data() {
     return {
       letters: ['A','B','C','D'],
@@ -256,7 +256,7 @@ export default {
   },
   computed: {
     hasImages(){
-      if ( typeof this.questions.data.IMAGENS === 'undefined' || this.questions.data.IMAGENS === '')
+      if ( typeof this.question.data.IMAGENS === 'undefined' || this.question.data.IMAGENS === '')
         return false
       else
         return true
@@ -271,71 +271,39 @@ export default {
       );
     },
     id(){
-      var aux = this.questions.id
+      var aux = this.question.id
       this.editedId = aux
       return aux
     }
-    // editedQuestion() {
-    //   var aux = this.$store.getters.findQuestionById(this.questions)
-    //
-    //   this.editedSubject = aux.data.DISCIPLINA
-    //   this.editedKnowledge = aux.data.CONHECIMENTO
-    //   this.editedKnowledgePWR = aux.data.RELEVANCIA_OR
-    //   this.editedKnowledgeBWR = aux.data.RELEVANCIA_OSR
-    //   this.editedAnswers = aux.data.RESPOSTAS
-    //   this.editedQuestionDescription = aux.data.PERGUNTA
-    //
-    //   if(typeof aux.data.RESPOSTAS[0].text == "string")
-    //     this.number = 1
-    //   else
-    //     this.number = auxdata.RESPOSTAS[0].text.length
-    //
-    //   if (this.number > 1) this.confirmTitle = true;
-    //   else this.confirmTitle = false;
-    //
-    //   if(this.number>1){
-    //     for(var i = 0; i < this.number; i++){
-    //       this.auxTitle[i] = this.questionsdata.RESPOSTAS[0].text[i].title
-    //     }
-    //   }
-    //
-    //   this.editedAnswers.forEach( element => {
-    //     if(element.value === true)
-    //       this.radios = element.ansId
-    //   })
-    //
-    //   return this.questions
-    // }
   },
   watch: {
-    questions(val) {
-      this.editedId = val.id
-    },
     editedId() {
-      this.editedId = this.questions.id
-      this.editedSubject = this.questions.data.DISCIPLINA
-      this.editedKnowledge = this.questions.data.CONHECIMENTO
-      this.editedKnowledgePWR = this.questions.data.RELEVANCIA_OR
-      this.editedKnowledgeBWR = this.questions.data.RELEVANCIA_OSR
-      this.editedAnswers = this.questions.data.RESPOSTAS
-      this.editedQuestionDescription = this.questions.data.PERGUNTA
+      this.editedId = this.question.id
+      this.editedSubject = this.question.data.DISCIPLINA
+      this.editedKnowledge = this.question.data.CONHECIMENTO
+      this.editedKnowledgePWR = this.question.data.RELEVANCIA_OR
+      this.editedKnowledgeBWR = this.question.data.RELEVANCIA_OSR
+      this.question.data.RESPOSTAS.forEach(element => {
+        this.editedAnswers.push(Object.assign({},element))
+      })
+      this.editedQuestionDescription = this.question.data.PERGUNTA
 
-      if ( typeof this.questions.data.IMAGENS === 'undefined' || this.questions.data.IMAGENS === '')
+      if ( typeof this.question.data.IMAGENS === 'undefined' || this.question.data.IMAGENS === '')
         this.editedImages = ""
       else
-        this.editedImages = this.questions.data.IMAGENS
+        this.editedImages = this.question.data.IMAGENS
 
-      if(typeof this.questions.data.RESPOSTAS[0].text == "string")
+      if(typeof this.question.data.RESPOSTAS[0].text == "string")
         this.number = 1
       else
-        this.number = this.questions.data.RESPOSTAS[0].text.length
+        this.number = this.question.data.RESPOSTAS[0].text.length
 
       if (this.number > 1) this.confirmTitle = true;
       else this.confirmTitle = false;
 
       if(this.number>1){
         for(var i = 0; i < this.number; i++){
-          this.auxTitle[i] = this.questions.data.RESPOSTAS[0].text[i].title
+          this.auxTitle[i] = this.question.data.RESPOSTAS[0].text[i].title
         }
       }
 
@@ -345,6 +313,7 @@ export default {
       })
     },
     auxTitle(val) {
+      console.log("loooool");
       this.editedAnswers.forEach(element => {
         for (var i = 0; i < this.number; i++) {
           element.text[i].title = val[i];
@@ -352,6 +321,7 @@ export default {
       })
     },
     radios(val) {
+    console.log("iiiii");
       this.editedAnswers.forEach(element => {
 
         if (element.ansId === val)
@@ -373,7 +343,18 @@ export default {
         URL.then(result => {
           this.editedImages = result
           console.log("Image as URL: ",this.editedImages)
-          const questionData = {
+          var oldData = {
+            id: this.question.id,
+            subject: this.question.data.DISCIPLINA,
+            questionDescription: this.question.data.PERGUNTA,
+            knowledge: this.question.data.CONHECIMENTO,
+            knowledgePWR: this.question.data.RELEVANCIA_OR,
+            knowledgeBWR: this.question.data.RELEVANCIA_OSR,
+            answers: this.question.data.RESPOSTAS,
+            images: this.question.data.IMAGENS,
+            edited: this.question.data.edited
+          };
+          var questionData = {
             id: this.editedId,
             subject: this.editedSubject,
             questionDescription: this.editedQuestionDescription,
@@ -383,15 +364,35 @@ export default {
             answers: this.editedAnswers,
             images: this.editedImages
           };
-
-          this.$store.dispatch("createQuestion", questionData);
-          this.$emit("load");
-          this.close();
+          var sendInfo = {
+            oldData: {},
+            questionData: {},
+            user: "",
+          }
+          sendInfo.oldData = oldData
+          sendInfo.questionData = questionData
+          sendInfo.user = this.$store.getters.user.id
+          var storeAux = this.$store.dispatch("editQuestion", sendInfo);
+          storeAux.then(() => {
+            this.$emit("load");
+            this.close();
+          })
         })
       }
 
       else {
-        const questionData = {
+        var oldData = {
+          id: this.question.id,
+          subject: this.question.data.DISCIPLINA,
+          questionDescription: this.question.data.PERGUNTA,
+          knowledge: this.question.data.CONHECIMENTO,
+          knowledgePWR: this.question.data.RELEVANCIA_OR,
+          knowledgeBWR: this.question.data.RELEVANCIA_OSR,
+          answers: this.question.data.RESPOSTAS,
+          images: this.question.data.IMAGENS,
+          edited: this.question.data.edited
+        };
+        var questionData = {
           id: this.editedId,
           subject: this.editedSubject,
           questionDescription: this.editedQuestionDescription,
@@ -401,14 +402,24 @@ export default {
           answers: this.editedAnswers,
           images: ""
         };
-        this.images = []
-        this.$store.dispatch("createQuestion", questionData);
-        this.$emit("load");
-        this.close();
+        var sendInfo = {
+          oldData: {},
+          questionData: {},
+          user: "",
+        }
+        sendInfo.oldData = oldData
+        sendInfo.questionData = questionData
+        sendInfo.user = this.$store.getters.user.id
+        var storeAux = this.$store.dispatch("editQuestion", sendInfo);
+        storeAux.then(() => {
+          this.$emit("load");
+          this.close();
+        })
       }
     },
     close() {
       this.e1 = 1;
+      this.images = []
       this.$store.dispatch("loadedQuestions");
       this.$emit("closeDialogEdit");
     }

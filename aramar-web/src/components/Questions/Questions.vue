@@ -51,7 +51,7 @@
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditQuestion">
-        <EditQuestion :questions="selectedEdit" @closeDialogEdit="dialogEditQuestion = false" @load="setLoader()"></EditQuestion>
+        <EditQuestion :question="selectedEdit" @closeDialogEdit="dialogEditQuestion = false" @load="setLoader()"></EditQuestion>
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogPDF">
@@ -138,6 +138,7 @@ export default {
   methods: {
     editQuestions(val){
       this.selectedEdit = val
+      this.loadQuestions()
       this.dialogEditQuestion = true
     },
     generatePDF(val){

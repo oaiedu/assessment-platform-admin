@@ -82,6 +82,76 @@ export default {
 
           return puta
         },
+        editQuestion({ commit, dispatch }, payload) {
+          commit('setLoading', true)
+
+          var today = new Date();
+
+          const db = firebase.firestore()
+          const question = {
+              id: payload.questionData.id,
+              questionDescription: payload.questionData.questionDescription,
+              subject: payload.questionData.subject,
+              knowledge: payload.questionData.knowledge,
+              knowledgePWR: payload.questionData.knowledgePWR,
+              knowledgeBWR: payload.questionData.knowledgeBWR,
+              answers: payload.questionData.answers,
+              images: payload.questionData.images
+          }
+          const edition = payload.oldData.edited
+          edition.push({
+            id: payload.user,
+            date: today,
+            question: payload.oldData.id + "-" + (payload.oldData.edited.length + 1)
+          })
+
+          db.collection("questions").doc(question.id).update({
+              PERGUNTA: question.questionDescription,
+              DISCIPLINA: question.subject,
+              CONHECIMENTO: question.knowledge,
+              RELEVANCIA_OR: question.knowledgePWR,
+              RELEVANCIA_OSR: question.knowledgeBWR,
+              RESPOSTAS: question.answers,
+              IMAGENS: question.images,
+              edited: edition
+          })
+              .then( () => {
+                  dispatch("createdEditedQuestion", payload.oldData)
+                  console.log("Success edit")
+              })
+              .catch(function (error) {
+                  console.error("Error writing document: ", error);
+              });
+        },
+        createdEditedQuestion({ commit }, payload) {
+          const db = firebase.firestore()
+          const editedQuestion = {
+              id: payload.id,
+              questionDescription: payload.questionDescription,
+              subject: payload.subject,
+              knowledge: payload.knowledge,
+              knowledgePWR: payload.knowledgePWR,
+              knowledgeBWR: payload.knowledgeBWR,
+              answers: payload.answers,
+              images: payload.images
+          }
+          db.collection("edited questions").doc(editedQuestion.id + "-" + payload.edited.length).set({
+              PERGUNTA: editedQuestion.questionDescription,
+              DISCIPLINA: editedQuestion.subject,
+              CONHECIMENTO: editedQuestion.knowledge,
+              RELEVANCIA_OR: editedQuestion.knowledgePWR,
+              RELEVANCIA_OSR: editedQuestion.knowledgeBWR,
+              RESPOSTAS: editedQuestion.answers,
+              IMAGENS: editedQuestion.images
+          })
+              .then( () => {
+                  commit('setLoading', false)
+                  console.log("Success create edit")
+              })
+              .catch(function (error) {
+                  console.error("Error writing document: ", error);
+              });
+        },
         createQuestion({ commit }, payload) {
             const db = firebase.firestore()
             const question = {
@@ -101,7 +171,8 @@ export default {
                 RELEVANCIA_OR: question.knowledgePWR,
                 RELEVANCIA_OSR: question.knowledgeBWR,
                 RESPOSTAS: question.answers,
-                IMAGENS: question.images
+                IMAGENS: question.images,
+                edited: []
             })
                 .then(function () {
                     console.log("Success")
