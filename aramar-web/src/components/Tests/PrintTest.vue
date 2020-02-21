@@ -1,8 +1,8 @@
 <template>
-  <v-container>
+  <v-container v>
     <div>
       <div id="example-1">
-        <div class="first-page">
+        <div v-if="checkFirtPage" class="question-page">
           <p class="centered-text">
             <b>
               MARINHA DO BRASIL
@@ -31,7 +31,7 @@
             <br>
           </p>
         </div>
-        <div class="second-page">
+        <div v-if="checkSecondPage" class="question-page">
           <v-simple-table>
             <template v-slot:default>
               <thead>
@@ -53,7 +53,7 @@
             </template>
           </v-simple-table>
         </div>
-        <div class="third-page">
+        <div v-if="checkThirdPage" class="question-page">
           <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
         </div>
         <div v-for="(question, index) in questions" :key="index">
@@ -133,28 +133,41 @@
         </div>
       </div>
 
-      <v-simple-table>
-        <template v-slot:default>
-          <thead>
-            <tr>
-              <th class="text-left">Questão</th>
-              <th class="text-left">IQ</th>
-              <th class="text-left">Resposta</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in table" :key="item.question">
-              <td>{{ item.question }}</td>
-              <td>{{ item.iq }}</td>
-              <td>{{ item.answer }}</td>
-            </tr>
-          </tbody>
-        </template>
-      </v-simple-table>
+      <div v-if="checkFinalPage" class="question-page">
+        <v-simple-table>
+          <template v-slot:default>
+            <thead>
+              <tr>
+                <th class="text-left">Questão</th>
+                <th class="text-left">IQ</th>
+                <th class="text-left">Resposta</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in table" :key="item.question">
+                <td>{{ item.question }}</td>
+                <td>{{ item.iq }}</td>
+                <td>{{ item.answer }}</td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
+      </div>
 
-      <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="toPrint()">
+      <!-- <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="printDialog = true">
         <v-icon>mdi-file-outline</v-icon>
-      </v-btn>
+      </v-btn> -->
+
+      <v-bottom-navigation fixed class="buttonIsHidden">
+        <v-checkbox class="ma-4" v-model="checkFirtPage" label="Introdução" value="true"></v-checkbox>
+        <v-checkbox class="ma-4" v-model="checkSecondPage" label="Referência de Questões" value="true"></v-checkbox>
+        <v-checkbox class="ma-4" v-model="checkThirdPage" label="Estatística" value="true"></v-checkbox>
+        <v-checkbox class="ma-4" v-model="checkFinalPage" label="Gabarito" value="true"></v-checkbox>
+        <v-spacer/>
+        <v-btn class="buttonIsHidden" dark fab @click="toPrint()">
+          <v-icon>mdi-file-outline</v-icon>
+        </v-btn>
+      </v-bottom-navigation>
     </div>
   </v-container>
 </template>
@@ -167,6 +180,11 @@ export default {
   components: { StatisticsQuestions },
   data() {
     return {
+      checkFirtPage: false,
+      checkSecondPage: false,
+      checkThirdPage: false,
+      checkFinalPage: false,
+      printDialog: false,
       testPurpose: "",
       testCreator: "",
       testEditedDate: "",
@@ -271,6 +289,10 @@ export default {
     display:none !important
    }
 
+   footer{
+     display: none !important
+   }
+
   @page {
       margin-top: 2cm;
       margin-bottom: 2cm;
@@ -278,20 +300,8 @@ export default {
       margin-right: 2cm;
   }
 
-  .first-page {
-    page-break-after: always;
-  }
-
-  .second-page {
-    page-break-after: always;
-  }
-
-  .third-page {
-    page-break-after: always;
-  }
-
   .question-page {
-      page-break-after: always;
+      page-break-after: always !important
   }
 
   .buttonIsHidden {

@@ -13,9 +13,6 @@
       </v-toolbar-items>
     </v-toolbar>
     <v-container>
-      {{question.data.RESPOSTAS}}
-      <br>
-      {{editedAnswers}}
       <v-row>
         <v-col>
           <v-card>
