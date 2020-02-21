@@ -13,6 +13,9 @@
       </v-toolbar-items>
     </v-toolbar>
     <v-container>
+      {{question.data.RESPOSTAS}}
+      <br>
+      {{editedAnswers}}
       <v-row>
         <v-col>
           <v-card>
@@ -283,9 +286,7 @@ export default {
       this.editedKnowledge = this.question.data.CONHECIMENTO
       this.editedKnowledgePWR = this.question.data.RELEVANCIA_OR
       this.editedKnowledgeBWR = this.question.data.RELEVANCIA_OSR
-      this.question.data.RESPOSTAS.forEach(element => {
-        this.editedAnswers.push(Object.assign({},element))
-      })
+      this.editedAnswers = JSON.parse(JSON.stringify(this.question.data.RESPOSTAS))
       this.editedQuestionDescription = this.question.data.PERGUNTA
 
       if ( typeof this.question.data.IMAGENS === 'undefined' || this.question.data.IMAGENS === '')
@@ -313,15 +314,15 @@ export default {
       })
     },
     auxTitle(val) {
-      console.log("loooool");
-      this.editedAnswers.forEach(element => {
-        for (var i = 0; i < this.number; i++) {
-          element.text[i].title = val[i];
-        }
-      })
+      if(this.confirmTitle){
+        this.editedAnswers.forEach(element => {
+          for (var i = 0; i < this.number; i++) {
+            element.text[i].title = val[i];
+          }
+        })
+      }
     },
     radios(val) {
-    console.log("iiiii");
       this.editedAnswers.forEach(element => {
 
         if (element.ansId === val)
@@ -417,9 +418,28 @@ export default {
         })
       }
     },
+    setInitialData(){
+      this.confirmTitle =  false;
+      this.editedQuestionDescription =  null;
+      this.e1 =  1;
+      this.radios =  null;
+      this.columns =  this.number;
+      this.multipleAnswer =  false;
+      this.auxTitle =  [];
+      this.editedImages =  null;
+      this.chips =  [];
+      this.items =  [];
+      this.images =  [];
+      this.editedAnswers =  [];
+      this.editedId =  null;
+      this.editedSubject =  null;
+      this.editedKnowledge =  null;
+      this.editedKnowledgePWR =  null;
+      this.editedKnowledgeBWR =  null;
+      this.number =  0
+    },
     close() {
-      this.e1 = 1;
-      this.images = []
+      this.setInitialData()
       this.$store.dispatch("loadedQuestions");
       this.$emit("closeDialogEdit");
     }

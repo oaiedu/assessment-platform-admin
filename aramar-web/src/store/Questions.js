@@ -192,7 +192,11 @@ export default {
         loadedQuestions(state) {
             return state.loadedQuestions
         },
-        getNumberOfQuestionBySubject:(state) => (subject)=>{
+        getAnswersById(state) {
+          let aux = state.loadedQuestions.find(question => question.id === id)
+          return Object.assign({},aux.data.RESPOSTAS)
+        },
+        getNumberOfQuestionBySubject:(state) => (subject)=> {
             let counter = 0
             state.loadedQuestions.forEach(element => {
                 if (element.data.DISCIPLINA === subject)
