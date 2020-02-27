@@ -1,7 +1,10 @@
 <template>
-  <v-container v>
+  <v-container>
     <div>
       <div id="example-1">
+        <div class="question-page">
+          <iframe id="iframepdf" src="./src/assets/01_rosto.pdf"></iframe>
+        </div>
         <div v-if="checkFirtPage" class="question-page">
           <p class="centered-text">
             <b>
@@ -61,7 +64,7 @@
             QUESTÃO {{index+1}}
             <br>
             <br>
-            ASSUNTO: {{ question.data.DISCIPLINA }}
+            DISCIPLINA: {{ question.data.DISCIPLINA }}
             <br>
             CONHECIMENTO: {{ question.data.CONHECIMENTO }} [ {{ question.data.RELEVANCIA_OR }} / {{ question.data.RELEVANCIA_OSR }} ]
             <br>
@@ -294,13 +297,14 @@ export default {
    }
 
   @page {
-      margin-top: 2cm;
-      margin-bottom: 2cm;
-      margin-left: 2cm;
-      margin-right: 2cm;
+      margin-top: 1cm;
+      margin-bottom: 1cm;
+      margin-left: 1cm;
+      margin-right: 1cm;
   }
 
   .question-page {
+      font-size: 13px;
       page-break-after: always !important
   }
 
