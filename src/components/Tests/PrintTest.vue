@@ -1,145 +1,139 @@
 <template>
   <v-container>
-    <div>
-      <div id="example-1">
-        <div>
-          
-          <!-- <object data="https://firebasestorage.googleapis.com/v0/b/pwr-quiz-generator.appspot.com/o/01_rosto.pdf?alt=media&token=74a6177d-bfe7-497f-b250-b24368b5354e" type="application/pdf" width="750px" height="750px">
-              <embed src="https://firebasestorage.googleapis.com/v0/b/pwr-quiz-generator.appspot.com/o/01_rosto.pdf?alt=media&token=74a6177d-bfe7-497f-b250-b24368b5354e" type="application/pdf">
-                  <p>This browser does not support PDFs. Please download the PDF to view it: <a href="http://yoursite.com/the.pdf">Download PDF</a>.</p>
-              </embed>
-          </object> -->
-          <!-- <embed src="https://drive.google.com/viewerng/viewer?embedded=true&url=https://firebasestorage.googleapis.com/v0/b/pwr-quiz-generator.appspot.com/o/01_rosto.pdf?alt=media&token=74a6177d-bfe7-497f-b250-b24368b5354e&embedded=true" width="500" height="375" frameborder="0"> -->
-          <!-- <iframe src="/../../pdf_files/01_rosto.pdf#toolbar=0&scrollbar=0" width="100%" height="500px" style="border: 0;"></iframe> -->
-        </div>
-        <div v-if="checkFirtPage" class="question-page">
-          <p class="centered-text">
-            <b>
-              MARINHA DO BRASIL
-              <br>
-              CENTRO TECNOLÓGICO DA MARINHA EM SÃO PAULO
-              <br><br>
-            </b>
-              {{testTilte}}
-              <br>
-              <b>{{currentDate}}</b>
-              <br>
-              <br>
-          </p>
-          <p class="left-text">
-            Responsável:    {{testCreator}}
+    <div id="example-1">
+      <div v-for="(paper, index) in papers" class=" question-page">
+        <viewer v-if="checkImage(paper.data.image)" :value="paper.data.description"/>
+        <img v-else :src="paper.data.image"/>
+      </div>
+      <div v-if="checkFirtPage" class="question-page">
+        <p class="centered-text">
+          <b>
+            MARINHA DO BRASIL
+            <br>
+            CENTRO TECNOLÓGICO DA MARINHA EM SÃO PAULO
+            <br><br>
+          </b>
+            {{testTilte}}
+            <br>
+            <b>{{currentDate}}</b>
             <br>
             <br>
-            Revisão:        {{testEditedDate}}
-            <br>
-            <br>
-            Propósito:      {{testPurpose}}
-            <br>
-            <br>
-            Alterações:
-            <br>
-            <br>
-          </p>
-        </div>
-        <div v-if="checkSecondPage" class="question-page">
-          <v-simple-table>
-            <template v-slot:default>
-              <thead>
-                <tr>
-                  <th class="text-left">QUESTÃO</th>
-                  <th class="text-left">DISCIPLINA</th>
-                  <th class="text-left">QUESTÃO DE REFERÊNCIA</th>
-                  <th class="text-left">Obs.</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in infoTable" :key="item.question">
-                  <td>{{ item.question }}</td>
-                  <td>{{ item.subject }}</td>
-                  <td>{{ item.iq }}</td>
-                  <td>{{ item.obs }}</td>
-                </tr>
-              </tbody>
-            </template>
-          </v-simple-table>
-        </div>
-        <div v-if="checkThirdPage" class="question-page">
-          <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
-        </div>
-        <div v-for="(question, index) in questions" :key="index">
-          <div class="question-page">
-            QUESTÃO {{index+1}}
-            <br>
-            <br>
-            DISCIPLINA: {{ question.data.DISCIPLINA }}
-            <br>
-            CONHECIMENTO: {{ question.data.CONHECIMENTO }} [ {{ question.data.RELEVANCIA_OR }} / {{ question.data.RELEVANCIA_OSR }} ]
-            <br>
-            IQ: {{ question.id }}
-            <br>
-            <br>
+        </p>
+        <p class="left-text">
+          Responsável:    {{testCreator}}
+          <br>
+          <br>
+          Revisão:        {{testEditedDate}}
+          <br>
+          <br>
+          Propósito:      {{testPurpose}}
+          <br>
+          <br>
+          Alterações:
+          <br>
+          <br>
+        </p>
+      </div>
 
-            {{ question.data.PERGUNTA }}
-            <br>
-            <br>
+      <div v-if="checkSecondPage" class="question-page">
+        <v-simple-table>
+          <template v-slot:default>
+            <thead>
+              <tr>
+                <th class="text-left">QUESTÃO</th>
+                <th class="text-left">DISCIPLINA</th>
+                <th class="text-left">QUESTÃO DE REFERÊNCIA</th>
+                <th class="text-left">Obs.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in infoTable" :key="item.question">
+                <td>{{ item.question }}</td>
+                <td>{{ item.subject }}</td>
+                <td>{{ item.iq }}</td>
+                <td>{{ item.obs }}</td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
+      </div>
 
-            <div class="img-container" v-if="confirmImage(question.data.IMAGENS)">
-              <img :src="question.data.IMAGENS" style="max-height: 250px; max-width: 180px"/>
-            </div>
+      <div v-if="checkThirdPage" class="question-page">
+        <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
+      </div>
 
-            <v-content v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
-              <v-row>
-                <v-col cols="2"></v-col>
-                <v-col v-for="(item, index) in question.data.RESPOSTAS[0].text" :key="index" cols="2">{{ item.title }}</v-col>
-              </v-row>
+      <div v-for="(question, index) in questions" :key="index">
+        <div class="question-page">
+          QUESTÃO {{index+1}}
+          <br>
+          <br>
+          DISCIPLINA: {{ question.data.DISCIPLINA }}
+          <br>
+          CONHECIMENTO: {{ question.data.CONHECIMENTO }} [ {{ question.data.RELEVANCIA_OR }} / {{ question.data.RELEVANCIA_OSR }} ]
+          <br>
+          IQ: {{ question.id }}
+          <br>
+          <br>
 
-              <v-row>
-                <v-col cols="2">A -</v-col>
-                <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[0].text"
-                  :key="index"
-                  cols="2"
-                >{{ item.answerDescription }}</v-col>
-              </v-row>
+          {{ question.data.PERGUNTA }}
+          <br>
+          <br>
 
-              <v-row>
-                <v-col cols="2">B -</v-col>
-                <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[1].text"
-                  :key="index"
-                  cols="2"
-                >{{ item.answerDescription }}</v-col>
-              </v-row>
-
-              <v-row>
-                <v-col cols="2">C -</v-col>
-                <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[2].text"
-                  :key="index"
-                  cols="2"
-                >{{ item.answerDescription }}</v-col>
-              </v-row>
-
-              <v-row>
-                <v-col cols="2">D -</v-col>
-                <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[3].text"
-                  :key="index"
-                  cols="2"
-                >{{ item.answerDescription }}</v-col>
-              </v-row>
-            </v-content>
-
-            <v-content v-else>
-              <v-row v-for="(item, index) in question.data.RESPOSTAS" :key="index">
-                <v-col cols="2">{{ letters[index] }} - </v-col>
-                <v-col>
-                  {{ item.text }}
-                </v-col>
-              </v-row>
-            </v-content>
-
+          <div class="img-container" v-if="confirmImage(question.data.IMAGENS)">
+            <img :src="question.data.IMAGENS" style="max-height: 250px; max-width: 180px"/>
           </div>
+
+          <v-content v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
+            <v-row>
+              <v-col cols="2"></v-col>
+              <v-col v-for="(item, index) in question.data.RESPOSTAS[0].text" :key="index" cols="2">{{ item.title }}</v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="2">A -</v-col>
+              <v-col
+                v-for="(item, index) in question.data.RESPOSTAS[0].text"
+                :key="index"
+                cols="2"
+              >{{ item.answerDescription }}</v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="2">B -</v-col>
+              <v-col
+                v-for="(item, index) in question.data.RESPOSTAS[1].text"
+                :key="index"
+                cols="2"
+              >{{ item.answerDescription }}</v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="2">C -</v-col>
+              <v-col
+                v-for="(item, index) in question.data.RESPOSTAS[2].text"
+                :key="index"
+                cols="2"
+              >{{ item.answerDescription }}</v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="2">D -</v-col>
+              <v-col
+                v-for="(item, index) in question.data.RESPOSTAS[3].text"
+                :key="index"
+                cols="2"
+              >{{ item.answerDescription }}</v-col>
+            </v-row>
+          </v-content>
+
+          <v-content v-else>
+            <v-row v-for="(item, index) in question.data.RESPOSTAS" :key="index">
+              <v-col cols="2">{{ letters[index] }} - </v-col>
+              <v-col>
+                {{ item.text }}
+              </v-col>
+            </v-row>
+          </v-content>
         </div>
       </div>
 
@@ -163,31 +157,37 @@
           </template>
         </v-simple-table>
       </div>
-
-      <!-- <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="printDialog = true">
-        <v-icon>mdi-file-outline</v-icon>
-      </v-btn> -->
-
-      <v-bottom-navigation fixed class="buttonIsHidden">
-        <v-checkbox class="ma-4" v-model="checkFirtPage" label="Introdução" value="true"></v-checkbox>
-        <v-checkbox class="ma-4" v-model="checkSecondPage" label="Referência de Questões" value="true"></v-checkbox>
-        <v-checkbox class="ma-4" v-model="checkThirdPage" label="Estatística" value="true"></v-checkbox>
-        <v-checkbox class="ma-4" v-model="checkFinalPage" label="Gabarito" value="true"></v-checkbox>
-        <v-spacer/>
-        <v-btn class="buttonIsHidden" dark fab @click="toPrint()">
-          <v-icon>mdi-file-outline</v-icon>
-        </v-btn>
-      </v-bottom-navigation>
     </div>
+
+    <!-- <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="printDialog = true">
+      <v-icon>mdi-file-outline</v-icon>
+    </v-btn> -->
+
+    <v-bottom-navigation fixed class="buttonIsHidden">
+      <v-checkbox class="ma-4" v-model="checkFirtPage" label="Introdução" value="true"></v-checkbox>
+      <v-checkbox class="ma-4" v-model="checkSecondPage" label="Referência de Questões" value="true"></v-checkbox>
+      <v-checkbox class="ma-4" v-model="checkThirdPage" label="Estatística" value="true"></v-checkbox>
+      <v-checkbox class="ma-4" v-model="checkFinalPage" label="Gabarito" value="true"></v-checkbox>
+
+      <v-spacer/>
+
+      <v-btn class="buttonIsHidden" dark fab @click="toPrint()">
+        <v-icon>mdi-file-outline</v-icon>
+      </v-btn>
+    </v-bottom-navigation>
   </v-container>
 </template>
 
 
 <script>
 import StatisticsQuestions from '@/components/Questions/StatisticsQuestions'
+import { Viewer } from "@toast-ui/vue-editor";
 
 export default {
-  components: { StatisticsQuestions },
+  components: {
+    StatisticsQuestions,
+    'viewer': Viewer
+  },
   data() {
     return {
       checkFirtPage: false,
@@ -213,9 +213,16 @@ export default {
 
       else
         return true
+    },
+    checkImage(item) {
+      if(item === '' || typeof item === 'undefined')
+        return true
     }
   },
   computed:{
+    papers(){
+      return this.$store.getters.loadedPapers
+    },
     currentDate() {
       var today = new Date();
       var months = [
