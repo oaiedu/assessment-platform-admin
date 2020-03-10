@@ -1,11 +1,38 @@
 <template>
   <v-container>
+    <v-dialog v-model="printDialog" scrollable max-width="300px">
+      <v-card>
+        <v-card-title>Selecione os documentos</v-card-title>
+
+        <v-divider></v-divider>
+
+        <v-card-text style="height: 300px">
+          <div>
+            <v-checkbox v-for="(item, index) in premadePapers" class="ma-4" :label="item.id" :value="item.value" :key="index"/>
+          </div>
+
+          <div>
+            <v-checkbox v-for="(item, index) in createdPapers" class="ma-4" :label="item.id" :value="item.value" :key="index"/>
+          </div>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-btn color="blue darken-1" text @click="printDialog = false">Close</v-btn>
+          <v-btn color="blue darken-1" text @click="printDialog = false">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <div id="example-1">
-      <div v-for="(paper, index) in papers" class=" question-page">
-        <viewer v-if="checkImage(paper.data.image)" :value="paper.data.description"/>
-        <img v-else :src="paper.data.image"/>
+      <div v-for="(paper, index) in createdPapers" class=" question-page">
+        <viewer v-if="checkImage(paper.object.data.image)" :value="paper.object.data.description"/>
+
+        <img v-else :src="paper.object.data.image"/>
       </div>
-      <div v-if="checkFirtPage" class="question-page">
+
+      <div v-if="premadePapers[0].value === true" class="question-page">
         <p class="centered-text">
           <b>
             MARINHA DO BRASIL
@@ -35,7 +62,7 @@
         </p>
       </div>
 
-      <div v-if="checkSecondPage" class="question-page">
+      <div v-if="premadePapers[1].value === true" class="question-page">
         <v-simple-table>
           <template v-slot:default>
             <thead>
@@ -58,7 +85,7 @@
         </v-simple-table>
       </div>
 
-      <div v-if="checkThirdPage" class="question-page">
+      <div v-if="premadePapers[3].value === true" class="question-page">
         <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
       </div>
 
@@ -137,7 +164,7 @@
         </div>
       </div>
 
-      <div v-if="checkFinalPage" class="question-page">
+      <div v-if="premadePapers[3].value === true" class="question-page">
         <v-simple-table>
           <template v-slot:default>
             <thead>
@@ -159,28 +186,15 @@
       </div>
     </div>
 
-    <!-- <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="printDialog = true">
+    <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="printDialog = true">
       <v-icon>mdi-file-outline</v-icon>
-    </v-btn> -->
-
-    <v-bottom-navigation fixed class="buttonIsHidden">
-      <v-checkbox class="ma-4" v-model="checkFirtPage" label="Introdução" value="true"></v-checkbox>
-      <v-checkbox class="ma-4" v-model="checkSecondPage" label="Referência de Questões" value="true"></v-checkbox>
-      <v-checkbox class="ma-4" v-model="checkThirdPage" label="Estatística" value="true"></v-checkbox>
-      <v-checkbox class="ma-4" v-model="checkFinalPage" label="Gabarito" value="true"></v-checkbox>
-
-      <v-spacer/>
-
-      <v-btn class="buttonIsHidden" dark fab @click="toPrint()">
-        <v-icon>mdi-file-outline</v-icon>
-      </v-btn>
-    </v-bottom-navigation>
+    </v-btn>
   </v-container>
 </template>
 
 
 <script>
-import StatisticsQuestions from '@/components/Questions/StatisticsQuestions'
+import StatisticsQuestions from '@/components/Questions/StatisticsQuestions';
 import { Viewer } from "@toast-ui/vue-editor";
 
 export default {
@@ -220,8 +234,27 @@ export default {
     }
   },
   computed:{
-    papers(){
-      return this.$store.getters.loadedPapers
+    createdPapers(){
+      let result = [];
+      let papers = JSON.stringify(this.$store.getters.loadedPapers);
+      papers = JSON.parse(papers);
+      papers.forEach( element => {
+        result.push({id: element.data.name, value: false, object: element});
+      });
+      return result
+    },
+    premadePapers() {
+      let result = [];
+      let aux = [
+        {id: "Introdução", value: false, object: null},
+        {id: "Questões", value: false, object: null},
+        {id: "Estatísticas", value: false, object: null},
+        {id: "Gabarito", value: false, object: null}
+      ];
+      aux.forEach( element => {
+        result.push(element);
+      });
+      return result;
     },
     currentDate() {
       var today = new Date();

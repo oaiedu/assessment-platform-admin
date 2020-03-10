@@ -1,16 +1,13 @@
 <template>
   <v-container>
     <v-row>
-    <v-col>
-      <editor v-model="content" @change="parseText()"/>
-    </v-col>
-    <!-- <v-col>
-      <v-row v-for="(t, index) in text" v-bind:key="index"> -->
-        <!-- <viewer :value="t.value" v-if="t.tag == 'text'"/> -->
-        <!-- <markdown-it-vue class="md-body" :content="t.value"/>
-      </v-row>
-    </v-col> -->
-  </v-row>
+      <v-col>
+        <editor v-model="content"/>
+      </v-col>
+    </v-row>
+    <v-row>
+      <markdown-it-vue class="md-body" :content="content"/>
+    </v-row>
   </v-container>
 </template>
 
@@ -33,20 +30,33 @@ export default {
     MarkdownItVue
   },
   methods: {
+    parseText2(){
+      this.text = []
+      var result = this.content.match(/\$\$(.*?)\$\$/gi)
+      var newText = this.content.replace(/\$\$(.*?)\$\$/gi,"<<!!>>")
+      var splitted = newText.split("<<!!>>")
+      var counter = 0
+      if(result==null)
+        result = []
+      splitted.forEach((item, index) => {
+        this.text.push({"tag":"text","value":item})
+        if(index<(splitted.length+result.length-2) && result!=null)
+          this.text.push({"tag":"math","value":result[index]})
+      })
+    },
     parseText(){
       this.text = []
       var result = this.content.match(/\$\$(.*?)\$\$/gi)
       var newText = this.content.replace(/\$\$(.*?)\$\$/gi,"<<!!>>")
       var splitted = newText.split("<<!!>>")
+      var counter = 0
       if(result==null)
         result = []
       splitted.forEach((item, index) => {
-        // console.log('index ' + index)
         this.text.push({"tag":"text","value":item})
         if(index<(splitted.length+result.length-2) && result!=null)
           this.text.push({"tag":"math","value":result[index]})
       })
-      // console.log("text: ",this.text)
       this.$emit("inputData",this.text[0].value)
     }
   },
