@@ -1,38 +1,7 @@
-<template>
+ <template>
   <v-container>
-    <v-dialog v-model="printDialog" scrollable max-width="300px">
-      <v-card>
-        <v-card-title>Selecione os documentos</v-card-title>
-
-        <v-divider></v-divider>
-
-        <v-card-text style="height: 300px">
-          <div>
-            <v-checkbox v-for="(item, index) in premadePapers" class="ma-4" :label="item.id" :value="item.value" :key="index"/>
-          </div>
-
-          <div>
-            <v-checkbox v-for="(item, index) in createdPapers" class="ma-4" :label="item.id" :value="item.value" :key="index"/>
-          </div>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-btn color="blue darken-1" text @click="printDialog = false">Close</v-btn>
-          <v-btn color="blue darken-1" text @click="printDialog = false">Save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
     <div id="example-1">
-      <div v-for="(paper, index) in createdPapers" class=" question-page">
-        <viewer v-if="checkImage(paper.object.data.image)" :value="paper.object.data.description"/>
-
-        <img v-else :src="paper.object.data.image"/>
-      </div>
-
-      <div v-if="premadePapers[0].value === true" class="question-page">
+      <div v-if="premadePapers[0].value" class="question-page">
         <p class="centered-text">
           <b>
             MARINHA DO BRASIL
@@ -62,7 +31,7 @@
         </p>
       </div>
 
-      <div v-if="premadePapers[1].value === true" class="question-page">
+      <div v-if="premadePapers[1].value" class="question-page">
         <v-simple-table>
           <template v-slot:default>
             <thead>
@@ -85,8 +54,16 @@
         </v-simple-table>
       </div>
 
-      <div v-if="premadePapers[3].value === true" class="question-page">
+      <div v-if="premadePapers[3].value" class="question-page">
         <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
+      </div>
+
+      <div v-for="(paper, index) in createdPapers" class=" question-page">
+        <div v-if="paper.value">
+          <viewer v-if="checkImage(paper.object.data.image)" :value="paper.object.data.description"/>
+
+          <img v-else :src="paper.object.data.image" style="max-height: 900px;"/>
+        </div>
       </div>
 
       <div v-for="(question, index) in questions" :key="index">
@@ -164,7 +141,7 @@
         </div>
       </div>
 
-      <div v-if="premadePapers[3].value === true" class="question-page">
+      <div v-if="premadePapers[3].value" class="question-page">
         <v-simple-table>
           <template v-slot:default>
             <thead>
@@ -186,9 +163,62 @@
       </div>
     </div>
 
-    <v-btn class="buttonIsHidden" fixed dark fab bottom right color="red" @click="printDialog = true">
-      <v-icon>mdi-file-outline</v-icon>
-    </v-btn>
+    <v-row>
+      <v-btn
+        class="buttonIsHidden"
+        fab
+        dark
+        fixed
+        bottom
+        right
+        color="indigo"
+        @click="toPrint()"
+      >
+        <v-icon>mdi-file-outline</v-icon>
+      </v-btn>
+
+    </v-row>
+
+    <v-row>
+      <v-btn
+        class="buttonIsHidden"
+        fab
+        dark
+        fixed
+        bottom
+        right
+        style="margin-bottom: 80px;"
+        color="grey"
+        @click="printDialog = true"
+      >
+        <v-icon>mdi-pencil</v-icon>
+      </v-btn>
+
+    </v-row>
+
+    <v-dialog v-model="printDialog" scrollable persistent max-width="300px">
+      <v-card>
+        <v-card-title>Selecione os documentos</v-card-title>
+
+        <v-divider></v-divider>
+
+        <v-card-text style="height: 300px">
+          <div>
+            <v-checkbox v-for="(item, index) in premadePapers" class="ma-4" :label="item.id" :input-value="item.value" v-model="item.value" :key="index"/>
+          </div>
+
+          <div>
+            <v-checkbox v-for="(item, index) in createdPapers" class="ma-4" :label="item.id" :input-value="item.value" v-model="item.value" :key="index"/>
+          </div>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-btn color="blue darken-1" text @click="printDialog = false">Salvar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -205,6 +235,8 @@ export default {
   data() {
     return {
       checkFirtPage: false,
+      fab: false,
+      tabs: null,
       checkSecondPage: false,
       checkThirdPage: false,
       checkFinalPage: false,
@@ -219,7 +251,7 @@ export default {
   },
   methods: {
     toPrint() {
-      window.print()
+      window.print();
     },
     confirmImage(val) {
       if (typeof val == 'undefined' || val == "")
@@ -246,15 +278,21 @@ export default {
     premadePapers() {
       let result = [];
       let aux = [
-        {id: "Introdução", value: false, object: null},
-        {id: "Questões", value: false, object: null},
-        {id: "Estatísticas", value: false, object: null},
-        {id: "Gabarito", value: false, object: null}
+        {id: "Introdução", value: true, object: null},
+        {id: "Questões", value:  true, object: null},
+        {id: "Estatísticas", value:  true, object: null},
+        {id: "Gabarito", value:  true, object: null}
       ];
       aux.forEach( element => {
         result.push(element);
       });
       return result;
+    },
+    activeFab () {
+      switch (this.tabs) {
+        case 'one': return { class: 'purple', icon: 'account_circle' }
+        default: return {}
+      }
     },
     currentDate() {
       var today = new Date();
@@ -325,7 +363,7 @@ export default {
 
       return result
     }
-  }
+  },
 }
 </script>
 
