@@ -278,10 +278,10 @@ export default {
     premadePapers() {
       let result = [];
       let aux = [
-        {id: "Introdução", value: true, object: null},
-        {id: "Questões", value:  true, object: null},
-        {id: "Estatísticas", value:  true, object: null},
-        {id: "Gabarito", value:  true, object: null}
+        {id: "Introdução", value: false, object: null},
+        {id: "Questões", value:  false, object: null},
+        {id: "Estatísticas", value:  false, object: null},
+        {id: "Gabarito", value:  false, object: null}
       ];
       aux.forEach( element => {
         result.push(element);

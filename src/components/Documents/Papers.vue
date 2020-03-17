@@ -32,7 +32,7 @@
             @page-count="pageCount = $event"
           >
             <template small v-slot:item.actions="{ item }">
-              <v-icon class="mr-2">mdi-pencil</v-icon>
+              <v-icon class="mr-2" @click="editPaper(item)">mdi-pencil</v-icon>
               <v-icon @click="deletePaperSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
             </template>
           </v-data-table>
@@ -45,6 +45,10 @@
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewPaper">
         <NewPaper @closeDialogNew="dialogNewPaper = false"></NewPaper>
+      </v-dialog>
+
+      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditPaper">
+        <EditPaper :paper="selectedEdit" @closeDialogEdit="dialogEditPaper = false"></EditPaper>
       </v-dialog>
 
       <div class="text-center pt-2">
@@ -61,13 +65,17 @@
 
 <script>
 import NewPaper from './CreatePaper'
+import EditPaper from './EditPaper'
 
 export default {
   components: {
-    NewPaper
+    NewPaper,
+    EditPaper
   },
   data: () => ({
     dialogNewPaper: false,
+    dialogEditPaper: false,
+    selectedEdit: {},
     headers: [
       { text: "Nome", align: "left",  value: "data.name" },
       { text: "Actions", value: "actions", sortable: false }
@@ -89,6 +97,11 @@ export default {
     }
   },
   methods: {
+    editPaper(val){
+      this.selectedEdit = val;
+      this.loadPapers();
+      this.dialogEditPaper = true;
+    },
     loadPapers() {
       console.log("é mano")
       let aux = this.$store.dispatch("loadedPapers");
