@@ -43,7 +43,7 @@ export default {
         commit('setLoading', false)
       })
     },
-    createPaper({ commit }, payload) {
+    createPaper({ commit, dispatch }, payload) {
       const db = firebase.firestore()
       const paper = {
         name: payload.paperName,
@@ -56,6 +56,30 @@ export default {
         description: paper.description
       })
         .then(function () {
+          commit('setLoading', false)
+          dispatch("loadedPapers")
+          console.log("Sucess")
+        })
+        .catch(function (error) {
+          console.error("Error writing document: ", error);
+        })
+    },
+    updatePaper({ commit, dispatch }, payload) {
+      const db = firebase.firestore()
+      const paper = {
+        name: payload.paperName,
+        image: payload.paperImage,
+        description: payload.paperDescription,
+        id: payload.id
+      }
+      db.collection("papers").doc(paper.id).update({
+        name: paper.name,
+        image: paper.image,
+        description: paper.description
+      })
+        .then(function () {
+          commit('setLoading', false)
+          dispatch("loadedPapers")
           console.log("Sucess")
         })
         .catch(function (error) {

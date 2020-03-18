@@ -1,12 +1,12 @@
 <template>
   <v-card>
-    <v-form ref="formRef" @submit.prevent="onCreatePaper()">
+    <v-form ref="formRef" @submit.prevent="onEditPaper()">
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="close()">
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
-          <v-btn dark text type="submit">Create Test</v-btn>
+          <v-btn dark text type="submit">Edit Test</v-btn>
         </v-toolbar-items>
       </v-toolbar>
       <v-container>
@@ -14,20 +14,6 @@
           <v-col>
             <v-card>
               <v-container>
-                <v-row>
-                  <v-col>
-                    <v-text-field
-                      solo
-                      flat
-                      filled
-                      outlined
-                      dense
-                      label="Paper name"
-                      v-model="name"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
                 <v-row>
                   <v-col>
                       <v-file-input
@@ -51,6 +37,9 @@
             <v-card>
               <v-card-title>Preview</v-card-title>
               <v-card-subtitle>{{paperName}}</v-card-subtitle>
+              <v-row justify="center">
+                <img v-if="hasImage" :src="paperImage" style="max-width: 400px"></img>
+              </v-row>
               <v-card-text>{{paperDescription}}</v-card-text>
             </v-card>
           </v-col>
@@ -88,6 +77,12 @@ export default {
   },
 
   methods: {
+    hasImage(){
+      if( paperImage !== '' && typeof paperImage !== 'undefined')
+        return true
+      else
+        return false
+    },
     updateData(variable) {
       this.paperDescription = variable;
     },
@@ -101,47 +96,47 @@ export default {
       this.paperImage = "",
       this.image = []
     },
-    onCreatePaper() {
+    onEditPaper() {
       if((this.paperName === "" && this.paperDescription === "") || (this.paperName === "" && typeof this.images[0] === 'undefined')){
         console.log("nop");
         return
       }
 
-      console.log("data: ", this.paperName, this.paperDescription, this.image);
+      if ( typeof this.images[0] !== 'undefined') {
+        const imageToUpload = {images: this.images[0]}
+        var URL = this.$store.dispatch("uploadImage", imageToUpload)
+        URL.then(result => {
+          this.paperImage = result
+          console.log("Image as URL: ",this.paperImage)
+          const paperData = {
+            paperName: this.paperName,
+            paperDescription: this.paperDescription,
+            paperImage: this.paperImage,
+            id: this.paper.id
+          };
 
-      // if ( typeof this.images[0] !== 'undefined') {
-      //   const imageToUpload = {images: this.images[0]}
-      //   var URL = this.$store.dispatch("uploadImage", imageToUpload)
-      //   URL.then(result => {
-      //     this.paperImage = result
-      //     console.log("Image as URL: ",this.paperImage)
-      //     const paperData = {
-      //       paperName: this.paperName,
-      //       paperDescription: this.paperDescription,
-      //       paperImage: this.paperImage
-      //     };
-      //
-      //     let aux = this.$store.dispatch("createPaper", paperData);
-      //     aux.then(()=>{
-      //       this.$emit("load");
-      //       this.close();
-      //     })
-      //   })
-      // }
-      //
-      // else {
-      //   const paperData = {
-      //     paperName: this.paperName,
-      //     paperDescription: this.paperDescription,
-      //     paperImage: this.paperImage
-      //   };
-      //
-      //   let aux = this.$store.dispatch("createPaper", paperData);
-      //   aux.then(()=>{
-      //     this.$emit("load");
-      //     this.close();
-      //   })
-      // }
+          let aux = this.$store.dispatch("updatePaper", paperData);
+          aux.then(()=>{
+            this.$emit("load");
+            this.close();
+          })
+        })
+      }
+
+      else {
+        const paperData = {
+          paperName: this.paperName,
+          paperDescription: this.paperDescription,
+          paperImage: this.paperImage,
+          id: this.paper.id
+        };
+
+        let aux = this.$store.dispatch("updatePaper", paperData);
+        aux.then(()=>{
+          this.$emit("load");
+          this.close();
+        })
+      }
     }
   }
 }
