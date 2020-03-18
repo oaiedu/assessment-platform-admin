@@ -32,13 +32,11 @@
             @page-count="pageCount = $event"
           >
             <template small v-slot:item.actions="{ item }">
-              <router-link class="mr-10" style="text-decoration: underline white;" :to="{name:'test',params:{testId:item.id}}" replace>
+              <router-link class="mr-10" style="text-decoration: none;" :to="{name:'test',params:{testId:item.id}}" replace>
                 <v-icon>mdi-pdf-box</v-icon>
               </router-link>
-              <v-icon class="mr-2">mdi-pencil</v-icon>
+              <v-icon @click="editPdf(item)" class="mr-2">mdi-pencil</v-icon>
               <v-icon @click="deleteTestSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
-              <!-- <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon>
-              <v-icon small class="mr-2" @click="generatePdf(item)">mdi-format-align-left</v-icon> -->
             </template>
           </v-data-table>
         </v-card>
@@ -54,6 +52,10 @@
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogHtmlTest">
         <HtmlTest :test="selectedTest"></HtmlTest>
+      </v-dialog>
+
+      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditTest">
+        <EditTest @closeDialogNew="dialogEditTest = false" :test="selectedTest"></EditTest>
       </v-dialog>
 
       <div class="text-center pt-2">
@@ -72,10 +74,13 @@
 <script>
 import NewTest from './NewTestForm'
 import HtmlTest from './HtmlToPdfTest'
+import EditTest from './EditTest'
+
 export default {
   components: {
     NewTest,
-    HtmlTest
+    HtmlTest,
+    EditTest
   },
   data() {
     return {
@@ -83,6 +88,7 @@ export default {
       deleteTestSnackBar: false,
       dialogNewTest: false,
       dialogHtmlTest: false,
+      dialogEditTest: false,
       page: 1,
       pageCount: 15,
       itemsPerPage: 10,
@@ -105,9 +111,9 @@ export default {
     }
   },
   methods: {
-    generatePdf(item){
-      this.selectedTest = item
-      this.dialogHtmlTest = true
+    editPdf(item){
+      this.selectedTest = item;
+      this.dialogEditTest = true;
     },
     deleteTest(id) {
       let aux = this.$store.dispatch("deleteTest", id);
