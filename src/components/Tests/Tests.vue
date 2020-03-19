@@ -35,7 +35,7 @@
               <router-link class="mr-10" style="text-decoration: none;" :to="{name:'test',params:{testId:item.id}}" replace>
                 <v-icon>mdi-pdf-box</v-icon>
               </router-link>
-              <v-icon @click="editPdf(item)" class="mr-2">mdi-pencil</v-icon>
+              <v-icon @click="editTest(item)" class="mr-2">mdi-pencil</v-icon>
               <v-icon @click="deleteTestSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
             </template>
           </v-data-table>
@@ -111,7 +111,7 @@ export default {
     }
   },
   methods: {
-    editPdf(item){
+    editTest(item){
       this.selectedTest = item;
       this.dialogEditTest = true;
     },

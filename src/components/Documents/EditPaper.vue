@@ -70,13 +70,16 @@ export default {
 
   watch: {
     paperName(){
-      this.paperName = this.paper.data.name
-      this.paperDescription = this.paper.data.description
-      this.paperImage = this.paper.data.image
+      this.update();
     }
   },
 
   methods: {
+    update(){
+      this.paperName = this.paper.data.name
+      this.paperDescription = this.paper.data.description
+      this.paperImage = this.paper.data.image
+    },
     hasImage(){
       if( paperImage !== '' && typeof paperImage !== 'undefined')
         return true
@@ -88,6 +91,7 @@ export default {
     },
     close() {
       this.setInitialData();
+      this.update();
       this.$emit("closeDialogEdit");
     },
     setInitialData() {

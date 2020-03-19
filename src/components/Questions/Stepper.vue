@@ -170,7 +170,7 @@
           <v-card fill>
             <v-card-title>Preview</v-card-title>
             <v-card-text>
-              ASSUNTO: {{subject}}
+              DISCIPLINA: {{subject}}
               <br />
               CONHECIMENTO: {{knowledge}} [{{knowledgePWR}}/{{knowledgeBWR}}]
               <br />

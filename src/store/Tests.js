@@ -23,7 +23,7 @@ export default {
             })
         },
         findImageTests({commit},payload){ls
-          
+
             var storage = firebase.storage();
             var pathReference = storage.refFromURL(`gs://pwr-quiz-generator.appspot.com/${payload}`);
 
@@ -54,7 +54,7 @@ export default {
                     console.error("Error removing document: ", error);
                 });
         },
-        createTest({ commit }, payload) {
+        createTest({ commit, dispatch }, payload) {
             const db = firebase.firestore()
             const test = {
               title: payload.title,
@@ -75,6 +75,38 @@ export default {
               purpose: test.purpose
             })
                 .then(function () {
+                    commit('setLoading', false)
+                    dispatch("loadedTests")
+                    console.log("Success")
+                })
+                .catch(function (error) {
+                    console.error("Error writing document: ", error);
+                });
+        },
+        updateTest({ commit, dispatch }, payload) {
+            const db = firebase.firestore()
+            const test = {
+              title: payload.title,
+              questions: payload.questions,
+              type: payload.type,
+              user: payload.user,
+              created: payload.created,
+              edited: payload.edited,
+              purpose: payload.purpose,
+              id: payload.id
+            }
+            db.collection("tests").doc(test.id).update({
+              title: test.title,
+              questions: test.questions,
+              type: test.type,
+              user: test.user,
+              created: test.created,
+              edited: test.edited,
+              purpose: test.purpose
+            })
+                .then(function () {
+                    commit('setLoading', false)
+                    dispatch("loadedTests")
                     console.log("Success")
                 })
                 .catch(function (error) {

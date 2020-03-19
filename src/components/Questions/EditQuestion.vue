@@ -138,7 +138,7 @@
           <v-card fill>
             <v-card-title>Preview</v-card-title>
             <v-card-text>
-              ASSUNTO: {{editedSubject}}
+              DISCIPLINA: {{editedSubject}}
               <br />
               CONHECIMENTO: {{editedKnowledge}} [{{editedKnowledgePWR}}/{{editedKnowledgeBWR}}]
               <br />
@@ -398,7 +398,7 @@ export default {
           knowledgePWR: this.editedKnowledgePWR,
           knowledgeBWR: this.editedKnowledgeBWR,
           answers: this.editedAnswers,
-          images: ""
+          images: this.question.data.IMAGENS
         };
         var sendInfo = {
           oldData: {},

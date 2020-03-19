@@ -12,7 +12,11 @@
       <v-row>
         <v-col>
           <v-container>
-            aa:{{test}}
+            <v-row>
+              <v-col>
+                <v-card-title>{{name}}</v-card-title>
+              </v-col>
+            </v-row>
             <v-row>
               <v-col>
                 <v-textarea
@@ -43,27 +47,11 @@
             </v-container>
 
             <v-container>
-              <v-card v-if="selectedSubjects.length == 0 ">
+              <v-card>
                 <v-data-table
                   v-model="selectedQuestions"
                   :headers="headers"
                   :items="questions"
-                  :page.sync="page"
-                  :items-per-page="itemsPerPage"
-                  :search="search"
-                  show-select
-                  item-key="id"
-                  hide-default-footer
-                  class="elevation-1"
-                  @page-count="pageCount = $event"
-                ></v-data-table>
-              </v-card>
-
-              <v-card v-else>
-                <v-data-table
-                  v-model="selectedQuestions"
-                  :headers="headers"
-                  :items="showedQuestions"
                   :page.sync="page"
                   :items-per-page="itemsPerPage"
                   :search="search"
@@ -92,9 +80,9 @@ export default {
   data() {
     return {
       randomQuestionsNumber: null,
-      selectedSubjects: [],
       selectedQuestions: [],
       testItems: [],
+      testTitle: "",
       purpose: "",
       items: [
         "Teoria do Reator",
@@ -141,6 +129,11 @@ export default {
     questions() {
       return this.$store.getters.loadedQuestions;
     },
+    name(){
+      let aux = this.test.data.title;
+      this.testTitle = aux;
+      return aux;
+    },
     loadQuestions() {
       this.$store.dispatch("loadedQuestions");
     },
@@ -149,33 +142,33 @@ export default {
     }
   },
   watch: {
-    selectedSubjects(val) {
-      this.questions.forEach(element => {
-        for (let i = 0; i < this.selectedSubjects.length; i++) {
-          if (element.data.DISCIPLINA == this.selectedSubjects[i]) {
-            let aux = true;
-            for (let k = 0; k < this.showedQuestions.length; k++) {
-              if (element === this.showedQuestions[k]) aux = false;
-            }
-            if (aux == true) this.showedQuestions.push(element);
-          }
-        }
-      });
-    },
     randomQuestionsNumber(val) {
       if ( val <= this.questions.length)
         this.randomSelection(val)
+    },
+    testTitle(val){
+      this.update();
     }
   },
   methods: {
+    update(){
+      console.log("AAAAAAAAA");
+      this.test.data.questions.forEach(element=>{
+        var question = this.$store.getters.findQuestionById(element)
+        this.selectedQuestions.push(question)
+      });
+      this.testType = this.test.data.type;
+      this.testName = this.test.data.title;
+      this.purpose = this.test.data.purpose;
+    },
     close() {
       this.setInitialData();
+      this.update();
       this.$emit("closeDialogNew");
     },
     setInitialData () {
       this.testType =  "Selecionado",
       this.randomQuestionsNumber =  null,
-      this.selectedSubjects =  [],
       this.selectedQuestions =  [],
       this.testItems =  [],
       this.testName =  "",
@@ -208,69 +201,41 @@ export default {
 
       console.log("hey",this.selectedQuestions)
     },
-    removeSelections(i) {
-      let aux = this.showedQuestions.length;
-
-      for (let j = 0; j < aux; j++) {
-        if (
-          this.showedQuestions[j].data.DISCIPLINA == this.selectedSubjects[i]
-        ) {
-          this.showedQuestions.splice(j, 1);
-          j--;
-          aux--;
-        }
-      }
-
-      this.selectedSubjects.splice(i, 1);
-    },
-    selections(i) {
-      let aux = false;
-      for (let j = 0; j < this.selectedSubjects.length; j++) {
-        if (this.items[i] == this.selectedSubjects[j]) aux = true;
-      }
-
-      if (aux == false) this.selectedSubjects.push(this.items[i]);
-    },
     onEditTest() {
       if(this.$refs.formRef.validate()){
 
-      if (this.randomQuestionsNumber == null && this.testType === "Aleatório") {
-        console.log("AAAAA: ",this.questions.length)
-        if (this.questions.length > 50) {
-          this.randomSelection(50)
+        // if (this.randomQuestionsNumber == null && this.testType === "Aleatório") {
+        //   console.log("AAAAA: ",this.questions.length)
+        //   if (this.questions.length > 50) {
+        //     this.randomSelection(50)
+        //   }
+        //
+        //   else {
+        //     this.randomSelection(this.questions.length)
+        //   }
+        // }
+
+        console.log("selected: ", this.selectedQuestions)
+
+        this.selectedQuestions.forEach(element => {
+          this.testItems.push(element.id);
+        });
+
+        const testData = {
+          title: this.testTitle,
+          questions: this.testItems,
+          type: this.testType,
+          user: this.test.data.user,
+          created: this.test.data.created,
+          edited: `${this.$store.getters.userInfo.name}`+'/'+`${Date()}`,
+          purpose: this.purpose,
+          id: this.test.id
         }
 
-        else {
-          this.randomSelection(this.questions.length)
-        }
+        this.close()
+        this.$store.dispatch("updateTest", testData);
+        this.$store.dispatch("loadedTests");
       }
-
-      console.log("selected: ", this.selectedQuestions)
-
-      if(this.testType == "Aleatório")
-        this.testType = "random"
-
-      else
-        this.testType = "selected"
-
-      this.selectedQuestions.forEach(element => {
-        this.testItems.push(element.id);
-      });
-
-      const testData = {
-        title: this.testName,
-        questions: this.testItems,
-        type: this.testType,
-        user: this.$store.getters.userInfo.name,
-        created: Date(),
-        edited: "",
-        purpose: this.purpose
-      }
-
-      this.close()
-      this.$store.dispatch("createTest", testData);
-      this.$store.dispatch("loadedTests");
-    }
 
     }
   }

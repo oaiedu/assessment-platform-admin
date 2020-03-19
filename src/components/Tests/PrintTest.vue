@@ -60,9 +60,11 @@
 
       <div v-for="(paper, index) in createdPapers" class=" question-page">
         <div v-if="paper.value">
-          <viewer v-if="checkImage(paper.object.data.image)" :value="paper.object.data.description"/>
+          <v-row justify="center">
+            <viewer v-if="checkImage(paper.object.data.image)" :value="paper.object.data.description"/>
 
-          <img v-else :src="paper.object.data.image" style="max-height: 900px;"/>
+            <img v-else :src="paper.object.data.image" style="max-height: 1150px; max-width: 700px"/>
+          </v-row>
         </div>
       </div>
 
@@ -403,6 +405,7 @@ export default {
 
 
   p {
+    font-size: 13px;
     page-break-inside: avoid;
   }
 }

@@ -123,7 +123,7 @@ export default {
                   console.error("Error writing document: ", error);
               });
         },
-        createdEditedQuestion({ commit }, payload) {
+        createdEditedQuestion({ commit, dispatch }, payload) {
           const db = firebase.firestore()
           const editedQuestion = {
               id: payload.id,
@@ -146,13 +146,14 @@ export default {
           })
               .then( () => {
                   commit('setLoading', false)
+                  dispatch("loadedQuestions")
                   console.log("Success create edit")
               })
               .catch(function (error) {
                   console.error("Error writing document: ", error);
               });
         },
-        createQuestion({ commit }, payload) {
+        createQuestion({ commit, dispatch }, payload) {
             const db = firebase.firestore()
             const question = {
                 id: payload.id,
@@ -175,6 +176,8 @@ export default {
                 edited: []
             })
                 .then(function () {
+                    commit('setLoading', false)
+                    dispatch("loadedQuestions")
                     console.log("Success")
                 })
                 .catch(function (error) {
