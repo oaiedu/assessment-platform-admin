@@ -12,7 +12,6 @@
               rounded
               dense
               append-icon="mdi-magnify"
-              label="Search for IQ"
               single-line
               hide-details
             ></v-text-field>
@@ -32,19 +31,26 @@
             @page-count="pageCount = $event"
           >
             <template small v-slot:item.actions="{ item }">
-              <router-link class="mr-10" style="text-decoration: none;" :to="{name:'test',params:{testId:item.id}}" replace>
-                <v-icon>mdi-pdf-box</v-icon>
-              </router-link>
-              <v-icon @click="editTest(item)" class="mr-2">mdi-pencil</v-icon>
-              <v-icon @click="deleteTestSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
+              <v-row justify="end">
+                <router-link class="mr-6" style="text-decoration: none;" :to="{name:'test',params:{testId:item.id}}" replace>
+                  <v-icon>mdi-pdf-box</v-icon>
+                </router-link>
+                <v-icon @click="editTest(item)" class="mr-2">mdi-pencil</v-icon>
+                <v-icon @click="deleteTestSnackBar = true; deleteSelect = item" class="mr-2">mdi-delete</v-icon>
+              </v-row>
             </template>
           </v-data-table>
         </v-card>
       </v-container>
 
-      <v-btn fixed dark fab bottom right color="cyan" @click.stop="dialogNewTest = true">
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
+      <v-tooltip left>
+        <template v-slot:activator="{ on }">
+          <v-btn v-on="on" fixed dark fab bottom right color="cyan" @click.stop="dialogNewTest = true">
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </template>
+        <span>Criar Prova</span>
+      </v-tooltip>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewTest">
         <NewTest @closeDialogNew="dialogNewTest = false"></NewTest>
@@ -94,10 +100,10 @@ export default {
       itemsPerPage: 10,
       selectedTest: null,
       headers: [
-        { text: "Nome", align: "left",  value: "data.title" },
-        { text: "Questions", align: "left",  value: "data.questions.length" },
-        { text: "Type", align: "left",  value: "data.type" },
-        { text: "Actions", value: "actions", sortable: false }
+        { text: "Nome", align: "start",  value: "data.title" },
+        { text: "Questões", align: "left",  value: "data.questions.length" },
+        { text: "Tipo", align: "left",  value: "data.type" },
+        { text: "Ações", align:"right", value: "actions", sortable: false }
       ]
     };
   },

@@ -32,16 +32,23 @@
             @page-count="pageCount = $event"
           >
             <template small v-slot:item.actions="{ item }">
-              <v-icon class="mr-2" @click="editPaper(item)">mdi-pencil</v-icon>
-              <v-icon @click="deletePaperSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
+              <v-row justify="end">
+                <v-icon class="mr-2" @click="editPaper(item)">mdi-pencil</v-icon>
+                <v-icon @click="deletePaperSnackBar = true; deleteSelect = item" class="mr-2">mdi-delete</v-icon>
+              </v-row>
             </template>
           </v-data-table>
         </v-card>
       </v-container>
 
-      <v-btn fixed dark fab bottom right color="cyan" @click.stop="dialogNewPaper = true">
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
+      <v-tooltip left>
+        <template v-slot:activator="{ on }">
+          <v-btn v-on="on" fixed dark fab bottom right color="cyan" @click.stop="dialogNewPaper = true">
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </template>
+        <span>Criar Documento</span>
+      </v-tooltip>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewPaper">
         <NewPaper @closeDialogNew="dialogNewPaper = false"></NewPaper>
@@ -78,7 +85,7 @@ export default {
     selectedEdit: {},
     headers: [
       { text: "Nome", align: "left",  value: "data.name" },
-      { text: "Actions", value: "actions", sortable: false }
+      { text: "Ações", align:"right", value: "actions", sortable: false }
     ],
     page: 1,
     pageCount: 15,

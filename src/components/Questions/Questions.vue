@@ -32,19 +32,28 @@
             @page-count="pageCount = $event"
           >
             <template v-slot:item.actions="{ item }">
-              <router-link class="mr-10" style="text-decoration: underline white;" :to="{name:'printquestion', params:{questionId:item.id}}" replace>
-                <v-icon>mdi-pdf-box</v-icon>
-              </router-link>
-              <v-icon class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
-              <v-icon @click="deleteQuestionSnackBar = true; deleteSelect = item">mdi-delete</v-icon>
+              <v-row justify="end">
+                <router-link class="mr-6" style="text-decoration: none;" :to="{name:'printquestion', params:{questionId:item.id}}" replace>
+                  <v-icon>mdi-pdf-box</v-icon>
+                </router-link>
+                <v-icon class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
+                <v-icon @click="deleteQuestionSnackBar = true; deleteSelect = item" class="mr-2">mdi-delete</v-icon>
+              </v-row>
             </template>
           </v-data-table>
         </v-card>
       </v-container>
 
-      <v-btn fixed dark fab bottom right color="cyan" @click.stop="dialogNewQuestion= true">
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
+
+
+      <v-tooltip left>
+        <template v-slot:activator="{ on }">
+          <v-btn v-on="on" fixed dark fab bottom right color="cyan" @click.stop="dialogNewQuestion= true">
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </template>
+        <span>Criar Questão</span>
+      </v-tooltip>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewQuestion">
         <Stepper  @closeDialogNew="dialogNewQuestion = false" @load="setLoader()"></Stepper>
@@ -107,7 +116,7 @@ export default {
         { text: "Relevância OR", value: "data.RELEVANCIA_OR" },
         { text: "Relevância OSR", value: "data.RELEVANCIA_OSR" },
         { text: "Disciplina", value: "data.DISCIPLINA", sortable: false },
-        { text: "Actions", value: "actions", sortable: false }
+        { text: "Ações", align:"right", value: "actions", sortable: false }
       ]
     };
   },

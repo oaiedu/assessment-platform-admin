@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <div class="question-page">
-      ASSUNTO: {{ question.data.DISCIPLINA }}
+      DISCIPLINA: {{ question.data.DISCIPLINA }}
       <br>
       CONHECIMENTO: {{ question.data.CONHECIMENTO }} [ {{ question.data.RELEVANCIA_OR }} / {{ question.data.RELEVANCIA_OSR }} ]
       <br>
@@ -73,6 +73,19 @@
         <v-icon>mdi-file-outline</v-icon>
       </v-btn>
 
+      <v-btn
+        fixed
+        fab
+        bottom
+        left
+        class="buttonIsHidden"
+        @click="back()"
+      >
+        <v-icon>
+          mdi-arrow-left
+        </v-icon>
+      </v-btn>
+
     </div>
   </v-container>
 </template>
@@ -94,6 +107,9 @@ export default {
     }
   },
   methods: {
+    back(){
+      this.$router.push('/questions');
+    },
     toPrint() {
       window.print()
     },

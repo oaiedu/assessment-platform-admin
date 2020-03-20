@@ -15,7 +15,7 @@ const projects_1 = require("../management/projects");
 const prompt_1 = require("../prompt");
 const requireAuth = require("../requireAuth");
 module.exports = new command_1.Command("projects:create [projectId]")
-    .description("create a new firebase project")
+    .description("creates a new Google Cloud Platform project, then adds Firebase resources to the project")
     .option("-n, --display-name <displayName>", "(optional) display name for the project")
     .option("-o, --organization <organizationId>", "(optional) ID of the parent Google Cloud Platform organization under which to create this project")
     .option("-f, --folder <folderId>", "(optional) ID of the parent Google Cloud Platform folder in which to create this project")

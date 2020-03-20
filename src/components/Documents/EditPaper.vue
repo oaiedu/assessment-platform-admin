@@ -6,42 +6,73 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
-          <v-btn dark text type="submit">Edit Test</v-btn>
+          <v-btn dark text type="submit">Editar Documento</v-btn>
         </v-toolbar-items>
       </v-toolbar>
-      <v-container>
+      <v-container fluid>
         <v-row>
           <v-col>
-            <v-card>
-              <v-container>
-                <v-row>
-                  <v-col>
-                      <v-file-input
-                        chips
-                        multiple
-                        dense
-                        label="Imagem"
-                        v-model="images"
-                      />
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col>
-                    <Combined :questionDescription="paperDescription" @inputData="updateData"></Combined>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card>
+            <v-row>
+              <v-col>
+                <h1>Formulário</h1>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-card>
+                  <v-container>
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          solo
+                          flat
+                          filled
+                          outlined
+                          dense
+                          label="Paper name"
+                          v-model="paperName"
+                          required
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col>
+                          <v-file-input
+                            chips
+                            multiple
+                            dense
+                            label="Imagem"
+                            v-model="images"
+                          />
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col>
+                        <Combined :questionDescription="paperDescription" @inputData="updateData"></Combined>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-card>
+              </v-col>
+            </v-row>
           </v-col>
           <v-col>
-            <v-card>
-              <v-card-title>Preview</v-card-title>
-              <v-card-subtitle>{{paperName}}</v-card-subtitle>
-              <v-row justify="center">
-                <img v-if="hasImage" :src="paperImage" style="max-width: 400px"></img>
-              </v-row>
-              <v-card-text>{{paperDescription}}</v-card-text>
-            </v-card>
+            <v-row>
+              <v-col>
+                <h1>Preview</h1>
+              </v-col>
+            </v-row>
+            <v-row fill-width>
+              <v-col cols="12">
+                <v-card>
+                  <v-card-title>{{name}}</v-card-title>
+                  <v-row justify="center">
+                    <img v-if="hasImage" :src="paperImage" style="max-width: 400px"></img>
+                  </v-row>
+                  <v-card-text>{{paperDescription}}</v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
       </v-container>
@@ -76,7 +107,6 @@ export default {
 
   methods: {
     update(){
-      this.paperName = this.paper.data.name
       this.paperDescription = this.paper.data.description
       this.paperImage = this.paper.data.image
     },
@@ -128,6 +158,7 @@ export default {
       }
 
       else {
+        console.log("paperName: ", this.paperName);
         const paperData = {
           paperName: this.paperName,
           paperDescription: this.paperDescription,

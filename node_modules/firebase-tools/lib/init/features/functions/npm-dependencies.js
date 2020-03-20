@@ -3,7 +3,7 @@ var spawn = require("cross-spawn");
 var logger = require("../../../logger");
 var { prompt } = require("../../../prompt");
 exports.askInstallDependencies = function (setup, config) {
-    return prompt(setup.functions, [
+    return prompt(setup, [
         {
             name: "npm",
             type: "confirm",
@@ -11,7 +11,7 @@ exports.askInstallDependencies = function (setup, config) {
             default: true,
         },
     ]).then(function () {
-        if (setup.functions.npm) {
+        if (setup.npm) {
             return new Promise(function (resolve) {
                 var installer = spawn("npm", ["install"], {
                     cwd: config.projectDir + "/functions",

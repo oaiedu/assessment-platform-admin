@@ -1,6 +1,6 @@
 <template>
   <p>
-    ASSUNTO: {{question.data.DISCIPLINA}}
+    DISCIPLINA: {{question.data.DISCIPLINA}}
     <br />
     CONHECIMENTO: {{question.data.CONHECIMENTO}} [{{question.data.RELEVANCIA_OR}}/{{question.data.RELEVANCIA_OSR}}]
     <br />

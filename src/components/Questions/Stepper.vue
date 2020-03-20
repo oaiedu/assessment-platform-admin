@@ -9,10 +9,10 @@
       <v-toolbar-items>
         <v-btn dark text @click="e1 = 2" v-if="e1 == 1">Continue</v-btn>
         <v-btn dark text @click="e1 = 3" v-if="e1 == 2">Continue</v-btn>
-        <v-btn dark text @click="onCreateQuestion()" v-if="e1 == 3">Create Question</v-btn>
+        <v-btn dark text @click="onCreateQuestion()" v-if="e1 == 3">Criar Questão</v-btn>
       </v-toolbar-items>
     </v-toolbar>
-    <v-container>
+    <v-container fluid>
       <v-row>
         <v-col>
           <v-card>
@@ -227,9 +227,9 @@
                 </v-row>
               </v-content>
 
-              <v-content v-else v-for="(item, index) in answers" :key="index">
-                <v-row>
-                  <v-col cols="2">{{ letters[index] }} - </v-col>
+              <v-content v-else>
+                <v-row v-for="(item, index) in answers" :key="index">
+                  <v-col cols="1">{{ letters[index] }} - </v-col>
                   <v-col>
                     {{ item.text }}
                   </v-col>

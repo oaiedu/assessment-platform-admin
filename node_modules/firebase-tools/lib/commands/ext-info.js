@@ -15,6 +15,7 @@ const command_1 = require("../command");
 const resolveSource_1 = require("../extensions/resolveSource");
 const extensionsApi = require("../extensions/extensionsApi");
 const extensionsHelper_1 = require("../extensions/extensionsHelper");
+const localHelper_1 = require("../extensions/localHelper");
 const logger = require("../logger");
 const requirePermissions_1 = require("../requirePermissions");
 const utils = require("../utils");
@@ -24,14 +25,23 @@ const FUNCTION_TYPE_REGEX = /\..+\.function/;
 exports.default = new command_1.Command("ext:info <extensionName>")
     .description("display information about an extension by name (extensionName@x.y.z for a specific version)")
     .option("--markdown", "output info in Markdown suitable for constructing a README file")
-    .before(requirePermissions_1.requirePermissions, ["firebasemods.sources.get"])
-    .before(extensionsHelper_1.ensureExtensionsApiEnabled)
     .action((extensionName, options) => __awaiter(void 0, void 0, void 0, function* () {
-    const [name, version] = extensionName.split("@");
-    const registryEntry = yield resolveSource_1.resolveRegistryEntry(name);
-    const sourceUrl = yield resolveSource_1.resolveSourceUrl(registryEntry, name, version);
-    const source = yield extensionsApi.getSource(sourceUrl);
-    const spec = source.spec;
+    let spec;
+    if (localHelper_1.isLocalExtension(extensionName)) {
+        if (!options.markdown) {
+            utils.logLabeledBullet(extensionsHelper_1.logPrefix, `reading extension from directory: ${extensionName}`);
+        }
+        spec = yield localHelper_1.getLocalExtensionSpec(extensionName);
+    }
+    else {
+        yield requirePermissions_1.requirePermissions(options, ["firebasemods.sources.get"]);
+        yield extensionsHelper_1.ensureExtensionsApiEnabled(options);
+        const [name, version] = extensionName.split("@");
+        const registryEntry = yield resolveSource_1.resolveRegistryEntry(name);
+        const sourceUrl = yield resolveSource_1.resolveSourceUrl(registryEntry, name, version);
+        const source = yield extensionsApi.getSource(sourceUrl);
+        spec = source.spec;
+    }
     if (!options.markdown) {
         utils.logLabeledBullet(extensionsHelper_1.logPrefix, `information about ${extensionName}:\n`);
     }

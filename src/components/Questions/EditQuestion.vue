@@ -9,10 +9,10 @@
       <v-toolbar-items>
         <v-btn dark text @click="e1 = 2" v-if="e1 == 1">Continue</v-btn>
         <v-btn dark text @click="e1 = 3" v-if="e1 == 2">Continue</v-btn>
-        <v-btn dark text @click="onEditQuestion()" v-if="e1 == 3">Edit Question</v-btn>
+        <v-btn dark text @click="onEditQuestion()" v-if="e1 == 3">Editar Questão</v-btn>
       </v-toolbar-items>
     </v-toolbar>
-    <v-container>
+    <v-container fluid>
       <v-row>
         <v-col>
           <v-card>

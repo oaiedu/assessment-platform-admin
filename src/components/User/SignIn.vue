@@ -6,7 +6,7 @@
                     <v-row>
                         <v-text-field
                             name="email"
-                            label="Mail"
+                            label="Email"
                             id="email"
                             v-model="email"
                             type="email"
@@ -16,7 +16,7 @@
                     <v-row>
                       <v-text-field
                           name="password"
-                          label="Password"
+                          label="Senha"
                           id="password"
                           v-model="password"
                           type="password"

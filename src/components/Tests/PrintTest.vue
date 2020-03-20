@@ -167,6 +167,21 @@
 
     <v-row>
       <v-btn
+        fixed
+        fab
+        bottom
+        left
+        class="buttonIsHidden"
+        @click="back()"
+      >
+        <v-icon>
+          mdi-arrow-left
+        </v-icon>
+      </v-btn>
+    </v-row>
+
+    <v-row>
+      <v-btn
         class="buttonIsHidden"
         fab
         dark
@@ -217,6 +232,10 @@
         <v-divider></v-divider>
 
         <v-card-actions>
+          <v-btn color="blue darken-1" text @click="cancel()">Cancelar</v-btn>
+
+          <v-spacer/>
+
           <v-btn color="blue darken-1" text @click="printDialog = false">Salvar</v-btn>
         </v-card-actions>
       </v-card>
@@ -252,6 +271,15 @@ export default {
     }
   },
   methods: {
+    cancel(){
+      this.premadePapers.forEach(element => {
+        element.value = false;
+      })
+      this.printDialog = false;
+    },
+    back(){
+      this.$router.push("/tests");
+    },
     toPrint() {
       window.print();
     },

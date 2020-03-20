@@ -70,32 +70,25 @@
         </v-card-text>
 
         <v-divider class="mt-12"></v-divider>
+
         <v-card-actions>
-          <!-- <v-spacer></v-spacer>
-          <v-slide-x-reverse-transition>
-            <v-tooltip
-              v-if="formHasErrors"
-              left
-            >
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  icon
-                  class="my-0"
-                  @click="resetForm"
-                  v-on="on"
-                >
-                  <v-icon>mdi-refresh</v-icon>
-                </v-btn>
-              </template>
-              <span>Refresh form</span>
-            </v-tooltip>
-          </v-slide-x-reverse-transition> -->
-          <v-btn color="primary" text @click="submit()">Submit</v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="cancel()"
+          >
+            Cancelar
+          </v-btn>
+
           <v-spacer/>
-          <transition>
-            <v-btn color="primary" text v-if="showChangePassword===false" @click="showChangePassword = !showChangePassword">Change Password</v-btn>
-            <v-btn color="primary" text v-if="showChangePassword===true">Submit New Password</v-btn>
-          </transition>
+
+          <v-btn
+            color="primary"
+            text
+            @click="submit()"
+          >
+            Salvar Alterações
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
@@ -131,6 +124,9 @@ export default {
     },
   },
   methods: {
+    cancel(){
+      this.$router.push('/');
+    },
     addImage() {
       document.getElementById("fileUpload").click();
     },

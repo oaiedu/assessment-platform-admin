@@ -1,31 +1,22 @@
 <template>
-  <v-row justify="center">
-    <v-col cols="12" sm="10" md="8" lg="6">
-      <v-card ref="form">
-        <v-card-text>
-          <div class="text-center">
-            <v-row>
-              <v-col>
-                <v-row justify="center">
-                  <v-avatar size="100">
-                    <img
-                      src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-                      v-if=" user.profileImages === '' || user.profileImages === null "
-                    />
-                    <img :src="user.profileImages" v-else />
-                  </v-avatar>
-                </v-row>
-                <v-row>
-                  <v-card-title>{{user.name}}</v-card-title>
-                  <v-card-subtitle>{{user.email}}</v-card-subtitle>
-                </v-row>
-              </v-col>
-            </v-row>
-          </div>
-        </v-card-text>
-      </v-card>
-    </v-col>
-  </v-row>
+  <v-card max-width="250" class="mx-auto">
+    <v-container>
+      <v-row justify="center" class="ma-8">
+        <v-avatar size="100">
+          <img
+            src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+            v-if=" user.profileImages === '' || user.profileImages === null "
+          />
+          <img :src="user.profileImages" v-else />
+        </v-avatar>
+      </v-row>
+
+      <v-row justify="start">
+        <v-card-title class="pb-0">{{user.name}}</v-card-title>
+        <v-card-text>{{user.email}}</v-card-text>
+      </v-row>
+    </v-container>
+  </v-card>
 </template>
 
 <script>
@@ -36,9 +27,6 @@ export default {
   computed: {
     user() {
       return this.$store.getters.userInfo
-    },
-    userEmail() {
-
     }
   }
 }

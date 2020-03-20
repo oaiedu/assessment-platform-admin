@@ -4,98 +4,73 @@
       bottom
       right
       v-model="fab"
-      :top="top"
-      :bottom="bottom"
-      :right="right"
-      :left="left"
-      :direction="direction"
-      :open-on-hover="hover"
-      :transition="transition"
+      direction="top"
+      transition="slide-y-reverse-transition"
     >
       <template v-slot:activator>
-        <v-btn
-          v-model="fab"
-          color="blue darken-2"
-          dark
-          fab
-        >
-          <v-icon v-if="fab">mdi-close</v-icon>
-          <v-icon v-else>mdi-plus</v-icon>
-        </v-btn>
+        <v-tooltip left>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              v-model="fab"
+              color="blue darken-2"
+              v-on="on"
+              dark
+              fab
+            >
+              <v-icon v-if="fab">mdi-close</v-icon>
+              <v-icon v-else>mdi-plus</v-icon>
+            </v-btn>
+          </template>
+          <span v-if="fab">Fechar</span>
+          <span v-else>Criar</span>
+        </v-tooltip>
       </template>
-      <v-btn
-        fab
-        dark
-        small
-        color="green"
-      >
-        <v-icon>mdi-file-question-outline</v-icon>
-      </v-btn>
-      <v-btn
-        fab
-        dark
-        small
-        color="indigo"
-      >
-        <v-icon>mdi-file-multiple-outline</v-icon>
-      </v-btn>
+      <v-tooltip left>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            fab
+            dark
+            small
+            v-on="on"
+            @click="toQuestions"
+            color="cyan darken-3"
+          >
+            <v-icon>mdi-file-question-outline</v-icon>
+          </v-btn>
+        </template>
+        <span>Criar nova questão</span>
+      </v-tooltip>
 
+      <v-tooltip left>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            fab
+            dark
+            small
+            v-on="on"
+            @click="toTests"
+            color="cyan darken-3"
+          >
+            <v-icon>mdi-file-multiple-outline</v-icon>
+          </v-btn>
+        </template>
+        <span>Criar nova prova</span>
+      </v-tooltip>
     </v-speed-dial>
 </template>
-
-
-
-<style>
-  /* This is for documentation purposes and will not be needed in your application */
-  #create .v-speed-dial {
-    position: absolute;
-    right:0
-  }
-
-  .v-speed-dial{
-  position:absolute !important
-  }
-
-</style>
-
 
 <script>
   export default {
     data: () => ({
-      direction: 'top',
-      fab: false,
-      fling: false,
-      hover: false,
-      tabs: null,
-      top: false,
-      right: true,
-      bottom: true,
-      left: false,
-      transition: 'slide-y-reverse-transition',
+      fab: false
     }),
-
-    computed: {
-      activeFab () {
-        switch (this.tabs) {
-          case 'one': return { class: 'purple', icon: 'account_circle' }
-          default: return {}
-        }
+    methods: {
+      toQuestions(){
+        this.$router.push('/questions')
       },
-    },
-
-    watch: {
-      top (val) {
-        this.bottom = !val
-      },
-      right (val) {
-        this.left = !val
-      },
-      bottom (val) {
-        this.top = !val
-      },
-      left (val) {
-        this.right = !val
-      },
-    },
+      toTests(){
+        this.$router.push('/tests')
+      }
+    }
   }
 </script>

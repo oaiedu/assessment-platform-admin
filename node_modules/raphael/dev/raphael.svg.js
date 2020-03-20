@@ -1,3 +1,13 @@
+// ┌─────────────────────────────────────────────────────────────────────┐ \\
+// │ Raphaël @@VERSION - JavaScript Vector Library                       │ \\
+// ├─────────────────────────────────────────────────────────────────────┤ \\
+// │ SVG Module                                                          │ \\
+// ├─────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright (c) 2008-2011 Dmitry Baranovskiy (http://raphaeljs.com)   │ \\
+// │ Copyright (c) 2008-2011 Sencha Labs (http://sencha.com)             │ \\
+// │ Licensed under the MIT (http://raphaeljs.com/license.html) license. │ \\
+// └─────────────────────────────────────────────────────────────────────┘ \\
+
 define(["./raphael.core"], function(R) {
     if (R && !R.svg) {
         return;
@@ -610,8 +620,8 @@ define(["./raphael.core"], function(R) {
         $(node, {x: a.x, y: a.y});
         el._.dirty = 1;
         var bb = el._getBBox(),
-            dif = a.y - (bb.y + bb.height / 2);
-        dif && R.is(dif, "finite") && $(tspans[0], {dy: dif});
+            dif = a.y - (bb.y + (bb.height / 2));
+        if (bb.height) dif && R.is(dif, "finite") && $(tspans[0], {dy: dif});
     },
     getRealNode = function (node) {
         if (node.parentNode && node.parentNode.tagName.toLowerCase() === "a") {
@@ -658,17 +668,8 @@ define(["./raphael.core"], function(R) {
          * Unique id of the element. Especially useful when you want to listen to events of the element,
          * because all events are fired in format `<module>.<action>.<id>`. Also useful for @Paper.getById method.
         \*/
-        this.id = guid();
+        this.id = R._oid++;
         node.raphaelid = this.id;
-
-        /**
-        * Method that returns a 5 letter/digit id, enough for 36^5 = 60466176 elements
-        * @returns {string} id
-        */
-        function guid() {
-            return ("0000" + (Math.random()*Math.pow(36,5) << 0).toString(36)).slice(-5);
-        }
-
         this.matrix = R.matrix();
         this.realPath = null;
         /*\
@@ -874,6 +875,9 @@ define(["./raphael.core"], function(R) {
             var sw = this.attrs[has]("stroke-width") ? this.attrs["stroke-width"] : 1;
             this.attr({"stroke-width": sw});
         }
+
+        //Reduce transform string
+        _.transform = this.matrix.toTransformString();
 
         return this;
     };
@@ -1272,15 +1276,15 @@ define(["./raphael.core"], function(R) {
     };
     R._engine.create = function () {
         var con = R._getContainer.apply(0, arguments),
-            container = con && con.container;
+            container = con && con.container,
+            x = con.x,
+            y = con.y,
+            width = con.width,
+            height = con.height;
         if (!container) {
             throw new Error("SVG container not found.");
         }
-        var x = con.x,
-            y = con.y,
-            width = con.width,
-            height = con.height,
-            cnvs = $("svg"),
+        var cnvs = $("svg"),
             css = "overflow:hidden;",
             isFloating;
         x = x || 0;
@@ -1352,7 +1356,7 @@ define(["./raphael.core"], function(R) {
      * Paper.renderfix
      [ method ]
      **
-     * Fixes the issue of Firefox and IE9 regarding subpixel rendering. If paper is dependent
+     * Fixes the issue of Firefox and IE9 regarding subpixel rendering. If paper is dependant
      * on other elements after reflow it could shift half pixel which cause for lines to lost their crispness.
      * This method fixes the issue.
      **

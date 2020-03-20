@@ -6,7 +6,7 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
-          <v-btn dark text type="submit">Create Test</v-btn>
+          <v-btn dark text type="submit">Criar Teste</v-btn>
         </v-toolbar-items>
       </v-toolbar>
       <v-row>

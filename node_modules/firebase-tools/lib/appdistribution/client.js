@@ -152,5 +152,5 @@ class AppDistributionClient {
     }
 }
 exports.AppDistributionClient = AppDistributionClient;
-AppDistributionClient.MAX_POLLING_RETRIES = 15;
+AppDistributionClient.MAX_POLLING_RETRIES = 30;
 AppDistributionClient.POLLING_INTERVAL_MS = 2000;

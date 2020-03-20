@@ -82,27 +82,27 @@ export default {
         drawerItems = [
         {
           icon: "mdi-home",
-          title: " Home",
+          title: "Página Inicial",
           link: "/"
         },
           {
             icon: "mdi-file-question-outline",
-            title: "Manage Questions",
+            title: "Gerenciar Questões",
             link: "/questions"
           },
           {
             icon: "mdi-file-multiple-outline",
-            title: " Manage Tests",
+            title: "Gerenciar provas",
             link: "/tests"
           },
           {
             icon: "mdi-file-document",
-            title: "Create Paper Document",
+            title: "Gerenciar Documentos",
             link: "/createpaper"
           },
           {
             icon: "mdi-account",
-            title: "Profile",
+            title: "Perfil",
             link: "/profile"
           }
         ];

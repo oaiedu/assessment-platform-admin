@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
 const clc = require("cli-color");
 const marked = require("marked");
+const extensionsApi_1 = require("./extensionsApi");
 const extensionsHelper_1 = require("./extensionsHelper");
 const utils_1 = require("./utils");
 const logger = require("../logger");
@@ -21,27 +22,27 @@ function checkResponse(response, spec) {
     let valid = true;
     let responses;
     if (spec.required && !response) {
-        utils.logWarning("You are required to enter a value for this question");
+        utils.logWarning(`Param ${spec.param} is required, but no value was provided.`);
         return false;
     }
-    if (spec.type === "MULTISELECT") {
+    if (spec.type === extensionsApi_1.ParamType.MULTISELECT) {
         responses = response.split(",");
     }
     else {
         responses = [response];
     }
-    if (spec.validationRegex) {
+    if (spec.validationRegex && !!response) {
         const re = new RegExp(spec.validationRegex);
         _.forEach(responses, (resp) => {
             if ((spec.required || resp !== "") && !re.test(resp)) {
-                const genericWarn = `${resp} is not a valid answer since it` +
-                    ` does not fit the regular expression "${spec.validationRegex}"`;
+                const genericWarn = `${resp} is not a valid value for ${spec.param} since it` +
+                    ` does not meet the requirements of the regex validation: "${spec.validationRegex}"`;
                 utils.logWarning(spec.validationErrorMessage || genericWarn);
                 valid = false;
             }
         });
     }
-    if (spec.type === "MULTISELECT" || spec.type === "SELECT") {
+    if (spec.type && (spec.type === extensionsApi_1.ParamType.MULTISELECT || spec.type === extensionsApi_1.ParamType.SELECT)) {
         _.forEach(responses, (r) => {
             let validChoice = _.some(spec.options, (option) => {
                 return r === option.value;
@@ -64,7 +65,7 @@ function askForParam(paramSpec) {
         logger.info(`\n${clc.bold(label)}${clc.bold(paramSpec.required ? "" : " (Optional)")}: ${marked(description).trim()}`);
         while (!valid) {
             switch (paramSpec.type) {
-                case "SELECT":
+                case extensionsApi_1.ParamType.SELECT:
                     response = yield prompt_1.promptOnce({
                         name: "input",
                         type: "list",
@@ -79,7 +80,7 @@ function askForParam(paramSpec) {
                         choices: utils_1.convertExtensionOptionToLabeledList(paramSpec.options),
                     });
                     break;
-                case "MULTISELECT":
+                case extensionsApi_1.ParamType.MULTISELECT:
                     response = yield utils_1.onceWithJoin({
                         name: "input",
                         type: "checkbox",
