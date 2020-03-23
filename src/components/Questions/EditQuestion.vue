@@ -1,4 +1,3 @@
-
 <template>
   <v-card>
     <v-toolbar dark color="primary">
@@ -198,9 +197,9 @@
                 </v-row>
               </v-content>
 
-              <v-content v-else v-for="(item, index) in editedAnswers" :key="index">
-                <v-row>
-                  <v-col cols="2">{{ letters[index] }} - </v-col>
+              <v-content v-else>
+                <v-row v-for="(item, index) in editedAnswers" :key="index">
+                  <v-col cols="1">{{ letters[index] }} - </v-col>
                   <v-col>
                     {{ item.text }}
                   </v-col>

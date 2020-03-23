@@ -109,7 +109,7 @@ export default {
       search: "",
       page: 1,
       pageCount: 15,
-      itemsPerPage: 10,
+      itemsPerPage: 8,
       headers: [
         { text: "IQ", align: "left", sortable: false, value: "id" },
         { text: "Conhecimento", value: "data.CONHECIMENTO" },
