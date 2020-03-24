@@ -178,7 +178,7 @@
               <br />
 
               <br/>
-                {{questionDescription}}
+              <viewer :value="questionDescription"/>
               <br/>
 
               <v-content v-if="confirmTitle">

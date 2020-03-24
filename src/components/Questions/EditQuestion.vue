@@ -144,7 +144,7 @@
               IQ: {{this.id}}
               <br />
               <br />
-              {{editedQuestionDescription}}
+              <viewer :value="editedQuestionDescription"/>
               <br />
 
               <v-row justify="center" style="margin-top: 20px" v-if="this.editedImages !== '' || typeof this.editedImages !== 'undefined'">
@@ -214,7 +214,10 @@
 </template>
 
 <script>
+import { Viewer } from "@toast-ui/vue-editor";
+
 export default {
+  components: {'viewer': Viewer},
   props: ["question"],
   data() {
     return {
