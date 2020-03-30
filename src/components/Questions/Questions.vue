@@ -56,11 +56,11 @@
       </v-tooltip>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewQuestion">
-        <Stepper  @closeDialogNew="dialogNewQuestion = false" @load="setLoader()"></Stepper>
+        <Stepper  @closeDialogNew="dialogNewQuestion = false"></Stepper>
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditQuestion">
-        <EditQuestion :question="selectedEdit" @closeDialogEdit="dialogEditQuestion = false" @load="setLoader()"></EditQuestion>
+        <EditQuestion :question="selectedEdit" @closeDialogEdit="dialogEditQuestion = false"></EditQuestion>
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogPDF">
@@ -68,7 +68,11 @@
       </v-dialog>
 
       <div class="text-center pt-2">
-        <v-pagination v-model="page" :length="pageCount"></v-pagination>
+        <v-pagination
+          v-model="page"
+          :length="pageCount"
+          total-visible="7" 
+          ></v-pagination>
       </div>
 
       <v-snackbar v-model="deleteQuestionSnackBar" color="black" right top>
@@ -84,6 +88,7 @@
 export default {
   data() {
     return {
+      loadedPages: [1],
       deleteSelect: "",
       selectedEdit: {},
       deleteQuestionSnackBar: false,
@@ -147,52 +152,27 @@ export default {
   methods: {
     editQuestions(val){
       this.selectedEdit = val
-      this.loadQuestions()
+      // this.loadQuestions()
       this.dialogEditQuestion = true
     },
     generatePDF(val){
       this.selectedEdit = val
       this.dialogPDF = true
     },
-    loadQuestions() {
-      console.log("é mano")
-      let aux = this.$store.dispatch("loadedQuestions");
-      aux.then(()=>{
-        return aux
-      })
-    },
-    removeSelections(i) {
-      let aux = this.showedQuestions.length;
-
-      for (let j = 0; j < aux; j++) {
-        if (this.showedQuestions[j].data.DISCIPLINA == this.selected[i]) {
-          this.showedQuestions.splice(j, 1);
-          j--;
-          aux--;
-        }
-      }
-
-      this.selected.splice(i, 1);
-    },
-    setLoader(){
-      this.loadQuestions()
-    },
-    selections(i) {
-      let aux = false;
-      for (let j = 0; j < this.selected.length; j++) {
-        if (this.items[i] == this.selected[j]) aux = true;
-      }
-
-      if (aux == false) this.selected.push(this.items[i]);
-    },
+    // loadQuestions() {
+    //   console.log("é mano")
+    //   let aux = this.$store.dispatch("loadedQuestions");
+    //   aux.then(()=>{
+    //     return aux
+    //   })
+    // },
     deleteQuestion(id) {
       console.log(id);
       let aux = this.$store.dispatch("deleteQuestion", id);
       aux.then(()=>{
         this.deleteQuestionSnackBar = false;
-        this.loadQuestions();
       })
     }
   }
-};
+}
 </script>

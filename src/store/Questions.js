@@ -28,14 +28,21 @@ export default {
         },
         createQuestion(state, payload) {
             state.loadedQuestions.push(payload)
+        },
+        deleteQuestion(state, payload) {
+            state.loadedQuestions.forEach((item, i) => {
+              if(item.id === payload)
+                state.loadedQuestions.splice(i, 1);
+            });
+
         }
     },
     actions: {
         loadedQuestions({ commit }) {
             commit('setLoading', true)
-            const db = firebase.firestore()
+            const db = firebase.firestore().collection("questions")
             let questions = []
-            db.collection("questions").get().then(querySnapshot => {
+            db.get().then(querySnapshot => {
                 querySnapshot.forEach(doc => {
                     questions.push(Object.assign({ id: doc.id, data: doc.data() }))
                 })
@@ -50,7 +57,7 @@ export default {
             return db.collection("questions").doc(id).delete()
                 .then( () => {
                     commit('setLoading', false)
-                    dispatch("loadedQuestions")
+                    commit('deleteQuestion', id)
                     console.log("Document successfully deleted!")
                 })
                 .catch(function (error) {
@@ -146,7 +153,7 @@ export default {
           })
               .then( () => {
                   commit('setLoading', false)
-                  dispatch("loadedQuestions")
+                  dispatch('loadedQuestions')
                   console.log("Success create edit")
               })
               .catch(function (error) {
@@ -155,29 +162,23 @@ export default {
         },
         createQuestion({ commit, dispatch }, payload) {
             const db = firebase.firestore()
-            const question = {
-                id: payload.id,
-                questionDescription: payload.questionDescription,
-                subject: payload.subject,
-                knowledge: payload.knowledge,
-                knowledgePWR: payload.knowledgePWR,
-                knowledgeBWR: payload.knowledgeBWR,
-                answers: payload.answers,
-                images: payload.images
-            }
-            db.collection("questions").doc(question.id).set({
-                PERGUNTA: question.questionDescription,
-                DISCIPLINA: question.subject,
-                CONHECIMENTO: question.knowledge,
-                RELEVANCIA_OR: question.knowledgePWR,
-                RELEVANCIA_OSR: question.knowledgeBWR,
-                RESPOSTAS: question.answers,
-                IMAGENS: question.images,
+            var question = {
+              id: payload.id,
+              data: {
+                PERGUNTA: payload.questionDescription,
+                DISCIPLINA: payload.subject,
+                CONHECIMENTO: payload.knowledge,
+                RELEVANCIA_OR: payload.knowledgePWR,
+                RELEVANCIA_OSR: payload.knowledgeBWR,
+                RESPOSTAS: payload.answers,
+                IMAGENS: payload.images,
                 edited: []
-            })
+              }
+            }
+            db.collection("questions").doc(question.id).set(question.data)
                 .then(function () {
                     commit('setLoading', false)
-                    dispatch("loadedQuestions")
+                    commit('createQuestion', question)
                     console.log("Success")
                 })
                 .catch(function (error) {

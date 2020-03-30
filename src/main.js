@@ -50,10 +50,7 @@ new Vue({
         this.$store.dispatch('autoSignIn', user )
       }
     })
-    this.$store.dispatch('clearError')
-    this.$store.dispatch('loadedQuestions')
-    this.$store.dispatch('loadedTests')
-    this.$store.dispatch('loadedPapers')
-    console.log(this.$store.state.loadedQuestions)
+    this.$store.dispatch('clearError');
+    this.$store.dispatch('loadedQuestions');
   }
 }).$mount('#app')

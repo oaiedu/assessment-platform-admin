@@ -280,6 +280,31 @@ export default {
   },
   watch: {
     editedId() {
+      this.update();
+    },
+    auxTitle(val) {
+      if(this.confirmTitle){
+        this.editedAnswers.forEach(element => {
+          for (var i = 0; i < this.number; i++) {
+            element.text[i].title = val[i];
+          }
+        })
+      }
+    },
+    radios(val) {
+      this.editedAnswers.forEach(element => {
+
+        if (element.ansId === val)
+          element.value = true;
+
+        else
+          element.value = false;
+      });
+    }
+  },
+  methods: {
+    update(){
+      console.log("AAAAAAAAA");
       this.editedId = this.question.id
       this.editedSubject = this.question.data.DISCIPLINA
       this.editedKnowledge = this.question.data.CONHECIMENTO
@@ -312,27 +337,6 @@ export default {
           this.radios = element.ansId
       })
     },
-    auxTitle(val) {
-      if(this.confirmTitle){
-        this.editedAnswers.forEach(element => {
-          for (var i = 0; i < this.number; i++) {
-            element.text[i].title = val[i];
-          }
-        })
-      }
-    },
-    radios(val) {
-      this.editedAnswers.forEach(element => {
-
-        if (element.ansId === val)
-          element.value = true;
-
-        else
-          element.value = false;
-      });
-    }
-  },
-  methods: {
     updateData(variable) {
       this.editedQuestionDescription = variable;
     },
@@ -374,7 +378,6 @@ export default {
           sendInfo.user = this.$store.getters.user.id
           var storeAux = this.$store.dispatch("editQuestion", sendInfo);
           storeAux.then(() => {
-            this.$emit("load");
             this.close();
           })
         })
@@ -412,7 +415,6 @@ export default {
         sendInfo.user = this.$store.getters.user.id
         var storeAux = this.$store.dispatch("editQuestion", sendInfo);
         storeAux.then(() => {
-          this.$emit("load");
           this.close();
         })
       }
@@ -439,7 +441,6 @@ export default {
     },
     close() {
       this.setInitialData()
-      this.$store.dispatch("loadedQuestions");
       this.$emit("closeDialogEdit");
     }
   }

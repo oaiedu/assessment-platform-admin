@@ -383,7 +383,6 @@ export default {
 
         let aux = this.$store.dispatch("createQuestion", questionData);
         aux.then(()=>{
-          this.$emit("load");
           this.setInitialData();
           this.close();
         })
@@ -404,22 +403,10 @@ export default {
 
       let aux = this.$store.dispatch("createQuestion", questionData);
       aux.then(()=>{
-        this.$emit("load");
         this.setInitialData();
         this.close();
       })
     }
-
-      // var reader = new FileReader();
-      // reader.readAsDataURL(this.images[0]);
-      // reader.onload = ()=> {
-      //   this.imagesAsBase64 = reader.result
-      //   console.log("Imagem dentro da Promisse: ",this.imagesAsBase64)
-      //   this.sendToStore()
-      // };
-      // reader.onerror = function (error) {
-      //   console.log('Error: ', error);
-      // };
     },
     setInitialData() {
       this.confirmTitle = false;
