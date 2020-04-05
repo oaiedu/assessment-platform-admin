@@ -34,7 +34,6 @@ export default {
               if(item.id === payload)
                 state.loadedQuestions.splice(i, 1);
             });
-
         }
     },
     actions: {
@@ -153,7 +152,6 @@ export default {
           })
               .then( () => {
                   commit('setLoading', false)
-                  dispatch('loadedQuestions')
                   console.log("Success create edit")
               })
               .catch(function (error) {
