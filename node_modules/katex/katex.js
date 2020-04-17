@@ -1,3 +1,4 @@
+// @flow
 /* eslint no-console:0 */
 /**
  * This is the main entry point for KaTeX. Here, we expose functions for
@@ -7,25 +8,41 @@
  * errors in the expression, or errors in javascript handling.
  */
 
-var ParseError = require("./src/ParseError");
-var Settings = require("./src/Settings");
+import ParseError from "./src/ParseError";
+import Settings from "./src/Settings";
 
-var buildTree = require("./src/buildTree");
-var parseTree = require("./src/parseTree");
-var utils = require("./src/utils");
+import {buildTree, buildHTMLTree} from "./src/buildTree";
+import parseTree from "./src/parseTree";
+import buildCommon from "./src/buildCommon";
+import {
+    Span,
+    Anchor,
+    SymbolNode,
+    SvgNode,
+    PathNode,
+    LineNode,
+} from "./src/domTree";
+
+import type {SettingsOptions} from "./src/Settings";
+import type {AnyParseNode} from "./src/parseNode";
+
+import {defineSymbol} from './src/symbols';
+import {defineMacro} from './src/macros';
+import {setFontMetrics} from './src/fontMetrics';
+
+declare var __VERSION__: string;
 
 /**
  * Parse and build an expression, and place that expression in the DOM node
  * given.
  */
-var render = function(expression, baseNode, options) {
-    utils.clearNode(baseNode);
-
-    var settings = new Settings(options);
-
-    var tree = parseTree(expression, settings);
-    var node = buildTree(tree, expression, settings).toNode();
-
+let render = function(
+    expression: string,
+    baseNode: Node,
+    options: SettingsOptions,
+) {
+    baseNode.textContent = "";
+    const node = renderToDomTree(expression, options).toNode();
     baseNode.appendChild(node);
 };
 
@@ -46,29 +63,151 @@ if (typeof document !== "undefined") {
 /**
  * Parse and build an expression, and return the markup for that.
  */
-var renderToString = function(expression, options) {
-    var settings = new Settings(options);
-
-    var tree = parseTree(expression, settings);
-    return buildTree(tree, expression, settings).toMarkup();
+const renderToString = function(
+    expression: string,
+    options: SettingsOptions,
+): string {
+    const markup = renderToDomTree(expression, options).toMarkup();
+    return markup;
 };
 
 /**
  * Parse an expression and return the parse tree.
  */
-var generateParseTree = function(expression, options) {
-    var settings = new Settings(options);
+const generateParseTree = function(
+    expression: string,
+    options: SettingsOptions,
+): AnyParseNode[] {
+    const settings = new Settings(options);
     return parseTree(expression, settings);
 };
 
-module.exports = {
-    render: render,
-    renderToString: renderToString,
+/**
+ * If the given error is a KaTeX ParseError and options.throwOnError is false,
+ * renders the invalid LaTeX as a span with hover title giving the KaTeX
+ * error message.  Otherwise, simply throws the error.
+ */
+const renderError = function(
+    error,
+    expression: string,
+    options: Settings,
+) {
+    if (options.throwOnError || !(error instanceof ParseError)) {
+        throw error;
+    }
+    const node = buildCommon.makeSpan(["katex-error"],
+        [new SymbolNode(expression)]);
+    node.setAttribute("title", error.toString());
+    node.setAttribute("style", `color:${options.errorColor}`);
+    return node;
+};
+
+/**
+ * Generates and returns the katex build tree. This is used for advanced
+ * use cases (like rendering to custom output).
+ */
+const renderToDomTree = function(
+    expression: string,
+    options: SettingsOptions,
+) {
+    const settings = new Settings(options);
+    try {
+        const tree = parseTree(expression, settings);
+        return buildTree(tree, expression, settings);
+    } catch (error) {
+        return renderError(error, expression, settings);
+    }
+};
+
+/**
+ * Generates and returns the katex build tree, with just HTML (no MathML).
+ * This is used for advanced use cases (like rendering to custom output).
+ */
+const renderToHTMLTree = function(
+    expression: string,
+    options: SettingsOptions,
+) {
+    const settings = new Settings(options);
+    try {
+        const tree = parseTree(expression, settings);
+        return buildHTMLTree(tree, expression, settings);
+    } catch (error) {
+        return renderError(error, expression, settings);
+    }
+};
+
+export default {
     /**
+     * Current KaTeX version
+     */
+    version: __VERSION__,
+    /**
+     * Renders the given LaTeX into an HTML+MathML combination, and adds
+     * it as a child to the specified DOM node.
+     */
+    render,
+    /**
+     * Renders the given LaTeX into an HTML+MathML combination string,
+     * for sending to the client.
+     */
+    renderToString,
+    /**
+     * KaTeX error, usually during parsing.
+     */
+    ParseError,
+    /**
+     * Parses the given LaTeX into KaTeX's internal parse tree structure,
+     * without rendering to HTML or MathML.
+     *
      * NOTE: This method is not currently recommended for public use.
      * The internal tree representation is unstable and is very likely
      * to change. Use at your own risk.
      */
     __parse: generateParseTree,
-    ParseError: ParseError,
+    /**
+     * Renders the given LaTeX into an HTML+MathML internal DOM tree
+     * representation, without flattening that representation to a string.
+     *
+     * NOTE: This method is not currently recommended for public use.
+     * The internal tree representation is unstable and is very likely
+     * to change. Use at your own risk.
+     */
+    __renderToDomTree: renderToDomTree,
+    /**
+     * Renders the given LaTeX into an HTML internal DOM tree representation,
+     * without MathML and without flattening that representation to a string.
+     *
+     * NOTE: This method is not currently recommended for public use.
+     * The internal tree representation is unstable and is very likely
+     * to change. Use at your own risk.
+     */
+    __renderToHTMLTree: renderToHTMLTree,
+    /**
+     * extends internal font metrics object with a new object
+     * each key in the new object represents a font name
+    */
+    __setFontMetrics: setFontMetrics,
+    /**
+     * adds a new symbol to builtin symbols table
+     */
+    __defineSymbol: defineSymbol,
+    /**
+     * adds a new macro to builtin macro list
+     */
+    __defineMacro: defineMacro,
+    /**
+     * Expose the dom tree node types, which can be useful for type checking nodes.
+     *
+     * NOTE: This method is not currently recommended for public use.
+     * The internal tree representation is unstable and is very likely
+     * to change. Use at your own risk.
+     */
+    __domTree: {
+        Span,
+        Anchor,
+        SymbolNode,
+        SvgNode,
+        PathNode,
+        LineNode,
+    },
 };

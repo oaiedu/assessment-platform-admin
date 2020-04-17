@@ -1,40 +1,66 @@
-var buildHTML = require("./buildHTML");
-var buildMathML = require("./buildMathML");
-var buildCommon = require("./buildCommon");
-var Options = require("./Options");
-var Settings = require("./Settings");
-var Style = require("./Style");
+// @flow
+import buildHTML from "./buildHTML";
+import buildMathML from "./buildMathML";
+import buildCommon from "./buildCommon";
+import Options from "./Options";
+import Settings from "./Settings";
+import Style from "./Style";
 
-var makeSpan = buildCommon.makeSpan;
+import type {AnyParseNode} from "./parseNode";
+import type {DomSpan} from "./domTree";
 
-var buildTree = function(tree, expression, settings) {
-    settings = settings || new Settings({});
-
-    var startStyle = Style.TEXT;
-    if (settings.displayMode) {
-        startStyle = Style.DISPLAY;
-    }
-
-    // Setup the default options
-    var options = new Options({
-        style: startStyle,
-        size: "size5",
+const optionsFromSettings = function(settings: Settings) {
+    return new Options({
+        style: (settings.displayMode ? Style.DISPLAY : Style.TEXT),
+        maxSize: settings.maxSize,
+        minRuleThickness: settings.minRuleThickness,
     });
-
-    // `buildHTML` sometimes messes with the parse tree (like turning bins ->
-    // ords), so we build the MathML version first.
-    var mathMLNode = buildMathML(tree, expression, options);
-    var htmlNode = buildHTML(tree, options);
-
-    var katexNode = makeSpan(["katex"], [
-        mathMLNode, htmlNode,
-    ]);
-
-    if (settings.displayMode) {
-        return makeSpan(["katex-display"], [katexNode]);
-    } else {
-        return katexNode;
-    }
 };
 
-module.exports = buildTree;
+const displayWrap = function(node: DomSpan, settings: Settings): DomSpan {
+    if (settings.displayMode) {
+        const classes = ["katex-display"];
+        if (settings.leqno) {
+            classes.push("leqno");
+        }
+        if (settings.fleqn) {
+            classes.push("fleqn");
+        }
+        node = buildCommon.makeSpan(classes, [node]);
+    }
+    return node;
+};
+
+export const buildTree = function(
+    tree: AnyParseNode[],
+    expression: string,
+    settings: Settings,
+): DomSpan {
+    const options = optionsFromSettings(settings);
+    let katexNode;
+    if (settings.output === "mathml") {
+        return  buildMathML(tree, expression, options, true);
+    } else if (settings.output === "html") {
+        const htmlNode = buildHTML(tree, options);
+        katexNode = buildCommon.makeSpan(["katex"], [htmlNode]);
+    } else {
+        const mathMLNode = buildMathML(tree, expression, options, false);
+        const htmlNode = buildHTML(tree, options);
+        katexNode = buildCommon.makeSpan(["katex"], [mathMLNode, htmlNode]);
+    }
+
+    return displayWrap(katexNode, settings);
+};
+
+export const buildHTMLTree = function(
+    tree: AnyParseNode[],
+    expression: string,
+    settings: Settings,
+): DomSpan {
+    const options = optionsFromSettings(settings);
+    const htmlNode = buildHTML(tree, options);
+    const katexNode = buildCommon.makeSpan(["katex"], [htmlNode]);
+    return displayWrap(katexNode, settings);
+};
+
+export default buildTree;

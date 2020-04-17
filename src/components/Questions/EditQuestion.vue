@@ -1,5 +1,6 @@
 <template>
   <v-card>
+    <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css">
     <v-toolbar dark color="primary">
       <v-btn icon dark @click="close()">
         <v-icon>mdi-close</v-icon>
@@ -78,7 +79,7 @@
                   <v-stepper-content step="2">
                     <v-container>
                       <v-row>
-                        <Combined :questionDescription="editedQuestionDescription" @inputData="updateData"></Combined>
+                        <editor v-model="editedQuestionDescription"/>
                       </v-row>
 
                       <v-row>
@@ -144,7 +145,7 @@
               IQ: {{this.id}}
               <br />
               <br />
-              <viewer :value="editedQuestionDescription"/>
+                <vue-markdown :source="editedQuestionDescription"/>
               <br />
 
               <v-row justify="center" style="margin-top: 20px" v-if="this.editedImages !== '' || typeof this.editedImages !== 'undefined'">
@@ -154,7 +155,9 @@
               <v-content v-if="confirmTitle">
                 <v-row>
                   <v-col cols="2"></v-col>
-                  <v-col v-for="(item, index) in editedAnswers[0].text" :key="index" cols="2">{{ item.title }}</v-col>
+                  <v-col v-for="(item, index) in editedAnswers[0].text" :key="index" cols="2">
+                    <vue-markdown :source="item.title"/>
+                  </v-col>
                 </v-row>
 
                 <v-row>
@@ -163,7 +166,9 @@
                     v-for="(item, index) in editedAnswers[0].text"
                     :key="index"
                     cols="2"
-                  >{{ item.answerDescription }}</v-col>
+                  >
+                    <vue-markdown :source="item.answerDescription"/>
+                  </v-col>
                 </v-row>
                 <br />
 
@@ -173,7 +178,9 @@
                     v-for="(item, index) in editedAnswers[1].text"
                     :key="index"
                     cols="2"
-                  >{{ item.answerDescription }}</v-col>
+                    >
+                      <vue-markdown :source="item.answerDescription"/>
+                    </v-col>
                 </v-row>
                 <br />
 
@@ -183,7 +190,9 @@
                     v-for="(item, index) in editedAnswers[2].text"
                     :key="index"
                     cols="2"
-                  >{{ item.answerDescription }}</v-col>
+                    >
+                      <vue-markdown :source="item.answerDescription"/>
+                    </v-col>
                 </v-row>
                 <br />
 
@@ -193,7 +202,9 @@
                     v-for="(item, index) in editedAnswers[3].text"
                     :key="index"
                     cols="2"
-                  >{{ item.answerDescription }}</v-col>
+                    >
+                      <vue-markdown :source="item.answerDescription"/>
+                    </v-col>
                 </v-row>
               </v-content>
 
@@ -201,7 +212,7 @@
                 <v-row v-for="(item, index) in editedAnswers" :key="index">
                   <v-col cols="1">{{ letters[index] }} - </v-col>
                   <v-col>
-                    {{ item.text }}
+                    <vue-markdown :source="item.text"/>
                   </v-col>
                 </v-row>
               </v-content>
@@ -214,10 +225,15 @@
 </template>
 
 <script>
-import { Viewer } from "@toast-ui/vue-editor";
+import { Editor } from '@toast-ui/vue-editor'
+import VueMarkdown from 'vue-markdown';
+require('vue-markdown');
 
 export default {
-  components: {'viewer': Viewer},
+  components: {
+    Editor,
+    'vue-markdown': VueMarkdown
+  },
   props: ["question"],
   data() {
     return {

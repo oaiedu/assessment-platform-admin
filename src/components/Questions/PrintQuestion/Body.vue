@@ -1,16 +1,20 @@
 <template>
   <v-container>
+    <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css">
     <div class="question-page">
       DISCIPLINA: {{ question.data.DISCIPLINA }}
       <br>
+
       CONHECIMENTO: {{ question.data.CONHECIMENTO }} [ {{ question.data.RELEVANCIA_OR }} / {{ question.data.RELEVANCIA_OSR }} ]
       <br>
+
       IQ: {{ question.id }}
       <br>
+
+      <br>
+        <vue-markdown :source="question.data.PERGUNTA"/>
       <br>
 
-      {{ question.data.PERGUNTA }}
-      <br>
       <br>
 
       <div class="img-container" v-if="confirmImage(question.data.IMAGENS)">
@@ -20,7 +24,9 @@
       <v-content v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
         <v-row>
           <v-col cols="2"></v-col>
-          <v-col v-for="(item, index) in question.data.RESPOSTAS[0].text" :key="index" cols="2">{{ item.title }}</v-col>
+          <v-col v-for="(item, index) in question.data.RESPOSTAS[0].text" :key="index" cols="2">
+            <vue-markdown :source="item.title"/>
+          </v-col>
         </v-row>
 
         <v-row>
@@ -29,7 +35,9 @@
             v-for="(item, index) in question.data.RESPOSTAS[0].text"
             :key="index"
             cols="2"
-          >{{ item.answerDescription }}</v-col>
+          >
+            <vue-markdown :source="item.answerDescription"/>
+          </v-col>
         </v-row>
 
         <v-row>
@@ -38,7 +46,9 @@
             v-for="(item, index) in question.data.RESPOSTAS[1].text"
             :key="index"
             cols="2"
-          >{{ item.answerDescription }}</v-col>
+            >
+              <vue-markdown :source="item.answerDescription"/>
+            </v-col>
         </v-row>
 
         <v-row>
@@ -47,7 +57,9 @@
             v-for="(item, index) in question.data.RESPOSTAS[2].text"
             :key="index"
             cols="2"
-          >{{ item.answerDescription }}</v-col>
+            >
+              <vue-markdown :source="item.answerDescription"/>
+            </v-col>
         </v-row>
 
         <v-row>
@@ -56,7 +68,9 @@
             v-for="(item, index) in question.data.RESPOSTAS[3].text"
             :key="index"
             cols="2"
-          >{{ item.answerDescription }}</v-col>
+            >
+              <vue-markdown :source="item.answerDescription"/>
+            </v-col>
         </v-row>
       </v-content>
 
@@ -64,7 +78,7 @@
         <v-row v-for="(item, index) in question.data.RESPOSTAS" :key="index">
           <v-col cols="2">{{ letters[index] }} - </v-col>
           <v-col>
-            {{ item.text }}
+            <vue-markdown :source="item.text"/>
           </v-col>
         </v-row>
       </v-content>
@@ -91,7 +105,13 @@
 </template>
 
 <script>
+import VueMarkdown from 'vue-markdown';
+require('vue-markdown');
+
 export default {
+  components: {
+    'vue-markdown': VueMarkdown
+  },
   data() {
     return {
       letters: ['A','B','C','D'],
