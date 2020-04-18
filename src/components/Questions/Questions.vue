@@ -33,9 +33,7 @@
           >
             <template v-slot:item.actions="{ item }">
               <v-row justify="end">
-                <router-link class="mr-6" style="text-decoration: none;" :to="{name:'printquestion', params:{questionId:item.id}}" replace>
-                  <v-icon>mdi-pdf-box</v-icon>
-                </router-link>
+                <v-icon class="mr-6" @click="dialogPDF = true; selectedEdit = item"> mdi-pdf-box </v-icon>
                 <v-icon class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
                 <v-icon @click="deleteQuestionSnackBar = true; deleteSelect = item" class="mr-2">mdi-delete</v-icon>
               </v-row>
@@ -71,7 +69,7 @@
         <v-pagination
           v-model="page"
           :length="pageCount"
-          total-visible="7" 
+          total-visible="7"
           ></v-pagination>
       </div>
 
