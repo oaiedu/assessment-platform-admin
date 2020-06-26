@@ -70,6 +70,6 @@ export default {
 <style>
   .section-1 {
     height: 100vh;
-    background: url("https://www.defesaaereanaval.com.br/wp-content/uploads/2013/05/aramar-em-foto-da-agc3aancia-brasil.jpg")
+    background: url("https://firebasestorage.googleapis.com/v0/b/pwr-quiz-generator.appspot.com/o/aramar-em-foto-da-agc3aancia-brasil.jpg?alt=media&token=e0077c22-cea2-4670-ad08-5e64eb0c8c57")
   }
 </style>

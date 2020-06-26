@@ -61,6 +61,7 @@ export default baseMixins.extend<options>().extend({
       default: 'button',
     },
     text: Boolean,
+    tile: Boolean,
     type: {
       type: String,
       default: 'button',
@@ -152,6 +153,7 @@ export default baseMixins.extend<options>().extend({
 
   methods: {
     click (e: MouseEvent): void {
+      // TODO: Remove this in v3
       !this.retainFocusOnClick && !this.fab && e.detail && this.$el.blur()
       this.$emit('click', e)
 

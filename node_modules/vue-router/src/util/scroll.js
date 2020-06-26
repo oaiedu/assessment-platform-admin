@@ -8,6 +8,10 @@ import { extend } from './misc'
 const positionStore = Object.create(null)
 
 export function setupScroll () {
+  // Prevent browser scroll behavior on History popstate
+  if ('scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual'
+  }
   // Fix for #1585 for Firefox
   // Fix for #2195 Add optional third attribute to workaround a bug in safari https://bugs.webkit.org/show_bug.cgi?id=182678
   // Fix for #2774 Support for apps loaded from Windows file shares not mapped to network drives: replaced location.origin with
@@ -19,12 +23,10 @@ export function setupScroll () {
   const stateCopy = extend({}, window.history.state)
   stateCopy.key = getStateKey()
   window.history.replaceState(stateCopy, '', absolutePath)
-  window.addEventListener('popstate', e => {
-    saveScrollPosition()
-    if (e.state && e.state.key) {
-      setStateKey(e.state.key)
-    }
-  })
+  window.addEventListener('popstate', handlePopState)
+  return () => {
+    window.removeEventListener('popstate', handlePopState)
+  }
 }
 
 export function handleScroll (
@@ -83,6 +85,13 @@ export function saveScrollPosition () {
       x: window.pageXOffset,
       y: window.pageYOffset
     }
+  }
+}
+
+function handlePopState (e) {
+  saveScrollPosition()
+  if (e.state && e.state.key) {
+    setStateKey(e.state.key)
   }
 }
 
