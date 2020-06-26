@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
     <v-toolbar dark color="primary">
       <v-btn icon dark @click="close()">
         <v-icon>mdi-close</v-icon>
@@ -34,64 +34,80 @@
                   <v-stepper-content step="1">
                     <v-container>
                       <v-row>
-                        <v-text-field name="id" label="IQ" id="id" v-model="id" required></v-text-field>
+                        <v-col>
+                          <v-text-field name="id" label="IQ" id="id" v-model="id" required></v-text-field>
+                        </v-col>
                       </v-row>
 
                       <v-row>
-                        <v-text-field
-                          name="knowledge"
-                          label="Conhecimento"
-                          id="knowledge"
-                          v-model="knowledge"
-                          required
-                        ></v-text-field>
+                        <v-col>
+                          <v-text-field
+                            name="knowledge"
+                            label="Conhecimento"
+                            id="knowledge"
+                            v-model="knowledge"
+                            required
+                          ></v-text-field>
+                        </v-col>
                       </v-row>
 
                       <v-row>
-                        <v-text-field
-                          name="knowledgePWR"
-                          label="Relevância OR"
-                          id="knowledgePWR"
-                          v-model="knowledgePWR"
-                          required
-                        ></v-text-field>
+                        <v-col>
+                          <v-text-field
+                            name="knowledgePWR"
+                            label="Relevância OR"
+                            id="knowledgePWR"
+                            v-model="knowledgePWR"
+                            required
+                          ></v-text-field>
+                        </v-col>
                       </v-row>
 
                       <v-row>
-                        <v-text-field
-                          name="knowledgeBWR"
-                          label="Relevância OSR"
-                          id="knowledgeBWR"
-                          v-model="knowledgeBWR"
-                          required
-                        ></v-text-field>
+                        <v-col>
+                          <v-text-field
+                            name="knowledgeBWR"
+                            label="Relevância OSR"
+                            id="knowledgeBWR"
+                            v-model="knowledgeBWR"
+                            required
+                          ></v-text-field>
+                        </v-col>
                       </v-row>
 
                       <v-row>
-                        <v-select
-                          :items="subjectItems"
-                          name="subject"
-                          id="subject"
-                          v-model="subject"
-                          label="Disciplina"
-                          solo
-                        ></v-select>
+                        <v-col>
+                          <v-select
+                            :items="subjectItems"
+                            name="subject"
+                            id="subject"
+                            v-model="subject"
+                            label="Disciplina"
+                            solo
+                          ></v-select>
+                        </v-col>
                       </v-row>
                     </v-container>
                   </v-stepper-content>
 
                   <v-stepper-content step="2">
                     <v-container>
-                      <v-row>
-                        <editor v-model="questionDescription"/>
+                      <v-row justify="center">
+                        <v-col cols="12">
+                          <editor v-model="questionDescription" />
+                        </v-col>
                       </v-row>
-                      <v-row>
-                        <v-file-input
-                          chips
-                          multiple
-                          label="Imagem"
-                          v-model="images"
-                        />
+                      <v-row justify="center">
+                        <v-col cols="12">
+                          <v-file-input chips multiple label="Imagem" v-model="images" />
+                        </v-col>
+                      </v-row>
+                      <v-row justify="center">
+                        <v-radio-group v-model="imageSize" row>
+                          <v-radio label="1x" value="radio-1"></v-radio>
+                          <v-radio label="2x" value="radio-2"></v-radio>
+                          <v-radio label="3x" value="radio-3"></v-radio>
+                        </v-radio-group>
                       </v-row>
                     </v-container>
                   </v-stepper-content>
@@ -146,7 +162,6 @@
 
                       <v-content v-else>
                         <v-row v-for="(item, index) in answers" :key="index">
-
                           <v-col cols="12" md="1" sm="1" xs="1">
                             <v-radio-group v-model="radios">
                               <v-radio :value="item.ansId"></v-radio>
@@ -157,7 +172,6 @@
                           </v-col>
                         </v-row>
                       </v-content>
-
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -177,71 +191,55 @@
               IQ: {{id}}
               <br />
 
-              <br/>
-                <vue-markdown :source="questionDescription"/>
-              <br/>
+              <br />
+              <vue-markdown :source="questionDescription" />
+              <br />
 
               <v-content v-if="confirmTitle">
                 <v-row>
                   <v-col cols="2"></v-col>
                   <v-col v-for="(item, index) in answers[0].text" :key="index" cols="2">
-                    <vue-markdown :source="item.title"/>
+                    <vue-markdown :source="item.title" />
                   </v-col>
                 </v-row>
 
                 <v-row>
                   <v-col cols="2">A -</v-col>
-                  <v-col
-                    v-for="(item, index) in answers[0].text"
-                    :key="index"
-                    cols="2"
-                  >
-                    <vue-markdown :source="item.answerDescription"/>
+                  <v-col v-for="(item, index) in answers[0].text" :key="index" cols="2">
+                    <vue-markdown :source="item.answerDescription" />
                   </v-col>
                 </v-row>
                 <br />
 
                 <v-row>
                   <v-col cols="2">B -</v-col>
-                  <v-col
-                    v-for="(item, index) in answers[1].text"
-                    :key="index"
-                    cols="2"
-                    >
-                      <vue-markdown :source="item.answerDescription"/>
-                    </v-col>
+                  <v-col v-for="(item, index) in answers[1].text" :key="index" cols="2">
+                    <vue-markdown :source="item.answerDescription" />
+                  </v-col>
                 </v-row>
                 <br />
 
                 <v-row>
                   <v-col cols="2">C -</v-col>
-                  <v-col
-                    v-for="(item, index) in answers[2].text"
-                    :key="index"
-                    cols="2"
-                    >
-                      <vue-markdown :source="item.answerDescription"/>
-                    </v-col>
+                  <v-col v-for="(item, index) in answers[2].text" :key="index" cols="2">
+                    <vue-markdown :source="item.answerDescription" />
+                  </v-col>
                 </v-row>
                 <br />
 
                 <v-row>
                   <v-col cols="2">D -</v-col>
-                  <v-col
-                    v-for="(item, index) in answers[3].text"
-                    :key="index"
-                    cols="2"
-                    >
-                      <vue-markdown :source="item.answerDescription"/>
-                    </v-col>
+                  <v-col v-for="(item, index) in answers[3].text" :key="index" cols="2">
+                    <vue-markdown :source="item.answerDescription" />
+                  </v-col>
                 </v-row>
               </v-content>
 
               <v-content v-else>
                 <v-row v-for="(item, index) in answers" :key="index">
-                  <v-col cols="1">{{ letters[index] }} - </v-col>
+                  <v-col cols="1">{{ letters[index] }} -</v-col>
                   <v-col>
-                    <vue-markdown :source="item.text"/>
+                    <vue-markdown :source="item.text" />
                   </v-col>
                 </v-row>
               </v-content>
@@ -254,26 +252,27 @@
 </template>
 
 <script>
-import { Editor } from '@toast-ui/vue-editor'
-import VueMarkdown from 'vue-markdown';
-require('vue-markdown');
+import { Editor } from "@toast-ui/vue-editor";
+import VueMarkdown from "vue-markdown";
+require("vue-markdown");
 
 export default {
   components: {
     Editor,
-    'vue-markdown': VueMarkdown
+    "vue-markdown": VueMarkdown
   },
   data() {
     return {
-      letters: ['A','B','C','D'],
+      letters: ["A", "B", "C", "D"],
       images: [],
       imagesAsURL: "",
+      imageSize: "radio-1",
       confirmTitle: false,
       questionDescription: "",
       e1: 1,
       test: null,
       columns: null,
-      radios: '',
+      radios: "",
       multipleAnswer: false,
       auxTitle: [],
       chips: [],
@@ -318,24 +317,23 @@ export default {
     }
   },
   watch: {
-    e1(val){
-      console.log(val)
+    e1(val) {
+      console.log(val);
     },
     number(val) {
       if (this.number > 1) {
         this.answers.forEach(element => {
-        let aux = [];
-        for (var i = 0; i < this.number; i++) {
-          aux.push({ title: "", answerDescription: "" });
-        }
-        element.text = aux;
-      });
+          let aux = [];
+          for (var i = 0; i < this.number; i++) {
+            aux.push({ title: "", answerDescription: "" });
+          }
+          element.text = aux;
+        });
         this.confirmTitle = true;
-      }
-      else {
+      } else {
         this.answers.forEach(element => {
-          element.text = ""
-        })
+          element.text = "";
+        });
         this.confirmTitle = false;
       }
     },
@@ -374,14 +372,32 @@ export default {
       this.questionDescription = variable;
     },
     onCreateQuestion() {
-      console.log("value: ", this.answers[1].value)
+      console.log("value: ", this.answers[1].value);
 
-    if ( typeof this.images[0] !== 'undefined') {
-      const imageToUpload = {images: this.images[0]}
-      var URL = this.$store.dispatch("uploadImage", imageToUpload)
-      URL.then(result => {
-        this.imagesAsURL = result
-        console.log("Image as URL: ",this.imagesAsURL)
+      if (typeof this.images[0] !== "undefined") {
+        const imageToUpload = { images: this.images[0] };
+        var URL = this.$store.dispatch("uploadImage", imageToUpload);
+        URL.then(result => {
+          this.imagesAsURL = result;
+          console.log("Image as URL: ", this.imagesAsURL);
+          const questionData = {
+            id: this.id,
+            subject: this.subject,
+            questionDescription: this.questionDescription,
+            knowledge: this.knowledge,
+            knowledgePWR: this.knowledgePWR,
+            knowledgeBWR: this.knowledgeBWR,
+            answers: this.answers,
+            images: this.imagesAsURL
+          };
+
+          let aux = this.$store.dispatch("createQuestion", questionData);
+          aux.then(() => {
+            this.setInitialData();
+            this.close();
+          });
+        });
+      } else {
         const questionData = {
           id: this.id,
           subject: this.subject,
@@ -390,35 +406,15 @@ export default {
           knowledgePWR: this.knowledgePWR,
           knowledgeBWR: this.knowledgeBWR,
           answers: this.answers,
-          images: this.imagesAsURL
+          images: ""
         };
 
         let aux = this.$store.dispatch("createQuestion", questionData);
-        aux.then(()=>{
+        aux.then(() => {
           this.setInitialData();
           this.close();
-        })
-      })
-    }
-
-    else {
-      const questionData = {
-        id: this.id,
-        subject: this.subject,
-        questionDescription: this.questionDescription,
-        knowledge: this.knowledge,
-        knowledgePWR: this.knowledgePWR,
-        knowledgeBWR: this.knowledgeBWR,
-        answers: this.answers,
-        images: ""
-      };
-
-      let aux = this.$store.dispatch("createQuestion", questionData);
-      aux.then(()=>{
-        this.setInitialData();
-        this.close();
-      })
-    }
+        });
+      }
     },
     setInitialData() {
       this.confirmTitle = false;
@@ -458,7 +454,7 @@ export default {
       ];
       this.number = 0;
       this.images = [];
-      this.imagesAsBase64 = ""
+      this.imagesAsBase64 = "";
     },
     close() {
       this.setInitialData();
