@@ -12,6 +12,7 @@ import HtmlTest from '@/components/Tests/HtmlToPdfTest.vue'
 import PrintTest from '@/components/Tests/PrintTest.vue'
 import PrintQuestions from '@/components/Questions/PrintQuestion/Body.vue'
 import Papers from '@/components/Documents/Papers.vue'
+import Inbox from '@/components/Inbox.vue'
 import Home from '@/views/Home.vue'
 import AuthGuard from './auth-guard'
 
@@ -22,6 +23,11 @@ const routes = [
     path:'/',
     component:Home,
     name:'home',
+  },
+  {
+    path:'/inbox',
+    component: Inbox,
+    name:'inbox',
   },
   {
     path: '/signup',

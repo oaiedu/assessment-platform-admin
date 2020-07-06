@@ -101,6 +101,11 @@ export default {
             link: "/createpaper"
           },
           {
+            icon: "mdi-inbox",
+            title: "Solicitações",
+            link: "/inbox"
+          },
+          {
             icon: "mdi-account",
             title: "Perfil",
             link: "/profile"
