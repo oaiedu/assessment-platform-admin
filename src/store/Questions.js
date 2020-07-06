@@ -103,7 +103,8 @@ export default {
               knowledgePWR: payload.questionData.knowledgePWR,
               knowledgeBWR: payload.questionData.knowledgeBWR,
               answers: payload.questionData.answers,
-              images: payload.questionData.images
+              images: payload.questionData.images,
+              imageSize: payload.questionData.imageSize,
           }
           const edition = payload.oldData.edited
           edition.push({
@@ -120,6 +121,7 @@ export default {
               RELEVANCIA_OSR: question.knowledgeBWR,
               RESPOSTAS: question.answers,
               IMAGENS: question.images,
+              TAMANHO_IMAGEM: question.imageSize,
               edited: edition
           })
               .then( () => {
@@ -140,7 +142,8 @@ export default {
               knowledgePWR: payload.knowledgePWR,
               knowledgeBWR: payload.knowledgeBWR,
               answers: payload.answers,
-              images: payload.images
+              images: payload.images,
+              imageSize: payload.imageSize
           }
           db.collection("edited questions").doc(editedQuestion.id + "-" + payload.edited.length).set({
               PERGUNTA: editedQuestion.questionDescription,
@@ -149,7 +152,8 @@ export default {
               RELEVANCIA_OR: editedQuestion.knowledgePWR,
               RELEVANCIA_OSR: editedQuestion.knowledgeBWR,
               RESPOSTAS: editedQuestion.answers,
-              IMAGENS: editedQuestion.images
+              IMAGENS: editedQuestion.images,
+              TAMANHO_IMAGEM: editedQuestion.imageSize,
           })
               .then( () => {
                   commit('setLoading', false)
@@ -172,6 +176,7 @@ export default {
                 RELEVANCIA_OSR: payload.knowledgeBWR,
                 RESPOSTAS: payload.answers,
                 IMAGENS: payload.images,
+                TAMANHO_IMAGEM: payload.imageSize,
                 edited: []
               }
             }

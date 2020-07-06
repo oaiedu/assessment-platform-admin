@@ -102,13 +102,15 @@
                           <v-file-input chips multiple label="Imagem" v-model="images" />
                         </v-col>
                       </v-row>
-                      <v-row justify="center">
-                        <v-radio-group v-model="imageSize" row>
-                          <v-radio label="1x" value="radio-1"></v-radio>
-                          <v-radio label="2x" value="radio-2"></v-radio>
-                          <v-radio label="3x" value="radio-3"></v-radio>
-                        </v-radio-group>
-                      </v-row>
+                      <v-content v-if="images.length != 0">
+                        <v-row justify="center">
+                          <v-radio-group v-model="imageSize" row>
+                            <v-radio label="1x" value="1x"></v-radio>
+                            <v-radio label="2x" value="2x"></v-radio>
+                            <v-radio label="3x" value="3x"></v-radio>
+                          </v-radio-group>
+                        </v-row>
+                      </v-content>
                     </v-container>
                   </v-stepper-content>
 
@@ -266,7 +268,7 @@ export default {
       letters: ["A", "B", "C", "D"],
       images: [],
       imagesAsURL: "",
-      imageSize: "radio-1",
+      imageSize: "1x",
       confirmTitle: false,
       questionDescription: "",
       e1: 1,
@@ -319,6 +321,9 @@ export default {
   watch: {
     e1(val) {
       console.log(val);
+    },
+    images(val) {
+      console.log("images: ", val.length);
     },
     number(val) {
       if (this.number > 1) {
@@ -388,7 +393,8 @@ export default {
             knowledgePWR: this.knowledgePWR,
             knowledgeBWR: this.knowledgeBWR,
             answers: this.answers,
-            images: this.imagesAsURL
+            images: this.imagesAsURL,
+            imageSize: this.imageSize,
           };
 
           let aux = this.$store.dispatch("createQuestion", questionData);
@@ -406,7 +412,8 @@ export default {
           knowledgePWR: this.knowledgePWR,
           knowledgeBWR: this.knowledgeBWR,
           answers: this.answers,
-          images: ""
+          images: "",
+          imageSize: this.imageSize,
         };
 
         let aux = this.$store.dispatch("createQuestion", questionData);
@@ -419,6 +426,7 @@ export default {
     setInitialData() {
       this.confirmTitle = false;
       this.questionDescription = "";
+      this.imageSize = "1x";
       this.e1 = 1;
       this.test = null;
       this.columns = null;
