@@ -28,6 +28,10 @@ Vue.component('def-block', DefinitionBlock);
 Vue.component('img-block', ImageBlock);
 Vue.component('ans-block', AnswerBlock);
 
+export const auth = firebase.auth();
+export const db = firebase.firestore();
+export const storage = firebase.storage();
+
 new Vue({
     router,
     store,
@@ -35,9 +39,9 @@ new Vue({
     render: h => h(App),
     created () {
         firebase.initializeApp(require('../.env'));
-        firebase.auth().onAuthStateChanged((user) => {
+        auth.onAuthStateChanged((user) => {
             if (user) {
-            this.$store.dispatch('autoSignIn', user )
+                this.$store.dispatch('autoSignIn', user );
             }
         });
         this.$store.dispatch('clearError');
