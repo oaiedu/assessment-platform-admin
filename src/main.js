@@ -28,6 +28,8 @@ Vue.component('def-block', DefinitionBlock);
 Vue.component('img-block', ImageBlock);
 Vue.component('ans-block', AnswerBlock);
 
+firebase.initializeApp(require('../.env'));
+
 export const auth = firebase.auth();
 export const db = firebase.firestore();
 export const storage = firebase.storage();
@@ -38,7 +40,6 @@ new Vue({
     vuetify,
     render: h => h(App),
     created () {
-        firebase.initializeApp(require('../.env'));
         auth.onAuthStateChanged((user) => {
             if (user) {
                 this.$store.dispatch('autoSignIn', user );
