@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
     <v-toolbar dark color="primary">
       <v-btn icon dark @click="close()">
         <v-icon>mdi-close</v-icon>
@@ -79,17 +79,24 @@
                   <v-stepper-content step="2">
                     <v-container>
                       <v-row>
-                        <editor v-model="editedQuestionDescription"/>
+                        <editor v-model="editedQuestionDescription" />
                       </v-row>
 
                       <v-row>
-                        <v-file-input
-                          chips
-                          multiple
-                          label="Imagem"
-                          v-model="images"
-                        />
+                        <v-file-input chips multiple label="Imagem" v-model="images" />
                       </v-row>
+
+                      <v-content
+                        v-if="this.editedImages !== '' && typeof this.editedImages !== 'undefined'"
+                      >
+                        <v-row justify="center">
+                          <v-radio-group v-model="editedImageSize" row>
+                            <v-radio label="1x" value="1x"></v-radio>
+                            <v-radio label="2x" value="2x"></v-radio>
+                            <v-radio label="3x" value="3x"></v-radio>
+                          </v-radio-group>
+                        </v-row>
+                      </v-content>
                     </v-container>
                   </v-stepper-content>
 
@@ -145,74 +152,62 @@
               IQ: {{this.id}}
               <br />
               <br />
-                <vue-markdown :source="editedQuestionDescription"/>
+              <vue-markdown :source="editedQuestionDescription" />
               <br />
 
-              <v-row justify="center" style="margin-top: 20px" v-if="this.editedImages !== '' || typeof this.editedImages !== 'undefined'">
-                <img style="max-height: 250px; max-width: 180px" :src="this.editedImages">
+              <v-row
+                justify="center"
+                style="margin-top: 20px"
+                v-if="this.editedImages !== '' && typeof this.editedImages !== 'undefined'"
+              >
+                <img style="max-height: 250px; max-width: 180px" :src="this.editedImages" />
               </v-row>
 
               <v-content v-if="confirmTitle">
                 <v-row>
                   <v-col cols="2"></v-col>
                   <v-col v-for="(item, index) in editedAnswers[0].text" :key="index" cols="2">
-                    <vue-markdown :source="item.title"/>
+                    <vue-markdown :source="item.title" />
                   </v-col>
                 </v-row>
 
                 <v-row>
                   <v-col cols="2">A -</v-col>
-                  <v-col
-                    v-for="(item, index) in editedAnswers[0].text"
-                    :key="index"
-                    cols="2"
-                  >
-                    <vue-markdown :source="item.answerDescription"/>
+                  <v-col v-for="(item, index) in editedAnswers[0].text" :key="index" cols="2">
+                    <vue-markdown :source="item.answerDescription" />
                   </v-col>
                 </v-row>
                 <br />
 
                 <v-row>
                   <v-col cols="2">B -</v-col>
-                  <v-col
-                    v-for="(item, index) in editedAnswers[1].text"
-                    :key="index"
-                    cols="2"
-                    >
-                      <vue-markdown :source="item.answerDescription"/>
-                    </v-col>
+                  <v-col v-for="(item, index) in editedAnswers[1].text" :key="index" cols="2">
+                    <vue-markdown :source="item.answerDescription" />
+                  </v-col>
                 </v-row>
                 <br />
 
                 <v-row>
                   <v-col cols="2">C -</v-col>
-                  <v-col
-                    v-for="(item, index) in editedAnswers[2].text"
-                    :key="index"
-                    cols="2"
-                    >
-                      <vue-markdown :source="item.answerDescription"/>
-                    </v-col>
+                  <v-col v-for="(item, index) in editedAnswers[2].text" :key="index" cols="2">
+                    <vue-markdown :source="item.answerDescription" />
+                  </v-col>
                 </v-row>
                 <br />
 
                 <v-row>
                   <v-col cols="2">D -</v-col>
-                  <v-col
-                    v-for="(item, index) in editedAnswers[3].text"
-                    :key="index"
-                    cols="2"
-                    >
-                      <vue-markdown :source="item.answerDescription"/>
-                    </v-col>
+                  <v-col v-for="(item, index) in editedAnswers[3].text" :key="index" cols="2">
+                    <vue-markdown :source="item.answerDescription" />
+                  </v-col>
                 </v-row>
               </v-content>
 
               <v-content v-else>
                 <v-row v-for="(item, index) in editedAnswers" :key="index">
-                  <v-col cols="1">{{ letters[index] }} - </v-col>
+                  <v-col cols="1">{{ letters[index] }} -</v-col>
                   <v-col>
-                    <vue-markdown :source="item.text"/>
+                    <vue-markdown :source="item.text" />
                   </v-col>
                 </v-row>
               </v-content>
@@ -225,19 +220,19 @@
 </template>
 
 <script>
-import { Editor } from '@toast-ui/vue-editor'
-import VueMarkdown from 'vue-markdown';
-require('vue-markdown');
+import { Editor } from "@toast-ui/vue-editor";
+import VueMarkdown from "vue-markdown";
+require("vue-markdown");
 
 export default {
   components: {
     Editor,
-    'vue-markdown': VueMarkdown
+    "vue-markdown": VueMarkdown
   },
   props: ["question"],
   data() {
     return {
-      letters: ['A','B','C','D'],
+      letters: ["A", "B", "C", "D"],
       confirmTitle: false,
       editedQuestionDescription: null,
       e1: 1,
@@ -254,6 +249,7 @@ export default {
       editedSubject: null,
       editedKnowledge: null,
       editedKnowledgePWR: null,
+      editedImageSize: null,
       editedKnowledgeBWR: null,
       subjectItems: [
         "Teoria do Reator",
@@ -273,11 +269,13 @@ export default {
     };
   },
   computed: {
-    hasImages(){
-      if ( typeof this.question.data.IMAGENS === 'undefined' || this.question.data.IMAGENS === '')
-        return false
-      else
-        return true
+    hasImages() {
+      if (
+        typeof this.question.data.IMAGENS === "undefined" ||
+        this.question.data.IMAGENS === ""
+      )
+        return false;
+      else return true;
     },
     formIsValid() {
       return (
@@ -288,10 +286,10 @@ export default {
         this.editedSubject !== ""
       );
     },
-    id(){
-      var aux = this.question.id
-      this.editedId = aux
-      return aux
+    id() {
+      var aux = this.question.id;
+      this.editedId = aux;
+      return aux;
     }
   },
   watch: {
@@ -299,81 +297,97 @@ export default {
       this.update();
     },
     auxTitle(val) {
-      if(this.confirmTitle){
+      if (this.confirmTitle) {
         this.editedAnswers.forEach(element => {
           for (var i = 0; i < this.number; i++) {
             element.text[i].title = val[i];
           }
-        })
+        });
       }
     },
     radios(val) {
       this.editedAnswers.forEach(element => {
-
-        if (element.ansId === val)
-          element.value = true;
-
-        else
-          element.value = false;
+        if (element.ansId === val) element.value = true;
+        else element.value = false;
       });
     }
   },
   methods: {
-    update(){
+    update() {
       console.log("AAAAAAAAA");
-      this.editedId = this.question.id
-      this.editedSubject = this.question.data.DISCIPLINA
-      this.editedKnowledge = this.question.data.CONHECIMENTO
-      this.editedKnowledgePWR = this.question.data.RELEVANCIA_OR
-      this.editedKnowledgeBWR = this.question.data.RELEVANCIA_OSR
-      this.editedAnswers = JSON.parse(JSON.stringify(this.question.data.RESPOSTAS))
-      this.editedQuestionDescription = this.question.data.PERGUNTA
+      this.editedId = this.question.id;
+      this.editedSubject = this.question.data.DISCIPLINA;
+      this.editedKnowledge = this.question.data.CONHECIMENTO;
+      this.editedKnowledgePWR = this.question.data.RELEVANCIA_OR;
+      this.editedKnowledgeBWR = this.question.data.RELEVANCIA_OSR;
+      this.editedImageSize = this.question.data.TAMANHO_IMAGEM;
+      this.editedAnswers = JSON.parse(
+        JSON.stringify(this.question.data.RESPOSTAS)
+      );
+      this.editedQuestionDescription = this.question.data.PERGUNTA;
 
-      if ( typeof this.question.data.IMAGENS === 'undefined' || this.question.data.IMAGENS === '')
-        this.editedImages = ""
-      else
-        this.editedImages = this.question.data.IMAGENS
+      if (
+        typeof this.question.data.IMAGENS === "undefined" ||
+        this.question.data.IMAGENS === ""
+      )
+        this.editedImages = "";
+      else this.editedImages = this.question.data.IMAGENS;
 
-      if(typeof this.question.data.RESPOSTAS[0].text == "string")
-        this.number = 1
-      else
-        this.number = this.question.data.RESPOSTAS[0].text.length
+      if (typeof this.question.data.RESPOSTAS[0].text == "string")
+        this.number = 1;
+      else this.number = this.question.data.RESPOSTAS[0].text.length;
 
       if (this.number > 1) this.confirmTitle = true;
       else this.confirmTitle = false;
 
-      if(this.number>1){
-        for(var i = 0; i < this.number; i++){
-          this.auxTitle[i] = this.question.data.RESPOSTAS[0].text[i].title
+      if (this.number > 1) {
+        for (var i = 0; i < this.number; i++) {
+          this.auxTitle[i] = this.question.data.RESPOSTAS[0].text[i].title;
         }
       }
 
-      this.editedAnswers.forEach( element => {
-        if(element.value === true)
-          this.radios = element.ansId
-      })
+      this.editedAnswers.forEach(element => {
+        if (element.value === true) this.radios = element.ansId;
+      });
     },
     updateData(variable) {
       this.editedQuestionDescription = variable;
     },
     onEditQuestion() {
-      if ( typeof this.images[0] !== 'undefined') {
-        const imageToUpload = {images: this.images[0]}
-        var URL = this.$store.dispatch("uploadImage", imageToUpload)
+      if (typeof this.images[0] !== "undefined") {
+        const imageToUpload = { images: this.images[0] };
+        var URL = this.$store.dispatch("uploadImage", imageToUpload);
         URL.then(result => {
-          this.editedImages = result
-          console.log("Image as URL: ",this.editedImages)
-          var oldData = {
-            id: this.question.id,
-            subject: this.question.data.DISCIPLINA,
-            questionDescription: this.question.data.PERGUNTA,
-            knowledge: this.question.data.CONHECIMENTO,
-            knowledgePWR: this.question.data.RELEVANCIA_OR,
-            knowledgeBWR: this.question.data.RELEVANCIA_OSR,
-            answers: this.question.data.RESPOSTAS,
-            images: this.question.data.IMAGENS,
-            edited: this.question.data.edited
-          };
+          this.editedImages = result;
+          console.log("Image as URL: ", this.editedImages);
+          if (this.question.data.TAMANHO_IMAGEM === undefined) {
+            var oldData = {
+              id: this.question.id,
+              subject: this.question.data.DISCIPLINA,
+              questionDescription: this.question.data.PERGUNTA,
+              knowledge: this.question.data.CONHECIMENTO,
+              knowledgePWR: this.question.data.RELEVANCIA_OR,
+              knowledgeBWR: this.question.data.RELEVANCIA_OSR,
+              answers: this.question.data.RESPOSTAS,
+              images: this.question.data.IMAGENS,
+              edited: this.question.data.edited,
+              imageSize: "1x"
+            };
+          }
+          else {
+            var oldData = {
+              id: this.question.id,
+              subject: this.question.data.DISCIPLINA,
+              questionDescription: this.question.data.PERGUNTA,
+              knowledge: this.question.data.CONHECIMENTO,
+              knowledgePWR: this.question.data.RELEVANCIA_OR,
+              knowledgeBWR: this.question.data.RELEVANCIA_OSR,
+              answers: this.question.data.RESPOSTAS,
+              images: this.question.data.IMAGENS,
+              edited: this.question.data.edited,
+              imageSize: this.question.data.TAMANHO_IMAGEM,
+            };
+          }
           var questionData = {
             id: this.editedId,
             subject: this.editedSubject,
@@ -382,24 +396,23 @@ export default {
             knowledgePWR: this.editedKnowledgePWR,
             knowledgeBWR: this.editedKnowledgeBWR,
             answers: this.editedAnswers,
-            images: this.editedImages
+            images: this.editedImages,
+            imageSize: this.editedImageSize
           };
           var sendInfo = {
             oldData: {},
             questionData: {},
-            user: "",
-          }
-          sendInfo.oldData = oldData
-          sendInfo.questionData = questionData
-          sendInfo.user = this.$store.getters.user.id
+            user: ""
+          };
+          sendInfo.oldData = oldData;
+          sendInfo.questionData = questionData;
+          sendInfo.user = this.$store.getters.user.id;
           var storeAux = this.$store.dispatch("editQuestion", sendInfo);
           storeAux.then(() => {
             this.close();
-          })
-        })
-      }
-
-      else {
+          });
+        });
+      } else {
         var oldData = {
           id: this.question.id,
           subject: this.question.data.DISCIPLINA,
@@ -409,7 +422,8 @@ export default {
           knowledgeBWR: this.question.data.RELEVANCIA_OSR,
           answers: this.question.data.RESPOSTAS,
           images: this.question.data.IMAGENS,
-          edited: this.question.data.edited
+          edited: this.question.data.edited,
+          imageSize: this.question.data.TAMANHO_IMAGEM
         };
         var questionData = {
           id: this.editedId,
@@ -419,44 +433,46 @@ export default {
           knowledgePWR: this.editedKnowledgePWR,
           knowledgeBWR: this.editedKnowledgeBWR,
           answers: this.editedAnswers,
+          imageSize: this.editedImageSize,
           images: this.question.data.IMAGENS
         };
         var sendInfo = {
           oldData: {},
           questionData: {},
-          user: "",
-        }
-        sendInfo.oldData = oldData
-        sendInfo.questionData = questionData
-        sendInfo.user = this.$store.getters.user.id
+          user: ""
+        };
+        sendInfo.oldData = oldData;
+        sendInfo.questionData = questionData;
+        sendInfo.user = this.$store.getters.user.id;
         var storeAux = this.$store.dispatch("editQuestion", sendInfo);
         storeAux.then(() => {
           this.close();
-        })
+        });
       }
     },
-    setInitialData(){
-      this.confirmTitle =  false;
-      this.editedQuestionDescription =  null;
-      this.e1 =  1;
-      this.radios =  null;
-      this.columns =  this.number;
-      this.multipleAnswer =  false;
-      this.auxTitle =  [];
-      this.editedImages =  null;
-      this.chips =  [];
-      this.items =  [];
-      this.images =  [];
-      this.editedAnswers =  [];
-      this.editedId =  null;
-      this.editedSubject =  null;
-      this.editedKnowledge =  null;
-      this.editedKnowledgePWR =  null;
-      this.editedKnowledgeBWR =  null;
-      this.number =  0
+    setInitialData() {
+      this.confirmTitle = false;
+      this.editedQuestionDescription = null;
+      this.e1 = 1;
+      this.radios = null;
+      this.columns = this.number;
+      this.multipleAnswer = false;
+      this.auxTitle = [];
+      this.editedImages = null;
+      this.chips = [];
+      this.items = [];
+      this.images = [];
+      this.editedAnswers = [];
+      this.editedId = null;
+      this.editedSubject = null;
+      this.editedKnowledge = null;
+      this.editedKnowledgePWR = null;
+      this.editedKnowledgeBWR = null;
+      this.editedImageSize = null;
+      this.number = 0;
     },
     close() {
-      this.setInitialData()
+      this.setInitialData();
       this.$emit("closeDialogEdit");
     }
   }
