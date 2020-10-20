@@ -24,11 +24,14 @@ const mutations = {
 
 const actions = {
     uploadAvatar({ commit }, payload) {
-        const puta = new Promise((resolve, reject) => {
+        const request = new Promise((resolve, reject) => {
             try {
                 const storageRef = storage.ref();
-                const file = payload.images
-                const images = storageRef.child(file.name).put(file)
+                const file = payload.images;
+                const prefix = 'avatar';
+                const suffix = auth.currentUser.uid;
+                const format = `users/${prefix}-${suffix}`;
+                storageRef.child(format).put(file)
                     .then(function (snapshot) {
                         console.log("Uploaded a file!: ", snapshot)
                         snapshot.ref.getDownloadURL().then(function (downloadURL) {
@@ -44,7 +47,7 @@ const actions = {
                 reject();
             }
         });
-        return puta;
+        return request;
     },
     signUserUp({ commit }, payload) {
         commit('setLoading', true);

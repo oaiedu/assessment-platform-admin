@@ -11,7 +11,7 @@
                   <v-file-input id="fileUpload" @change="sendImage()" v-model="avatarImage" style="visibility: hidden; max-height: 1px" />
                 </v-row>
                 <v-row justify="center">
-                  <v-avatar size="100" @click="addImage()" clickable>
+                  <v-avatar size="100" @click="addImage()" clickable :class="{ 'avatar-edit': this.$route.path == '/profile' }">
                     <img
                       src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
                       v-if=" imagesAsURL === null "
@@ -153,11 +153,16 @@ export default {
 </script>
 
 <style>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
-}
-.fade-enter, .fade-leave-to{
-  opacity: 0;
-}
+    .fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
+    }
 
+    .fade-enter, .fade-leave-to{
+    opacity: 0;
+    }
+
+    .v-avatar.avatar-edit:hover {
+        cursor: pointer;
+        opacity: 0.8;
+    }
 </style>

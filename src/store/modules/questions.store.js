@@ -71,11 +71,15 @@ const actions = {
             });
     },
     uploadImage({ commit }, payload) {
-        const puta = new Promise((resolve,reject) => {
+        const request = new Promise((resolve,reject) => {
             try {
                 const storageRef = storage.ref()
                 const file = payload.images;
-                const images = storageRef.child(file.name).put(file)
+                const prefix = 'question';
+                const questionId = payload.id;
+                const suffix = payload.knowledge.replace('.', '-');
+                const format = `questions/${prefix}-${questionId}-${suffix}`;
+                storageRef.child(format).put(file)
                     .then(snapshot => {
                         console.log("Uploaded a file!: ", snapshot)
                         snapshot.ref.getDownloadURL().then(downloadURL => {
@@ -84,14 +88,14 @@ const actions = {
                         });
                     })
                     .catch(error => {
-                        console.error("Error uploading file",error);
+                        console.error("Error uploading file", error);
                         resolve(error);
                     });
             } catch{
-                reject("yuuiijioj");
+                reject();
             }
         });
-        return puta;
+        return request;
     },
     editQuestion({ commit, dispatch }, payload) {
         commit('setLoading', true);
