@@ -99,10 +99,18 @@
                       </v-row>
                       <v-row justify="center">
                         <v-col cols="12">
-                          <v-file-input chips multiple label="Imagem" v-model="images" />
+                          <v-file-input
+                            chips
+                            clearable
+                            multiple
+                            label="Imagem"
+                            placeholder="Escolha uma imagem"
+                            v-model="images"
+                            @change="checkImageType"
+                            accept='image/png, image/jpeg, image/bmp' />
                         </v-col>
                       </v-row>
-                      <v-content v-if="images.length != 0">
+                      <v-content v-if="images && images.length != 0">
                         <v-row justify="center">
                           <v-radio-group v-model="imageSize" row>
                             <v-radio label="1x" value="1x"></v-radio>
@@ -259,215 +267,218 @@ import VueMarkdown from "vue-markdown";
 require("vue-markdown");
 
 export default {
-  components: {
-    Editor,
-    "vue-markdown": VueMarkdown
-  },
-  data() {
-    return {
-      letters: ["A", "B", "C", "D"],
-      images: [],
-      imagesAsURL: "",
-      imageSize: "1x",
-      confirmTitle: false,
-      questionDescription: "",
-      e1: 1,
-      test: null,
-      columns: null,
-      radios: "",
-      multipleAnswer: false,
-      auxTitle: [],
-      chips: [],
-      items: [],
-      answers: [
-        { text: "", ansId: "radio-1", value: false },
-        { text: "", ansId: "radio-2", value: false },
-        { text: "", ansId: "radio-3", value: false },
-        { text: "", ansId: "radio-4", value: false }
-      ],
-      id: "",
-      subject: "",
-      knowledge: "",
-      knowledgePWR: "",
-      knowledgeBWR: "",
-      subjectItems: [
-        "Teoria do Reator",
-        "Termodinâmica",
-        "Instrumentação e Controle",
-        "Válvulas e Bombas",
-        "Eletricidade",
-        "Mecânica dos Fluidos",
-        "Tratamento Qúimico Refrigerante",
-        "Análise Integrada",
-        "Instrumentação Nuclear",
-        "Física Nuclear",
-        "Transferência de Calor",
-        "Materiais"
-      ],
-      number: 1
-    };
-  },
-  computed: {
-    formIsValid() {
-      return (
-        this.id !== "" &&
-        this.knowledge !== "" &&
-        this.knowledgePWR !== "" &&
-        this.knowledgeBWR !== "" &&
-        this.subject !== ""
-      );
-    }
-  },
-  watch: {
-    e1(val) {
-      console.log(val);
+    components: {
+        Editor,
+        "vue-markdown": VueMarkdown
     },
-    images(val) {
-      console.log("images: ", val.length);
-    },
-    number(val) {
-      if (this.number > 1) {
-        this.answers.forEach(element => {
-          let aux = [];
-          for (var i = 0; i < this.number; i++) {
-            aux.push({ title: "", answerDescription: "" });
-          }
-          element.text = aux;
-        });
-        this.confirmTitle = true;
-      } else {
-        this.answers.forEach(element => {
-          element.text = "";
-        });
-        this.confirmTitle = false;
-      }
-    },
-    auxTitle(val) {
-      this.answers.forEach(element => {
-        for (var i = 0; i < this.number; i++) {
-          element.text[i].title = this.auxTitle[i];
-        }
-      });
-    },
-    radios(val) {
-      console.log("1");
-      this.answers.forEach(element => {
-        console.log("2");
-
-        if (element.ansId === val) {
-          console.log("3");
-
-          element.value = true;
-        } else {
-          console.log("4");
-
-          element.value = false;
-        }
-      });
-    }
-  },
-  methods: {
-    decreaseColumns() {
-      if (this.number > 1) this.number--;
-    },
-    increaseColumns() {
-      if (this.number < 5) this.number++;
-    },
-    updateData(variable) {
-      this.questionDescription = variable;
-    },
-    onCreateQuestion() {
-      console.log("value: ", this.answers[1].value);
-
-      if (typeof this.images[0] !== "undefined") {
-        const imageToUpload = { images: this.images[0] };
-        var URL = this.$store.dispatch("uploadImage", imageToUpload);
-        URL.then(result => {
-          this.imagesAsURL = result;
-          console.log("Image as URL: ", this.imagesAsURL);
-          const questionData = {
-            id: this.id,
-            subject: this.subject,
-            questionDescription: this.questionDescription,
-            knowledge: this.knowledge,
-            knowledgePWR: this.knowledgePWR,
-            knowledgeBWR: this.knowledgeBWR,
-            answers: this.answers,
-            images: this.imagesAsURL,
-            imageSize: this.imageSize,
-          };
-
-          let aux = this.$store.dispatch("createQuestion", questionData);
-          aux.then(() => {
-            this.setInitialData();
-            this.close();
-          });
-        });
-      } else {
-        const questionData = {
-          id: this.id,
-          subject: this.subject,
-          questionDescription: this.questionDescription,
-          knowledge: this.knowledge,
-          knowledgePWR: this.knowledgePWR,
-          knowledgeBWR: this.knowledgeBWR,
-          answers: this.answers,
-          images: "",
-          imageSize: this.imageSize,
+    data() {
+        return {
+            letters: ["A", "B", "C", "D"],
+            images: [],
+            imagesAsURL: "",
+            imageSize: "1x",
+            confirmTitle: false,
+            questionDescription: "",
+            e1: 1,
+            test: null,
+            columns: null,
+            radios: "",
+            multipleAnswer: false,
+            auxTitle: [],
+            chips: [],
+            items: [],
+            answers: [
+                { text: "", ansId: "radio-1", value: false },
+                { text: "", ansId: "radio-2", value: false },
+                { text: "", ansId: "radio-3", value: false },
+                { text: "", ansId: "radio-4", value: false }
+            ],
+            id: "",
+            subject: "",
+            knowledge: "",
+            knowledgePWR: "",
+            knowledgeBWR: "",
+            subjectItems: [
+                "Teoria do Reator",
+                "Termodinâmica",
+                "Instrumentação e Controle",
+                "Válvulas e Bombas",
+                "Eletricidade",
+                "Mecânica dos Fluidos",
+                "Tratamento Qúimico Refrigerante",
+                "Análise Integrada",
+                "Instrumentação Nuclear",
+                "Física Nuclear",
+                "Transferência de Calor",
+                "Materiais"
+            ],
+            number: 1
         };
+    },
+    computed: {
+        formIsValid() {
+            return (
+                this.id !== "" &&
+                this.knowledge !== "" &&
+                this.knowledgePWR !== "" &&
+                this.knowledgeBWR !== "" &&
+                this.subject !== ""
+            );
+        }
+    },
+    watch: {
+        e1(val) {
+            console.log(val);
+        },
+        images(val) {
+            console.log("images: ", val.length);
+        },
+        number(val) {
+            if (this.number > 1) {
+            this.answers.forEach(element => {
+                let aux = [];
+                for (var i = 0; i < this.number; i++) {
+                    aux.push({ title: "", answerDescription: "" });
+                }
+                element.text = aux;
+            });
+            this.confirmTitle = true;
+            } else {
+                this.answers.forEach(element => {
+                    element.text = "";
+                });
+                this.confirmTitle = false;
+            }
+        },
+        auxTitle(val) {
+            this.answers.forEach(element => {
+                for (var i = 0; i < this.number; i++) {
+                    element.text[i].title = this.auxTitle[i];
+                }
+            });
+        },
+        radios(val) {
+            this.answers.forEach(element => {
+                if (element.ansId === val) {
+                    element.value = true;
+                } else {
+                    element.value = false;
+                }
+            });
+        }
+    },
+    methods: {
+        decreaseColumns() {
+            if (this.number > 1) this.number--;
+        },
+        increaseColumns() {
+            if (this.number < 5) this.number++;
+        },
+        updateData(variable) {
+            this.questionDescription = variable;
+        },
+        onCreateQuestion() {
+            console.log("value: ", this.answers[1].value);
 
-        let aux = this.$store.dispatch("createQuestion", questionData);
-        aux.then(() => {
-          this.setInitialData();
-          this.close();
-        });
-      }
-    },
-    setInitialData() {
-      this.confirmTitle = false;
-      this.questionDescription = "";
-      this.imageSize = "1x";
-      this.e1 = 1;
-      this.test = null;
-      this.columns = null;
-      this.radios = "aaaa";
-      this.multipleAnswer = false;
-      this.auxTitle = [];
-      this.chips = [];
-      this.items = [];
-      this.answers = [
-        { text: [], ansId: "radio-1", value: false },
-        { text: [], ansId: "radio-2", value: false },
-        { text: [], ansId: "radio-3", value: false },
-        { text: [], ansId: "radio-4", value: false }
-      ];
-      this.id = "";
-      this.subject = "";
-      this.knowledge = "";
-      this.knowledgePWR = "";
-      this.knowledgeBWR = "";
-      this.subjectItems = [
-        "Teoria do Reator",
-        "Termodinâmica",
-        "Instrumentação e Controle",
-        "Válvulas e Bombas",
-        "Eletricidade",
-        "Mecânica dos Fluidos",
-        "Tratamento Qúimico Refrigerante",
-        "Análise Integrada",
-        "Instrumentação Nuclear",
-        "Física Nuclear",
-        "Transferência de Calor",
-        "Materiais"
-      ];
-      this.number = 0;
-      this.images = [];
-      this.imagesAsBase64 = "";
-    },
-    close() {
-      this.setInitialData();
-      this.$emit("closeDialogNew");
+            if (typeof this.images[0] !== "undefined") {
+                const imageToUpload = { id: this.id, knowledge: this.knowledge, images: this.images[0] };
+                var URL = this.$store.dispatch("uploadImage", imageToUpload);
+                URL.then(result => {
+                    this.imagesAsURL = result;
+                    const questionData = {
+                        id: this.id,
+                        subject: this.subject,
+                        questionDescription: this.questionDescription,
+                        knowledge: this.knowledge,
+                        knowledgePWR: this.knowledgePWR,
+                        knowledgeBWR: this.knowledgeBWR,
+                        answers: this.answers,
+                        images: this.imagesAsURL,
+                        imageSize: this.imageSize,
+                    };
+
+                    let aux = this.$store.dispatch("createQuestion", questionData);
+                    aux.then(() => {
+                        this.setInitialData();
+                        this.close();
+                    });
+                });
+            } else {
+                const questionData = {
+                    id: this.id,
+                    subject: this.subject,
+                    questionDescription: this.questionDescription,
+                    knowledge: this.knowledge,
+                    knowledgePWR: this.knowledgePWR,
+                    knowledgeBWR: this.knowledgeBWR,
+                    answers: this.answers,
+                    images: "",
+                    imageSize: this.imageSize,
+                };
+
+                let aux = this.$store.dispatch("createQuestion", questionData);
+                aux.then(() => {
+                    this.setInitialData();
+                    this.close();
+                });
+            }
+        },
+        setInitialData() {
+            this.confirmTitle = false;
+            this.questionDescription = "";
+            this.imageSize = "1x";
+            this.e1 = 1;
+            this.test = null;
+            this.columns = null;
+            this.radios = "aaaa";
+            this.multipleAnswer = false;
+            this.auxTitle = [];
+            this.chips = [];
+            this.items = [];
+            this.answers = [
+                { text: [], ansId: "radio-1", value: false },
+                { text: [], ansId: "radio-2", value: false },
+                { text: [], ansId: "radio-3", value: false },
+                { text: [], ansId: "radio-4", value: false }
+            ];
+            this.id = "";
+            this.subject = "";
+            this.knowledge = "";
+            this.knowledgePWR = "";
+            this.knowledgeBWR = "";
+            this.subjectItems = [
+                "Teoria do Reator",
+                "Termodinâmica",
+                "Instrumentação e Controle",
+                "Válvulas e Bombas",
+                "Eletricidade",
+                "Mecânica dos Fluidos",
+                "Tratamento Qúimico Refrigerante",
+                "Análise Integrada",
+                "Instrumentação Nuclear",
+                "Física Nuclear",
+                "Transferência de Calor",
+                "Materiais"
+            ];
+            this.number = 0;
+            this.images = [];
+            this.imagesAsBase64 = "";
+        },
+        checkImageType(event) {
+            if(event && event[0] && event[0].type) {
+                if(!event[0].type.match(/image.*/)) {
+                    alert('O arquivo inserido NÃO é uma imagem!');
+                    this.images = [];
+                } else if (event[0].size > 2000000) {
+                    alert('O tamanho da imagem deve ser no MÁXIMO 2 MB!');
+                    this.images = [];
+                }
+            }
+        },
+        close() {
+            this.setInitialData();
+            this.$emit("closeDialogNew");
+        }
     }
-  }
 };
 </script>
