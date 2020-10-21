@@ -83,6 +83,15 @@
           <v-spacer/>
 
           <v-btn
+            color="warning"
+            text
+            @click="moveStorage()">
+              Move images
+          </v-btn>
+
+          <v-spacer/>
+
+          <v-btn
             color="primary"
             text
             @click="submit()"
@@ -147,6 +156,12 @@ export default {
       }
       this.$store.dispatch("updateUser", updateChanges)
       this.$router.push("/")
+    },
+    moveStorage() {
+      this.$store.dispatch("moveImages")
+        .then(() => {
+            alert('Moved!');
+        });
     }
   }
 };

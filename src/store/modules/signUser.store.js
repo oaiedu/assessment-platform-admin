@@ -163,6 +163,25 @@ const actions = {
     },
     reset({ commit }) {
         commit('RESET');
+    },
+    moveImages(state) {
+        return new Promise((resolve, reject) => {
+            try {
+                const storageRef = storage.ref();
+                const check = 'keyboard';
+                storageRef.child('').listAll().then(image => {
+                    const items = image.items;
+
+                    items.forEach(i => {
+                        if(i.location.path.includes(check)) {
+                            console.log(i);
+                        }
+                    })
+                });
+            } catch {
+                reject();
+            }
+        });
     }
 }
 
