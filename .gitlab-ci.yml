@@ -1,0 +1,76 @@
+image: node:12-13.0-alpine
+
+before_script:
+    - npm i -g firebase-tools
+
+deploy-functions:
+    stage: deploy
+    script:
+        - cd functions
+        - npm install
+        - cd ..
+        - firebase use default
+        - firebase deploy --only functions --token $FIREBASE_TOKEN
+    only:
+        refs:
+            - master
+        changes:
+            - functions/**/*
+
+deploy-firestore:
+    stage: deploy
+    script:
+        - firebase use default
+        - firebase deploy --only firestore --token $FIREBASE_TOKEN
+    only:
+        refs:
+            - master
+        changes:
+            - firestore.rules
+            - firestore.indexes.json
+
+prod-hosting:
+    stage: deploy
+    script:
+        - npm run build
+        - firebase use default
+        - firebase deploy --only hosting --token $FIREBASE_TOKEN
+    only:
+        refs:
+            - master
+
+dev-hosting:
+    stage: deploy
+    script:
+        - npm run build
+        - firebase use develop
+        - firebase deploy --only hosting --token $FIREBASE_TOKEN
+    only:
+        refs:
+            - develop
+
+dev-deploy-functions:
+    stage: deploy
+    script:
+        - cd functions
+        - npm install
+        - cd ..
+        - firebase use develop
+        - firebase deploy --only functions --token $FIREBASE_TOKEN
+    only:
+        refs:
+            - develop
+        changes:
+            - functions/**/*
+
+dev-deploy-firestore:
+    stage: deploy
+    script:
+        - firebase use develop
+        - firebase deploy --only firestore --token $FIREBASE_TOKEN
+    only:
+        refs:
+            - develop
+        changes:
+            - firestore.rules
+            - firestore.indexes.json
