@@ -32,7 +32,8 @@ deploy-firestore:
 prod-hosting:
     stage: deploy
     script:
-        - npm run build
+        - yarn
+        - yarn build
         - firebase use default
         - firebase deploy --only hosting --token $FIREBASE_TOKEN
     only:
@@ -42,7 +43,8 @@ prod-hosting:
 dev-hosting:
     stage: deploy
     script:
-        - npm run build
+        - yarn
+        - yarn build
         - firebase use develop
         - firebase deploy --only hosting --token $FIREBASE_TOKEN
     only:
