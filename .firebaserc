@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "pwr-quiz-generator"
+    "default": "pwr-quiz-generator",
+    "develop": "pwr-quiz-generator-develop"
   }
 }
