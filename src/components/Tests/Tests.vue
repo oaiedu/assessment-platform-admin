@@ -30,7 +30,7 @@
             class="elevation-1"
             @page-count="pageCount = $event"
           >
-            <template small v-slot:item.actions="{ item }">
+            <template small v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
                 <router-link class="mr-6" style="text-decoration: none;" :to="{name:'test',params:{testId:item.id}}" replace>
                   <v-icon>mdi-pdf-box</v-icon>
@@ -78,63 +78,66 @@
 </template>
 
 <script>
-import NewTest from './NewTestForm'
-import HtmlTest from './HtmlToPdfTest'
-import EditTest from './EditTest'
+    import NewTest from './NewTestForm'
+    import HtmlTest from './HtmlToPdfTest'
+    import EditTest from './EditTest'
 
 export default {
-  components: {
-    NewTest,
-    HtmlTest,
-    EditTest
-  },
-  data() {
-    return {
-      search: "",
-      deleteTestSnackBar: false,
-      dialogNewTest: false,
-      dialogHtmlTest: false,
-      dialogEditTest: false,
-      page: 1,
-      pageCount: 15,
-      itemsPerPage: 10,
-      selectedTest: null,
-      headers: [
-        { text: "Nome", align: "start",  value: "data.title" },
-        { text: "Questões", align: "left",  value: "data.questions.length" },
-        { text: "Tipo", align: "left",  value: "data.type" },
-        { text: "Ações", align:"right", value: "actions", sortable: false }
-      ]
-    };
-  },
-  computed: {
-    loading () {
-        return this.$store.getters.loading
-        this.$store.dispatch('clearLoading')
+    components: {
+        NewTest,
+        HtmlTest,
+        EditTest
     },
-    tests() {
-      return this.$store.getters.loadedTests;
-    }
-  },
-  methods: {
-    editTest(item){
-      this.selectedTest = item;
-      this.dialogEditTest = true;
+    data() {
+        return {
+            search: "",
+            deleteTestSnackBar: false,
+            dialogNewTest: false,
+            dialogHtmlTest: false,
+            dialogEditTest: false,
+            page: 1,
+            pageCount: 15,
+            itemsPerPage: 10,
+            selectedTest: null,
+            headers: [
+                { text: "Nome", align: "start",  value: "data.title" },
+                { text: "Questões", align: "left",  value: "data.questions.length" },
+                { text: "Tipo", align: "left",  value: "data.type" },
+                { text: "Ações", align:"right", value: "actions", sortable: false }
+            ]
+        }
     },
-    deleteTest(id) {
-      let aux = this.$store.dispatch("deleteTest", id);
-      aux.then(()=>{
-        this.deleteTestSnackBar = false;
+    computed: {
+        loading () {
+            return this.$store.getters.loading;
+            this.$store.dispatch('clearLoading');
+        },
+        tests() {
+            return this.$store.getters.loadedTests;
+        }
+    },
+    methods: {
+        editTest(item){
+            this.selectedTest = item;
+            this.dialogEditTest = true;
+        },
+        deleteTest(id) {
+            let aux = this.$store.dispatch("deleteTest", id);
+            aux.then(()=>{
+                this.deleteTestSnackBar = false;
+                this.loadTests();
+            });
+        },
+        loadTests() {
+            console.log("é mano");
+            let aux = this.$store.dispatch("loadedTests");
+            aux.then(()=>{
+                return aux;
+            });
+        }
+    },
+    mounted() {
         this.loadTests();
-      })
-    },
-    loadTests() {
-      console.log("é mano")
-      let aux = this.$store.dispatch("loadedTests");
-      aux.then(()=>{
-        return aux
-      })
     }
-  }
 };
 </script>

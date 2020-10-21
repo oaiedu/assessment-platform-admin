@@ -31,7 +31,7 @@
             class="elevation-1"
             @page-count="pageCount = $event"
           >
-            <template small v-slot:item.actions="{ item }">
+            <template small v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
                 <v-icon class="mr-2" @click="editPaper(item)">mdi-pencil</v-icon>
                 <v-icon @click="deletePaperSnackBar = true; deleteSelect = item" class="mr-2">mdi-delete</v-icon>
@@ -71,62 +71,65 @@
 </template>
 
 <script>
-import NewPaper from './CreatePaper'
-import EditPaper from './EditPaper'
+    import NewPaper from './CreatePaper'
+    import EditPaper from './EditPaper'
 
-export default {
-  components: {
-    NewPaper,
-    EditPaper
-  },
-  data: () => ({
-    dialogNewPaper: false,
-    dialogEditPaper: false,
-    selectedEdit: {},
-    headers: [
-      { text: "Nome", align: "left",  value: "data.name" },
-      { text: "Ações", align:"right", value: "actions", sortable: false }
-    ],
-    page: 1,
-    pageCount: 15,
-    itemsPerPage: 10,
-    search: "",
-    deletePaperSnackBar: false,
-    deleteSelect: "",
-  }),
-  computed: {
-    loading () {
-        return this.$store.getters.loading
-        this.$store.dispatch('clearLoading')
-    },
-    papers () {
-      return this.$store.getters.loadedPapers
+    export default {
+        components: {
+            NewPaper,
+            EditPaper
+        },
+        data: () => ({
+            dialogNewPaper: false,
+            dialogEditPaper: false,
+            selectedEdit: {},
+            headers: [
+                { text: "Nome", align: "left",  value: "data.name" },
+                { text: "Ações", align:"right", value: "actions", sortable: false }
+            ],
+            page: 1,
+            pageCount: 15,
+            itemsPerPage: 10,
+            search: "",
+            deletePaperSnackBar: false,
+            deleteSelect: "",
+        }),
+        computed: {
+            loading () {
+                return this.$store.getters.loading
+                this.$store.dispatch('clearLoading')
+            },
+            papers () {
+                return this.$store.getters.loadedPapers
+            }
+        },
+        methods: {
+            editPaper(val){
+                this.selectedEdit = val;
+                this.loadPapers();
+                this.dialogEditPaper = true;
+            },
+            loadPapers() {
+                console.log("é mano")
+                let aux = this.$store.dispatch("loadedPapers");
+                aux.then(()=>{
+                    return aux;
+                })
+            },
+            setLoader(){
+                this.loadQuestions();
+            },
+            deletePaper(id) {
+                console.log(id);
+                let aux = this.$store.dispatch("deletePaper", id);
+                aux.then(()=>{
+                    this.deletePaperSnackBar = false;
+                    this.loadPapers();
+                });
+            }
+        },
+        mounted() {
+            this.loadPapers();
+        }
     }
-  },
-  methods: {
-    editPaper(val){
-      this.selectedEdit = val;
-      this.loadPapers();
-      this.dialogEditPaper = true;
-    },
-    loadPapers() {
-      console.log("é mano")
-      let aux = this.$store.dispatch("loadedPapers");
-      aux.then(()=>{
-        return aux
-      })
-    },
-    setLoader(){
-      this.loadQuestions()
-    },
-    deletePaper(id) {
-      console.log(id);
-      let aux = this.$store.dispatch("deletePaper", id);
-      aux.then(()=>{
-        this.deletePaperSnackBar = false;
-        this.loadPapers();
-      })
-    }
-  }
-}
 </script>
