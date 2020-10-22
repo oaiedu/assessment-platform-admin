@@ -1,4 +1,8 @@
 import { auth, db, storage } from '../../main';
+import * as firebase from 'firebase';
+
+const secondary = firebase.initializeApp(require('../../../.env'), 'secondary');
+const secDB = secondary.firestore();
 
 const initialState = () => ({
     user: null,
@@ -28,9 +32,9 @@ const actions = {
             try {
                 const storageRef = storage.ref();
                 const file = payload.images;
-                const prefix = 'avatar';
-                const suffix = auth.currentUser.uid;
-                const format = `users/${prefix}-${suffix}`;
+                const name = 'avatar';
+                const subfolder = auth.currentUser.uid;
+                const format = `users/${subfolder}/${name}`;
                 storageRef.child(format).put(file)
                     .then(function (snapshot) {
                         console.log("Uploaded a file!: ", snapshot)
@@ -168,16 +172,61 @@ const actions = {
         return new Promise((resolve, reject) => {
             try {
                 const storageRef = storage.ref();
-                const check = 'keyboard';
-                storageRef.child('').listAll().then(image => {
-                    const items = image.items;
+                const format = `questions/`;
+                db.collection('questions').get()
+                    .then(snapshot => {
+                        snapshot.forEach(doc => {
+                            // console.log(doc.data().IMAGENS);
+                            const image = doc.data().IMAGENS;
+                            const childImage = image.split('?alt=media')[0].split('/o/')[1];
+                            const child = decodeURIComponent(childImage);
+                            const format = `questions/question-${doc.id}-${doc.data().CONHECIMENTO.replace('.', '-')}`;
+                            if(child !== format) {
+                                storageRef.child(child).getDownloadURL().then(url => {
+                                    console.log(doc.data().IMAGENS);
+                                    secDB.collection('users').get()
+                                        .then(snapshot => {
+                                            snapshot.forEach(doc => {
+                                                console.log(doc.id);
+                                            })
+                                        })
+                                    // const blob = fetch(url, {
+                                    //     method: 'GET'
+                                    // })
+                                    // const xhr = new XMLHttpRequest();
+                                    // xhr.open('GET', url, true);
+                                    // xhr.responseType = "blob";
+                                    // console.log('here');
+                                    // xhr.onload = event => {
+                                    //     console.log(this.response);
+                                    // }
+                                    // xhr.send();
 
-                    items.forEach(i => {
-                        if(i.location.path.includes(check)) {
-                            console.log(i);
-                        }
+                                    // storageRef.child(format).put(url)
+                                    //     .then(() => {
+                                    //         storageRef.child(format).getDownloadURL().then(url => {
+                                    //             doc.data().IMAGENS = url;
+                                    //             db.collection('questions').doc(doc.id).set(doc.data());
+                                    //         });
+                                    //     });
+                                });
+                            }
+                        });
                     })
-                });
+                    .catch(error => {
+                        alert(error);
+                    });
+                // const storageRef = storage.ref();
+                // const check = 'keyboard';
+                // storageRef.child('').listAll().then(image => {
+                //     const items = image.items;
+
+                //     items.forEach(i => {
+                //         if(i.location.path.includes(check)) {
+                //             console.log(i);
+                //         }
+                //     })
+                // });
             } catch {
                 reject();
             }
