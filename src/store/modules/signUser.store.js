@@ -144,12 +144,10 @@ const actions = {
         let user = {};
         db.collection("users").get().then(querySnapshot => {
             querySnapshot.forEach(doc => {
-                if( doc.id === payload) {
-                    console.log("deu certo");
+                if(doc.id === payload) {
                     user = doc.data();
                 }
-            })
-            console.log("USer Info: ", user);
+            });
             commit('setUserInfo', user);
             commit('setLoading', false);
         });
@@ -183,13 +181,13 @@ const actions = {
                             const format = `questions/question-${doc.id}-${doc.data().CONHECIMENTO.replace('.', '-')}`;
                             if(child !== format) {
                                 storageRef.child(child).getDownloadURL().then(url => {
-                                    console.log(doc.data().IMAGENS);
-                                    secDB.collection('users').get()
-                                        .then(snapshot => {
-                                            snapshot.forEach(doc => {
-                                                console.log(doc.id);
-                                            })
-                                        })
+                                    console.log(image);
+                                    // secDB.collection('users').get()
+                                    //     .then(snapshot => {
+                                    //         snapshot.forEach(doc => {
+                                    //             console.log(doc.id);
+                                    //         })
+                                    //     })
                                     // const blob = fetch(url, {
                                     //     method: 'GET'
                                     // })
