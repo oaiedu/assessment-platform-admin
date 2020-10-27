@@ -3,11 +3,10 @@
     <v-form ref="formRef" @submit.prevent="onEditTest()">
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="close()">
-          <v-icon>mdi-close</v-icon>
+            <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
-          <v-btn dark text type="submit">Editar Teste</v-btn>
-        </v-toolbar-items>
+        <v-btn dark text type="submit" height="100">Editar Teste</v-btn>
       </v-toolbar>
       <v-row>
         <v-col>
@@ -221,13 +220,20 @@ export default {
           this.testItems.push(element.id);
         });
 
+        const now = new Date();
+        const editedHour = parseInt(now.toLocaleTimeString().split(':')[0]);
+        const isAfterNoon = now.toLocaleString().split(':')[2].includes('PM');
+        const editedDate = now.toISOString().split('T')[0] + 'T'
+            + (isAfterNoon ? (editedHour + 12) : (editedHour < 10 ? '0' + editedHour : editedHour))
+            + now.toISOString().split('T')[1].slice(2);
+
         const testData = {
           title: this.testTitle,
           questions: this.testItems,
           type: this.testType,
           user: this.test.data.user,
           created: this.test.data.created,
-          edited: `${this.$store.getters.userInfo.name}`+'/'+`${Date()}`,
+          edited: `${this.$store.getters.userInfo.name}`+'/'+`${editedDate}`,
           purpose: this.purpose,
           id: this.test.id
         }
@@ -236,7 +242,6 @@ export default {
         this.$store.dispatch("updateTest", testData);
         this.$store.dispatch("loadedTests");
       }
-
     }
   }
 };
