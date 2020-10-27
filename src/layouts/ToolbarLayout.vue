@@ -4,16 +4,20 @@
       <v-content v-if="authUser !== null">
         <v-list>
           <v-list-item class="px-2">
-            <v-list-item-avatar>
-              <img
-                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-                v-if=" user.profileImages === '' || user.profileImages === null "
-              />
-              <img :src="user.profileImages" v-else />
-            </v-list-item-avatar>
+            <v-list-item>
+                <v-row justify="center">
+                    <v-avatar size="150">
+                        <img
+                            src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                            v-if="user.profileImages === '' || user.profileImages === null"
+                        />
+                        <img :src="user.profileImages" v-else />
+                    </v-avatar>
+                </v-row>
+            </v-list-item>
           </v-list-item>
 
-          <v-list-item link>
+          <v-list-item link to="/profile">
             <v-list-item-content>
               <v-list-item-title class="title">{{user.name}}</v-list-item-title>
               <v-list-item-subtitle>{{user.email}}</v-list-item-subtitle>
@@ -37,7 +41,7 @@
         </v-list>
       </v-content>
     </v-navigation-drawer>
-    <v-app-bar app color="light-blue darken-4" dark dense absolute>
+    <v-app-bar app color="blue darken-1" dark dense absolute>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" v-if="authUser !== null"></v-app-bar-nav-icon>
       <v-toolbar-title>PWR Quiz Generator</v-toolbar-title>
       <v-spacer></v-spacer>
