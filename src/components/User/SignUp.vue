@@ -5,11 +5,23 @@
                 <v-form @submit.prevent="onSignup">
                     <v-row>
                       <v-text-field
+                          name="name"
+                          label="Name"
+                          id="name"
+                          v-model="name"
+                          type="text"
+                          :rules='required'
+                          required>
+                      </v-text-field>
+                    </v-row>
+                    <v-row>
+                      <v-text-field
                           name="email"
                           label="Email"
                           id="email"
                           v-model="email"
                           type="email"
+                          :rules='required'
                           required>
                       </v-text-field>
                     </v-row>
@@ -20,6 +32,7 @@
                           id="password"
                           v-model="password"
                           type="password"
+                          :rules='required'
                           required>
                       </v-text-field>
                     </v-row>
@@ -30,7 +43,7 @@
                           id="confirmPassword"
                           v-model="confirmPassword"
                           type="password"
-                          :rules="[comparePassword]">
+                          :rules="[...required, comparePassword]">
                       </v-text-field>
                     </v-row>
                     <v-row>
@@ -49,43 +62,47 @@
 
 <script>
 export default {
-  data () {
-    return {
-      email: '',
-      password: '',
-      confirmPassword: ''
-    }
-  },
-  computed: {
-    comparePassword () {
-      return this.password !== this.confirmPassword ? 'Passwords do not match' : ''
+    data () {
+        return {
+            name: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            required: [
+                value => (value && value.length > 0) || 'Este campo é obrigatório!'
+            ]
+        }
     },
-    user () {
-      return this.$store.getters.user
+    computed: {
+        comparePassword() {
+            return this.password === this.confirmPassword || 'As senhas não correspondem!';
+        },
+        user() {
+            return this.$store.getters.user
+        },
+        error() {
+            return this.$store.getters.error
+        },
+        loading() {
+            return this.$store.getters.loading
+            this.$store.dispatch('clearLoading')
+        }
     },
-    error () {
-        return this.$store.getters.error
+    watch: {
+        user(value) {
+            if (value !== null & value !== undefined) {
+                this.$router.push('/');
+            }
+        }
     },
-    loading () {
-        return this.$store.getters.loading
-        this.$store.dispatch('clearLoading')
-    }
-  },
-  watch: {
-    user (value) {
-      if (value !== null & value !== undefined) {
-          this.$router.push('/')
-      }
-    }
-  },
-  methods: {
-    onSignup () {
-      this.$store.dispatch('signUserUp', {email: this.email, password: this.password})
-    },
-    onDismissed () {
-        console.log('Dismissed Alert!')
-        this.$store.dispatch('clearError')
-    }
+    methods: {
+        onSignup() {
+            this.$store.dispatch('signUserUp', {name: this.name, email: this.email, password: this.password});
+        },
+        onDismissed() {
+            console.log('Dismissed Alert!');
+            this.$store.dispatch('clearError');
+        }
   }
 }
 </script>

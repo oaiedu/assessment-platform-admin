@@ -51,7 +51,7 @@ const actions = {
         let questions = [];
         db.collection('questions').get().then(querySnapshot => {
             querySnapshot.forEach(doc => {
-                questions.push(Object.assign({ id: doc.id, data: doc.data() }));
+                questions.push(Object.assign({ id: doc.data().IQ, data: doc.data() }));
             });
             commit('setLoadedQuestions', questions);
             commit('setLoading', false);
@@ -60,7 +60,18 @@ const actions = {
     deleteQuestion({ commit }, payload) {
         commit('setLoading', true);
         const id = payload;
-        return db.collection("questions").doc(id).delete()
+        return db.collection("questions").where('IQ', '==', id).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    doc.ref.delete();
+                    if(doc.data().IMAGENS && doc.data().IMAGENS.length > 0) {
+                        const image = doc.data().IMAGENS;
+                        const childImage = image.split('?alt=media')[0].split('/o/')[1];
+                        const child = decodeURIComponent(childImage);
+                        storage.ref().child(child).delete();
+                    }
+                });
+            })
             .then(() => {
                 commit('setLoading', false);
                 commit('deleteQuestion', id);
@@ -70,15 +81,14 @@ const actions = {
                 console.error("Error removing document: ", error);
             });
     },
-    uploadImage({ commit }, payload) {
+    uploadImageQuestion({ commit }, payload) {
         const request = new Promise((resolve,reject) => {
             try {
-                const storageRef = storage.ref()
+                const storageRef = storage.ref();
                 const file = payload.images;
-                const prefix = 'question';
-                const questionId = payload.id;
+                const questionIQ = payload.id;
                 const suffix = payload.knowledge.replace('.', '-');
-                const format = `questions/${prefix}-${questionId}-${suffix}`;
+                const format = `questions/question-${questionIQ}-${suffix}`;
                 storageRef.child(format).put(file)
                     .then(snapshot => {
                         console.log("Uploaded a file!: ", snapshot)
@@ -120,17 +130,22 @@ const actions = {
             question: payload.oldData.id + "-" + (payload.oldData.edited.length + 1)
         });
 
-        db.collection("questions").doc(question.id)
-            .update({
-                PERGUNTA: question.questionDescription,
-                DISCIPLINA: question.subject,
-                CONHECIMENTO: question.knowledge,
-                RELEVANCIA_OR: question.knowledgePWR,
-                RELEVANCIA_OSR: question.knowledgeBWR,
-                RESPOSTAS: question.answers,
-                IMAGENS: question.images,
-                TAMANHO_IMAGEM: question.imageSize,
-                edited: edition
+        db.collection("questions").where('IQ', '==', question.id).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    doc.ref.update({
+                        IQ: question.id,
+                        PERGUNTA: question.questionDescription,
+                        DISCIPLINA: question.subject,
+                        CONHECIMENTO: question.knowledge,
+                        RELEVANCIA_OR: question.knowledgePWR,
+                        RELEVANCIA_OSR: question.knowledgeBWR,
+                        RESPOSTAS: question.answers,
+                        IMAGENS: question.images,
+                        TAMANHO_IMAGEM: question.imageSize,
+                        edited: edition
+                    });
+                });
             })
             .then(() => {
                 dispatch("createdEditedQuestion", payload.oldData);
@@ -141,8 +156,10 @@ const actions = {
             });
     },
     createdEditedQuestion({ commit }, payload) {
+        commit('setLoading', true);
+
         const editedQuestion = {
-            id: payload.id,
+            id: payload.id + '-' + payload.edited.length,
             questionDescription: payload.questionDescription,
             subject: payload.subject,
             knowledge: payload.knowledge,
@@ -152,8 +169,9 @@ const actions = {
             images: payload.images,
             imageSize: payload.imageSize
         }
-        db.collection("edited questions").doc(editedQuestion.id + "-" + payload.edited.length)
-            .set({
+        db.collection("edited questions")
+            .add({
+                IQ: editedQuestion.id,
                 PERGUNTA: editedQuestion.questionDescription,
                 DISCIPLINA: editedQuestion.subject,
                 CONHECIMENTO: editedQuestion.knowledge,
@@ -172,9 +190,12 @@ const actions = {
             });
     },
     createQuestion({ commit }, payload) {
+        commit('setLoading', true);
+
         const question = {
             id: payload.id,
             data: {
+                IQ: payload.id,
                 PERGUNTA: payload.questionDescription,
                 DISCIPLINA: payload.subject,
                 CONHECIMENTO: payload.knowledge,
@@ -187,7 +208,7 @@ const actions = {
             }
         }
 
-        db.collection("questions").doc(question.id).set(question.data)
+        db.collection("questions").add(question.data)
             .then(() => {
                 commit('setLoading', false);
                 commit('createQuestion', question);

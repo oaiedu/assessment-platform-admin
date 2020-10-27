@@ -299,12 +299,19 @@
                         this.testItems.push(element.id);
                     });
 
+                    const now = new Date();
+                    const createdHour = parseInt(now.toLocaleTimeString().split(':')[0]);
+                    const isAfterNoon = now.toLocaleString().split(':')[2].includes('PM');
+                    const createdDate = now.toISOString().split('T')[0] + 'T'
+                        + (isAfterNoon ? (createdHour + 12) : (createdHour < 10 ? '0' + createdHour : createdHour))
+                        + now.toISOString().split('T')[1].slice(2);
+
                     const testData = {
                         title: this.testName,
                         questions: this.testItems,
                         type: this.testType,
                         user: this.$store.getters.userInfo.name,
-                        created: Date(),
+                        created: createdDate,
                         edited: "",
                         purpose: this.purpose
                     }

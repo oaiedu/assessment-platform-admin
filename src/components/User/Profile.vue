@@ -11,7 +11,7 @@
                   <v-file-input id="fileUpload" @change="sendImage()" v-model="avatarImage" style="visibility: hidden; max-height: 1px" />
                 </v-row>
                 <v-row justify="center">
-                  <v-avatar size="100" @click="addImage()" clickable :class="{ 'avatar-edit': this.$route.path == '/profile' }">
+                  <v-avatar size="150" @click="addImage()" clickable :class="{ 'avatar-edit': this.$route.path == '/profile' }">
                     <img
                       src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
                       v-if=" imagesAsURL === null "
@@ -28,9 +28,8 @@
           <v-text-field
             ref="nickName"
             v-model="nickName"
-            :rules="[() => !!nickName || 'This field is required']"
-            label="Nome completo"
-            placeholder="Fill with firebase"
+            :rules="[() => !!nickName || 'Este campo é obrigatório!']"
+            label="Nome"
             required
           ></v-text-field>
           <transition
@@ -83,6 +82,15 @@
           <v-spacer/>
 
           <v-btn
+            color="warning"
+            text
+            @click="moveStorage()">
+              Move images
+          </v-btn>
+
+          <v-spacer/>
+
+          <v-btn
             color="primary"
             text
             @click="submit()"
@@ -125,7 +133,7 @@ export default {
   },
   methods: {
     cancel(){
-      this.$router.push('/');
+      this.$router.back();
     },
     addImage() {
       document.getElementById("fileUpload").click();
@@ -147,6 +155,12 @@ export default {
       }
       this.$store.dispatch("updateUser", updateChanges)
       this.$router.push("/")
+    },
+    moveStorage() {
+      this.$store.dispatch("moveImages")
+        .then(() => {
+            alert('Moved!');
+        });
     }
   }
 };
@@ -154,11 +168,11 @@ export default {
 
 <style>
     .fade-enter-active, .fade-leave-active {
-    transition: opacity .5s;
+        transition: opacity .5s;
     }
 
     .fade-enter, .fade-leave-to{
-    opacity: 0;
+        opacity: 0;
     }
 
     .v-avatar.avatar-edit:hover {
