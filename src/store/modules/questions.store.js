@@ -81,7 +81,7 @@ const actions = {
                 console.error("Error removing document: ", error);
             });
     },
-    uploadImage({ commit }, payload) {
+    uploadImageQuestion({ commit }, payload) {
         const request = new Promise((resolve,reject) => {
             try {
                 const storageRef = storage.ref();
