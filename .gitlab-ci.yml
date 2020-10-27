@@ -1,4 +1,4 @@
-# image: node:12-13.0-alpine
+# image: node:12.13.0-alpine
 
 # before_script:
 #     - npm i -g firebase-tools
@@ -32,6 +32,7 @@
 # prod-hosting:
 #     stage: deploy
 #     script:
+#         - npm install
 #         - npm run build
 #         - firebase use default
 #         - firebase deploy --only hosting --token $FIREBASE_TOKEN
@@ -42,6 +43,7 @@
 # dev-hosting:
 #     stage: deploy
 #     script:
+#         - npm install
 #         - npm run build
 #         - firebase use develop
 #         - firebase deploy --only hosting --token $FIREBASE_TOKEN
