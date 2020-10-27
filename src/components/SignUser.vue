@@ -7,21 +7,23 @@
       <v-row justify="center" class="pb-4">
         <v-btn
           rounded
-          class="primary"
+          color="blue"
+          dark
           width="10vw"
-          @click="SignIn"
+          @click="SignUp"
         >
-          Sign In
+          Registrar-se
         </v-btn>
       </v-row>
       <v-row justify="center" class="pb-4">
         <v-btn
           rounded
-          class="primary"
+          color='blue-grey darken-1'
+          dark
           width="10vw"
-          @click="SignUp"
+          @click="SignIn"
         >
-          Sign Up
+          Entrar
         </v-btn>
       </v-row>
     </v-content>
