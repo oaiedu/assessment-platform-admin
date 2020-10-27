@@ -65,7 +65,7 @@ const actions = {
                         id: user.user.uid
                     }
                     const userInfo = {
-                        name: "",
+                        name: payload.name,
                         profileImages: "",
                         email: payload.email
                     }
@@ -75,14 +75,14 @@ const actions = {
                         profileImages: userInfo.profileImages,
                         email: userInfo.email
                     })
-                        .then(() => {
-                            console.log("Sucess User Firestore");
-                        })
-                        .catch(error => {
-                            commit('setLoading', false);
-                            commit('setError', error);
-                            console.error(error);
-                        });
+                    .then(() => {
+                        console.log("Sucess User Firestore");
+                    })
+                    .catch(error => {
+                        commit('setLoading', false);
+                        commit('setError', error);
+                        console.error(error);
+                    });
                     commit('setUser', newUser);
                     commit('setUserInfo', userInfo);
                     console.log('Success Auth');
