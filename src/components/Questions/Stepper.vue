@@ -381,7 +381,7 @@ export default {
             console.log("value: ", this.answers[1].value);
 
             if (typeof this.images[0] !== "undefined") {
-                const imageToUpload = { id: this.id, knowledge: this.knowledge, images: this.images[0] };
+                const imageToUpload = { id: this.id, images: this.images[0] };
                 var URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
                 URL.then(result => {
                     this.imagesAsURL = result;

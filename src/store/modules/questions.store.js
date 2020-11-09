@@ -87,8 +87,7 @@ const actions = {
                 const storageRef = storage.ref();
                 const file = payload.images;
                 const questionIQ = payload.id;
-                const suffix = payload.knowledge.replace('.', '-');
-                const format = `questions/question-${questionIQ}-${suffix}`;
+                const format = `questions/question-${questionIQ}`;
                 storageRef.child(format).put(file)
                     .then(snapshot => {
                         console.log("Uploaded a file!: ", snapshot)
