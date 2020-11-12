@@ -32,7 +32,8 @@ const actions = {
                 const storageRef = storage.ref();
                 const file = payload.images;
                 const paperId = payload.id;
-                const format = `documents/document-$${paperId}`;
+                const type = file.type.split('/')[1];
+                const format = `documents/document-$${paperId}.${type}`;
                 storageRef.child(format).put(file)
                     .then(snapshot => {
                         console.log("Uploaded a file!: ", snapshot)

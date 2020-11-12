@@ -34,16 +34,17 @@ const actions = {
                 const file = payload.images;
                 const name = 'avatar';
                 const subfolder = auth.currentUser.uid;
-                const format = `users/${subfolder}/${name}`;
+                const type = file.type.split('/')[1];
+                const format = `users/${subfolder}/${name}.${type}`;
                 storageRef.child(format).put(file)
-                    .then(function (snapshot) {
+                    .then(snapshot => {
                         console.log("Uploaded a file!: ", snapshot)
                         snapshot.ref.getDownloadURL().then(function (downloadURL) {
                             console.log('File available at', downloadURL);
                             resolve(downloadURL.toString())
                         });
                     })
-                    .catch(function (error) {
+                    .catch(error => {
                         console.error("Error uploading file", error);
                         resolve(error);
                     });
