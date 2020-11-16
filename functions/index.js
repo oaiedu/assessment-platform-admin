@@ -9,6 +9,23 @@ const db = admin.firestore();
 const storage = admin.storage().bucket();
 const auth = admin.auth();
 
+exports.scheduleFunction = functions.pubsub.schedule('2 * * * *').onRun(async context => {
+    // const data = [];
+
+    // await db.collection('events').get()
+    //     .then(snapshot => {
+    //         snapshot.forEach(doc => {
+    //             data.push(doc.data());
+    //         });
+    //     })
+    //     .catch(error => {
+    //         console.log(error);
+    //     });
+
+    // console.log('Finished...');
+    // console.log(data);
+});
+
 exports.backupAuth = functions.https.onRequest(async (req, res) => {
     const fileName = 'auth.json';
     const folderName = 'auth-backup';
