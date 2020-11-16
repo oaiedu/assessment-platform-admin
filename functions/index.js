@@ -7,6 +7,51 @@ admin.initializeApp();
 
 const db = admin.firestore();
 const storage = admin.storage().bucket();
+const auth = admin.auth();
+
+exports.backupAuth = functions.https.onRequest(async (req, res) => {
+    const fileName = 'auth.json';
+    const folderName = 'auth-backup';
+    const path = `../../${folderName}`;
+
+    await auth.listUsers()
+        .then(snapshot => {
+            const json = JSON.stringify(snapshot.users);
+
+            fs.mkdirSync(path, { recursive: true });
+            fs.writeFileSync(`${path}/${fileName}`, json);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    res.send('Data wrote into \'' + fileName + '\'');
+});
+
+exports.backupFirestore = functions.https.onRequest(async (req, res) => {
+    const collection = 'question requests';
+    const fileName = collection + '.json';
+    const folderName = 'firestore-backup';
+    const path = `../../${folderName}`;
+
+    const data = [];
+
+    await db.collection(collection).get()
+        .then(snapshot => {
+            snapshot.forEach(doc => {
+                data.push(doc.data());
+            });
+        })
+        .then(() => {
+            const json = JSON.stringify(data);
+
+            fs.mkdirSync(path, { recursive: true });
+            fs.writeFileSync(`${path}/${fileName}`, json);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    res.send('Data wrote into \'' + fileName + '\'');
+});
 
 exports.moveImages = functions.https.onRequest(async (req, res) => {
     const data = [];
@@ -50,7 +95,7 @@ exports.moveImages = functions.https.onRequest(async (req, res) => {
 });
 
 exports.compressFiles = functions.https.onRequest(async (req, res) => {
-    const folderName = 'storage-backup-dev';
+    const folderName = 'storage-backup';
     const collection = 'users';
     let counter = 0;
 
@@ -84,8 +129,8 @@ exports.compressFiles = functions.https.onRequest(async (req, res) => {
 
                 const zip = new AdmZip();
                 zip.addLocalFolder(path);
-                fs.mkdirSync('../../storage-bkp-dev', { recursive: true });
-                fs.writeFileSync(`../../storage-bkp-dev/storage.zip`, zip.toBuffer());
+                fs.mkdirSync('../../storage-bkp', { recursive: true });
+                fs.writeFileSync(`../../storage-bkp/storage.zip`, zip.toBuffer());
 
                 counter++;
                 if(counter === files.length - 1) {
