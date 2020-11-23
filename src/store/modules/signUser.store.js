@@ -170,62 +170,27 @@ const actions = {
     moveImages(state) {
         return new Promise((resolve, reject) => {
             try {
-                const storageRef = storage.ref();
-                const format = `questions/`;
-                db.collection('questions').get()
+                const cn = 'no one';
+                db.collection(cn).get()
                     .then(snapshot => {
                         snapshot.forEach(doc => {
-                            // console.log(doc.data().IMAGENS);
-                            const image = doc.data().IMAGENS;
-                            const childImage = image.split('?alt=media')[0].split('/o/')[1];
-                            const child = decodeURIComponent(childImage);
-                            const format = `questions/question-${doc.id}-${doc.data().CONHECIMENTO.replace('.', '-')}`;
-                            if(child !== format) {
-                                storageRef.child(child).getDownloadURL().then(url => {
-                                    console.log(image);
-                                    // secDB.collection('users').get()
-                                    //     .then(snapshot => {
-                                    //         snapshot.forEach(doc => {
-                                    //             console.log(doc.id);
-                                    //         })
-                                    //     })
-                                    // const blob = fetch(url, {
-                                    //     method: 'GET'
-                                    // })
-                                    // const xhr = new XMLHttpRequest();
-                                    // xhr.open('GET', url, true);
-                                    // xhr.responseType = "blob";
-                                    // console.log('here');
-                                    // xhr.onload = event => {
-                                    //     console.log(this.response);
-                                    // }
-                                    // xhr.send();
+                            if(doc.data().IQ) {
+                                console.log(doc.id);
+                            } else {
+                                const data = doc.data();
+                                const IQ = doc.id;
 
-                                    // storageRef.child(format).put(url)
-                                    //     .then(() => {
-                                    //         storageRef.child(format).getDownloadURL().then(url => {
-                                    //             doc.data().IMAGENS = url;
-                                    //             db.collection('questions').doc(doc.id).set(doc.data());
-                                    //         });
-                                    //     });
-                                });
+                                db.collection(cn).add({ ...data, IQ })
+                                    .then(() => {
+                                        doc.ref.delete();
+                                    })
+                                    .catch(console.log);
                             }
                         });
                     })
                     .catch(error => {
-                        alert(error);
-                    });
-                // const storageRef = storage.ref();
-                // const check = 'keyboard';
-                // storageRef.child('').listAll().then(image => {
-                //     const items = image.items;
-
-                //     items.forEach(i => {
-                //         if(i.location.path.includes(check)) {
-                //             console.log(i);
-                //         }
-                //     })
-                // });
+                        console.log(error);
+                    })
             } catch {
                 reject();
             }
