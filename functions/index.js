@@ -15,20 +15,7 @@ const secStorage = secondaryAdmin.storage().bucket();
 const secAuth = secondaryAdmin.auth();
 
 exports.scheduleFunction = functions.pubsub.schedule('2 * * * *').onRun(async context => {
-    // const data = [];
 
-    // await db.collection('events').get()
-    //     .then(snapshot => {
-    //         snapshot.forEach(doc => {
-    //             data.push(doc.data());
-    //         });
-    //     })
-    //     .catch(error => {
-    //         console.log(error);
-    //     });
-
-    // console.log('Finished...');
-    // console.log(data);
 });
 
 exports.backupAuth = functions.https.onRequest(async (req, res) => {
@@ -194,6 +181,7 @@ exports.moveQuestionImages = functions.https.onRequest(async (req, res) => {
                     }
                 }
 
+                const iq = doc.data().IQ || doc.id;
                 const format = `questions/question-${iq}.${type}`;
 
                 if(image && image !== format) {
@@ -526,7 +514,7 @@ exports.deleteNonExistingReferences = functions.https.onRequest(async (req, res)
                                     : undefined;
 
                                 if(image && image.length > 0) {
-                                    if(image.includes('questions/') || image.includes('users/') || image.includes('documents/')) {
+                                    if(image.includes('questions/') || image.includes('users/') || image.includes('documents/') || image.includes('home-background')) {
 
                                     } else {
                                         console.log(`${cn} - ${doc.id} - ${image}`);
@@ -550,7 +538,7 @@ exports.deleteUnusedImages = functions.https.onRequest(async (req, res) => {
     await storage.getFiles()
         .then(files => {
             files[0].forEach(async file => {
-                if(file.name.includes('questions/') || file.name.includes('users/') || file.name.includes('documents/')) {
+                if(file.name.includes('questions/') || file.name.includes('users/') || file.name.includes('documents/') || file.name.includes('home-background')) {
 
                 } else {
                     await storage.file(file.name).delete().catch(console.log);
