@@ -18,22 +18,157 @@ exports.scheduleFunction = functions.pubsub.schedule('2 * * * *').onRun(async co
 
 });
 
-exports.backupAuth = functions.https.onRequest(async (req, res) => {
-    const fileName = 'auth.json';
-    const folderName = 'auth-backup';
-    const path = `../../${folderName}`;
+exports.deleteAuth = functions.https.onRequest(async (req, res) => {
+
+    await auth.listUsers()
+        .then(snapshot => {
+            snapshot.users.forEach(user => {
+                auth.deleteUser(user.uid);
+            });
+        })
+        .catch(console.log);
+
+    res.send('Finished!');
+});
+
+exports.importFirestore = functions.https.onRequest(async (req, res) => {
+    const folderRootName = 'backups';
+    const timestamp = '2020-11-24T20:15:50.393Z';
+    const path = `../../${folderRootName}/${timestamp}/firestore`;
+
+    await secDB.listCollections()
+        .then(collections => {
+            collections.forEach(collection => {
+                const cn = collection.id;
+
+                const jsonPath = `${path}/${cn}-${timestamp}.json`;
+                const file = fs.readFileSync(jsonPath);
+                const json = JSON.parse(file);
+
+                json.forEach(doc => {
+                    db.collection(cn).add(doc).catch(console.log);
+                });
+            });
+        })
+        .catch(e => console.log(e));
+
+    res.send('Imported!');
+});
+
+exports.importAuth = functions.https.onRequest(async (req, res) => {
+    const folderRootName = 'backups';
+    const timestamp = '2020-11-24T20:15:50.393Z';
+    const path = `../../${folderRootName}`;
+
+    const jsonPath = `${path}/auth-${timestamp}.json`;
+        const file = fs.readFileSync(jsonPath);
+        const json = JSON.parse(file);
+
+        json.forEach(doc => {
+
+        });
+
+    res.send('Imported!');
+});
+
+exports.backupFirebase = functions.https.onRequest(async (req, res) => {
+    const now = new Date().toISOString();
+    const fileNameAuth = `auth-${now}.json`;
+    const folderRootName = 'backups';
+    const folderFirestore = 'firestore';
+    const folderStorage = 'storage';
+    const path = `../../${folderRootName}/${now}`;
+    const firestoreData = [];
 
     await auth.listUsers()
         .then(snapshot => {
             const json = JSON.stringify(snapshot.users);
 
             fs.mkdirSync(path, { recursive: true });
-            fs.writeFileSync(`${path}/${fileName}`, json);
+            fs.writeFileSync(`${path}/${fileNameAuth}`, json);
         })
         .catch(error => {
             console.log(error);
         });
-    res.send('Data wrote into \'' + fileName + '\'');
+
+    await db.listCollections()
+        .then(collections => {
+            collections.forEach(async collection => {
+                const cn = collection.id;
+
+                await db.collection(cn).get()
+                    .then(snapshot => {
+                        snapshot.forEach(doc => {
+                            firestoreData.push(doc.data());
+                        });
+                    })
+                    .then(() => {
+                        const json = JSON.stringify(firestoreData);
+                        const fileName = `${cn}-${now}.json`;
+
+                        fs.mkdirSync(`${path}/${folderFirestore}`, { recursive: true });
+                        fs.writeFileSync(`${path}/${folderFirestore}/${fileName}`, json);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            });
+        })
+        .catch(console.log);
+
+        await storage.getFiles()
+            .then(files => {
+                files[0].forEach(file => {
+
+                    storage.file(file.name).download().then(dlFile => {
+                        const image = file.name;
+                        let imagePath = '';
+                        let imageFile = '';
+                        if(image.includes('/')) {
+                            const slashSplit = image.split('/');
+                            const imageName = slashSplit[slashSplit.length - 1];
+                            imageFile = imageName;
+                            imagePath = image.split(imageName)[0];
+
+                        } else {
+                            imageFile = image;
+                        }
+                        const pieces = image.split('.');
+                        let type = pieces[pieces.length - 1];
+
+                        const hasType = (type != undefined && type.length > 2 && type.length < 5);
+                        type = hasType ? type : 'jpeg';
+
+                        const format = imagePath + imageFile + (hasType ? '' : `.${type}`);
+
+                        fs.mkdirSync(`${path}/${folderStorage}/${imagePath}`, { recursive: true });
+                        fs.writeFileSync(`${path}/${folderStorage}/${format}`, dlFile[0]);
+
+                        // const zip = new AdmZip();
+                        // zip.addLocalFolder(path);
+                        // fs.mkdirSync('../../storage-bkp', { recursive: true });
+                        // fs.writeFileSync(`../../storage-bkp/storage.zip`, zip.toBuffer());
+
+                        // counter++;
+                        // if(counter === files.length - 1) {
+                        //     console.log("Finished...");
+                        //     fs.rmdir(path, { recursive: true }, (err) => {
+                        //         if(err) {
+                        //             return console.log(err);
+                        //         }
+                        //     });
+                        // }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            });
+
+    res.send('Backup Finished!\nTimestamp: ' + now);
 });
 
 exports.backupFirestore = functions.https.onRequest(async (req, res) => {
@@ -94,20 +229,20 @@ exports.backupStorage = functions.https.onRequest(async (req, res) => {
                 fs.mkdirSync(`${path}/${imagePath}`, { recursive: true });
                 fs.writeFileSync(`${path}/${format}`, dlFile[0]);
 
-                const zip = new AdmZip();
-                zip.addLocalFolder(path);
-                fs.mkdirSync('../../storage-bkp', { recursive: true });
-                fs.writeFileSync(`../../storage-bkp/storage.zip`, zip.toBuffer());
+                // const zip = new AdmZip();
+                // zip.addLocalFolder(path);
+                // fs.mkdirSync('../../storage-bkp', { recursive: true });
+                // fs.writeFileSync(`../../storage-bkp/storage.zip`, zip.toBuffer());
 
-                counter++;
-                if(counter === files.length - 1) {
-                    console.log("Finished...");
-                    fs.rmdir(path, { recursive: true }, (err) => {
-                        if(err) {
-                            return console.log(err);
-                        }
-                    });
-                }
+                // counter++;
+                // if(counter === files.length - 1) {
+                //     console.log("Finished...");
+                //     fs.rmdir(path, { recursive: true }, (err) => {
+                //         if(err) {
+                //             return console.log(err);
+                //         }
+                //     });
+                // }
             })
             .catch(error => {
                 console.log(error);
