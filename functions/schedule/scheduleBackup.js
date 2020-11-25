@@ -1,0 +1,3 @@
+exports.scheduleFunction = async context => {
+
+}
