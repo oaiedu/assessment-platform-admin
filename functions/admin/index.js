@@ -11,11 +11,14 @@ const secDB = secondaryAdmin.firestore();
 const secStorage = secondaryAdmin.storage().bucket();
 const secAuth = secondaryAdmin.auth();
 
+const secRDB = secondaryAdmin.database();
+
 module.exports = {
     db,
     storage,
     auth,
     secDB,
     secStorage,
-    secAuth
+    secAuth,
+    secRDB
 }

@@ -98,7 +98,7 @@ exports.deleteNonexistentReferences = async (req, res) => {
 
 exports.importFirestore = async (req, res) => {
     const folderRootName = 'backups';
-    const timestamp = '2020-11-25T16-23-01.553Z';
+    const timestamp = '2020-11-26T17-32-39.212Z';
     const path = `../../${folderRootName}/${timestamp}/firestore`;
     const collections = ['users', 'questions', 'question requests', 'edited questions', 'tests', 'papers'];
 
@@ -115,4 +115,119 @@ exports.importFirestore = async (req, res) => {
     });
 
     res.send('Firestore data imported!');
+}
+
+exports.importQuestions = async (req, res) => {
+    const folderRootName = 'backups';
+    const timestamp = '2020-11-26T17-32-39.212Z';
+    const path = `../../${folderRootName}/${timestamp}/firestore`;
+
+    const jsonPath = `${path}/questions-${timestamp}.json`;
+    const file = fs.readFileSync(jsonPath);
+    const json = JSON.parse(file);
+
+    // console.log(cn + ': ' + json.length);
+
+    // await db.collection('questions').get()
+    //     .then(snapshot => {
+    //         console.log('Len: ' + snapshot.docs.length);
+    //     }).catch(console.log);
+    // json.forEach(doc => {
+    //     if(doc.IMAGENS && doc.IMAGENS.length > 0) {
+    //         const imageName = decodeURIComponent(doc.IMAGENS.split('?alt=media')[0].split('/o/')[1]);
+    //         if(imageName.includes('vaso')) {
+    //             // console.log(imageName.split('_')[0]);
+    //             console.log(imageName.split(' ')[1].split('.')[0].replace('p', 'P'));
+    //             db.collection('questions').doc(imageName.split(' ')[1].split('.')[0].replace('p', 'P')).set(doc).catch(console.log);
+
+    //         }
+    //     }
+    // });
+
+    res.send('Firestore data imported!');
+}
+
+exports.compareQuestions = async (req, res) => {
+    const auxQuestions = [];
+    const iqs = [];
+    const updatedQuestions = [];
+    const subjects = [
+        "Teoria do Reator",
+        "Termodinâmica",
+        "Instrumentação e Controle",
+        "Válvulas e Bombas",
+        "Eletricidade",
+        "Mecânica dos Fluidos",
+        "Tratamento Qúimico Refrigerante",
+        "Análise Integrada",
+        "Instrumentação Nuclear",
+        "Física Nuclear",
+        "Transferência de Calor",
+        "Materiais"
+    ]
+
+    await db.collection('questions').get()
+        .then(snapshot => {
+            snapshot.forEach(doc => {
+                auxQuestions.push(doc.data());
+            });
+        })
+        .catch(console.log);
+
+    const promises = subjects.map(async sbj => {
+        return await db.collection('realtime-questions').where('DISCIPLINA', '==', sbj).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    const iq = doc.id;
+                    const klg = doc.data().CONHECIMENTO;
+
+                    auxQuestions.forEach(question => {
+                        if(question.CONHECIMENTO === klg
+                            && question.DISCIPLINA === sbj
+                            && !iqs.includes(iq)) {
+                            iqs.push(iq);
+                            updatedQuestions.push({ ...question, IQ: iq });
+                        }
+                    });
+                });
+            })
+            .catch(console.log);
+        });
+
+        await Promise.all(promises);
+
+        console.log(updatedQuestions.length);
+        updatedQuestions.forEach(doc => {
+            db.collection('updated-questions').add(doc).catch(console.log);
+        });
+
+    res.send('Done!');
+}
+
+exports.auxQuestions = async (req, res) => {
+    const folderRootName = 'backups';
+    const timestamp = '2020-11-26T17-32-39.212Z';
+    const path = `../../${folderRootName}/${timestamp}/firestore`;
+
+    const jsonPath = `${path}/questions-${timestamp}.json`;
+    const file = fs.readFileSync(jsonPath);
+    const json = JSON.parse(file);
+
+
+    // json.forEach(doc => {
+    //     db.collection('aux-questions').add(doc).catch(console.log);
+    // });
+
+    // await db.collection('realtime-questions').get()
+    //     .then(snapshot => {
+    //         console.log('Length: ' + snapshot.docs.length);
+    //     }).catch(console.log);
+
+    await db.collection('edited questions').where('IQ', '==', 'testquestion-1').get()
+        .then(snapshot => {
+            snapshot.forEach(doc => console.log(doc.id));
+        })
+        .catch(console.log);
+
+    res.send('Aux questions created!');
 }

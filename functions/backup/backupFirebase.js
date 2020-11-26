@@ -33,7 +33,11 @@ exports.backupFirebase = async (req, res) => {
                 await secDB.collection(cn).get()
                     .then(snapshot => {
                         snapshot.forEach(doc => {
-                            firestoreData.push(doc.data());
+                            if(cn.includes('question')) {
+                                firestoreData.push({ ...doc.data(), IQ: doc.id });
+                            } else {
+                                firestoreData.push(doc.data());
+                            }
                         });
                     })
                     .then(() => {
