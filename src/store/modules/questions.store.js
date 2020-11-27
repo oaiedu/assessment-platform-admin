@@ -49,7 +49,7 @@ const actions = {
     loadedQuestions({ commit }) {
         commit('setLoading', true);
         let questions = [];
-        db.collection('updated-questions').get().then(querySnapshot => {
+        db.collection('questions').get().then(querySnapshot => {
             querySnapshot.forEach(doc => {
                 questions.push(Object.assign({ id: doc.data().IQ, data: doc.data() }));
             });
@@ -60,7 +60,7 @@ const actions = {
     deleteQuestion({ commit }, payload) {
         commit('setLoading', true);
         const id = payload;
-        return db.collection("updated-questions").where('IQ', '==', id).get()
+        return db.collection("questions").where('IQ', '==', id).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.delete();
@@ -130,7 +130,7 @@ const actions = {
             question: payload.oldData.id + "-" + (payload.oldData.edited.length + 1)
         });
 
-        db.collection("updated-questions").where('IQ', '==', question.id).get()
+        db.collection("questions").where('IQ', '==', question.id).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.update({
@@ -208,7 +208,7 @@ const actions = {
             }
         }
 
-        db.collection("updated-questions").add(question.data)
+        db.collection("questions").add(question.data)
             .then(() => {
                 commit('setLoading', false);
                 commit('createQuestion', question);
