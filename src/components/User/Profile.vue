@@ -81,12 +81,12 @@
 
           <v-spacer/>
 
-          <v-btn
+          <!-- <v-btn
             color="warning"
             text
             @click="moveStorage()">
               Move images
-          </v-btn>
+          </v-btn> -->
 
           <v-spacer/>
 
