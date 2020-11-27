@@ -28,28 +28,35 @@ exports.backupFirebase = async (req, res) => {
         .then(collections => {
             collections.forEach(async collection => {
                 const cn = collection.id;
-                const firestoreData = [];
+                const firestoreData = {};
 
-                await secDB.collection(cn).get()
-                    .then(snapshot => {
-                        snapshot.forEach(doc => {
-                            if(cn.includes('question')) {
-                                firestoreData.push({ ...doc.data(), IQ: doc.id });
-                            } else {
-                                firestoreData.push(doc.data());
-                            }
+                if(cn !== 'aux-questions' && cn !== 'realtime-questions') {
+                    await secDB.collection(cn).get()
+                        .then(snapshot => {
+                            snapshot.forEach(doc => {
+                                if(cn.includes('question') && !doc.data().IQ) {
+                                    firestoreData[doc.id] = {
+                                        ...doc.data(),
+                                        IQ: doc.id
+                                    };
+                                } else if(cn.includes('question') && doc.data().IQ && doc.data().IQ.length > 0) {
+                                    firestoreData[doc.data().IQ] = doc.data();
+                                } else {
+                                    firestoreData[doc.id] = doc.data();
+                                }
+                            });
+                        })
+                        .then(() => {
+                            const jsonFirestore = JSON.stringify(firestoreData);
+                            const fileName = `${cn}-${now}.json`;
+
+                            fs.mkdirSync(`${path}/${folderFirestore}`, { recursive: true });
+                            fs.writeFileSync(`${path}/${folderFirestore}/${fileName}`, jsonFirestore);
+                        })
+                        .catch(error => {
+                            console.log(error);
                         });
-                    })
-                    .then(() => {
-                        const jsonFirestore = JSON.stringify(firestoreData);
-                        const fileName = `${cn}-${now}.json`;
-
-                        fs.mkdirSync(`${path}/${folderFirestore}`, { recursive: true });
-                        fs.writeFileSync(`${path}/${folderFirestore}/${fileName}`, jsonFirestore);
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });
+                }
             });
         })
         .catch(console.log);
