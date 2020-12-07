@@ -191,7 +191,7 @@ exports.auxQuestions = async (req, res) => {
     // const json = JSON.parse(file);
     // const dataRDB = [];
 
-    const fileBkp = fs.readFileSync('../../backups/2020-11-27T16-43-04.696Z/firestore/questions-2020-11-27T16-43-04.696Z.json');
+    const fileBkp = fs.readFileSync('../../backups/2020-11-25T16-23-01.553Z/firestore/questions-2020-11-25T16-23-01.553Z.json');
     const jsonBkp = JSON.parse(fileBkp);
     const dataBkp = [];
 
@@ -201,6 +201,37 @@ exports.auxQuestions = async (req, res) => {
 
     const fileProd = fs.readFileSync(prodPath);
     const jsonProd = JSON.parse(fileProd);
+
+    // for(let key in jsonProd) {
+    //     prodData.push(jsonProd[key].PERGUNTA);
+    // }
+
+    // let counter = 0;
+    // const data = {}
+    // const ids = ['QEEDyKtJgThv5uMUqqBd',
+    //             'KuE7bG33h9XxVZdJcen6',
+    //             'OOcUZZqb5IjE3zw4JGBt',
+    //             'LPYfKKJa54wtpiBXGRzp',
+    //             '67YprFZaR5y5jxdzs8JU',
+    //             '5wIk9F5usNKW3iqpWT8T',
+    //             '1kxbcnj0iv8g95aMSRGR',
+    //             '3WwbSjddmYDm6xKbxN0d',
+    //             '0hW2yksx9Ni7nkM8Qglt',
+    //             'qtj3BcWeBKTeDCjodNYk',
+    //             '2pptYsIPVFg0qKYGRQCx']
+
+    // const promises = jsonBkp.map(doc => {
+    //     if(!(doc.edited && doc.edited.length > 0)) {
+    //         if(!prodData.includes(doc.PERGUNTA)) {
+    //             data[ids[counter++]] = doc;
+    //         }
+    //     }
+    // });
+
+    // Promise.all(promises);
+
+    // const lostData = JSON.stringify(data);
+    // fs.writeFileSync('../../backups/lost-questions.json', lostData);
 
     // for (const key in jsonBkp) {
     //     // dataBkp.push([key, jsonBkp[key]]);
@@ -212,44 +243,44 @@ exports.auxQuestions = async (req, res) => {
     //     db.collection('questions').doc(doc[0]).set(doc[1]).catch(error => console.log(error));
     // });
 
-    const p3633 = {
-        CONHECIMENTO: 'C1.12',
-        DISCIPLINA: 'Transferência de Calor',
-        IMAGENS: '',
-        IQ: 'P3633',
-        PERGUNTA: 'O conjunto turbina + gerador principal opera com 80% de carga. O trocador de calor do sistema de óleo lubrificante da turbina principal apresentava as seguintes temperaturas iniciais em regime permanente: Temperatura do óleo lubrificante na entrada do trocador (To-e) = 79ºC Temperatura do óleo lubrificante na saída do trocador (To-s) = 45ºC Temperatura da água de resfriamento na entrada do trocador (Ta-e) = 29ºC Temperatura da água de resfriamento na saída do trocador (Ta-s) = 46ºC Passaram-se seis meses de operação. O trocador de calor do sistema de óleo lubrificante da turbina principal apresenta agora as seguintes temperaturas <u>atuais</u> em regime permanente: To-e = 82ºC To-s = 48ºC Ta-e = 29ºC Ta-s = 46ºC Presuma que ao longo dos seis meses de operação as vazões e os calores específicos da água de resfriamento e do óleo lubrificante permaneceram inalteradas. Qual das seguintes situações pode ter sido responsável pela diferença observada no trocador de calor entre as temperaturas em regime permanente iniciais e atuais?',
-        RELEVANCIA_OR: '2.5',
-        RELEVANCIA_OSR: '2.7',
-        RESPOSTAS: [
-            {
-                ansId: 'radio-1',
-                text: 'Houve crescimento de incrustação nos tubos do trocador de calor.',
-                value: true
-            },
-            {
-                ansId: 'radio-2',
-                text: 'A temperatura da fonte de água de resfriamento aumentou.',
-                value: false
-            },
-            {
-                ansId: 'radio-3',
-                text: 'Aumentou a carga sobre o conjunto turbina + gerador principal.',
-                value: false
-            },
-            {
-                ansId: 'radio-4',
-                text: 'Diminuiu a carga sobre o conjunto turbina + gerador principal.',
-                value: false
-            }
-        ],
-        edited: []
-    }
+    // const p3633 = {
+    //     CONHECIMENTO: 'C1.12',
+    //     DISCIPLINA: 'Transferência de Calor',
+    //     IMAGENS: '',
+    //     IQ: 'P3633',
+    //     PERGUNTA: 'O conjunto turbina + gerador principal opera com 80% de carga. O trocador de calor do sistema de óleo lubrificante da turbina principal apresentava as seguintes temperaturas iniciais em regime permanente: Temperatura do óleo lubrificante na entrada do trocador (To-e) = 79ºC Temperatura do óleo lubrificante na saída do trocador (To-s) = 45ºC Temperatura da água de resfriamento na entrada do trocador (Ta-e) = 29ºC Temperatura da água de resfriamento na saída do trocador (Ta-s) = 46ºC Passaram-se seis meses de operação. O trocador de calor do sistema de óleo lubrificante da turbina principal apresenta agora as seguintes temperaturas <u>atuais</u> em regime permanente: To-e = 82ºC To-s = 48ºC Ta-e = 29ºC Ta-s = 46ºC Presuma que ao longo dos seis meses de operação as vazões e os calores específicos da água de resfriamento e do óleo lubrificante permaneceram inalteradas. Qual das seguintes situações pode ter sido responsável pela diferença observada no trocador de calor entre as temperaturas em regime permanente iniciais e atuais?',
+    //     RELEVANCIA_OR: '2.5',
+    //     RELEVANCIA_OSR: '2.7',
+    //     RESPOSTAS: [
+    //         {
+    //             ansId: 'radio-1',
+    //             text: 'Houve crescimento de incrustação nos tubos do trocador de calor.',
+    //             value: true
+    //         },
+    //         {
+    //             ansId: 'radio-2',
+    //             text: 'A temperatura da fonte de água de resfriamento aumentou.',
+    //             value: false
+    //         },
+    //         {
+    //             ansId: 'radio-3',
+    //             text: 'Aumentou a carga sobre o conjunto turbina + gerador principal.',
+    //             value: false
+    //         },
+    //         {
+    //             ansId: 'radio-4',
+    //             text: 'Diminuiu a carga sobre o conjunto turbina + gerador principal.',
+    //             value: false
+    //         }
+    //     ],
+    //     edited: []
+    // }
 
-    jsonBkp['P3633'] = p3633;
+    // jsonBkp['P3633'] = p3633;
 
-    const prodBkp = JSON.stringify(jsonBkp);
+    // const prodBkp = JSON.stringify(jsonBkp);
 
-    fs.writeFileSync(`../../backups/2020-11-27T16-43-04.696Z/firestore/prod-questions-${timestamp}.json`, prodBkp);
+    // fs.writeFileSync(`../../backups/2020-11-27T16-43-04.696Z/firestore/prod-questions-${timestamp}.json`, prodBkp);
 
     // for (const key in json) {
     //     dataRDB.push([key, json[key]]);
