@@ -355,8 +355,8 @@ export default {
     },
     onEditQuestion() {
       if (typeof this.images[0] !== "undefined") {
-        const imageToUpload = { images: this.images[0] };
-        var URL = this.$store.dispatch("uploadImage", imageToUpload);
+        const imageToUpload = { images: this.images[0], id: this.question.id };
+        var URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
         URL.then(result => {
           this.editedImages = result;
           console.log("Image as URL: ", this.editedImages);
