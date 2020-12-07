@@ -1,6 +1,51 @@
 const fs = require('fs');
 // const AdmZip = require('adm-zip');
-const { secAuth, secDB, secStorage } = require('../admin');
+const { auth, db, secAuth, secDB, secStorage } = require('../admin');
+
+exports.backupUsers = async (req, res) => {
+    const collections = ['users'];
+    const now = req.query.now;
+    const path = '../../backups';
+
+    fs.mkdirSync(`${path}/${now}/firestore`, { recursive: true });
+
+    await auth.listUsers()
+        .then(snapshot => {
+            const users = {}
+            snapshot.users.forEach(userRecord => {
+                users[userRecord.uid] = userRecord;
+            });
+            const jsonAuth = JSON.stringify(users);
+
+            fs.writeFileSync(`${path}/${now}/auth-${now}.json`, jsonAuth);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+
+    const promises = collections.map(collection => {
+        db.collection(collection).get()
+            .then(snapshot => {
+                const dbData = {}
+                snapshot.forEach(doc => {
+                    const id = doc.id;
+                    const data = doc.data();
+
+                    dbData[id] = data;
+                });
+
+                const json = JSON.stringify(dbData);
+                fs.writeFileSync(`${path}/${now}/firestore/${collection}-${now}.json`, json);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    });
+
+    Promise.all(promises);
+
+    res.end();
+}
 
 exports.backupFirebase = async (req, res) => {
     const now = new Date().toISOString().replace(/:/g, '-');
@@ -12,8 +57,9 @@ exports.backupFirebase = async (req, res) => {
 
     await secAuth.listUsers()
         .then(snapshot => {
-            const users = snapshot.users.map(userRecord => {
-                return {...userRecord};
+            const users = {}
+            snapshot.users.forEach(userRecord => {
+                users[userRecord.uid] = userRecord;
             });
             const jsonAuth = JSON.stringify(users);
 
