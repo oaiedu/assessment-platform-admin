@@ -5,6 +5,10 @@
     </v-overlay>
     <v-container>
       <v-container>
+          <h1 class="text-center blue--text">Gerenciar Questões</h1>
+      </v-container>
+
+      <v-container>
           <v-container>
             <v-text-field
               v-model="search"
@@ -31,7 +35,7 @@
             class="elevation-1"
             @page-count="pageCount = $event"
           >
-            <template v-slot:item.actions="{ item }">
+            <template v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
                 <v-icon class="mr-6" @click="dialogPDF = true; selectedEdit = item"> mdi-pdf-box </v-icon>
                 <v-icon class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>

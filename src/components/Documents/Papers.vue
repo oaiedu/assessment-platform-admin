@@ -5,6 +5,10 @@
     </v-overlay>
     <v-container>
       <v-container>
+          <h1 class="text-center blue--text">Gerenciar Documentos</h1>
+      </v-container>
+
+      <v-container>
           <v-container>
             <v-text-field
               v-model="search"
