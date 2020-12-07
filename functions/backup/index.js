@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
-const { backupFirebase } = require('./backupFirebase');
+const { backupFirebase, backupUsers } = require('./backupFirebase');
 
 module.exports = {
-    backupFirebase: functions.https.onRequest(backupFirebase)
+    backupFirebase: functions.https.onRequest(backupFirebase),
+    backupUsers: functions.https.onRequest(backupUsers)
 }
