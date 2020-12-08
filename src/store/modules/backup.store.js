@@ -7,9 +7,16 @@ const mutations = {}
 const actions = {
     backupFirebase(state, payload) {
         const now = payload.now;
-        const url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-backupUsers?now=' + now;
+        let url = '';
+        if(process.env.NODE_ENV === 'development') {
+            url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-backupFirestoreAuth?now=' + now;
+        } else if(process.env.NODE_ENV === 'production') {
+            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/backup-backupFirestoreAuth?now=' + now;
+        };
         http.get(url, res => {
-            res.on('end', resolve('Backup saved in \'backups/' + now + '/\''));
+            res.on('end', () => {
+                console.log('Backup available at \'backups/' + now + '/\'');
+            })
         });
     }
 }
