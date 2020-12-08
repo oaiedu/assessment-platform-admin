@@ -1,9 +1,16 @@
 const fs = require('fs');
 // const AdmZip = require('adm-zip');
-const { auth, db, secAuth, secDB, secStorage } = require('../admin');
+const { auth, db, storage } = require('../admin');
 
-exports.backupUsers = async (req, res) => {
-    const collections = ['users'];
+exports.backupFirestoreAuth = async (req, res) => {
+    const collections = [
+        'edited questions',
+        'papers',
+        'question requests',
+        'questions',
+        'tests',
+        'users'
+    ];
     const now = req.query.now;
     const path = '../../backups';
 
@@ -31,7 +38,18 @@ exports.backupUsers = async (req, res) => {
                     const id = doc.id;
                     const data = doc.data();
 
-                    dbData[id] = data;
+                    if(collection.includes('question')) {
+                        if(!data.IQ) {
+                            dbData[id] = {
+                                ...data,
+                                IQ: id
+                            };
+                        } else if(data.IQ.length > 0) {
+                            dbData[data.IQ] = data;
+                        }
+                    } else {
+                        dbData[id] = data;
+                    }
                 });
 
                 const json = JSON.stringify(dbData);
@@ -44,7 +62,7 @@ exports.backupUsers = async (req, res) => {
 
     Promise.all(promises);
 
-    res.end();
+    res.status(200).end();
 }
 
 exports.backupFirebase = async (req, res) => {
@@ -55,7 +73,7 @@ exports.backupFirebase = async (req, res) => {
     const folderStorage = 'storage';
     const path = `../../${folderRootName}/${now}`;
 
-    await secAuth.listUsers()
+    await auth.listUsers()
         .then(snapshot => {
             const users = {}
             snapshot.users.forEach(userRecord => {
@@ -70,14 +88,14 @@ exports.backupFirebase = async (req, res) => {
             console.log(error);
         });
 
-    await secDB.listCollections()
+    await db.listCollections()
         .then(collections => {
             collections.forEach(async collection => {
                 const cn = collection.id;
                 const firestoreData = {};
 
                 if(cn !== 'aux-questions' && cn !== 'realtime-questions') {
-                    await secDB.collection(cn).get()
+                    await db.collection(cn).get()
                         .then(snapshot => {
                             snapshot.forEach(doc => {
                                 if(cn.includes('question') && !doc.data().IQ) {
@@ -107,11 +125,11 @@ exports.backupFirebase = async (req, res) => {
         })
         .catch(console.log);
 
-        await secStorage.getFiles()
+        await storage.getFiles()
             .then(files => {
                 files[0].forEach(file => {
 
-                    secStorage.file(file.name).download().then(dlFile => {
+                    storage.file(file.name).download().then(dlFile => {
                         const image = file.name;
                         let imagePath = '';
                         let imageFile = '';
