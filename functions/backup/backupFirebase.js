@@ -14,6 +14,8 @@ exports.backupFirestoreAuth = async (req, res) => {
     const now = req.query.now;
     const path = '../../backups';
 
+    let size = 0;
+
     fs.mkdirSync(`${path}/${now}/firestore`, { recursive: true });
 
     await auth.listUsers()
@@ -25,13 +27,14 @@ exports.backupFirestoreAuth = async (req, res) => {
             const jsonAuth = JSON.stringify(users);
 
             fs.writeFileSync(`${path}/${now}/auth-${now}.json`, jsonAuth);
+            size += encodeURI(jsonAuth).split(/%..|./).length - 1;
         })
         .catch(error => {
             console.log(error);
         });
 
-    const promises = collections.map(collection => {
-        db.collection(collection).get()
+    const promises = collections.map(async collection => {
+        return db.collection(collection).get()
             .then(snapshot => {
                 const dbData = {}
                 snapshot.forEach(doc => {
@@ -51,18 +54,25 @@ exports.backupFirestoreAuth = async (req, res) => {
                         dbData[id] = data;
                     }
                 });
-
                 const json = JSON.stringify(dbData);
+
                 fs.writeFileSync(`${path}/${now}/firestore/${collection}-${now}.json`, json);
+                size += encodeURI(json).split(/%..|./).length - 1;
             })
             .catch(error => {
                 console.log(error);
             });
     });
 
-    Promise.all(promises);
+    await Promise.all(promises);
 
-    res.status(200).end();
+    if(size < 1024) size = size + ' bytes';
+    else if(size < 1048576) size = (size / 1024).toFixed(2) + ' KB';
+    else if(size < 1073741824) size = (size / 1048576).toFixed(2) + ' MB';
+    else size = (size / 1073741824).toFixed(2) + ' GB';
+
+    res.append('Access-Control-Allow-Origin', '*');
+    res.send({endDate: new Date().toISOString(), size});
 }
 
 exports.backupFirebase = async (req, res) => {
