@@ -11,10 +11,12 @@
         </div>
 
         <v-data-table
-            :items='backupsCurrentMonth'
+            :items='getBackupsByMonth(currentMonth)'
             class="elevation-1 mt-10"
             :headers="headers"
             :loading="loading"
+            :sort-by="['start']"
+            :sort-desc="[true]"
             loading-text="Carregando backups..." >
             <template v-slot:top>
                 <v-toolbar flat color="blue">
@@ -37,7 +39,7 @@
         </v-data-table>
 
         <v-data-table
-            :items='backupsLastMonth'
+            :items='getBackupsByMonth(lastMonth)'
             class="elevation-1 mt-10"
             :headers="headers"
             :loading="loading"
@@ -63,7 +65,7 @@
         </v-data-table>
 
         <v-data-table
-            :items='backupsTwoMonthAgo'
+            :items='getBackupsByMonth(twoMonthsAgo)'
             class="elevation-1 mt-10"
             :headers="headers"
             :loading="loading"
@@ -133,21 +135,19 @@
             loading() {
                 return this.$store.getters.loading;
             },
+            currentMonth() {
+                return parseInt(new Date().toISOString().split('-')[1]);
+            },
+            lastMonth() {
+                return this.currentMonth - 1 === 0 ? 12 : this.currentMonth - 1;
+            },
+            twoMonthsAgo() {
+                return this.currentMonth - 2 === 0 ? 12 : this.currentMonth - 2;
+            },
             pastMonths() {
-                const month = new Date().toISOString().substr(0, 10).split('-')[1];
-                const monthNumber = parseInt(month);
-                const lastMonth = monthNumber - 1 === 0 ? 12 : monthNumber - 1;
-                const twoMonthAgo = monthNumber - 2 === 0 ? 12 : monthNumber - 2;
-
-                return [this.months[lastMonth], this.months[twoMonthAgo]];
+                return [this.months[this.lastMonth], this.months[this.twoMonthsAgo]];
             },
-            backupsCurrentMonth() {
-                return this.$store.getters.getBackups;
-            },
-            backupsLastMonth() {
-                return this.$store.getters.getBackups;
-            },
-            backupsTwoMonthAgo() {
+            backups() {
                 return this.$store.getters.getBackups;
             }
         },
@@ -155,6 +155,33 @@
             backup() {
                 const now = new Date().toISOString();
                 this.$store.dispatch('backupFirebase', { now });
+            },
+            getBackupsByMonth(month) {
+                const backups = this.backups;
+                const bkps = [];
+                const wanted = month;
+
+                backups.forEach(bkp => {
+                    const start = bkp.start;
+                    const bkpMon = start.substr(0, 3);
+                    const months = [];
+
+                    for (const key in this.months) {
+                        const mon = this.months[key].substr(0, 3);
+
+                        if(bkpMon === mon) {
+                            months.push(key);
+                        }
+                    }
+
+                    months.forEach(m => {
+                        if(m == wanted) {
+                            bkps.push(bkp);
+                        }
+                    });
+                });
+
+                return bkps;
             },
             downloadBkp(bkp) {
                 const iso = new Date().toISOString().replace(/:/g, '-');
@@ -174,7 +201,7 @@
 
                 console.log(bkp);
             },
-            deleteBkp(bkp) {
+            deleteBkp(backup) {
 
             }
         },
