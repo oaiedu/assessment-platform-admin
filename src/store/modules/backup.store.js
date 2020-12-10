@@ -1,4 +1,5 @@
-const http = require('http');
+const axios = require('axios');
+
 import { db } from '../../main';
 
 const state = {
@@ -22,30 +23,44 @@ const state = {
 const mutations = {
     setBackups(state, data) {
         state.backups = data;
+    },
+    newBackup(state, data) {
+        state.backups.push(data);
     }
 }
 
 const actions = {
-    backupFirebase({ state }, payload) {
+    async backupFirebase({ commit, state }, payload) {
         const now = payload.now;
-        let url = '';
-        if(process.env.NODE_ENV === 'development') {
-            url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-backupFirestoreAuth?now=' + now;
-        } else if(process.env.NODE_ENV === 'production') {
-            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/backup-backupFirestoreAuth?now=' + now;
-        };
-        http.get(url, res => {
-            res.on('end', () => {
-                console.log('Backup available at \'backups/' + now.replace(/:/g, '-') + '/\'');
-            })
-        });
 
-        console.log(state.months);
+        let url = '';
+
+        if(process.env.NODE_ENV === 'development') {
+            url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
+        } else if(process.env.NODE_ENV === 'production') {
+            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
+        };
+
+        const bkp = {
+            id: '',
+            size: '',
+            start: '',
+            end: ''
+        }
+
+        await axios.get(url)
+            .then(res => {
+                bkp.size = res.data.size;
+                bkp.end = res.data.endDate;
+
+                alert('Backup available at \'backups/' + now + '/\'');
+            }).catch(error => console.log(error));
 
         db.collection('backups').get()
             .then(snapshot => {
                 let lastBkpId;
                 let bkpId;
+
                 if(snapshot.docs.length > 0) {
                     snapshot.forEach(doc => {
                         const id = parseInt(doc.data().id.split('p')[1]);
@@ -59,25 +74,28 @@ const actions = {
                     });
 
                     bkpId = lastBkpId + 1;
-                } else { bkpId = 1}
+                } else bkpId = 1;
 
-                const locale = new Date(now).toLocaleString();
-                const month = locale.split('/')[0];
+                function formatDate(date) {
+                    const locale = new Date(date).toLocaleString();
+                    const month = locale.split('/')[0];
 
-                const dateTime = new Date(now).toString();
-                const sub = dateTime.substr(7, 17);
-                const monthName = state.months[month].substr(0, 3);
+                    const dateTime = new Date(date).toString();
+                    const sub = dateTime.substr(7, 17);
+                    const monthName = state.months[month].substr(0, 3);
 
-                const startDate = monthName + sub;
-
-                const bkp = {
-                    id: 'bkp' + bkpId,
-                    size: 1024,
-                    start: startDate,
-                    end: startDate
+                    return monthName + sub;
                 }
 
-                db.collection('backups').add(bkp).catch(error => console.log(error));
+                bkp.id = 'bkp' + bkpId;
+                bkp.start = formatDate(now);
+                bkp.end = formatDate(bkp.end);
+
+                db.collection('backups').add(bkp)
+                    .then(() => {
+                        commit('newBackup', bkp);
+                    })
+                    .catch(error => console.log(error));
             })
             .catch(error => {
                 console.log(error);
