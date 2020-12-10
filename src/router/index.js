@@ -28,7 +28,8 @@ const routes = [
     {
         path: '/admin',
         component: Management,
-        name: 'management'
+        name: 'management',
+        beforeEnter: AuthGuard
     },
     {
         path:'/inbox',
