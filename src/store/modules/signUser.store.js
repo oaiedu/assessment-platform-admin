@@ -1,22 +1,24 @@
-import { auth, db, storage } from '../../main';
-import * as firebase from 'firebase';
+const axios = require('axios');
 
-const secondary = firebase.initializeApp(require('../../../.env'), 'secondary');
-const secDB = secondary.firestore();
+import { auth, db, storage } from '../../main';
 
 const initialState = () => ({
     user: null,
     userInfo: null,
+    userClaims: null
 });
 
 const state = initialState();
 
 const mutations = {
     setUser(state, payload) {
-        state.user = payload
+        state.user = payload;
     },
     setUserInfo(state, payload) {
-        state.userInfo = payload
+        state.userInfo = payload;
+    },
+    setUserClaims(state, payload) {
+        state.userClaims = payload;
     },
     RESET(state) {
         const newState = initialState();
@@ -58,44 +60,51 @@ const actions = {
         commit('setLoading', true);
         commit('clearError');
         auth.createUserWithEmailAndPassword(payload.email, payload.password)
-            .then(
-                user => {
-                    console.log("User: ", user.user.uid);
-                    commit('setLoading', false);
-                    const newUser = {
-                        id: user.user.uid
+            .then(user => {
+                commit('setLoading', false);
+                const newUser = {
+                    id: user.user.uid
+                }
+                const userInfo = {
+                    name: payload.name,
+                    profileImages: '',
+                    email: payload.email,
+                    role: {
+                        common: true
                     }
-                    const userInfo = {
-                        name: payload.name,
-                        profileImages: "",
-                        email: payload.email
-                    }
-                    console.log("user id: ", newUser.id);
-                    db.collection("users").doc(newUser.id).set({
-                        name: userInfo.name,
-                        profileImages: userInfo.profileImages,
-                        email: userInfo.email
-                    })
-                    .then(() => {
-                        console.log("Sucess User Firestore");
+                }
+
+                let url = '';
+
+                if(process.env.NODE_ENV === 'development') {
+                    url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-userDefaultRole';
+                } else if(process.env.NODE_ENV === 'production') {
+                    url = 'http://localhost:5001/pwr-quiz-generator/us-central1/authentication-userDefaultRole';
+                };
+
+                db.collection("users").doc(newUser.id).set(userInfo)
+                    .then(async () => {
+                        axios.get(url, { headers: { uid: newUser.id } })
+                            .catch(error => {
+                                console.log(error);
+                            });
                     })
                     .catch(error => {
                         commit('setLoading', false);
                         commit('setError', error);
                         console.error(error);
                     });
-                    commit('setUser', newUser);
-                    commit('setUserInfo', userInfo);
-                    console.log('Success Auth');
-                }
-            )
+
+                commit('setUser', newUser);
+                commit('setUserInfo', userInfo);
+                console.log('Success Auth');
+            })
             .catch(error => {
-                    commit('setLoading', false);
-                    commit('setError', error);
-                    console.error(error);
-                }
-            );
-        },
+                commit('setLoading', false);
+                commit('setError', error);
+                console.error(error);
+            });
+    },
     updateUser({ commit, state }, payload) {
         const userInfo = {
             name: payload.name,
@@ -153,12 +162,24 @@ const actions = {
             commit('setLoading', false);
         });
     },
+    loadUserClaims({ commit }) {
+        auth.currentUser && auth.currentUser.getIdTokenResult()
+            .then(idTokenResult => {
+                if(idTokenResult.claims) {
+                    commit('setUserClaims', idTokenResult.claims);
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
     logout({ commit }) {
         auth.signOut();
         commit('setUser', null);
     },
     autoSignIn({ commit, dispatch }, payload) {
         dispatch('loadUserInfo', payload.uid);
+        dispatch('loadUserClaims');
         commit('setUser', { id: payload.uid });
     },
     user(state) {
@@ -166,35 +187,6 @@ const actions = {
     },
     reset({ commit }) {
         commit('RESET');
-    },
-    moveImages(state) {
-        return new Promise((resolve, reject) => {
-            try {
-                const cn = 'no one';
-                db.collection(cn).get()
-                    .then(snapshot => {
-                        snapshot.forEach(doc => {
-                            if(doc.data().IQ) {
-                                console.log(doc.id);
-                            } else {
-                                const data = doc.data();
-                                const IQ = doc.id;
-
-                                db.collection(cn).add({ ...data, IQ })
-                                    .then(() => {
-                                        doc.ref.delete();
-                                    })
-                                    .catch(console.log);
-                            }
-                        });
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
-            } catch {
-                reject();
-            }
-        });
     }
 }
 
@@ -204,6 +196,9 @@ const getters = {
     },
     userInfo(state) {
         return state.userInfo;
+    },
+    getUserClaims(state) {
+        return state.userClaims;
     }
 }
 
