@@ -74,21 +74,24 @@ export default {
     drawer: null,
   }),
   computed: {
+    currentUserClaims() {
+      return this.$store.getters.getUserClaims;
+    },
     authUser() {
-      return this.$store.getters.user
+      return this.$store.getters.user;
     },
     user(){
-      return this.$store.getters.userInfo
+      return this.$store.getters.userInfo;
     },
     drawerItems() {
       let drawerItems = [];
       if (this.userIsAuthenticated()) {
         drawerItems = [
-        {
-          icon: "mdi-home",
-          title: "Página Inicial",
-          link: "/"
-        },
+          {
+            icon: "mdi-home",
+            title: "Página Inicial",
+            link: "/"
+          },
           {
             icon: "mdi-file-question-outline",
             title: "Gerenciar Questões",
@@ -115,6 +118,19 @@ export default {
             link: "/profile"
           }
         ];
+
+        const claims = this.currentUserClaims;
+        if(claims && claims['admin']) {
+            drawerItems = [
+                drawerItems[0],
+                {
+                    icon: "mdi-account-cog",
+                    title: "Administração",
+                    link: "/admin"
+                },
+                ...drawerItems.slice(1)
+            ]
+        }
       }
       return drawerItems;
     },

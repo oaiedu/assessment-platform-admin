@@ -1,6 +1,31 @@
 const fs = require('fs');
 const { auth } = require('../admin');
 
+exports.userDefaultRole = async (req, res) => {
+    const uid = req.headers['uid'];
+
+    await auth.setCustomUserClaims(uid, { common: true })
+        .catch(error => {
+            console.log(error);
+        });
+
+    res.append('Access-Control-Allow-Origin', '*');
+    res.append('Access-Control-Allow-Headers', ['Content-Type', 'uid']);
+    res.send({ endDate: new Date().toISOString() });
+}
+
+exports.setAdminRole = async (req, res) => {
+    await auth.getUserByEmail('role@user.com')
+        .then(user => {
+            console.log(user);
+        })
+        .catch(error => {
+            console.log(error);
+        })
+
+    res.end();
+}
+
 exports.importAuth = async (req, res) => {
     const folderRootName = 'backups';
     const timestamp = '2020-11-25T16-23-01.553Z';

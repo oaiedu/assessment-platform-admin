@@ -4,9 +4,6 @@
             <v-row justify="center">
                 <v-col sm=4>
                     <profile />
-                    <div class="text-center mt-10">
-                        <v-btn color="red" dark @click="adminClicked()">Administração</v-btn>
-                    </div>
                 </v-col>
                 <v-col sm=8>
                     <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
@@ -59,9 +56,6 @@
             },
             numberOfQuestions() {
                 return this.$store.getters.numberOfQuestions;
-            },
-            adminClicked() {
-                this.$router.push('/admin');
             }
         }
     }
