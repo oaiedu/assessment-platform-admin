@@ -1,8 +1,5 @@
 <template>
   <div>
-    <v-overlay :value="loading">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
-    </v-overlay>
     <v-container>
       <v-container>
           <h1 class="text-center blue--text">Gerenciar Documentos</h1>
@@ -31,6 +28,8 @@
             :page.sync="page"
             :items-per-page="itemsPerPage"
             :search="search"
+            :loading="loading"
+            loading-text="Carregando documentos..."
             hide-default-footer
             class="elevation-1"
             @page-count="pageCount = $event"
@@ -66,8 +65,8 @@
         <v-pagination v-model="page" :length="pageCount"></v-pagination>
       </div>
       <v-snackbar v-model="deletePaperSnackBar" color="black" right top>
-        Você realmente quer deletar esta prova?
-        <v-btn dark color="yellow" text @click="deletePaper(deleteSelect.id)">Ok</v-btn>
+        Você realmente quer deletar este documento?
+        <v-btn dark color="yellow" text @click="deletePaper(deleteSelect)">Ok</v-btn>
         <v-btn dark color="yellow" text @click="deletePaperSnackBar = false">Cancelar</v-btn>
       </v-snackbar>
     </v-container>
@@ -88,7 +87,7 @@
             dialogEditPaper: false,
             selectedEdit: {},
             headers: [
-                { text: "Nome", align: "left",  value: "data.name" },
+                { text: "Nome", align: "left",  value: "name", sortable: true },
                 { text: "Ações", align:"right", value: "actions", sortable: false }
             ],
             page: 1,
@@ -100,40 +99,28 @@
         }),
         computed: {
             loading () {
-                return this.$store.getters.loading
-                this.$store.dispatch('clearLoading')
+                return this.$store.getters.loading;
+                this.$store.dispatch('clearLoading');
             },
             papers () {
-                return this.$store.getters.loadedPapers
+                return this.$store.getters.loadedPapers;
+            },
+            userClaims() {
+                return this.$store.getters.getUserClaims;
             }
         },
         methods: {
             editPaper(val){
                 this.selectedEdit = val;
-                this.loadPapers();
                 this.dialogEditPaper = true;
             },
-            loadPapers() {
-                console.log("é mano")
-                let aux = this.$store.dispatch("loadedPapers");
-                aux.then(()=>{
-                    return aux;
-                })
-            },
-            setLoader(){
-                this.loadQuestions();
-            },
-            deletePaper(id) {
-                console.log(id);
-                let aux = this.$store.dispatch("deletePaper", id);
-                aux.then(()=>{
-                    this.deletePaperSnackBar = false;
-                    this.loadPapers();
-                });
+            deletePaper(paper) {
+                this.$store.dispatch("deletePaper", paper);
+                this.deletePaperSnackBar = false;
             }
         },
         mounted() {
-            this.loadPapers();
+            this.$store.dispatch("loadedPapers");
         }
     }
 </script>
