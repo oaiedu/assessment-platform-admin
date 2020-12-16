@@ -1,8 +1,5 @@
 <template>
   <div>
-    <v-overlay :value="loading">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
-    </v-overlay>
     <v-container>
       <v-container>
           <h1 class="text-center blue--text">Gerenciar Provas</h1>
@@ -30,6 +27,8 @@
             :page.sync="page"
             :items-per-page="itemsPerPage"
             :search="search"
+            :loading="loading"
+            loading-text="Carregando provas..."
             hide-default-footer
             class="elevation-1"
             @page-count="pageCount = $event"
