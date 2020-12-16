@@ -1,24 +1,45 @@
-const axios = require('axios');
+import axios from 'axios';
 
 import { auth, db, storage } from '../../main';
 
 const initialState = () => ({
     user: null,
     userInfo: null,
-    userClaims: null
+    userClaims: null,
+    users: null
 });
 
 const state = initialState();
 
 const mutations = {
-    setUser(state, payload) {
-        state.user = payload;
+    setUser(state, data) {
+        state.user = data;
     },
-    setUserInfo(state, payload) {
-        state.userInfo = payload;
+    setUserInfo(state, data) {
+        state.userInfo = data;
     },
-    setUserClaims(state, payload) {
-        state.userClaims = payload;
+    setUserClaims(state, data) {
+        state.userClaims = data;
+    },
+    setUsers(state, data) {
+        state.users = data;
+    },
+    setUserRole(state, data) {
+        const { email, role } = data;
+        const users = [];
+
+        state.users.forEach(user => {
+            if(user.email === email) {
+                users.push({
+                    ...user,
+                    role
+                });
+            } else {
+                users.push(user);
+            }
+        });
+
+        state.users = [...users];
     },
     RESET(state) {
         const newState = initialState();
@@ -70,7 +91,7 @@ const actions = {
                     profileImages: '',
                     email: payload.email,
                     role: {
-                        common: true
+                        student: true
                     }
                 }
 
@@ -138,7 +159,6 @@ const actions = {
                         id: user.user.uid
                     }
                     commit('setUser', newUser);
-                    console.log("newUser: ", newUser);
                     dispatch('loadUserInfo', newUser.id);
                 }
             )
@@ -173,6 +193,53 @@ const actions = {
                 console.log(error);
             });
     },
+    loadUsers({ commit }) {
+        const users = [];
+
+        db.collection('users').get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    users.push(doc.data());
+                });
+            })
+            .then(() => {
+                commit('setUsers', users);
+            })
+            .catch(error => {
+                console.log(error + '');
+            });
+    },
+    setUserRole({ commit }, payload) {
+        const { email, role } = payload;
+
+        let url = '';
+
+        if(process.env.NODE_ENV === 'development') {
+            url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-setRole';
+        } else if(process.env.NODE_ENV === 'production') {
+            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/authentication-setRole';
+        }
+
+        axios.post(url, {
+            data: {
+                email,
+                role
+            }
+        }).then(res => {
+            if(res.data.uid) {
+                db.collection('users').doc(res.data.uid).update({ role })
+                    .then(() => {
+                        commit('setUserRole', payload);
+                    })
+                    .catch(error => {
+                        console.log('Database error!');
+                        console.log(error);
+                    });
+            }
+        }).catch(error => {
+            console.log(error);
+        });
+    },
     logout({ commit }) {
         auth.signOut();
         commit('setUser', null);
@@ -196,6 +263,9 @@ const getters = {
     },
     userInfo(state) {
         return state.userInfo;
+    },
+    users(state) {
+        return state.users;
     },
     getUserClaims(state) {
         return state.userClaims;
