@@ -3,7 +3,7 @@
     name="fade"
     mode="out-in"
   >
-    <v-content v-if="showSignOption">
+    <v-main v-if="showSignOption">
       <v-row justify="center" class="pb-4">
         <v-btn
           rounded
@@ -26,7 +26,7 @@
           Entrar
         </v-btn>
       </v-row>
-    </v-content>
+    </v-main>
 
     <div v-else>
       <SignIn v-if="showSignIn"/>
