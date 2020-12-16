@@ -1,10 +1,11 @@
 const fs = require('fs');
-const { auth } = require('../admin');
+const { auth, db } = require('../admin');
+const { hash } = require('../.env');
 
 exports.userDefaultRole = async (req, res) => {
     const uid = req.headers['uid'];
 
-    await auth.setCustomUserClaims(uid, { common: true })
+    await auth.setCustomUserClaims(uid, { admin: false, appraiser: false, teacher: false, student: true })
         .catch(error => {
             console.log(error);
         });
@@ -14,16 +15,60 @@ exports.userDefaultRole = async (req, res) => {
     res.send({ endDate: new Date().toISOString() });
 }
 
-exports.setAdminRole = async (req, res) => {
-    await auth.getUserByEmail('role@user.com')
-        .then(user => {
-            console.log(user);
+exports.setRole = async (req, res) => {
+    let email = '';
+    let role = '';
+    if(req.body.data) {
+        email = req.body.data['email'];
+        role = req.body.data['role'];
+    }
+
+    let uid = null;
+
+    if(email && role) {
+        await auth.getUserByEmail(email)
+            .then(user => {
+                uid = user.uid;
+                customClaims = {
+                    student: false,
+                    admin: false,
+                    appraiser: false,
+                    teacher: false,
+                }
+                auth.setCustomUserClaims(user.uid, { ...customClaims, [role]: true })
+                    .catch(error => {
+                        console.log(error + '');
+                    });
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+    res.append('Access-Control-Allow-Origin', '*');
+    res.append('Access-Control-Allow-Headers', 'Content-Type, email, role');
+    res.send({ uid });
+}
+
+exports.setDefaultRoleToAll = async (req, res) => {
+    await db.collection('users').get()
+        .then(snapshot => {
+            snapshot.forEach(doc => {
+                if(!doc.data().role.admin){
+                    doc.ref.update({ role: 'student' });
+
+                    auth.setCustomUserClaims(doc.id, { admin: false, appraiser: false, teacher: false, student: true })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                }
+            });
         })
         .catch(error => {
             console.log(error);
-        })
+        });
 
-    res.end();
+    res.send('Roles Updated!');
 }
 
 exports.importAuth = async (req, res) => {
@@ -40,18 +85,7 @@ exports.importAuth = async (req, res) => {
         user.passwordSalt = Buffer.from(user.passwordSalt, 'base64');
     });
 
-    await auth.importUsers(
-        json,
-        {
-            // pick from firebase authentication password hash config
-            hash: {
-                algorithm: "",
-                key: Buffer.from("", 'base64'),
-                saltSeparator: Buffer.from("", 'base64'),
-                rounds: 0,
-                memoryCost: 0
-            }
-        })
+    await auth.importUsers(json, { hash })
         .then(results => {
             const error = results.errors.length > 0 ? results.errors[0].error : 'Ok!';
             console.log(error);
