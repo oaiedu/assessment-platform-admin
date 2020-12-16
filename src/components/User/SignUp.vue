@@ -88,16 +88,12 @@ export default {
             this.$store.dispatch('clearLoading')
         }
     },
-    watch: {
-        user(value) {
-            if (value !== null & value !== undefined) {
-                this.$router.push('/');
-            }
-        }
-    },
     methods: {
         onSignup() {
             this.$store.dispatch('signUserUp', {name: this.name, email: this.email, password: this.password});
+            if(window.location.pathname !== '/') {
+                this.$router.push('/');
+            }
         },
         onDismissed() {
             console.log('Dismissed Alert!');
