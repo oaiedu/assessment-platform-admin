@@ -1,26 +1,23 @@
 <template>
   <div>
-    <v-overlay :value="loading">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
-    </v-overlay>
     <v-container>
       <v-container>
-          <h1 class="text-center blue--text">Gerenciar Questões</h1>
+        <h1 class="text-center blue--text">Gerenciar Questões</h1>
       </v-container>
 
       <v-container>
-          <v-container>
-            <v-text-field
-              v-model="search"
-              filled
-              rounded
-              dense
-              append-icon="mdi-magnify"
-              label="Search for IQ"
-              single-line
-              hide-details
-            ></v-text-field>
-          </v-container>
+        <v-container>
+          <v-text-field
+            v-model="search"
+            filled
+            rounded
+            dense
+            append-icon="mdi-magnify"
+            label="Search for IQ"
+            single-line
+            hide-details
+          ></v-text-field>
+        </v-container>
       </v-container>
 
       <v-container>
@@ -31,42 +28,86 @@
             :page.sync="page"
             :items-per-page="itemsPerPage"
             :search="search"
+            :loading="loading"
+            loading-text="Carregando questões..."
             hide-default-footer
             class="elevation-1"
             @page-count="pageCount = $event"
           >
             <template v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
-                <v-icon class="mr-6" @click="dialogPDF = true; selectedEdit = item"> mdi-pdf-box </v-icon>
-                <v-icon class="mr-2" @click="editQuestions(item)">mdi-pencil</v-icon>
-                <v-icon @click="deleteQuestionSnackBar = true; deleteSelect = item" class="mr-2">mdi-delete</v-icon>
+                <v-icon
+                  class="mr-6"
+                  @click='dialogPDF = true; selectedEdit = item;' >
+                  mdi-pdf-box
+                </v-icon>
+                <v-icon
+                    class="mr-2"
+                    v-if='userClaims["admin"]'
+                    @click="editQuestions(item)" >
+                    mdi-pencil
+                </v-icon>
+                <v-icon
+                    class="mr-2"
+                    v-if='userClaims["admin"]'
+                    @click='deleteQuestionSnackBar = true; deleteSelect = item;' >
+                    mdi-delete
+                </v-icon>
               </v-row>
             </template>
           </v-data-table>
         </v-card>
       </v-container>
 
-
-
-      <v-tooltip left>
+      <v-tooltip left v-if='userClaims["appraiser"] || userClaims["admin"]' >
         <template v-slot:activator="{ on }">
-          <v-btn v-on="on" fixed dark fab bottom right color="cyan" @click.stop="dialogNewQuestion= true">
+          <v-btn
+            v-on="on"
+            fixed
+            dark
+            fab
+            bottom
+            right
+            color="cyan"
+            @click.stop="dialogNewQuestion = true"
+          >
             <v-icon>mdi-plus</v-icon>
           </v-btn>
         </template>
         <span>Criar Questão</span>
       </v-tooltip>
 
-      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogNewQuestion">
-        <Stepper  @closeDialogNew="dialogNewQuestion = false"></Stepper>
+      <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+        v-model="dialogNewQuestion"
+      >
+        <Stepper @closeDialogNew="dialogNewQuestion = false"></Stepper>
       </v-dialog>
 
-      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditQuestion">
-        <EditQuestion :question="selectedEdit" @closeDialogEdit="dialogEditQuestion = false"></EditQuestion>
+      <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+        v-model="dialogEditQuestion"
+      >
+        <EditQuestion
+          :question="selectedEdit"
+          @closeDialogEdit="dialogEditQuestion = false"
+        ></EditQuestion>
       </v-dialog>
 
-      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogPDF">
-        <Body :question="selectedEdit" @closeDialogPrint="dialogPDF = false"></Body>
+      <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+        v-model="dialogPDF"
+      >
+        <Body
+          :question="selectedEdit"
+          @closeDialogPrint="dialogPDF = false"
+        ></Body>
       </v-dialog>
 
       <div class="text-center pt-2">
@@ -74,13 +115,17 @@
           v-model="page"
           :length="pageCount"
           total-visible="7"
-          ></v-pagination>
+        ></v-pagination>
       </div>
 
       <v-snackbar v-model="deleteQuestionSnackBar" color="black" right top>
         Você realmente quer deletar esta questão?
-        <v-btn dark color="yellow" text @click="deleteQuestion(deleteSelect.id)">Ok</v-btn>
-        <v-btn dark color="yellow" text @click="deleteQuestionSnackBar = false">Cancelar</v-btn>
+        <v-btn dark color="yellow" text @click="deleteQuestion(deleteSelect.id)"
+          >Ok</v-btn
+        >
+        <v-btn dark color="yellow" text @click="deleteQuestionSnackBar = false"
+          >Cancelar</v-btn
+        >
       </v-snackbar>
     </v-container>
   </div>
@@ -110,7 +155,7 @@ export default {
         "Instrumentação Nuclear",
         "Física Nuclear",
         "Transferência de Calor",
-        "Materiais"
+        "Materiais",
       ],
       showedQuestions: [],
       search: "",
@@ -123,22 +168,25 @@ export default {
         { text: "Relevância OR", value: "data.RELEVANCIA_OR" },
         { text: "Relevância OSR", value: "data.RELEVANCIA_OSR" },
         { text: "Disciplina", value: "data.DISCIPLINA", sortable: false },
-        { text: "Ações", align:"right", value: "actions", sortable: false }
-      ]
+        { text: "Ações", align: "right", value: "actions", sortable: false },
+      ],
     };
   },
   computed: {
-    loading () {
-        return this.$store.getters.loading
-        this.$store.dispatch('clearLoading')
+    loading() {
+      return this.$store.getters.loading;
+      this.$store.dispatch("clearLoading");
     },
     questions() {
       return this.$store.getters.loadedQuestions;
+    },
+    userClaims() {
+        return this.$store.getters.getUserClaims;
     }
   },
   watch: {
     selected(val) {
-      this.questions.forEach(element => {
+      this.questions.forEach((element) => {
         for (let i = 0; i < this.selected.length; i++) {
           if (element.data.DISCIPLINA == this.selected[i]) {
             let aux = true;
@@ -149,17 +197,17 @@ export default {
           }
         }
       });
-    }
+    },
   },
   methods: {
-    editQuestions(val){
-      this.selectedEdit = val
+    editQuestions(val) {
+      this.selectedEdit = val;
       // this.loadQuestions()
-      this.dialogEditQuestion = true
+      this.dialogEditQuestion = true;
     },
-    generatePDF(val){
-      this.selectedEdit = val
-      this.dialogPDF = true
+    generatePDF(val) {
+      this.selectedEdit = val;
+      this.dialogPDF = true;
     },
     // loadQuestions() {
     //   console.log("é mano")
@@ -171,10 +219,10 @@ export default {
     deleteQuestion(id) {
       console.log(id);
       let aux = this.$store.dispatch("deleteQuestion", id);
-      aux.then(()=>{
+      aux.then(() => {
         this.deleteQuestionSnackBar = false;
-      })
-    }
-  }
-}
+      });
+    },
+  },
+};
 </script>
