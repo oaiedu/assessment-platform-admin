@@ -4,151 +4,79 @@
             <h1 class="blue--text">Administração</h1>
         </div>
 
-        <div class="text-center">
-            <v-btn color="green" dark fab @click="backup()">
-                <v-icon>mdi-cloud-upload</v-icon>
-            </v-btn>
-        </div>
-
-        <v-data-table
-            :items='getBackupsByMonth(currentMonth)'
-            class="elevation-1 mt-10"
-            :headers="headers"
-            :loading="loading"
-            :sort-by="['start']"
-            :sort-desc="[true]"
-            loading-text="Carregando backups..." >
-            <template v-slot:top>
-                <v-toolbar flat color="blue">
-                    <v-toolbar-title class="white--text">Mês Atual</v-toolbar-title>
-                </v-toolbar>
-            </template>
-            <template v-slot:[`item.actions`]='{ item }'>
-                <v-icon
+        <v-tooltip left>
+            <template v-slot:activator='{ on, attrs }' >
+                <v-btn
                     color="green"
-                    @click="downloadBkp(item)" >
-                    mdi-download
-                </v-icon>
-                <v-icon
-                    class="ml-1"
-                    color="red"
-                    @click="deleteBkp(item)" >
-                    mdi-delete
-                </v-icon>
+                    dark
+                    x-large
+                    fab
+                    v-bind='attrs'
+                    v-on='on'
+                    fixed
+                    style="bottom: 30px; right: 30px;"
+                    @click="backup()" >
+                    <v-icon>mdi-cloud-upload</v-icon>
+                </v-btn>
             </template>
-        </v-data-table>
+            <span>Fazer Backup</span>
+        </v-tooltip>
 
-        <v-data-table
-            :items='getBackupsByMonth(lastMonth)'
-            class="elevation-1 mt-10"
-            :headers="headers"
-            :loading="loading"
-            loading-text="Carregando backups..." >
-            <template v-slot:top>
-                <v-toolbar flat color="blue">
-                    <v-toolbar-title class="white--text">{{ pastMonths[0] }}</v-toolbar-title>
-                </v-toolbar>
-            </template>
-            <template v-slot:[`item.actions`]='{ item }'>
-                <v-icon
-                    color="green"
-                    @click="downloadBkp(item)" >
-                    mdi-download
-                </v-icon>
-                <v-icon
-                    class="ml-1"
-                    color="red"
-                    @click="deleteBkp(item)" >
-                    mdi-delete
-                </v-icon>
-            </template>
-        </v-data-table>
+        <v-btn
+            color="orange"
+            dark
+            x-large
+            fab
+            fixed
+            style="bottom: 120px; right: 30px;"
+            @click="testAPI" >
+            <v-icon>mdi-share</v-icon>
+        </v-btn>
 
-        <v-data-table
-            :items='getBackupsByMonth(twoMonthsAgo)'
-            class="elevation-1 mt-10"
-            :headers="headers"
-            :loading="loading"
-            loading-text="Carregando backups..." >
-            <template v-slot:top>
-                <v-toolbar flat color="blue">
-                    <v-toolbar-title class="white--text">{{ pastMonths[1] }}</v-toolbar-title>
-                </v-toolbar>
-            </template>
-            <template v-slot:[`item.actions`]='{ item }'>
-                <v-icon
-                    color="green"
-                    @click="downloadBkp(item)" >
-                    mdi-download
-                </v-icon>
-                <v-icon
-                    class="ml-1"
-                    color="red"
-                    @click="deleteBkp(item)" >
-                    mdi-delete
-                </v-icon>
-            </template>
-        </v-data-table>
+        <template>
+            <v-tabs
+                v-model='tab'
+                background-color="white" >
+                <v-tab>
+                    <v-icon left>
+                        mdi-database
+                    </v-icon>
+                    Backups
+                </v-tab>
+                <v-tab>
+                    <v-icon left>
+                        mdi-account
+                    </v-icon>
+                    Usuários
+                </v-tab>
+            </v-tabs>
+
+            <v-tabs-items v-model="tab" >
+                <v-tab-item>
+                    <v-card>
+                        <BackupsTable />
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                    <v-card>
+                        <UsersTable />
+                    </v-card>
+                </v-tab-item>
+            </v-tabs-items>
+        </template>
     </v-container>
 </template>
 
 <script>
+    import BackupsTable from './BackupsTable';
+    import UsersTable from './UsersTable';
+
     export default {
         name: 'Management',
+        components: { BackupsTable, UsersTable },
         data() {
             return {
-                months: {},
-                headers: [
-                    {
-                        text: 'ID',
-                        value: 'id',
-                        align: 'center',
-                        sortable: true
-                    },
-                    {
-                        text: 'Tamanho',
-                        value: 'size',
-                        align: 'center',
-                        sortable: true
-                    },
-                    {
-                        text: 'Data de Início',
-                        value: 'start',
-                        align: 'center',
-                        sortable: true
-                    },
-                    {
-                        text: 'Data de Término',
-                        value: 'end',
-                        align: 'center',
-                        sortable: true
-                    },
-                    {
-                        value: 'actions',
-                        align: 'center',
-                        sortable: false
-                    }
-                ]
-            }
-        },
-        computed: {
-            loading() {
-                return this.$store.getters.loading;
-            },
-            currentMonth() {
-                return parseInt(new Date().toISOString().split('-')[1]);
-            },
-            lastMonth() {
-                return this.currentMonth - 1 === 0 ? 12 : this.currentMonth - 1;
-            },
-            twoMonthsAgo() {
-                return this.currentMonth - 2 === 0 ? 12 : this.currentMonth - 2;
-            },
-            pastMonths() {
-                return [this.months[this.lastMonth], this.months[this.twoMonthsAgo]];
-            },
-            backups() {
-                return this.$store.getters.getBackups;
+                tab: null
             }
         },
         methods: {
@@ -156,63 +84,13 @@
                 const now = new Date().toISOString();
                 this.$store.dispatch('backupFirebase', { now });
             },
-            getBackupsByMonth(month) {
-                const backups = this.backups;
-                const bkps = [];
-                const wanted = month;
-
-                backups.forEach(bkp => {
-                    const start = bkp.start;
-                    const bkpMon = start.substr(0, 3);
-                    const months = [];
-
-                    for (const key in this.months) {
-                        const mon = this.months[key].substr(0, 3);
-
-                        if(bkpMon === mon) {
-                            months.push(key);
-                        }
-                    }
-
-                    months.forEach(m => {
-                        if(m == wanted) {
-                            bkps.push(bkp);
-                        }
-                    });
-                });
-
-                return bkps;
-            },
-            downloadBkp(bkp) {
-                const iso = new Date().toISOString().replace(/:/g, '-');
-                const date = iso.split('T')[0];
-                const time = iso.split('T')[1].replace(/-/g, ':');
-
-                const newDate = date + 'T' + time;
-
-                const locale = new Date(newDate).toLocaleString();
-                const month = locale.split('/')[0];
-
-                const dateTime = new Date(newDate).toString();
-                const sub = dateTime.substr(7, 17);
-                const monthName = this.months[month].substr(0, 3);
-
-                const fullDate = monthName + sub;
-
-                console.log(bkp);
-            },
-            deleteBkp(backup) {
-
+            testAPI() {
+                this.$store.dispatch('testAPI');
             }
-        },
-        mounted() {
-            this.months = this.$store.getters.getMonths;
-            setTimeout(() => {
-                this.$store.dispatch('clearLoading');
-            }, 2000);
         },
         created() {
             this.$store.dispatch('loadBackups');
+            this.$store.dispatch('loadUsers');
         }
     }
 </script>
