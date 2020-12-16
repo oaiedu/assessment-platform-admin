@@ -1,4 +1,6 @@
 const axios = require('axios');
+const unzip = require('unzip-js');
+const AdmZip = require('adm-zip');
 
 import { db } from '../../main';
 
@@ -26,6 +28,14 @@ const mutations = {
     },
     newBackup(state, data) {
         state.backups.push(data);
+    },
+    removeBackup(state, data) {
+        const index = state.backups.indexOf(data);
+        console.log(index);
+        if(index !== -1) {
+            state.backups.splice(index, 1);
+            console.log(this.getBackups);
+        }
     }
 }
 
@@ -45,15 +55,17 @@ const actions = {
             id: '',
             size: '',
             start: '',
-            end: ''
+            end: '',
+            cloudId: ''
         }
 
         await axios.get(url)
             .then(res => {
                 bkp.size = res.data.size;
                 bkp.end = res.data.endDate;
+                bkp.cloudId = res.data.cloudId;
 
-                alert('Backup available at \'backups/' + now + '/\'');
+                console.log('Backup realizado com sucesso!');
             }).catch(error => console.log(error));
 
         db.collection('backups').get()
@@ -63,7 +75,7 @@ const actions = {
 
                 if(snapshot.docs.length > 0) {
                     snapshot.forEach(doc => {
-                        const id = parseInt(doc.data().id.split('p')[1]);
+                        const id = parseInt(doc.data().id.substr(3, 4));
                         if(!lastBkpId) {
                             lastBkpId = id;
                         } else {
@@ -77,8 +89,7 @@ const actions = {
                 } else bkpId = 1;
 
                 function formatDate(date) {
-                    const locale = new Date(date).toLocaleString();
-                    const month = locale.split('/')[0];
+                    const month = new Date(date).getMonth() + 1;
 
                     const dateTime = new Date(date).toString();
                     const sub = dateTime.substr(7, 17);
@@ -87,7 +98,7 @@ const actions = {
                     return monthName + sub;
                 }
 
-                bkp.id = 'bkp' + bkpId;
+                bkp.id = 'mb' + (bkpId >= 1000 ? bkpId : bkpId.toString().padStart(4, '0'));
                 bkp.start = formatDate(now);
                 bkp.end = formatDate(bkp.end);
 
@@ -102,6 +113,8 @@ const actions = {
             });
     },
     loadBackups({ commit }) {
+        commit('setLoading', true);
+
         const data = [];
         db.collection('backups').get()
             .then(snapshot => {
@@ -111,9 +124,142 @@ const actions = {
             })
             .then(() => {
                 commit('setBackups', data);
+                commit('setLoading', false);
             })
             .catch(error => {
                 console.log(error);
+            });
+    },
+    downloadBackup(store, payload) {
+        let url = ''
+
+        if(process.env.NODE_ENV === 'development') {
+            url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-downloadBackup?id=' + payload.cloudId;
+        } else if(process.env.NODE_ENV === 'production') {
+            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/backup-downloadBackup?id=' + payload.cloudId;
+        }
+
+        axios.get(url)
+            .then(res => {
+                const data = res.data.backup;
+
+                unzip(new Blob([Buffer.from(data)], { type: 'application/zip' }), (err, zipFile) => {
+                    if(err) {
+                        console.log(err);
+                    }
+
+                    zipFile.readEntries((err, entries) => {
+                        if(err) {
+                            console.log(err);
+                        }
+
+                        const zip = new AdmZip();
+
+                        let counter = 0;
+                        let len = 0;
+                        entries.forEach(entry => {
+                            zipFile.readEntryData(entry, false, (err, readStream) => {
+                                if(err) {
+                                    console.log(err);
+                                }
+
+                                readStream.on('data', async chunk => {
+                                    const chars = [];
+                                    const promises = chunk.map(dataIn => chars.push(dataIn));
+
+                                    await Promise.all(promises);
+
+                                    const fromCharCode = String.fromCharCode(...chars);
+
+                                    const json = JSON.stringify(fromCharCode);
+
+                                    zip.addFile('file' + ++counter + '.json', json);
+                                });
+                                readStream.on('error', error => {
+                                    console.log(error);
+                                });
+                                readStream.on('end', () => {
+                                    len++;
+                                    if(entries.length === len) {
+                                        const toBlob = zip.toBuffer();
+                                        const contentType = 'application/zip';
+                                        const blob = new Blob([toBlob], { type: contentType });
+
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `${payload.id.toUpperCase()}-${payload.date}.zip`;
+                                        a.click();
+                                        a.remove();
+                                    }
+                                });
+                            });
+                        });
+                    });
+                });
+
+                // if(data) {
+                //     const toBlob = Buffer.from(data);
+                //     const contentType = 'application/zip';
+                //     const blob = new Blob([toBlob], { type: contentType });
+
+                //     if(data) {
+                //         const url = URL.createObjectURL(blob);
+                //         const a = document.createElement('a');
+                //         a.href = url;
+                //         a.download = `${payload.id.toUpperCase()}-${payload.date}.zip`;
+                //         a.click();
+                //         a.remove();
+                //     }
+                // } else {
+                //     const error = res.data.error;
+                //     alert('Ocorrou um erro ao baixar o arquivo: ', error);
+                // }
+            })
+            .catch(error => {
+                console.log(error + '');
+            });
+    },
+    async deleteBackup({ commit }, payload) {
+        let url = '';
+        if(process.env.NODE_ENV === 'development') {
+            url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-deleteBackup?id=' + payload.id;
+        } else if(process.env.NODE_ENV === 'production') {
+            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/backup-deleteBackup?id=' + payload.id;
+        }
+
+        await axios.get(url)
+            .then(res => {
+                const deleted = res.data.deleted;
+                if(deleted) {
+                    db.collection('backups').where('cloudId', '==', payload.id).get()
+                        .then(snapshot => {
+                            snapshot.forEach(doc => {
+                                doc.ref.delete();
+                                commit('removeBackup', doc.data());
+                                alert('Backup excluído com sucesso!');
+                            });
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                } else {
+                    alert('Um erro ocorreu ao excluir o backup!');
+                }
+            })
+            .catch(error => {
+                console.log(error + '');
+            });
+    },
+    testAPI(store) {
+        const url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-testAPI';
+
+        axios.get(url)
+            .then(res => {
+                console.log(res.data.file);
+            })
+            .catch(error => {
+                console.log(error + '');
             });
     }
 }
