@@ -1,8 +1,176 @@
 const fs = require('fs');
-// const AdmZip = require('adm-zip');
+
+const AdmZip = require('adm-zip');
+const { google } = require('googleapis');
+
 const { auth, db, storage } = require('../admin');
+const { serviceAccount } = require('../.env');
+
+exports.downloadBackup = async (req, res) => {
+    const jwtClient = new google.auth.JWT(
+        serviceAccount.client_email,
+        null,
+        serviceAccount.private_key,
+        ['https://www.googleapis.com/auth/drive'],
+        null
+    );
+
+    const drive = google.drive({ version: 'v3', auth: jwtClient });
+    const zip = new AdmZip();
+
+    const fileId = req.query.id;
+
+    const folderPath = './temp';
+    const filePath = `${folderPath}/${fileId}.zip`;
+
+    fs.mkdirSync(folderPath);
+
+    await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' })
+        .then(async response => {
+            const dest = fs.createWriteStream(filePath);
+
+            await response.data
+                .on('end', () => {
+                    setTimeout(async () => {
+                        zip.addLocalFile(filePath);
+
+                        const data = zip.getEntries()[0].getData();
+
+                        fs.rmdirSync(folderPath, { recursive: true });
+
+                        res.append('Access-Control-Allow-Origin', '*');
+                        res.send({ backup: data });
+                    }, 1000);
+                })
+                .on('error', err => {
+                    console.log('Error downloading file: ', err);
+                    res.send({ backup: null, error: err });
+                })
+                .pipe(dest);
+        })
+        .catch(error => console.log(error));
+}
+
+exports.deleteBackup = async (req, res) => {
+    const jwtClient = new google.auth.JWT(
+        serviceAccount.client_email,
+        null,
+        serviceAccount.private_key,
+        ['https://www.googleapis.com/auth/drive'],
+        null
+    );
+
+    const dv3 = google.drive({ version: 'v3', auth: jwtClient });
+
+    const fileId = req.query.id;
+    let deleted = false;
+
+    dv3.files.delete({
+        fileId
+    }, (error, response) => {
+        if(error) console.log(error);
+        else {
+            deleted = true;
+        }
+
+        res.append('Access-Control-Allow-Origin', '*');
+        res.send({ deleted });
+    });
+
+}
+
+exports.testAPI = async (req, res) => {
+    const jwtClient = new google.auth.JWT(
+        serviceAccount.client_email,
+        null,
+        serviceAccount.private_key,
+        ['https://www.googleapis.com/auth/drive'],
+        null
+    );
+
+    const dv3 = google.drive({ version: 'v3', auth: jwtClient });
+
+    // const json = fs.readFileSync('../../backups/2020-12-09T19-40-40.732Z/auth-2020-12-09T19-40-40.732Z.json');
+
+    // const contentType = 'application/zip';
+
+    // const zip = new AdmZip();
+
+    // zip.addFile('json1.json', json);
+
+    // let data = null;
+
+    // fs.writeFileSync('./zipFile.zip', zip.toBuffer());
+
+    // const file = await dv3.files.create({
+    //     requestBody: {
+    //         name: 'zipFile.zip',
+    //         mimeType: contentType
+    //     },
+    //     media: {
+    //         mimeType: contentType,
+    //         body: fs.createReadStream('./zipFile.zip')
+    //     }
+    // });
+
+    // console.log(file.data);
+    // fs.rmSync('./zipFile.zip', { recursive: true });
+
+    // res.append('Access-Control-Allow-Origin', '*');
+    // res.send({ file: file.data });
+
+    // const folder = await dv3.files.list({});
+    // console.log(folder.data);
+
+    dv3.files.list({}, (error, response) => {
+        if(error) console.log(error + '');
+        else {
+            response.data.files.forEach(file => {
+                console.log(file.name + ' - ' + file.id);
+            });
+        }
+
+        res.append('Access-Control-Allow-Origin', '*');
+        res.send('Ok');
+    });
+
+    // dv3.files.delete({ fileId: '1vBiTVppHDhAYdchVyRP_qRoz9NV31K3u' });
+    // res.append('Access-Control-Allow-Origin', '*');
+    // res.send('ok');
+
+    // txt -> 1g7N9jGGsIWS0Pz84RYi3NQlAXmTBtedV
+    // json -> 1iaK_EGNXLQMA9fR9WkuIf0qCcRsOqXGW
+    // zip -> 1P5YD1VwOL_ajm4JmUejWaCOOijiSs6gR
+
+    // dv3.files.get({ fileId: '1xjmp6afHrNOtepNqLkEq97w7AHaihnf8' },
+    //     (e, r) => {
+    //         if(e) return console.log(e);
+    //         else {
+    //             data = r.data;
+    //             console.log(data);
+    //             // fs.writeFileSync('./data.zip', data);
+    //             // data = fs.createWriteStream('./data.zip');
+    //         }
+
+    //         res.append('Access-Control-Allow-Origin', '*');
+    //         // res.send({ backup: data });
+    //         res.end();
+    //     });
+}
 
 exports.backupFirestoreAuth = async (req, res) => {
+    const jwtClient = new google.auth.JWT(
+        serviceAccount.client_email,
+        null,
+        serviceAccount.private_key,
+        ['https://www.googleapis.com/auth/drive'],
+        null
+    );
+
+    const dv3 = google.drive({ version: 'v3', auth: jwtClient });
+
+    const zip = new AdmZip();
+
     const collections = [
         'edited questions',
         'papers',
@@ -11,12 +179,10 @@ exports.backupFirestoreAuth = async (req, res) => {
         'tests',
         'users'
     ];
+
     const now = req.query.now;
-    const path = '../../backups';
 
     let size = 0;
-
-    fs.mkdirSync(`${path}/${now}/firestore`, { recursive: true });
 
     await auth.listUsers()
         .then(snapshot => {
@@ -26,7 +192,7 @@ exports.backupFirestoreAuth = async (req, res) => {
             });
             const jsonAuth = JSON.stringify(users);
 
-            fs.writeFileSync(`${path}/${now}/auth-${now}.json`, jsonAuth);
+            zip.addFile(`auth-${now}.json`, jsonAuth);
             size += encodeURI(jsonAuth).split(/%..|./).length - 1;
         })
         .catch(error => {
@@ -42,13 +208,48 @@ exports.backupFirestoreAuth = async (req, res) => {
                     const data = doc.data();
 
                     if(collection.includes('question')) {
+                        dbData[id] = {
+                            ...data,
+                            PERGUNTA: encodeURIComponent(data.PERGUNTA),
+                            DISCIPLINA: encodeURIComponent(data.DISCIPLINA),
+                            RESPOSTAS: data.RESPOSTAS.map(ans => {
+                                return {
+                                    ...ans,
+                                    text: encodeURIComponent(ans.text)
+                                }
+                            }),
+                        };
+                        if(collection === 'question requests') {
+                            dbData[id] = {
+                                ...dbData[id],
+                                NOME: encodeURIComponent(data.NOME)
+                            }
+                        }
                         if(!data.IQ) {
                             dbData[id] = {
-                                ...data,
+                                ...dbData[id],
                                 IQ: id
-                            };
-                        } else if(data.IQ.length > 0) {
-                            dbData[data.IQ] = data;
+                            }
+                        }
+                    } else if(collection.includes('papers')) {
+                        dbData[id] = {
+                            image: data.image,
+                            description: encodeURIComponent(data.description),
+                            name: encodeURIComponent(data.name)
+                        };
+                    } else if(collection.includes('tests')) {
+                        dbData[id] = {
+                            ...data,
+                            created: encodeURIComponent(data.created),
+                            purpose: encodeURIComponent(data.purpose),
+                            title: encodeURIComponent(data.title),
+                            user: encodeURIComponent(data.user)
+                        }
+                    } else if(collection.includes('users')) {
+                        dbData[id] = {
+                            email: encodeURIComponent(data.email),
+                            name: encodeURIComponent(data.name),
+                            profileImages: data.profileImages
                         }
                     } else {
                         dbData[id] = data;
@@ -56,7 +257,9 @@ exports.backupFirestoreAuth = async (req, res) => {
                 });
                 const json = JSON.stringify(dbData);
 
-                fs.writeFileSync(`${path}/${now}/firestore/${collection}-${now}.json`, json);
+                console.log(JSON.parse(json));
+
+                zip.addFile(`db-${collection}-${now}.json`, json);
                 size += encodeURI(json).split(/%..|./).length - 1;
             })
             .catch(error => {
@@ -66,13 +269,33 @@ exports.backupFirestoreAuth = async (req, res) => {
 
     await Promise.all(promises);
 
-    if(size < 1024) size = size + ' bytes';
+    if(size < 1024) size = size + ' B';
     else if(size < 1048576) size = (size / 1024).toFixed(2) + ' KB';
     else if(size < 1073741824) size = (size / 1048576).toFixed(2) + ' MB';
     else size = (size / 1073741824).toFixed(2) + ' GB';
 
+    const zipFileName = `backup-${now}.zip`;
+    const contentType = 'application/zip';
+
+    fs.writeFileSync('./' + zipFileName, zip.toBuffer());
+
+    const file = await dv3.files.create({
+        requestBody: {
+            name: zipFileName,
+            mimeType: contentType
+        },
+        media: {
+            mimeType: contentType,
+            body: fs.createReadStream('./' + zipFileName)
+        }
+    });
+
+    zip.extractAllTo('./extracted', true);
+
+    fs.rmSync('./' + zipFileName, { recursive: true });
+
     res.append('Access-Control-Allow-Origin', '*');
-    res.send({endDate: new Date().toISOString(), size});
+    res.send({ endDate: new Date().toISOString(), size, cloudId: file.data.id });
 }
 
 exports.backupFirebase = async (req, res) => {
