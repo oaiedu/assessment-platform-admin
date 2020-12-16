@@ -9,7 +9,7 @@
                     <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
                 </v-col>
             </v-row>
-            <fab/>
+            <fab :userClaims='userClaims' v-if='!userClaims["student"]' />
         </v-container>
 
         <v-row justify="center" align="center" v-else>
@@ -56,6 +56,9 @@
             },
             numberOfQuestions() {
                 return this.$store.getters.numberOfQuestions;
+            },
+            userClaims() {
+                return this.$store.getters.getUserClaims;
             }
         }
     }
@@ -63,7 +66,7 @@
 
 <style>
     .section-1 {
-        height: 100vh;
+        height: calc(100vh - 48px);
         background: url("https://firebasestorage.googleapis.com/v0/b/pwr-quiz-generator.appspot.com/o/home-background.jpg?alt=media&token=9f763b10-06ae-450e-90d1-96bbc7667376");
     }
 </style>

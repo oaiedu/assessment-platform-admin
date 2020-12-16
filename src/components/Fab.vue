@@ -25,7 +25,8 @@
           <span v-else>Criar</span>
         </v-tooltip>
       </template>
-      <v-tooltip left>
+
+      <v-tooltip left v-if='userClaims["appraiser"] || userClaims["admin"]'>
         <template v-slot:activator="{ on }">
           <v-btn
             fab
@@ -41,7 +42,7 @@
         <span>Criar nova questão</span>
       </v-tooltip>
 
-      <v-tooltip left>
+      <v-tooltip left v-if='userClaims["teacher"] || userClaims["admin"]'>
         <template v-slot:activator="{ on }">
           <v-btn
             fab
@@ -60,17 +61,20 @@
 </template>
 
 <script>
-  export default {
-    data: () => ({
-      fab: false
-    }),
-    methods: {
-      toQuestions(){
-        this.$router.push('/questions')
-      },
-      toTests(){
-        this.$router.push('/tests')
-      }
+    export default {
+        props: ['userClaims'],
+        data() {
+            return {
+                fab: false
+            }
+        },
+        methods: {
+            toQuestions(){
+                this.$router.push('/questions')
+            },
+            toTests(){
+                this.$router.push('/tests')
+            }
+        }
     }
-  }
 </script>

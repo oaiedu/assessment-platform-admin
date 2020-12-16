@@ -110,7 +110,7 @@
                             accept='image/png, image/jpeg, image/bmp' />
                         </v-col>
                       </v-row>
-                      <v-content v-if="images && images.length != 0">
+                      <v-main v-if="images && images.length != 0">
                         <v-row justify="center">
                           <v-radio-group v-model="imageSize" row>
                             <v-radio label="1x" value="1x"></v-radio>
@@ -118,7 +118,7 @@
                             <v-radio label="3x" value="3x"></v-radio>
                           </v-radio-group>
                         </v-row>
-                      </v-content>
+                      </v-main>
                     </v-container>
                   </v-stepper-content>
 
@@ -151,7 +151,7 @@
                         </v-container>
                       </v-row>
 
-                      <v-content v-if="confirmTitle">
+                      <v-main v-if="confirmTitle">
                         <v-row justify="end">
                           <v-col cols="1"></v-col>
                           <v-col v-for="i in number" :key="i">
@@ -168,9 +168,9 @@
                             <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
                           </v-col>
                         </v-row>
-                      </v-content>
+                      </v-main>
 
-                      <v-content v-else>
+                      <v-main v-else>
                         <v-row v-for="(item, index) in answers" :key="index">
                           <v-col cols="12" md="1" sm="1" xs="1">
                             <v-radio-group v-model="radios">
@@ -181,7 +181,7 @@
                             <v-text-field outlined v-model="item.text"></v-text-field>
                           </v-col>
                         </v-row>
-                      </v-content>
+                      </v-main>
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -245,14 +245,14 @@
                 </v-row>
               </v-content>
 
-              <v-content v-else>
+              <v-main v-else>
                 <v-row v-for="(item, index) in answers" :key="index">
                   <v-col cols="1">{{ letters[index] }} -</v-col>
                   <v-col>
                     <vue-markdown :source="item.text" />
                   </v-col>
                 </v-row>
-              </v-content>
+              </v-main>
             </v-card-text>
           </v-card>
         </v-col>
@@ -271,6 +271,7 @@ export default {
         Editor,
         "vue-markdown": VueMarkdown
     },
+    props: ['questionRequest'],
     data() {
         return {
             letters: ["A", "B", "C", "D"],
@@ -324,6 +325,12 @@ export default {
                 this.knowledgeBWR !== "" &&
                 this.subject !== ""
             );
+        },
+        userClaims() {
+            return this.$store.getters.getUserClaims;
+        },
+        userInfo() {
+            return this.$store.getters.userInfo;
         }
     },
     watch: {
@@ -380,24 +387,36 @@ export default {
         onCreateQuestion() {
             console.log("value: ", this.answers[1].value);
 
-            if (typeof this.images[0] !== "undefined") {
+            if (this.images && this.images[0]) {
                 const imageToUpload = { id: this.id, images: this.images[0] };
                 var URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
                 URL.then(result => {
                     this.imagesAsURL = result;
                     const questionData = {
-                        id: this.id,
+                        id: this.iq,
                         subject: this.subject,
-                        questionDescription: this.questionDescription,
+                        question: this.questionDescription,
                         knowledge: this.knowledge,
                         knowledgePWR: this.knowledgePWR,
                         knowledgeBWR: this.knowledgeBWR,
                         answers: this.answers,
-                        images: this.imagesAsURL,
+                        image: this.imagesAsURL,
                         imageSize: this.imageSize,
                     };
 
-                    let aux = this.$store.dispatch("createQuestion", questionData);
+                    let aux = null;
+
+                    if(this.userClaims['admin']) {
+                        aux = this.$store.dispatch("createQuestion", questionData);
+                    } else {
+                        aux = this.$store.dispatch('createQuestionRequest', {
+                            ...questionData,
+                            name: userInfo.name,
+                            email: userInfo.email,
+                            status: 'Pendente'
+                        });
+                    }
+
                     aux.then(() => {
                         this.setInitialData();
                         this.close();
@@ -405,18 +424,30 @@ export default {
                 });
             } else {
                 const questionData = {
-                    id: this.id,
+                    id: this.iq,
                     subject: this.subject,
                     questionDescription: this.questionDescription,
                     knowledge: this.knowledge,
                     knowledgePWR: this.knowledgePWR,
                     knowledgeBWR: this.knowledgeBWR,
                     answers: this.answers,
-                    images: "",
+                    image: "",
                     imageSize: this.imageSize,
                 };
 
-                let aux = this.$store.dispatch("createQuestion", questionData);
+                let aux = null;
+
+                if(this.userClaims['admin']) {
+                        aux = this.$store.dispatch("createQuestion", questionData);
+                } else {
+                    aux = this.$store.dispatch('createQuestionRequest', {
+                        ...questionData,
+                        name: this.userInfo.name,
+                        email: this.userInfo.email,
+                        status: 'Pendente'
+                    });
+                }
+
                 aux.then(() => {
                     this.setInitialData();
                     this.close();
