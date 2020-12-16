@@ -47,30 +47,26 @@ export default {
   },
   computed: {
     user () {
-      return this.$store.getters.user
+        return this.$store.getters.user;
     },
     error () {
-        return this.$store.getters.error
+        return this.$store.getters.error;
     },
     loading () {
-        return this.$store.getters.loading
-        this.$store.dispatch('clearLoading')
-    }
-  },
-  watch: {
-    user (value) {
-      if (value !== null & value !== undefined) {
-          this.$router.push('/')
-      }
+        return this.$store.getters.loading;
+        this.$store.dispatch('clearLoading');
     }
   },
   methods: {
     onSignin () {
-      this.$store.dispatch('signUserIn', {email: this.email, password: this.password})
+      this.$store.dispatch('signUserIn', {email: this.email, password: this.password});
+      if(window.location.pathname !== '/') {
+        this.$router.push('/');
+      }
     },
     onDismissed () {
-        console.log('Dismissed Alert!')
-        this.$store.dispatch('clearError')
+        console.log('Dismissed Alert!');
+        this.$store.dispatch('clearError');
     }
   }
 }

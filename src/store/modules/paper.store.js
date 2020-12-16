@@ -8,14 +8,25 @@ const initialState = () => ({
 const state = initialState();
 
 const mutations = {
-    setLoadedPapers(state,payload) {
+    setLoadedPapers(state, payload) {
         state.loadedPapers = payload;
     },
-    createPaper(state,payload) {
+    createPaper(state, payload) {
         state.loadedPapers.push(payload);
     },
-    deletePaper(state,payload) {
-        state.deletePaper = payload;
+    updatePaper(state, payload) {
+        const papers = state.loadedPapers;
+        for(let index = 0; index < papers.length; index++) {
+            if(papers[index].id === payload.id) {
+                state.loadedPapers[index] = payload;
+            }
+        }
+    },
+    removePaper(state, payload) {
+        const index = state.loadedPapers.indexOf(payload);
+        if(index !== -1) {
+            state.loadedPapers.splice(index, 1);
+        }
     },
     RESET(state) {
         const newState = initialState();
@@ -54,8 +65,7 @@ const actions = {
     },
     deletePaper({ commit, dispatch }, payload) {
         commit('setLoading', true);
-        const id = payload;
-        return db.collection("papers").where('id', '==', id).get()
+        db.collection("papers").where('id', '==', payload.id).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.delete();
@@ -68,8 +78,8 @@ const actions = {
                 });
             })
             .then(() => {
+                commit('removePaper', payload);
                 commit('setLoading', false);
-                dispatch("loadedPapers");
                 console.log("Document successfully deleted!");
             })
             .catch(function (error) {
@@ -82,7 +92,7 @@ const actions = {
         db.collection("papers").get()
             .then(querySnapshot => {
                 querySnapshot.forEach(doc => {
-                    papers.push(Object.assign({id: doc.data().id, data: doc.data()}));
+                    papers.push(doc.data());
             });
             commit('setLoadedPapers', papers);
             commit('setLoading', false);
@@ -95,17 +105,18 @@ const actions = {
             image: payload.paperImage,
             description: payload.paperDescription
         }
+        console.log(paper);
         db.collection("papers").add(paper)
             .then(() => {
+                commit('createPaper', paper);
                 commit('setLoading', false);
-                dispatch("loadedPapers");
                 console.log("Success");
             })
             .catch(error => {
                 console.error("Error writing document: ", error);
             });
     },
-    updatePaper({ commit, dispatch }, payload) {
+    updatePaper({ commit }, payload) {
         const paper = {
             name: payload.paperName,
             image: payload.paperImage,
@@ -119,8 +130,8 @@ const actions = {
                 });
             })
             .then(() => {
+                commit('updatePaper', paper);
                 commit('setLoading', false);
-                dispatch("loadedPapers");
                 console.log("Success");
             })
             .catch(error => {

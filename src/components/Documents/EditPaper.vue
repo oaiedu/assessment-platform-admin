@@ -94,9 +94,9 @@
 
         computed: {
             name() {
-                var aux = this.paper.data.name
-                this.paperName = aux
-                return aux
+                const aux = this.paper.name;
+                this.paperName = aux;
+                return aux;
             }
         },
 
@@ -108,8 +108,8 @@
 
         methods: {
             update() {
-                this.paperDescription = this.paper.data.description
-                this.paperImage = this.paper.data.image
+                this.paperDescription = this.paper.description
+                this.paperImage = this.paper.image
             },
             hasImage() {
                 if( paperImage !== '' && typeof paperImage !== 'undefined')
@@ -147,7 +147,7 @@
                 if ((this.images && this.images[0])) {
                     const imageToUpload = {
                         name: this.paperName,
-                        oldName: this.paper.data.name,
+                        oldName: this.paper.name,
                         images: this.images[0],
                         id: this.paper.id
                     }

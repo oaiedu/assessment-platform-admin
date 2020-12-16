@@ -193,26 +193,22 @@ const actions = {
         commit('setLoading', true);
 
         const question = {
-            id: payload.id,
-            data: {
-                IQ: payload.id,
-                PERGUNTA: payload.questionDescription,
-                DISCIPLINA: payload.subject,
-                CONHECIMENTO: payload.knowledge,
-                RELEVANCIA_OR: payload.knowledgePWR,
-                RELEVANCIA_OSR: payload.knowledgeBWR,
-                RESPOSTAS: payload.answers,
-                IMAGENS: payload.images,
-                TAMANHO_IMAGEM: payload.imageSize,
-                edited: []
-            }
+            IQ: payload.iq,
+            PERGUNTA: payload.question,
+            DISCIPLINA: payload.subject,
+            CONHECIMENTO: payload.knowledge,
+            RELEVANCIA_OR: payload.knowledgePWR,
+            RELEVANCIA_OSR: payload.knowledgeBWR,
+            RESPOSTAS: payload.answers,
+            IMAGENS: payload.image,
+            TAMANHO_IMAGEM: payload.imageSize,
+            edited: []
         }
 
-        db.collection("questions").add(question.data)
+        db.collection("questions").add(question)
             .then(() => {
                 commit('setLoading', false);
                 commit('createQuestion', question);
-                console.log("Success");
             })
             .catch(error => {
                 console.error("Error writing document: ", error);

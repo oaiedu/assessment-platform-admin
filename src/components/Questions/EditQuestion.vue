@@ -86,7 +86,7 @@
                         <v-file-input chips multiple label="Imagem" v-model="images" />
                       </v-row>
 
-                      <v-content
+                      <v-main
                         v-if="this.editedImages !== '' && typeof this.editedImages !== 'undefined'"
                       >
                         <v-row justify="center">
@@ -96,13 +96,13 @@
                             <v-radio label="3x" value="3x"></v-radio>
                           </v-radio-group>
                         </v-row>
-                      </v-content>
+                      </v-main>
                     </v-container>
                   </v-stepper-content>
 
                   <v-stepper-content step="3">
                     <v-container>
-                      <v-content v-if="confirmTitle">
+                      <v-main v-if="confirmTitle">
                         <v-row justify="end">
                           <v-col cols="1"></v-col>
                           <v-col v-for="i in number" :key="i">
@@ -119,9 +119,9 @@
                             <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
                           </v-col>
                         </v-row>
-                      </v-content>
+                      </v-main>
 
-                      <v-content v-else>
+                      <v-main v-else>
                         <v-row v-for="(item, index) in editedAnswers" :key="index">
                           <v-col cols="12" md="1" sm="1" xs="1">
                             <v-radio-group v-model="radios">
@@ -132,7 +132,7 @@
                             <v-text-field outlined v-model="editedAnswers[index].text"></v-text-field>
                           </v-col>
                         </v-row>
-                      </v-content>
+                      </v-main>
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -163,7 +163,7 @@
                 <img style="max-height: 250px; max-width: 180px" :src="this.editedImages" />
               </v-row>
 
-              <v-content v-if="confirmTitle">
+              <v-main v-if="confirmTitle">
                 <v-row>
                   <v-col cols="2"></v-col>
                   <v-col v-for="(item, index) in editedAnswers[0].text" :key="index" cols="2">
@@ -201,16 +201,16 @@
                     <vue-markdown :source="item.answerDescription" />
                   </v-col>
                 </v-row>
-              </v-content>
+              </v-main>
 
-              <v-content v-else>
+              <v-main v-else>
                 <v-row v-for="(item, index) in editedAnswers" :key="index">
                   <v-col cols="1">{{ letters[index] }} -</v-col>
                   <v-col>
                     <vue-markdown :source="item.text" />
                   </v-col>
                 </v-row>
-              </v-content>
+              </v-main>
             </v-card-text>
           </v-card>
         </v-col>

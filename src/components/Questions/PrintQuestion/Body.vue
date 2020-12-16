@@ -19,24 +19,24 @@
             <br />
 
             <div class="img-container" v-if="confirmImage(question.data.IMAGENS)">
-              <v-content v-if="question.data.TAMANHO_IMAGEM === '1x'">
+              <v-main v-if="question.data.TAMANHO_IMAGEM === '1x'">
                 <img :src="question.data.IMAGENS" style="max-height: 40vh; max-width: 40vw" />
-              </v-content>
+              </v-main>
 
-              <v-content v-if="question.data.TAMANHO_IMAGEM === '2x'">
+              <v-main v-if="question.data.TAMANHO_IMAGEM === '2x'">
                 <img :src="question.data.IMAGENS" style="max-height: 50vh; max-width: 50vw" />
-              </v-content>
+              </v-main>
 
-              <v-content v-if="question.data.TAMANHO_IMAGEM === '3x'">
+              <v-main v-if="question.data.TAMANHO_IMAGEM === '3x'">
                 <img :src="question.data.IMAGENS" style="max-height: 60vh; max-width: 60vw" />
-              </v-content>
+              </v-main>
 
-              <v-content v-if="question.data.TAMANHO_IMAGEM === undefined">
+              <v-main v-if="question.data.TAMANHO_IMAGEM === undefined">
                 <img :src="question.data.IMAGENS" style="max-height: 50vh; max-width: 50vw" />
-              </v-content>
+              </v-main>
             </div>
 
-            <v-content v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
+            <v-main v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
               <v-row>
                 <v-col cols="2"></v-col>
                 <v-col
@@ -91,16 +91,16 @@
                   <vue-markdown :source="item.answerDescription" />
                 </v-col>
               </v-row>
-            </v-content>
+            </v-main>
 
-            <v-content v-else>
+            <v-main v-else>
               <v-row v-for="(item, index) in question.data.RESPOSTAS" :key="index">
                 <v-col cols="2">{{ letters[index] }} -</v-col>
                 <v-col>
                   <vue-markdown :source="item.text" />
                 </v-col>
               </v-row>
-            </v-content>
+            </v-main>
 
             <v-btn
               class="buttonIsHidden"
