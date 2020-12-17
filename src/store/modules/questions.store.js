@@ -33,7 +33,7 @@ const mutations = {
     },
     deleteQuestion(state, payload) {
         state.loadedQuestions.forEach((item, i) => {
-            if(item.id === payload)
+            if(item.iq === payload)
                 state.loadedQuestions.splice(i, 1);
         });
     },
@@ -51,7 +51,7 @@ const actions = {
         let questions = [];
         db.collection('questions').get().then(querySnapshot => {
             querySnapshot.forEach(doc => {
-                questions.push(Object.assign({ id: doc.data().IQ, data: doc.data() }));
+                questions.push(doc.data());
             });
             commit('setLoadedQuestions', questions);
             commit('setLoading', false);
@@ -59,13 +59,13 @@ const actions = {
     },
     deleteQuestion({ commit }, payload) {
         commit('setLoading', true);
-        const id = payload;
-        return db.collection("questions").where('IQ', '==', id).get()
+        const iq = payload;
+        return db.collection("questions").where('iq', '==', iq).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.delete();
-                    if(doc.data().IMAGENS && doc.data().IMAGENS.length > 0) {
-                        const image = doc.data().IMAGENS;
+                    if(doc.data().image && doc.data().image.length > 0) {
+                        const image = doc.data().image;
                         const childImage = image.split('?alt=media')[0].split('/o/')[1];
                         const child = decodeURIComponent(childImage);
                         storage.ref().child(child).delete();
@@ -74,7 +74,7 @@ const actions = {
             })
             .then(() => {
                 commit('setLoading', false);
-                commit('deleteQuestion', id);
+                commit('deleteQuestion', iq);
                 console.log("Document successfully deleted!");
             })
             .catch(error => {
@@ -85,8 +85,8 @@ const actions = {
         const request = new Promise((resolve,reject) => {
             try {
                 const storageRef = storage.ref();
-                const file = payload.images;
-                const questionIQ = payload.id;
+                const file = payload.image;
+                const questionIQ = payload.iq;
                 const type = file.type.split('/')[1];
                 const format = `questions/question-${questionIQ}.${type}`;
                 storageRef.child(format).put(file)
@@ -111,8 +111,8 @@ const actions = {
         commit('setLoading', true);
 
         const question = {
-            id: payload.questionData.id,
-            questionDescription: payload.questionData.questionDescription,
+            iq: payload.questionData.iq,
+            question: payload.questionData.question,
             subject: payload.questionData.subject,
             knowledge: payload.questionData.knowledge,
             knowledgePWR: payload.questionData.knowledgePWR,
@@ -127,24 +127,13 @@ const actions = {
         edition.push({
             id: payload.user,
             date: today,
-            question: payload.oldData.id + "-" + (payload.oldData.edited.length + 1)
+            question: payload.oldData.iq + "-" + (payload.oldData.edited.length + 1)
         });
 
-        db.collection("questions").where('IQ', '==', question.id).get()
+        db.collection("questions").where('iq', '==', question.iq).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
-                    doc.ref.update({
-                        IQ: question.id,
-                        PERGUNTA: question.questionDescription,
-                        DISCIPLINA: question.subject,
-                        CONHECIMENTO: question.knowledge,
-                        RELEVANCIA_OR: question.knowledgePWR,
-                        RELEVANCIA_OSR: question.knowledgeBWR,
-                        RESPOSTAS: question.answers,
-                        IMAGENS: question.images,
-                        TAMANHO_IMAGEM: question.imageSize,
-                        edited: edition
-                    });
+                    doc.ref.update({ ...question, edited: edition });
                 });
             })
             .then(() => {
@@ -159,28 +148,11 @@ const actions = {
         commit('setLoading', true);
 
         const editedQuestion = {
-            id: payload.id + '-' + payload.edited.length,
-            questionDescription: payload.questionDescription,
-            subject: payload.subject,
-            knowledge: payload.knowledge,
-            knowledgePWR: payload.knowledgePWR,
-            knowledgeBWR: payload.knowledgeBWR,
-            answers: payload.answers,
-            images: payload.images,
-            imageSize: payload.imageSize
+            ...question,
+            iq: payload.iq + '-' + payload.edited.length
         }
         db.collection("edited questions")
-            .add({
-                IQ: editedQuestion.id,
-                PERGUNTA: editedQuestion.questionDescription,
-                DISCIPLINA: editedQuestion.subject,
-                CONHECIMENTO: editedQuestion.knowledge,
-                RELEVANCIA_OR: editedQuestion.knowledgePWR,
-                RELEVANCIA_OSR: editedQuestion.knowledgeBWR,
-                RESPOSTAS: editedQuestion.answers,
-                IMAGENS: editedQuestion.images,
-                TAMANHO_IMAGEM: editedQuestion.imageSize,
-            })
+            .add(editedQuestion)
             .then(() => {
                 commit('setLoading', false);
                 console.log("Success create edit");
@@ -192,18 +164,7 @@ const actions = {
     createQuestion({ commit }, payload) {
         commit('setLoading', true);
 
-        const question = {
-            IQ: payload.iq,
-            PERGUNTA: payload.question,
-            DISCIPLINA: payload.subject,
-            CONHECIMENTO: payload.knowledge,
-            RELEVANCIA_OR: payload.knowledgePWR,
-            RELEVANCIA_OSR: payload.knowledgeBWR,
-            RESPOSTAS: payload.answers,
-            IMAGENS: payload.image,
-            TAMANHO_IMAGEM: payload.imageSize,
-            edited: []
-        }
+        const question = { ...payload, edited: [] }
 
         db.collection("questions").add(question)
             .then(() => {
@@ -230,18 +191,18 @@ const getters = {
         return state.loadedQuestions;
     },
     getAnswersById(state) {
-        let aux = state.loadedQuestions.find(question => question.id === id);
-        return Object.assign({}, aux.data.RESPOSTAS);
+        let aux = state.loadedQuestions.find(question => question.iq === iq);
+        return { ...aux.answers }
     },
     getNumberOfQuestionBySubject: state => subject => {
         let counter = 0;
-        state.loadedQuestions.forEach(element => {
-            if (element.data.DISCIPLINA === subject)
+        state.loadedQuestions.forEach(question => {
+            if (question.subject === subject)
                 counter++;
         });
         return counter;
     },
-    findQuestionById: state => id => state.loadedQuestions.find(question => question.id === id)
+    findQuestionByIq: state => iq => state.loadedQuestions.find(question => question.iq === iq)
 }
 
 export default {

@@ -1,25 +1,20 @@
 <template>
   <p>
-    DISCIPLINA: {{question.data.DISCIPLINA}}
+    DISCIPLINA: {{question.subject}}
     <br />
-    CONHECIMENTO: {{question.data.CONHECIMENTO}} [{{question.data.RELEVANCIA_OR}}/{{question.data.RELEVANCIA_OSR}}]
+    CONHECIMENTO: {{question.knowledge}} [{{question.knowledgePWR}}/{{question.knowledgePWR}}]
     <br />
-    IQ: {{question.id}}
+    IQ: {{question.iq}}
     <br />
 
     <br/>
-      {{question.data.PERGUNTA}}
+      {{question.question}}
     <br/>
   </p>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-
-    }
-  },
   props: ["question"]
 }
 </script>

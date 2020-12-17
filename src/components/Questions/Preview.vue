@@ -2,11 +2,11 @@
   <v-card fill>
     <v-card-title>Preview</v-card-title>
     <v-card-text>
-      DISCIPLINA: {{subject}}
+      DISCIPLINA: {{ question.subject }}
       <br />
-      CONHECIMENTO: {{knowledge}} [{{knowledgePWR}}/{{knowledgeBWR}}]
+      CONHECIMENTO: {{ question.knowledge }} [{{ question.knowledgePWR }}/{{ question.knowledgeBWR }}]
       <br />
-      IQ: {{id}}
+      IQ: {{ question.iq }}
       <br />
 
       <br/>
@@ -16,13 +16,13 @@
       <v-content v-if="confirmTitle">
         <v-row>
           <v-col cols="2"></v-col>
-          <v-col v-for="(item, index) in answers[0].text" :key="index" cols="2">{{ item.title }}</v-col>
+          <v-col v-for="(item, index) in question.answers[0].text" :key="index" cols="2">{{ item.title }}</v-col>
         </v-row>
 
         <v-row>
           <v-col cols="2">A -</v-col>
           <v-col
-            v-for="(item, index) in answers[0].text"
+            v-for="(item, index) in question.answers[0].text"
             :key="index"
             cols="2"
           >{{ item.answerDescription }}</v-col>
@@ -32,7 +32,7 @@
         <v-row>
           <v-col cols="2">B -</v-col>
           <v-col
-            v-for="(item, index) in answers[1].text"
+            v-for="(item, index) in question.answers[1].text"
             :key="index"
             cols="2"
           >{{ item.answerDescription }}</v-col>
@@ -42,7 +42,7 @@
         <v-row>
           <v-col cols="2">C -</v-col>
           <v-col
-            v-for="(item, index) in answers[2].text"
+            v-for="(item, index) in question.answers[2].text"
             :key="index"
             cols="2"
           >{{ item.answerDescription }}</v-col>
@@ -52,7 +52,7 @@
         <v-row>
           <v-col cols="2">D -</v-col>
           <v-col
-            v-for="(item, index) in answers[3].text"
+            v-for="(item, index) in question.answers[3].text"
             :key="index"
             cols="2"
           >{{ item.answerDescription }}</v-col>
@@ -60,7 +60,7 @@
       </v-content>
 
       <v-content v-else>
-        <v-row v-for="(item, index) in answers" :key="index">
+        <v-row v-for="(item, index) in question.answers" :key="index">
           <v-col cols="1">{{ letters[index] }} - </v-col>
           <v-col>
             {{ item.text }}

@@ -149,7 +149,7 @@
               <br />
               CONHECIMENTO: {{editedKnowledge}} [{{editedKnowledgePWR}}/{{editedKnowledgeBWR}}]
               <br />
-              IQ: {{this.id}}
+              IQ: {{ id }}
               <br />
               <br />
               <vue-markdown :source="editedQuestionDescription" />
@@ -245,7 +245,7 @@ export default {
       items: [],
       images: [],
       editedAnswers: [],
-      editedId: null,
+      editedIq: null,
       editedSubject: null,
       editedKnowledge: null,
       editedKnowledgePWR: null,
@@ -271,15 +271,15 @@ export default {
   computed: {
     hasImages() {
       if (
-        typeof this.question.data.IMAGENS === "undefined" ||
-        this.question.data.IMAGENS === ""
+        typeof this.question.image === "undefined" ||
+        this.question.image === ""
       )
         return false;
       else return true;
     },
     formIsValid() {
       return (
-        this.editedId !== "" &&
+        this.editedIq !== "" &&
         this.editedKnowledge !== "" &&
         this.editedKnowledgePWR !== "" &&
         this.editedKnowledgeBWR !== "" &&
@@ -287,13 +287,13 @@ export default {
       );
     },
     id() {
-      var aux = this.question.id;
-      this.editedId = aux;
+      var aux = this.question.iq;
+      this.editedIq = aux;
       return aux;
     }
   },
   watch: {
-    editedId() {
+    editedIq() {
       this.update();
     },
     auxTitle(val) {
@@ -315,34 +315,34 @@ export default {
   methods: {
     update() {
       console.log("AAAAAAAAA");
-      this.editedId = this.question.id;
-      this.editedSubject = this.question.data.DISCIPLINA;
-      this.editedKnowledge = this.question.data.CONHECIMENTO;
-      this.editedKnowledgePWR = this.question.data.RELEVANCIA_OR;
-      this.editedKnowledgeBWR = this.question.data.RELEVANCIA_OSR;
-      this.editedImageSize = this.question.data.TAMANHO_IMAGEM;
+      this.editedIq = this.question.id;
+      this.editedSubject = this.question.subject;
+      this.editedKnowledge = this.question.knowledge;
+      this.editedKnowledgePWR = this.question.knowledgePWR;
+      this.editedKnowledgeBWR = this.question.knowledgeBWR;
+      this.editedImageSize = this.question.imageSize;
       this.editedAnswers = JSON.parse(
-        JSON.stringify(this.question.data.RESPOSTAS)
+        JSON.stringify(this.question.answers)
       );
-      this.editedQuestionDescription = this.question.data.PERGUNTA;
+      this.editedQuestionDescription = this.question.question;
 
       if (
-        typeof this.question.data.IMAGENS === "undefined" ||
-        this.question.data.IMAGENS === ""
+        typeof this.question.image === "undefined" ||
+        this.question.image === ""
       )
         this.editedImages = "";
-      else this.editedImages = this.question.data.IMAGENS;
+      else this.editedImages = this.question.image;
 
-      if (typeof this.question.data.RESPOSTAS[0].text == "string")
+      if (typeof this.question.answers[0].text == "string")
         this.number = 1;
-      else this.number = this.question.data.RESPOSTAS[0].text.length;
+      else this.number = this.question.answers[0].text.length;
 
       if (this.number > 1) this.confirmTitle = true;
       else this.confirmTitle = false;
 
       if (this.number > 1) {
         for (var i = 0; i < this.number; i++) {
-          this.auxTitle[i] = this.question.data.RESPOSTAS[0].text[i].title;
+          this.auxTitle[i] = this.question.answers[0].text[i].title;
         }
       }
 
@@ -360,36 +360,36 @@ export default {
         URL.then(result => {
           this.editedImages = result;
           console.log("Image as URL: ", this.editedImages);
-          if (this.question.data.TAMANHO_IMAGEM === undefined) {
+          if (this.question.imageSize === undefined) {
             var oldData = {
-              id: this.question.id,
-              subject: this.question.data.DISCIPLINA,
-              questionDescription: this.question.data.PERGUNTA,
-              knowledge: this.question.data.CONHECIMENTO,
-              knowledgePWR: this.question.data.RELEVANCIA_OR,
-              knowledgeBWR: this.question.data.RELEVANCIA_OSR,
-              answers: this.question.data.RESPOSTAS,
-              images: this.question.data.IMAGENS,
-              edited: this.question.data.edited,
+              iq: this.question.iq,
+              subject: this.question.subject,
+              questionDescription: this.question.question,
+              knowledge: this.question.knowledge,
+              knowledgePWR: this.question.knowledgePWR,
+              knowledgeBWR: this.question.knowledgeBWR,
+              answers: this.question.answers,
+              images: this.question.image,
+              edited: this.question.edited,
               imageSize: "1x"
             };
           }
           else {
             var oldData = {
-              id: this.question.id,
-              subject: this.question.data.DISCIPLINA,
-              questionDescription: this.question.data.PERGUNTA,
-              knowledge: this.question.data.CONHECIMENTO,
-              knowledgePWR: this.question.data.RELEVANCIA_OR,
-              knowledgeBWR: this.question.data.RELEVANCIA_OSR,
-              answers: this.question.data.RESPOSTAS,
-              images: this.question.data.IMAGENS,
-              edited: this.question.data.edited,
-              imageSize: this.question.data.TAMANHO_IMAGEM,
+              iq: this.question.iq,
+              subject: this.question.subject,
+              questionDescription: this.question.question,
+              knowledge: this.question.knowledge,
+              knowledgePWR: this.question.knowledgePWR,
+              knowledgeBWR: this.question.knowledgeBWR,
+              answers: this.question.answers,
+              images: this.question.image,
+              edited: this.question.edited,
+              imageSize: this.question.imageSize,
             };
           }
           var questionData = {
-            id: this.editedId,
+            iq: this.editedIq,
             subject: this.editedSubject,
             questionDescription: this.editedQuestionDescription,
             knowledge: this.editedKnowledge,
@@ -414,19 +414,19 @@ export default {
         });
       } else {
         var oldData = {
-          id: this.question.id,
-          subject: this.question.data.DISCIPLINA,
-          questionDescription: this.question.data.PERGUNTA,
-          knowledge: this.question.data.CONHECIMENTO,
-          knowledgePWR: this.question.data.RELEVANCIA_OR,
-          knowledgeBWR: this.question.data.RELEVANCIA_OSR,
-          answers: this.question.data.RESPOSTAS,
-          images: this.question.data.IMAGENS,
-          edited: this.question.data.edited,
-          imageSize: this.question.data.TAMANHO_IMAGEM
+          iq: this.question.iq,
+          subject: this.question.subject,
+          questionDescription: this.question.question,
+          knowledge: this.question.knowledge,
+          knowledgePWR: this.question.knowledgePWR,
+          knowledgeBWR: this.question.knowledgeBWR,
+          answers: this.question.answers,
+          images: this.question.image,
+          edited: this.question.edited,
+          imageSize: this.question.imageSize
         };
         var questionData = {
-          id: this.editedId,
+          id: this.editedIq,
           subject: this.editedSubject,
           questionDescription: this.editedQuestionDescription,
           knowledge: this.editedKnowledge,
@@ -434,7 +434,7 @@ export default {
           knowledgeBWR: this.editedKnowledgeBWR,
           answers: this.editedAnswers,
           imageSize: this.editedImageSize,
-          images: this.question.data.IMAGENS
+          images: this.question.image
         };
         var sendInfo = {
           oldData: {},
@@ -463,7 +463,7 @@ export default {
       this.items = [];
       this.images = [];
       this.editedAnswers = [];
-      this.editedId = null;
+      this.editedIq = null;
       this.editedSubject = null;
       this.editedKnowledge = null;
       this.editedKnowledgePWR = null;

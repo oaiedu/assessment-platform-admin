@@ -35,7 +35,7 @@
                     <v-container>
                       <v-row>
                         <v-col>
-                          <v-text-field name="id" label="IQ" id="id" v-model="id" required></v-text-field>
+                          <v-text-field name="iq" label="IQ" id="iq" v-model="iq" required></v-text-field>
                         </v-col>
                       </v-row>
 
@@ -194,11 +194,11 @@
           <v-card fill>
             <v-card-title>Preview</v-card-title>
             <v-card-text>
-              DISCIPLINA: {{subject}}
+              DISCIPLINA: {{ subject }}
               <br />
-              CONHECIMENTO: {{knowledge}} [{{knowledgePWR}}/{{knowledgeBWR}}]
+              CONHECIMENTO: {{ knowledge }} [{{ knowledgePWR }}/{{ knowledgeBWR }}]
               <br />
-              IQ: {{id}}
+              IQ: {{ iq }}
               <br />
 
               <br />
@@ -294,7 +294,7 @@ export default {
                 { text: "", ansId: "radio-3", value: false },
                 { text: "", ansId: "radio-4", value: false }
             ],
-            id: "",
+            iq: "",
             subject: "",
             knowledge: "",
             knowledgePWR: "",
@@ -319,7 +319,7 @@ export default {
     computed: {
         formIsValid() {
             return (
-                this.id !== "" &&
+                this.iq !== "" &&
                 this.knowledge !== "" &&
                 this.knowledgePWR !== "" &&
                 this.knowledgeBWR !== "" &&
@@ -388,12 +388,12 @@ export default {
             console.log("value: ", this.answers[1].value);
 
             if (this.images && this.images[0]) {
-                const imageToUpload = { id: this.id, images: this.images[0] };
+                const imageToUpload = { id: this.iq, images: this.images[0] };
                 var URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
                 URL.then(result => {
                     this.imagesAsURL = result;
                     const questionData = {
-                        id: this.iq,
+                        iq: this.iq,
                         subject: this.subject,
                         question: this.questionDescription,
                         knowledge: this.knowledge,
@@ -424,9 +424,9 @@ export default {
                 });
             } else {
                 const questionData = {
-                    id: this.iq,
+                    iq: this.iq,
                     subject: this.subject,
-                    questionDescription: this.questionDescription,
+                    question: this.questionDescription,
                     knowledge: this.knowledge,
                     knowledgePWR: this.knowledgePWR,
                     knowledgeBWR: this.knowledgeBWR,
@@ -472,7 +472,7 @@ export default {
                 { text: [], ansId: "radio-3", value: false },
                 { text: [], ansId: "radio-4", value: false }
             ];
-            this.id = "";
+            this.iq = "";
             this.subject = "";
             this.knowledge = "";
             this.knowledgePWR = "";

@@ -71,7 +71,7 @@ exports.deleteNonexistentReferences = async (req, res) => {
                                 } else if(cn === 'papers') {
                                     imageUrl = doc.data().image;
                                 } else {
-                                    imageUrl = doc.data().IMAGENS;
+                                    imageUrl = doc.data().image;
                                 }
 
                                 const image = imageUrl && imageUrl.length > 0
@@ -82,7 +82,7 @@ exports.deleteNonexistentReferences = async (req, res) => {
                                     if(image.includes('questions/') || image.includes('users/') || image.includes('documents/') || image.includes('home-background')) {
 
                                     } else {
-                                        db.collection(cn).doc(doc.id).set({ ...doc.data(), IMAGENS: '' }).catch(console.log);
+                                        db.collection(cn).doc(doc.id).set({ ...doc.data(), image: '' }).catch(console.log);
                                     }
                                 }
                             });
@@ -98,10 +98,10 @@ exports.deleteNonexistentReferences = async (req, res) => {
 
 exports.importFirestore = async (req, res) => {
     const folderRootName = 'backups';
-    const timestamp = '2020-12-09T19-40-40.732Z';
+    const timestamp = '2020-11-27T16-43-04.696Z';
     const path = `../../${folderRootName}/${timestamp}/firestore`;
-    const collections = ['users', 'questions', 'question requests', 'edited questions', 'tests', 'papers'];
-    // const collections = ['users'];
+    const collections = ['users', 'questions', 'question-requests', 'edited questions', 'tests', 'papers'];
+    // const collections = ['edited questions'];
 
     collections.forEach(cn => {
         const jsonPath = `${path}/${cn}-${timestamp}.json`;
@@ -113,9 +113,9 @@ exports.importFirestore = async (req, res) => {
             if(cn.includes('question')) {
                 const toPush = {
                     ...json[key],
-                    PERGUNTA: decodeURIComponent(json[key].PERGUNTA),
-                    DISCIPLINA: decodeURIComponent(json[key].DISCIPLINA),
-                    RESPOSTAS: json[key].RESPOSTAS.map(ans => {
+                    question: decodeURIComponent(json[key].question),
+                    subject: decodeURIComponent(json[key].subject),
+                    answers: json[key].answers.map(ans => {
                         return {
                             ...ans,
                             text: decodeURIComponent(ans.text)
@@ -124,7 +124,7 @@ exports.importFirestore = async (req, res) => {
                 }
 
                 if(cn === 'question requests') {
-                    toPush.NOME = decodeURIComponent(json[key].NOME);
+                    toPush.user.name = decodeURIComponent(json[key].user.name);
                 }
 
                 data.push([key, toPush]);
@@ -159,4 +159,35 @@ exports.importFirestore = async (req, res) => {
     });
 
     res.send('Firestore data imported!');
+}
+
+exports.rearrangeQuestions = async (req, res) => {
+    await db.collection('questions').get()
+        .then(snapshot => {
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const newData = {
+                    ...data,
+                    iq: data.iq || data.IQ,
+                    question: data.question || data.PERGUNTA,
+                    subject: data.subject || data.DISCIPLINA,
+                    knowledge: data.knowledge || data.CONHECIMENTO,
+                    knowledgePWR: data.knowledgePWR || data.RELEVANCIA_OR,
+                    knowledgeBWR: data.knowledgeBWR || data.RELEVANCIA_OSR,
+                    answers: data.answers || data.RESPOSTAS,
+                    image: data.image || data.IMAGENS || ''
+                }
+
+                if(data.imageSize || data.TAMANHO_IMAGEM) {
+                    newData['imageSize'] = data.imageSize || data.TAMANHO_IMAGEM;
+                }
+
+                doc.ref.set(newData);
+            });
+        })
+        .catch(error => {
+            console.log(error);
+        });
+
+    res.send('Done!');
 }

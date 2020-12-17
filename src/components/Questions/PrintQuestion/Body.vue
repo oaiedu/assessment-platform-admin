@@ -5,42 +5,42 @@
         <div class="print">
           <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
           <div class="question-page">
-            DISCIPLINA: {{ question.data.DISCIPLINA }}
+            DISCIPLINA: {{ question.subject }}
             <br />
-            CONHECIMENTO: {{ question.data.CONHECIMENTO }} [ {{ question.data.RELEVANCIA_OR }} / {{ question.data.RELEVANCIA_OSR }} ]
+            CONHECIMENTO: {{ question.knowledge }} [ {{ question.knowledgePWR }} / {{ question.knowledgeBWR }} ]
             <br />
-            IQ: {{ question.id }}
-            <br />
-
-            <br />
-            <vue-markdown :source="question.data.PERGUNTA" />
+            IQ: {{ question.iq }}
             <br />
 
             <br />
+            <vue-markdown :source="question.question" />
+            <br />
 
-            <div class="img-container" v-if="confirmImage(question.data.IMAGENS)">
-              <v-main v-if="question.data.TAMANHO_IMAGEM === '1x'">
-                <img :src="question.data.IMAGENS" style="max-height: 40vh; max-width: 40vw" />
+            <br />
+
+            <div class="img-container" v-if="confirmImage(question.image)">
+              <v-main v-if="question.imageSize === '1x'">
+                <img :src="question.image" style="max-height: 40vh; max-width: 40vw" />
               </v-main>
 
-              <v-main v-if="question.data.TAMANHO_IMAGEM === '2x'">
-                <img :src="question.data.IMAGENS" style="max-height: 50vh; max-width: 50vw" />
+              <v-main v-if="question.imageSize === '2x'">
+                <img :src="question.image" style="max-height: 50vh; max-width: 50vw" />
               </v-main>
 
-              <v-main v-if="question.data.TAMANHO_IMAGEM === '3x'">
-                <img :src="question.data.IMAGENS" style="max-height: 60vh; max-width: 60vw" />
+              <v-main v-if="question.imageSize === '3x'">
+                <img :src="question.image" style="max-height: 60vh; max-width: 60vw" />
               </v-main>
 
-              <v-main v-if="question.data.TAMANHO_IMAGEM === undefined">
-                <img :src="question.data.IMAGENS" style="max-height: 50vh; max-width: 50vw" />
+              <v-main v-if="question.imageSize === undefined">
+                <img :src="question.image" style="max-height: 50vh; max-width: 50vw" />
               </v-main>
             </div>
 
-            <v-main v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
+            <v-main v-if="typeof question.answers[0].text !== 'string'">
               <v-row>
                 <v-col cols="2"></v-col>
                 <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[0].text"
+                  v-for="(item, index) in question.answers[0].text"
                   :key="index"
                   cols="2"
                 >
@@ -51,7 +51,7 @@
               <v-row>
                 <v-col cols="2">A -</v-col>
                 <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[0].text"
+                  v-for="(item, index) in question.answers[0].text"
                   :key="index"
                   cols="2"
                 >
@@ -62,7 +62,7 @@
               <v-row>
                 <v-col cols="2">B -</v-col>
                 <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[1].text"
+                  v-for="(item, index) in question.answers[1].text"
                   :key="index"
                   cols="2"
                 >
@@ -73,7 +73,7 @@
               <v-row>
                 <v-col cols="2">C -</v-col>
                 <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[2].text"
+                  v-for="(item, index) in question.answers[2].text"
                   :key="index"
                   cols="2"
                 >
@@ -84,7 +84,7 @@
               <v-row>
                 <v-col cols="2">D -</v-col>
                 <v-col
-                  v-for="(item, index) in question.data.RESPOSTAS[3].text"
+                  v-for="(item, index) in question.answers[3].text"
                   :key="index"
                   cols="2"
                 >
@@ -94,7 +94,7 @@
             </v-main>
 
             <v-main v-else>
-              <v-row v-for="(item, index) in question.data.RESPOSTAS" :key="index">
+              <v-row v-for="(item, index) in question.answers" :key="index">
                 <v-col cols="2">{{ letters[index] }} -</v-col>
                 <v-col>
                   <vue-markdown :source="item.text" />

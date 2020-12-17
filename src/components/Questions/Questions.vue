@@ -37,18 +37,17 @@
             <template v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
                 <v-icon
-                  class="mr-6"
                   @click='dialogPDF = true; selectedEdit = item;' >
                   mdi-pdf-box
                 </v-icon>
                 <v-icon
-                    class="mr-2"
+                    class="ml-2"
                     v-if='userClaims["admin"]'
                     @click="editQuestions(item)" >
                     mdi-pencil
                 </v-icon>
                 <v-icon
-                    class="mr-2"
+                    class="ml-2"
                     v-if='userClaims["admin"]'
                     @click='deleteQuestionSnackBar = true; deleteSelect = item;' >
                     mdi-delete
@@ -118,111 +117,112 @@
         ></v-pagination>
       </div>
 
-      <v-snackbar v-model="deleteQuestionSnackBar" color="black" right top>
-        Você realmente quer deletar esta questão?
-        <v-btn dark color="yellow" text @click="deleteQuestion(deleteSelect.id)"
-          >Ok</v-btn
-        >
-        <v-btn dark color="yellow" text @click="deleteQuestionSnackBar = false"
-          >Cancelar</v-btn
-        >
+      <v-snackbar v-model="deleteQuestionSnackBar" light color="white" right top :timeout="15000">
+        Você realmente quer excluir esta questão?
+        <v-btn
+            dark
+            class="ml-2"
+            color="blue"
+            text
+            @click="deleteQuestion(deleteSelect.iq)" >
+            Excluir
+        </v-btn>
+        <v-btn
+            dark
+            color="grey"
+            text
+            @click="deleteQuestionSnackBar = false" >
+            Cancelar
+        </v-btn>
       </v-snackbar>
     </v-container>
   </div>
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      loadedPages: [1],
-      deleteSelect: "",
-      selectedEdit: {},
-      deleteQuestionSnackBar: false,
-      selected: [],
-      dialogNewQuestion: false,
-      dialogEditQuestion: false,
-      dialogPDF: false,
-      items: [
-        "Teoria do Reator",
-        "Termodinâmica",
-        "Instrumentação e Controle",
-        "Válvulas e Bombas",
-        "Eletricidade",
-        "Mecânica dos Fluidos",
-        "Tratamento Qúimico Refrigerante",
-        "Análise Integrada",
-        "Instrumentação Nuclear",
-        "Física Nuclear",
-        "Transferência de Calor",
-        "Materiais",
-      ],
-      showedQuestions: [],
-      search: "",
-      page: 1,
-      pageCount: 15,
-      itemsPerPage: 8,
-      headers: [
-        { text: "IQ", align: "left", sortable: false, value: "id" },
-        { text: "Conhecimento", value: "data.CONHECIMENTO" },
-        { text: "Relevância OR", value: "data.RELEVANCIA_OR" },
-        { text: "Relevância OSR", value: "data.RELEVANCIA_OSR" },
-        { text: "Disciplina", value: "data.DISCIPLINA", sortable: false },
-        { text: "Ações", align: "right", value: "actions", sortable: false },
-      ],
-    };
-  },
-  computed: {
-    loading() {
-      return this.$store.getters.loading;
-      this.$store.dispatch("clearLoading");
-    },
-    questions() {
-      return this.$store.getters.loadedQuestions;
-    },
-    userClaims() {
-        return this.$store.getters.getUserClaims;
-    }
-  },
-  watch: {
-    selected(val) {
-      this.questions.forEach((element) => {
-        for (let i = 0; i < this.selected.length; i++) {
-          if (element.data.DISCIPLINA == this.selected[i]) {
-            let aux = true;
-            for (let k = 0; k < this.showedQuestions.length; k++) {
-              if (element === this.showedQuestions[k]) aux = false;
+    export default {
+        data() {
+            return {
+                loadedPages: [1],
+                deleteSelect: "",
+                selectedEdit: {},
+                deleteQuestionSnackBar: false,
+                selected: [],
+                dialogNewQuestion: false,
+                dialogEditQuestion: false,
+                dialogPDF: false,
+                items: [
+                    "Teoria do Reator",
+                    "Termodinâmica",
+                    "Instrumentação e Controle",
+                    "Válvulas e Bombas",
+                    "Eletricidade",
+                    "Mecânica dos Fluidos",
+                    "Tratamento Qúimico Refrigerante",
+                    "Análise Integrada",
+                    "Instrumentação Nuclear",
+                    "Física Nuclear",
+                    "Transferência de Calor",
+                    "Materiais",
+                ],
+                showedQuestions: [],
+                search: "",
+                page: 1,
+                pageCount: 15,
+                itemsPerPage: 8,
+                headers: [
+                    { text: "IQ", align: "left", sortable: false, value: "iq" },
+                    { text: "Conhecimento", value: "knowledge" },
+                    { text: "Relevância OR", value: "knowledgePWR" },
+                    { text: "Relevância OSR", value: "knowledgeBWR" },
+                    { text: "Disciplina", value: "subject", sortable: false },
+                    { text: "Ações", align: "right", value: "actions", sortable: false },
+                ]
             }
-            if (aux == true) this.showedQuestions.push(element);
-          }
+        },
+    computed: {
+        loading() {
+            return this.$store.getters.loading;
+            this.$store.dispatch("clearLoading");
+        },
+        questions() {
+        return this.$store.getters.loadedQuestions;
+        },
+        userClaims() {
+            return this.$store.getters.getUserClaims;
         }
-      });
     },
-  },
-  methods: {
-    editQuestions(val) {
-      this.selectedEdit = val;
-      // this.loadQuestions()
-      this.dialogEditQuestion = true;
-    },
-    generatePDF(val) {
-      this.selectedEdit = val;
-      this.dialogPDF = true;
-    },
-    // loadQuestions() {
-    //   console.log("é mano")
-    //   let aux = this.$store.dispatch("loadedQuestions");
-    //   aux.then(()=>{
-    //     return aux
-    //   })
-    // },
-    deleteQuestion(id) {
-      console.log(id);
-      let aux = this.$store.dispatch("deleteQuestion", id);
-      aux.then(() => {
-        this.deleteQuestionSnackBar = false;
-      });
-    },
-  },
-};
+        watch: {
+            selected(val) {
+                this.questions.forEach((element) => {
+                    for (let i = 0; i < this.selected.length; i++) {
+                        if (element.data.DISCIPLINA == this.selected[i]) {
+                            let aux = true;
+                            for (let k = 0; k < this.showedQuestions.length; k++) {
+                                if (element === this.showedQuestions[k]) aux = false;
+                            }
+                            if (aux == true) this.showedQuestions.push(element);
+                        }
+                    }
+                });
+            }
+        },
+        methods: {
+            editQuestions(val) {
+                this.selectedEdit = val;
+                this.dialogEditQuestion = true;
+            },
+            generatePDF(val) {
+                this.selectedEdit = val;
+                this.dialogPDF = true;
+            },
+            deleteQuestion(iq) {
+                console.log(iq);
+                let aux = this.$store.dispatch("deleteQuestion", iq);
+                aux.then(() => {
+                    this.deleteQuestionSnackBar = false;
+                });
+            }
+        }
+    }
 </script>

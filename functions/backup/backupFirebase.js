@@ -210,9 +210,9 @@ exports.backupFirestoreAuth = async (req, res) => {
                     if(collection.includes('question')) {
                         dbData[id] = {
                             ...data,
-                            PERGUNTA: encodeURIComponent(data.PERGUNTA),
-                            DISCIPLINA: encodeURIComponent(data.DISCIPLINA),
-                            RESPOSTAS: data.RESPOSTAS.map(ans => {
+                            question: encodeURIComponent(data.question),
+                            subject: encodeURIComponent(data.subject),
+                            answers: data.answers.map(ans => {
                                 return {
                                     ...ans,
                                     text: encodeURIComponent(ans.text)
@@ -222,7 +222,10 @@ exports.backupFirestoreAuth = async (req, res) => {
                         if(collection === 'question requests') {
                             dbData[id] = {
                                 ...dbData[id],
-                                NOME: encodeURIComponent(data.NOME)
+                                user: {
+                                    ...user,
+                                    name: encodeURIComponent(data.user.name)
+                                }
                             }
                         }
                         if(!data.IQ) {
