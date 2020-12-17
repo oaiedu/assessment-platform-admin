@@ -81,14 +81,15 @@ const actions = {
                 console.error("Error removing document: ", error);
             });
     },
-    uploadImageQuestion({ commit }, payload) {
-        const request = new Promise((resolve,reject) => {
+    async uploadImageQuestion({ commit }, payload) {
+        return new Promise((resolve,reject) => {
             try {
                 const storageRef = storage.ref();
                 const file = payload.image;
                 const questionIQ = payload.iq;
                 const type = file.type.split('/')[1];
                 const format = `questions/question-${questionIQ}.${type}`;
+
                 storageRef.child(format).put(file)
                     .then(snapshot => {
                         console.log("Uploaded a file!: ", snapshot)
@@ -101,11 +102,10 @@ const actions = {
                         console.error("Error uploading file", error);
                         resolve(error);
                     });
-            } catch{
+            } catch {
                 reject();
             }
         });
-        return request;
     },
     editQuestion({ commit, dispatch }, payload) {
         commit('setLoading', true);

@@ -168,10 +168,10 @@
                 itemsPerPage: 10,
                 headers: [
                     { text: "IQ", align: "left", sortable: false, value: "id" },
-                    { text: "Conhecimento", value: "data.CONHECIMENTO" },
-                    { text: "Relevância OR", value: "data.RELEVANCIA_OR" },
-                    { text: "Relevância OSR", value: "data.RELEVANCIA_OSR" },
-                    { text: "Disciplina", value: "data.DISCIPLINA", sortable: false },
+                    { text: "Conhecimento", value: "knowledge" },
+                    { text: "Relevância OR", value: "knowledgePWR" },
+                    { text: "Relevância OSR", value: "knowledgeBWR" },
+                    { text: "Disciplina", value: "subject", sortable: false },
                     { text: "", value: "actions", sortable: false }
                 ],
                 textRule: [
@@ -199,7 +199,7 @@
             selectedSubjects(val) {
                 this.questions.forEach(element => {
                     for (let i = 0; i < this.selectedSubjects.length; i++) {
-                        if (element.data.DISCIPLINA == this.selectedSubjects[i]) {
+                        if (element.subject == this.selectedSubjects[i]) {
                             let aux = true;
                             for (let k = 0; k < this.showedQuestions.length; k++) {
                                 if (element === this.showedQuestions[k]) aux = false;
@@ -258,7 +258,7 @@
                 let aux = this.showedQuestions.length;
 
                 for (let j = 0; j < aux; j++) {
-                    if (this.showedQuestions[j].data.DISCIPLINA == this.selectedSubjects[i]) {
+                    if (this.showedQuestions[j].subject == this.selectedSubjects[i]) {
                         this.showedQuestions.splice(j, 1);
                         j--;
                         aux--;

@@ -107,11 +107,11 @@ export default {
       pageCount: 15,
       itemsPerPage: 10,
       headers: [
-        { text: "IQ", align: "left", sortable: false, value: "id" },
-        { text: "Conhecimento", value: "data.CONHECIMENTO" },
-        { text: "Relevância OR", value: "data.RELEVANCIA_OR" },
-        { text: "Relevância OSR", value: "data.RELEVANCIA_OSR" },
-        { text: "Disciplina", value: "data.DISCIPLINA", sortable: false },
+        { text: "IQ", align: "left", sortable: false, value: "iq" },
+        { text: "Conhecimento", value: "knowledge" },
+        { text: "Relevância OR", value: "knowledgePWR" },
+        { text: "Relevância OSR", value: "knowledgeBWR" },
+        { text: "Disciplina", value: "subject", sortable: false },
         { text: "", value: "actions", sortable: false }
       ],
       textRule: [
@@ -129,7 +129,7 @@ export default {
       return this.$store.getters.loadedQuestions;
     },
     name(){
-      let aux = this.test.data.title;
+      let aux = this.test.title;
       this.testTitle = aux;
       return aux;
     },
@@ -152,13 +152,13 @@ export default {
   methods: {
     update(){
       console.log("AAAAAAAAA");
-      this.test.data.questions.forEach(element=>{
+      this.test.questions.forEach(element=>{
         var question = this.$store.getters.findQuestionById(element)
         this.selectedQuestions.push(question)
       });
-      this.testType = this.test.data.type;
-      this.testName = this.test.data.title;
-      this.purpose = this.test.data.purpose;
+      this.testType = this.test.type;
+      this.testName = this.test.title;
+      this.purpose = this.test.purpose;
     },
     close() {
       this.setInitialData();
@@ -231,8 +231,8 @@ export default {
           title: this.testTitle,
           questions: this.testItems,
           type: this.testType,
-          user: this.test.data.user,
-          created: this.test.data.created,
+          user: this.test.user,
+          created: this.test.created,
           edited: `${this.$store.getters.userInfo.name}`+'/'+`${editedDate}`,
           purpose: this.purpose,
           id: this.test.id

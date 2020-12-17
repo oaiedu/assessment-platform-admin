@@ -21,7 +21,7 @@ export default {
     currentTest() {
       let aux = [];
 
-      this.test.data.PERGUNTAS.forEach(element =>
+      this.test.questionS.forEach(element =>
         aux.push(this.$store.getters.findQuestionById(element))
       );
 
@@ -45,21 +45,21 @@ export default {
         reader = new FileReader();
 
       this.currentTest.forEach( element => {
-        if ( typeof element.data.IMAGENS === 'undefined' || element.data.IMAGENS === "" ){
+        if ( typeof element.image === 'undefined' || element.image === "" ){
           let texttohtml = `
-ASSUNTO: ${element.data.DISCIPLINA}
-CONHECIMENTO: ${element.data.CONHECIMENTO} [${element.data.RELEVANCIA_OR}/${element.data.RELEVANCIA_OSR}]
+ASSUNTO: ${element.subject}
+CONHECIMENTO: ${element.knowledge} [${element.knowledgePWR}/${element.knowledgeBWR}]
 IQ: ${element.id}
 
-      ${element.data.PERGUNTA}
+      ${element.question}
 
-A - ${element.data.RESPOSTAS[0].text}
+A - ${element.answers[0].text}
 
-B - ${element.data.RESPOSTAS[1].text}
+B - ${element.answers[1].text}
 
-C - ${element.data.RESPOSTAS[2].text}
+C - ${element.answers[2].text}
 1909
-D - ${element.data.RESPOSTAS[3].text}
+D - ${element.answers[3].text}
           `
           let textLines = doc.splitTextToSize(texttohtml,maxLineWidth)
           doc.text(textLines, margin, margin)
@@ -69,11 +69,11 @@ D - ${element.data.RESPOSTAS[3].text}
 
         else {
           let texttohtml = `
-ASSUNTO: ${element.data.DISCIPLINA}
-CONHECIMENTO: ${element.data.CONHECIMENTO} [${element.data.RELEVANCIA_OR}/${element.data.RELEVANCIA_OSR}]
+ASSUNTO: ${element.subject}
+CONHECIMENTO: ${element.knowledge} [${element.knowledgePWR}/${element.knowledgeBWR}]
 IQ: ${element.id}
 
-      ${element.data.PERGUNTA}
+      ${element.question}
 
 
 
@@ -97,20 +97,20 @@ IQ: ${element.id}
 
 
 
-      
 
-A - ${element.data.RESPOSTAS[0].text}
 
-B - ${element.data.RESPOSTAS[1].text}
+A - ${element.answers[0].text}
 
-C - ${element.data.RESPOSTAS[2].text}
+B - ${element.answers[1].text}
 
-D - ${element.data.RESPOSTAS[3].text}
+C - ${element.answers[2].text}
+
+D - ${element.answers[3].text}
           `
           let textLines = doc.splitTextToSize(texttohtml,maxLineWidth)
           doc.text(textLines, margin, margin)
 
-          doc.addImage(element.data.IMAGENS, "JPEG", pageWidth/4, 100, 76.2, 76.2)
+          doc.addImage(element.image, "JPEG", pageWidth/4, 100, 76.2, 76.2)
 
           doc.addPage( "a4", "p" )
         }
@@ -121,16 +121,16 @@ D - ${element.data.RESPOSTAS[3].text}
     var generateData = (amount) => {
       var result = []
       var data = {
-        QUESTÃO: "",
-        RESPOSTA: ""
+        question: "",
+        answer: ""
       }
 
       for(var i = 0; i < amount; i++){
-        data.QUESTÃO = `${i+1}`
+        data.question = `${i+1}`
 
         for(var j = 0; j < 4; j++ ){
-          if ( this.currentTest[i].data.RESPOSTAS[j].value === true ) {
-            data.RESPOSTA = letters[j]
+          if ( this.currentTest[i].answers[j].value === true ) {
+            data.answer = letters[j]
           }
         }
         result.push(Object.assign({}, data))
@@ -150,7 +150,7 @@ D - ${element.data.RESPOSTAS[3].text}
       return result;
     }
 
-      var headers = createHeaders(["QUESTÃO", "RESPOSTA"]);
+      var headers = createHeaders(["question", "answer"]);
       doc.table(pageWidth/4, margin, generateData(this.currentTest.length), headers);
       doc.save("test.pdf")
     }
