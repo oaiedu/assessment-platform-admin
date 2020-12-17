@@ -205,7 +205,7 @@
               <vue-markdown :source="questionDescription" />
               <br />
 
-              <v-content v-if="confirmTitle">
+              <v-main v-if="confirmTitle">
                 <v-row>
                   <v-col cols="2"></v-col>
                   <v-col v-for="(item, index) in answers[0].text" :key="index" cols="2">
@@ -243,7 +243,7 @@
                     <vue-markdown :source="item.answerDescription" />
                   </v-col>
                 </v-row>
-              </v-content>
+              </v-main>
 
               <v-main v-else>
                 <v-row v-for="(item, index) in answers" :key="index">
@@ -388,8 +388,9 @@ export default {
             console.log("value: ", this.answers[1].value);
 
             if (this.images && this.images[0]) {
-                const imageToUpload = { id: this.iq, images: this.images[0] };
-                var URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
+                const imageToUpload = { iq: this.iq, image: this.images[0] };
+                const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
+
                 URL.then(result => {
                     this.imagesAsURL = result;
                     const questionData = {
@@ -411,8 +412,8 @@ export default {
                     } else {
                         aux = this.$store.dispatch('createQuestionRequest', {
                             ...questionData,
-                            name: userInfo.name,
-                            email: userInfo.email,
+                            name: this.userInfo.name,
+                            email: this.userInfo.email,
                             status: 'Pendente'
                         });
                     }
