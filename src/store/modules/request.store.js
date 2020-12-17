@@ -14,16 +14,14 @@ const mutations = {
         state.questionRequests.push(data);
     },
     updateQuestionRequest(state, data) {
-        const requests = state.questionRequests;
-        for(let index = 0; index < requests.length; index++) {
-            if(requests[index].iq === data.iq) {
-                state.questionRequests[index] = data;
-            }
-        }
+        const requests = state.questionRequests.map(req => {
+            if(req.iq === data.iq) return { ...data, user: req.user };
+            return req;
+        });
+        state.questionRequests = requests;
     },
     removeQuestionRequest (state, data) {
         const index = state.questionRequests.indexOf(data);
-        console.log(index);
         if(index !== -1) {
             state.questionRequests.splice(index, 1);
         }
@@ -133,6 +131,7 @@ const actions = {
                 doc.ref.delete()
                     .then(() => {
                         commit('removeQuestionRequest', payload);
+                        commit('setLoading', false);
                         if(doc.data().image && doc.data().image.length > 0) {
                             const image = doc.data().image;
                             const childImage = image.split('?alt=media')[0].split('/o/')[1];
