@@ -44,7 +44,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in infoTable" :key="item.question">
+              <tr v-for="item in infoTable" :key="item.iq">
                 <td>{{ item.question }}</td>
                 <td>{{ item.subject }}</td>
                 <td>{{ item.iq }}</td>
@@ -59,12 +59,12 @@
         <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
       </div>
 
-      <div v-for="(paper, index) in createdPapers" class=" question-page">
+      <div v-for="(paper, index) in createdPapers" :key='index' class=" question-page">
         <div v-if="paper.value">
           <v-row justify="center">
-            <viewer v-if="checkImage(paper.object.data.image)" :value="paper.object.data.description"/>
+            <viewer v-if="checkImage(paper.object.image)" :value="paper.object.description"/>
 
-            <img v-else :src="paper.object.data.image" style="max-height: 1150px; max-width: 700px"/>
+            <img v-else :src="paper.object.image" style="max-height: 1150px; max-width: 700px"/>
           </v-row>
         </div>
       </div>
@@ -74,29 +74,29 @@
           QUESTÃO {{index+1}}
           <br>
           <br>
-          DISCIPLINA: {{ question.data.DISCIPLINA }}
+          DISCIPLINA: {{ question.subject }}
           <br>
 
-          CONHECIMENTO: {{ question.data.CONHECIMENTO }} [ {{ question.data.RELEVANCIA_OR }} / {{ question.data.RELEVANCIA_OSR }} ]
+          CONHECIMENTO: {{ question.knowledge }} [ {{ question.knowledgePWR }} / {{ question.knowledgeBWR }} ]
           <br>
 
-          IQ: {{ question.id }}
-          <br>
-
-          <br>
-            <vue-markdown :source="question.data.PERGUNTA"/>
+          IQ: {{ question.iq }}
           <br>
 
           <br>
+            <vue-markdown :source="question.question"/>
+          <br>
 
-          <div class="img-container" v-if="confirmImage(question.data.IMAGENS)">
-            <img :src="question.data.IMAGENS" style="max-height: 250px; max-width: 180px"/>
+          <br>
+
+          <div class="img-container" v-if="confirmImage(question.image)">
+            <img :src="question.image" style="max-height: 250px; max-width: 180px"/>
           </div>
 
-          <v-content v-if="typeof question.data.RESPOSTAS[0].text !== 'string'">
+          <v-main v-if="typeof question.answers[0].text !== 'string'">
             <v-row>
               <v-col cols="2"></v-col>
-              <v-col v-for="(item, index) in question.data.RESPOSTAS[0].text" :key="index" cols="2">
+              <v-col v-for="(item, index) in question.answers[0].text" :key="index" cols="2">
                 <vue-markdown :source="item.title"/>
               </v-col>
             </v-row>
@@ -104,7 +104,7 @@
             <v-row>
               <v-col cols="2">A -</v-col>
               <v-col
-                v-for="(item, index) in question.data.RESPOSTAS[0].text"
+                v-for="(item, index) in question.answers[0].text"
                 :key="index"
                 cols="2"
               >
@@ -115,7 +115,7 @@
             <v-row>
               <v-col cols="2">B -</v-col>
               <v-col
-                v-for="(item, index) in question.data.RESPOSTAS[1].text"
+                v-for="(item, index) in question.answers[1].text"
                 :key="index"
                 cols="2"
                 >
@@ -126,7 +126,7 @@
             <v-row>
               <v-col cols="2">C -</v-col>
               <v-col
-                v-for="(item, index) in question.data.RESPOSTAS[2].text"
+                v-for="(item, index) in question.answers[2].text"
                 :key="index"
                 cols="2"
                 >
@@ -137,23 +137,23 @@
             <v-row>
               <v-col cols="2">D -</v-col>
               <v-col
-                v-for="(item, index) in question.data.RESPOSTAS[3].text"
+                v-for="(item, index) in question.answers[3].text"
                 :key="index"
                 cols="2"
                 >
                   <vue-markdown :source="item.answerDescription"/>
                 </v-col>
             </v-row>
-          </v-content>
+          </v-main>
 
-          <v-content v-else>
-            <v-row v-for="(item, index) in question.data.RESPOSTAS" :key="index">
+          <v-main v-else>
+            <v-row v-for="(item, index) in question.answers" :key="index">
               <v-col cols="2">{{ letters[index] }} - </v-col>
               <v-col>
                 <vue-markdown :source="item.text"/>
               </v-col>
             </v-row>
-          </v-content>
+          </v-main>
         </div>
       </div>
 
@@ -168,7 +168,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in table" :key="item.question">
+              <tr v-for="item in table" :key="item.iq">
                 <td>{{ item.question }}</td>
                 <td>{{ item.iq }}</td>
                 <td>{{ item.answer }}</td>
@@ -235,11 +235,19 @@
 
         <v-card-text style="height: 300px">
           <div>
-            <v-checkbox v-for="(item, index) in premadePapers" class="ma-4" :label="item.id" :input-value="item.value" v-model="item.value" :key="index"/>
+            <v-checkbox v-for="(item, index) in premadePapers" :key="index"
+                class="ma-4"
+                :label="item.id"
+                :input-value="item.value"
+                v-model="item.value" />
           </div>
 
           <div>
-            <v-checkbox v-for="(item, index) in createdPapers" class="ma-4" :label="item.id" :input-value="item.value" v-model="item.value" :key="index"/>
+            <v-checkbox v-for="(item, index) in createdPapers" :key="index"
+                class="ma-4"
+                :label="item.id"
+                :input-value="item.value"
+                v-model="item.value" />
           </div>
         </v-card-text>
 
@@ -286,13 +294,13 @@ export default {
     }
   },
   methods: {
-    cancel(){
+    cancel() {
       this.premadePapers.forEach(element => {
         element.value = false;
       })
       this.printDialog = false;
     },
-    back(){
+    back() {
       this.$router.push("/tests");
     },
     toPrint() {
@@ -310,13 +318,13 @@ export default {
         return true
     }
   },
-  computed:{
-    createdPapers(){
+  computed: {
+    createdPapers() {
       let result = [];
       let papers = JSON.stringify(this.$store.getters.loadedPapers);
       papers = JSON.parse(papers);
       papers.forEach( element => {
-        result.push({id: element.data.name, value: false, object: element});
+        result.push({id: element.name, value: false, object: element});
       });
       return result
     },
@@ -348,7 +356,7 @@ export default {
       var result = months[today.getMonth()] + " DE " + today.getFullYear()
       return result
     },
-    statistics(){
+    statistics() {
       let statisticsObj=[]
       const cat =  this.$store.getters.getSubjects
       cat.forEach(element=>{
@@ -360,18 +368,18 @@ export default {
       console.log(statisticsObj)
       return statisticsObj
     },
-    numberOfQuestions(){
+    numberOfQuestions() {
       return this.questions.length
     },
     questions() {
       let questionsAux=[]
       let test = this.$store.getters.findTestById(this.$route.params.testId)
-      this.testTilte = test.data.title.toUpperCase()
-      this.testPurpose = test.data.purpose
-      this.testEditedDate = test.data.edited
-      this.testCreator = test.data.user
-      test.data.questions.forEach(element=>{
-        var question = this.$store.getters.findQuestionById(element)
+      this.testTilte = test.title.toUpperCase()
+      this.testPurpose = test.purpose
+      this.testEditedDate = test.edited
+      this.testCreator = test.user
+      test.questions.forEach(element=>{
+        var question = this.$store.getters.findQuestionByIq(element)
         questionsAux.push(question)
       })
       console.log(questionsAux)
@@ -383,10 +391,10 @@ export default {
       for ( let i = 0; i < this.questions.length; i++ ) {
         let data = { question: "", iq: "", answer: ""}
         data.question = i+1
-        data.iq = this.questions[i].id
+        data.iq = this.questions[i].iq
 
         for( let j = 0; j < 4; j++){
-          if(this.questions[i].data.RESPOSTAS[j].value == true) {
+          if(this.questions[i].answers[j].value == true) {
             data.answer = this.letters[j]
           }
         }
@@ -401,8 +409,8 @@ export default {
       for ( let i = 0; i < this.questions.length; i++ ) {
         let data = { question: "", subject: "", iq: "", obs: ""}
         data.question = i+1
-        data.subject = this.questions[i].data.DISCIPLINA
-        data.iq = this.questions[i].id
+        data.subject = this.questions[i].subject
+        data.iq = this.questions[i].iq
         result.push(data)
       }
 

@@ -24,7 +24,7 @@ export default {
       pageCount: 15,
       page: 1,
       headers: [
-        { text: "Nome", align: "left",  value: "data.name" },
+        { text: "Nome", align: "left",  value: "name" },
       ]
     }
   },
@@ -34,10 +34,10 @@ export default {
       papers = JSON.parse(papers);
       console.log("papers: ", typeof papers);
       let aux = [
-        {id: "introduction", data: {description: "", image: "", name: "Introdução"}},
-        {id: "questions", data: {description: "", image: "", name: "Referência de Questões"}},
-        {id: "statistics", data: {description: "", image: "", name: "Estatísticas"}},
-        {id: "answers", data: {description: "", image: "", name: "Introdução"}}
+        {id: "introduction", description: "", image: "", name: "Introdução"},
+        {id: "questions", description: "", image: "", name: "Referência de Questões"},
+        {id: "statistics", description: "", image: "", name: "Estatísticas"},
+        {id: "answers", description: "", image: "", name: "Introdução"}
       ];
       aux.forEach( element => {
         papers.push(element)

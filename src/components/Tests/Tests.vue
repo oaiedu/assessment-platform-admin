@@ -33,20 +33,34 @@
             class="elevation-1"
             @page-count="pageCount = $event"
           >
+            <template v-slot:[`item.type`]='{ item }'>
+                {{ item.type === 'selected' ? 'Selecionado' : 'Aleatório' }}
+            </template>
+
             <template small v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
-                <router-link class="mr-6" style="text-decoration: none;" :to="{name:'test',params:{testId:item.id}}" replace>
+                <router-link class="mr-6" style="text-decoration: none;" :to="`/tests/${item.id}`" replace>
                   <v-icon>mdi-pdf-box</v-icon>
                 </router-link>
-                <v-icon @click="editTest(item)" class="mr-2">mdi-pencil</v-icon>
-                <v-icon @click="deleteTestSnackBar = true; deleteSelect = item" class="mr-2">mdi-delete</v-icon>
+                <v-icon
+                    v-if='!userClaims["student"]'
+                    @click="editTest(item)"
+                    class="mr-2">
+                    mdi-pencil
+                </v-icon>
+                <v-icon
+                    v-if='!userClaims["student"]'
+                    @click="deleteTestSnackBar = true; deleteSelect = item"
+                    class="mr-2">
+                    mdi-delete
+                </v-icon>
               </v-row>
             </template>
           </v-data-table>
         </v-card>
       </v-container>
 
-      <v-tooltip left>
+      <v-tooltip left v-if='!userClaims["student"]'>
         <template v-slot:activator="{ on }">
           <v-btn v-on="on" fixed dark fab bottom right color="cyan" @click.stop="dialogNewTest = true">
             <v-icon>mdi-plus</v-icon>
@@ -103,9 +117,9 @@ export default {
             itemsPerPage: 10,
             selectedTest: null,
             headers: [
-                { text: "Nome", align: "start",  value: "data.title" },
-                { text: "Questões", align: "left",  value: "data.questions.length" },
-                { text: "Tipo", align: "left",  value: "data.type" },
+                { text: "Nome", align: "start",  value: "title" },
+                { text: "Questões", align: "left",  value: "questions.length" },
+                { text: "Tipo", align: "left",  value: "type" },
                 { text: "Ações", align:"right", value: "actions", sortable: false }
             ]
         }
@@ -117,6 +131,9 @@ export default {
         },
         tests() {
             return this.$store.getters.loadedTests;
+        },
+        userClaims() {
+            return this.$store.getters.getUserClaims;
         }
     },
     methods: {
@@ -125,22 +142,14 @@ export default {
             this.dialogEditTest = true;
         },
         deleteTest(id) {
-            let aux = this.$store.dispatch("deleteTest", id);
-            aux.then(()=>{
+            this.$store.dispatch("deleteTest", id).then(() => {
                 this.deleteTestSnackBar = false;
                 this.loadTests();
-            });
-        },
-        loadTests() {
-            console.log("é mano");
-            let aux = this.$store.dispatch("loadedTests");
-            aux.then(()=>{
-                return aux;
             });
         }
     },
     mounted() {
-        this.loadTests();
+        this.$store.dispatch("loadedTests");
     }
 };
 </script>

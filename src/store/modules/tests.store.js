@@ -24,7 +24,7 @@ const actions = {
         let tests = []
         db.collection("tests").get().then(querySnapshot => {
             querySnapshot.forEach(doc => {
-                tests.push(Object.assign({ id: doc.id, data: doc.data() }));
+                tests.push({ id: doc.id, ...doc.data() });
             });
             commit('setLoadedTests', tests);
             commit('setLoading', false);
