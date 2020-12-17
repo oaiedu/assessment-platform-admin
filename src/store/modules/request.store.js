@@ -97,29 +97,36 @@ const actions = {
             });
     },
     loadQuestionRequests({ commit }, payload) {
-        commit('setLoading', true);
-        const { claims, userInfo } = payload;
+        return new Promise((resolve, reject) => {
+            try {
+                commit('setLoading', true);
+                const { claims, userInfo } = payload;
 
-        const data = [];
-        let dbRequest = null;
+                const data = [];
+                let dbRequest = null;
 
-        if(claims['admin']) {
-            dbRequest = db.collection('question-requests').get();
-        } else {
-            dbRequest = db.collection('question-requests').where('user.email', '==', userInfo.email).get();
-        }
+                if(claims['admin']) {
+                    dbRequest = db.collection('question-requests').get();
+                } else {
+                    dbRequest = db.collection('question-requests').where('user.email', '==', userInfo.email).get();
+                }
 
-        dbRequest.then(snapshot => {
-            snapshot.forEach(doc => {
-                data.push(doc.data());
-            });
-        })
-        .then(() => {
-            commit('setQuestionRequests', data);
-            commit('setLoading', false);
-        })
-        .catch(error => {
-            console.log(error);
+                dbRequest.then(snapshot => {
+                    snapshot.forEach(doc => {
+                        data.push(doc.data());
+                    });
+                })
+                .then(() => {
+                    commit('setQuestionRequests', data);
+                    commit('setLoading', false);
+                    resolve();
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            } catch {
+                reject('Error');
+            }
         });
     },
     deleteQuestionRequest({ commit }, payload) {
@@ -142,6 +149,20 @@ const actions = {
                     .catch(error => {
                         console.log(error);
                     });
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    deleteApprovedRequests({ commit }, payload) {
+        const { userInfo } = payload;
+
+        db.collection('question-requests')
+            .where('user.email', '==', userInfo.email)
+            .where('status', '==', 'Aprovado')
+            .get()
+            .then(snapshot => {
+                snapshot.docs[0].ref.delete();
             })
             .catch(error => {
                 console.log(error);

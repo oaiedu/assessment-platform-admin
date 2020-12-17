@@ -15,9 +15,20 @@
                         append-icon="mdi-magnify"
                         label="Search for IQ"
                         single-line
-                        hide-details
-                    ></v-text-field>
+                        hide-details >
+                    </v-text-field>
                 </v-container>
+            </v-container>
+
+            <v-container v-if='hasApprovedRequests && userClaims["appraiser"]'>
+                <v-alert
+                    text
+                    prominent
+                    type='warning'
+                    color="red"
+                    icon='mdi-alert' >
+                    Solicitações aprovadas serão excluídas automaticamente quando sair desta página!
+                </v-alert>
             </v-container>
 
             <v-container>
@@ -108,7 +119,7 @@
                                         v-bind='attrs'
                                         class="ml-3"
                                         color="red"
-                                        :disabled='userClaims["admin"] ? item.status === "Rejeitado" : false'
+                                        :disabled='userClaims["admin"] ? item.status === "Rejeitado" : item.status === "Aprovado"'
                                         @click="userClaims['admin']
                                             ? rejectQuestion(item)
                                             : askDelete(item)" >
@@ -191,6 +202,7 @@
         components: { Body, EditQuestion },
         data() {
             return {
+                deleteApproved: false,
                 page: 1,
                 pageCount: 15,
                 dialogPDF: false,
@@ -201,18 +213,27 @@
                 search: '',
                 page: 1,
                 pageCount: 15,
-                itemsPerPage: 8,
-                headers: [
-                    { text: 'IQ', sortable: true, value: 'iq', align: 'center' },
-                    { text: 'Usuário', value: 'user.name', sortable: true, align: 'center' },
-                    { text: 'E-mail', value: 'user.email', sortable: true, align: 'center' },
-                    { text: 'Disciplina', value: 'subject', sortable: true, align: 'center' },
-                    { text: 'Status', value: 'status', sortable: true, align: 'center' },
-                    { text: 'Ações', value: 'actions', sortable: false, align: 'center' }
-                ]
+                itemsPerPage: 8
             };
         },
         computed: {
+            headers() {
+                return this.userClaims['admin']
+                    ? [
+                        { text: 'IQ', sortable: true, value: 'iq', align: 'center' },
+                        { text: 'Usuário', value: 'user.name', sortable: true, align: 'center' },
+                        { text: 'E-mail', value: 'user.email', sortable: true, align: 'center' },
+                        { text: 'Disciplina', value: 'subject', sortable: true, align: 'center' },
+                        { text: 'Status', value: 'status', sortable: true, align: 'center' },
+                        { text: 'Ações', value: 'actions', sortable: false, align: 'center' }
+                    ]
+                    : [
+                        { text: 'IQ', sortable: true, value: 'iq', align: 'center' },
+                        { text: 'Disciplina', value: 'subject', sortable: true, align: 'center' },
+                        { text: 'Status', value: 'status', sortable: true, align: 'center' },
+                        { text: 'Ações', value: 'actions', sortable: false, align: 'center' }
+                    ]
+            },
             loading() {
                 return this.$store.getters.loading;
                 this.$store.dispatch('clearLoading');
@@ -225,6 +246,15 @@
             },
             userInfo() {
                 return this.$store.getters.userInfo;
+            },
+            hasApprovedRequests() {
+                let itHas = false;
+                this.questions.forEach(question => {
+                    if(question.status === 'Aprovado') {
+                        itHas = true;
+                    }
+                });
+                return itHas;
             }
         },
         methods: {
@@ -258,11 +288,26 @@
                 this.$store.dispatch('deleteQuestionRequest', question);
             },
             rejectQuestion(question) {
-                this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', question });
+                this.$store.dispatch('deleteQuestion', question.iq)
+                    .then(() => {
+                        this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', question });
+                    });
             }
         },
         mounted() {
-            this.$store.dispatch('loadQuestionRequests', { claims: this.userClaims, userInfo: this.userInfo });
+            this.$store.dispatch('loadQuestionRequests', { claims: this.userClaims, userInfo: this.userInfo })
+                .then(() => {
+                    if(this.userClaims['appraiser'] && this.hasApprovedRequests) {
+                        this.deleteApproved = true;
+                    } else {
+                        this.deleteApproved = false;
+                    }
+                });
+        },
+        beforeDestroy() {
+            if(this.deleteApproved) {
+                this.$store.dispatch('deleteApprovedRequests', { userInfo: this.userInfo });
+            }
         }
     };
 </script>
