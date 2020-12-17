@@ -149,7 +149,7 @@
               <br />
               CONHECIMENTO: {{editedKnowledge}} [{{editedKnowledgePWR}}/{{editedKnowledgeBWR}}]
               <br />
-              IQ: {{ id }}
+              IQ: {{ iq }}
               <br />
               <br />
               <vue-markdown :source="editedQuestionDescription" />
@@ -229,7 +229,7 @@ export default {
     Editor,
     "vue-markdown": VueMarkdown
   },
-  props: ["question"],
+  props: ['question', 'userClaims', 'userInfo'],
   data() {
     return {
       letters: ["A", "B", "C", "D"],
@@ -265,7 +265,8 @@ export default {
         "Transferência de Calor",
         "Materiais"
       ],
-      number: 0
+      number: 0,
+      dialogState: false
     };
   },
   computed: {
@@ -286,15 +287,14 @@ export default {
         this.editedSubject !== ""
       );
     },
-    id() {
-      var aux = this.question.iq;
-      this.editedIq = aux;
-      return aux;
+    iq() {
+        this.editedIq = this.question.iq;
+        return this.question.iq;
     }
   },
   watch: {
     editedIq() {
-      this.update();
+        this.update();
     },
     auxTitle(val) {
       if (this.confirmTitle) {
@@ -314,8 +314,7 @@ export default {
   },
   methods: {
     update() {
-      console.log("AAAAAAAAA");
-      this.editedIq = this.question.id;
+      this.editedIq = this.question.iq;
       this.editedSubject = this.question.subject;
       this.editedKnowledge = this.question.knowledge;
       this.editedKnowledgePWR = this.question.knowledgePWR;
@@ -364,12 +363,12 @@ export default {
             var oldData = {
               iq: this.question.iq,
               subject: this.question.subject,
-              questionDescription: this.question.question,
+              question: this.question.question,
               knowledge: this.question.knowledge,
               knowledgePWR: this.question.knowledgePWR,
               knowledgeBWR: this.question.knowledgeBWR,
               answers: this.question.answers,
-              images: this.question.image,
+              image: this.question.image,
               edited: this.question.edited,
               imageSize: "1x"
             };
@@ -378,37 +377,54 @@ export default {
             var oldData = {
               iq: this.question.iq,
               subject: this.question.subject,
-              questionDescription: this.question.question,
+              question: this.question.question,
               knowledge: this.question.knowledge,
               knowledgePWR: this.question.knowledgePWR,
               knowledgeBWR: this.question.knowledgeBWR,
               answers: this.question.answers,
-              images: this.question.image,
+              image: this.question.image,
               edited: this.question.edited,
               imageSize: this.question.imageSize,
             };
           }
-          var questionData = {
+
+          const questionData = {
             iq: this.editedIq,
             subject: this.editedSubject,
-            questionDescription: this.editedQuestionDescription,
+            question: this.editedQuestionDescription,
             knowledge: this.editedKnowledge,
             knowledgePWR: this.editedKnowledgePWR,
             knowledgeBWR: this.editedKnowledgeBWR,
             answers: this.editedAnswers,
-            images: this.editedImages,
+            image: this.editedImages,
             imageSize: this.editedImageSize
-          };
-          var sendInfo = {
-            oldData: {},
-            questionData: {},
-            user: ""
-          };
-          sendInfo.oldData = oldData;
-          sendInfo.questionData = questionData;
-          sendInfo.user = this.$store.getters.user.id;
-          var storeAux = this.$store.dispatch("editQuestion", sendInfo);
-          storeAux.then(() => {
+          }
+
+          let aux = null;
+
+          if(this.userClaims['admin']) {
+            const sendInfo = {
+                oldData: {},
+                questionData: {},
+                user: ""
+            }
+            sendInfo.oldData = oldData;
+            sendInfo.questionData = questionData;
+            sendInfo.user = this.$store.getters.user.id;
+
+            aux = this.$store.dispatch("editQuestion", sendInfo);
+          } else {
+            const question = {
+                ...questionData,
+                status: 'Pendente',
+                user: {
+                    name: this.userInfo.name,
+                    email: this.userInfo.email
+                }
+            }
+            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', question });
+          }
+          aux.then(() => {
             this.close();
           });
         });
@@ -416,36 +432,53 @@ export default {
         var oldData = {
           iq: this.question.iq,
           subject: this.question.subject,
-          questionDescription: this.question.question,
+          question: this.question.question,
           knowledge: this.question.knowledge,
           knowledgePWR: this.question.knowledgePWR,
           knowledgeBWR: this.question.knowledgeBWR,
           answers: this.question.answers,
-          images: this.question.image,
+          image: this.question.image,
           edited: this.question.edited,
           imageSize: this.question.imageSize
         };
-        var questionData = {
-          id: this.editedIq,
+
+        const  questionData = {
+          iq: this.editedIq,
           subject: this.editedSubject,
-          questionDescription: this.editedQuestionDescription,
+          question: this.editedQuestionDescription,
           knowledge: this.editedKnowledge,
           knowledgePWR: this.editedKnowledgePWR,
           knowledgeBWR: this.editedKnowledgeBWR,
           answers: this.editedAnswers,
           imageSize: this.editedImageSize,
-          images: this.question.image
+          image: this.question.image
         };
-        var sendInfo = {
-          oldData: {},
-          questionData: {},
-          user: ""
-        };
-        sendInfo.oldData = oldData;
-        sendInfo.questionData = questionData;
-        sendInfo.user = this.$store.getters.user.id;
-        var storeAux = this.$store.dispatch("editQuestion", sendInfo);
-        storeAux.then(() => {
+
+        let aux = null;
+
+        if(this.userClaims['admin']) {
+            const sendInfo = {
+                oldData: {},
+                questionData: {},
+                user: ""
+            }
+            sendInfo.oldData = oldData;
+            sendInfo.questionData = questionData;
+            sendInfo.user = this.$store.getters.user.id;
+
+            aux = this.$store.dispatch("editQuestion", sendInfo);
+          } else {
+            const question = {
+                ...questionData,
+                status: 'Pendente',
+                user: {
+                    name: this.userInfo.name,
+                    email: this.userInfo.email
+                }
+            }
+            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', question });
+          }
+        aux.then(() => {
           this.close();
         });
       }
