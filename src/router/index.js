@@ -82,9 +82,9 @@ const routes = [
         beforeEnter: AuthGuard
     },
     {
-        path: '/test/:testId',
+        path: '/tests/:testId',
         component: PrintTest,
-        name: 'test',
+        name: 'tests',
         beforeEnter: AuthGuard
     },
     {
