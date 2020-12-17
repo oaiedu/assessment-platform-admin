@@ -123,8 +123,36 @@
             </v-container>
 
             <div class="text-center pt-2">
-                <v-pagination v-model="page" :length="pageCount" total-visible="7"></v-pagination>
+                <v-pagination
+                    v-model="page"
+                    :length="pageCount"
+                    total-visible="7" >
+                </v-pagination>
             </div>
+
+            <v-dialog
+                fullscreen
+                hide-overlay
+                transition="dialog-bottom-transition"
+                v-model="dialogEditQuestion" >
+                <EditQuestion
+                    :question="editItem"
+                    :userClaims='userClaims'
+                    :userInfo='userInfo'
+                    @closeDialogEdit="dialogEditQuestion = false" >
+                </EditQuestion>
+            </v-dialog>
+
+            <v-dialog
+                fullscreen
+                hide-overlay
+                transition="dialog-bottom-transition"
+                v-model="dialogPDF" >
+                <Body
+                    :question="editItem"
+                    @closeDialogPrint="dialogPDF = false" >
+                </Body>
+            </v-dialog>
 
             <v-snackbar
                 v-model="deleteQuestionSnackBar"
@@ -156,12 +184,18 @@
 </template>
 
 <script>
+    import Body from './Questions/PrintQuestion/Body';
     import EditQuestion from './Questions/EditQuestion';
 
     export default {
-        components: { EditQuestion },
+        components: { Body, EditQuestion },
         data() {
             return {
+                page: 1,
+                pageCount: 15,
+                dialogPDF: false,
+                editItem: null,
+                dialogEditQuestion: false,
                 deleteItem: null,
                 deleteQuestionSnackBar: false,
                 search: '',
@@ -201,7 +235,8 @@
                 a.remove();
             },
             printQuestion(question) {
-                console.log(question);
+                this.dialogPDF = true;
+                this.editItem = question;
             },
             checkQuestion(question) {
                 this.$store.dispatch('createQuestion', question)
@@ -210,14 +245,16 @@
                     });
             },
             editQuestion(question) {
-                // TODO
-                this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Pendente', question });
+                this.dialogEditQuestion = true;
+                this.editItem = question;
             },
             askDelete(question) {
                 this.deleteQuestionSnackBar = true;
                 this.deleteItem = question;
             },
             deleteQuestion(question) {
+                this.deleteQuestionSnackBar = false;
+                this.deleteItem = null;
                 this.$store.dispatch('deleteQuestionRequest', question);
             },
             rejectQuestion(question) {
