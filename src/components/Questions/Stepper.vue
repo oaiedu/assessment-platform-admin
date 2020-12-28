@@ -394,7 +394,7 @@ export default {
                 URL.then(result => {
                     this.imagesAsURL = result;
                     const questionData = {
-                        iq: this.iq,
+                        iq: this.iq.toUpperCase(),
                         subject: this.subject,
                         question: this.questionDescription,
                         knowledge: this.knowledge,
@@ -425,7 +425,7 @@ export default {
                 });
             } else {
                 const questionData = {
-                    iq: this.iq,
+                    iq: this.iq.toUpperCase(),
                     subject: this.subject,
                     question: this.questionDescription,
                     knowledge: this.knowledge,
