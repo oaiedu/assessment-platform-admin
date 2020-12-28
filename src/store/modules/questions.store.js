@@ -3,6 +3,9 @@ import { db, storage } from '../../main';
 const initialState = () => ({
     deleteQuestionId: null,
     loadedQuestions: [],
+    questions: {},
+    filteredQuestions: [],
+    currentQuestionsPage: [],
     subjects: [
         "Teoria do Reator",
         "Termodinâmica",
@@ -16,28 +19,65 @@ const initialState = () => ({
         "Física Nuclear",
         "Transferência de Calor",
         "Materiais"
-    ]
+    ],
+    subjectsAmount: null,
+    lastSnapshot: null
 });
 
 const state = initialState();
 
 const mutations = {
-    setLoadedQuestions(state, payload) {
-        state.loadedQuestions = payload;
+    setQuestions(state, data) {
+        state.loadedQuestions = data;
     },
-    setDeletedQuestion(state, payload) {
-        state.deleteQuestionId = payload;
+    setQuestionPage(state, data) {
+        state.questions[data.page] = data.data;
     },
-    createQuestion(state, payload) {
-        state.loadedQuestions.push(payload);
+    setFilteredQuestions(state, data) {
+        state.filteredQuestions = data;
     },
-    deleteQuestion(state, payload) {
-        state.loadedQuestions.forEach((item, i) => {
-            if(item.iq === payload)
-                state.loadedQuestions.splice(i, 1);
+    resetFilteredQuestions(state) {
+        state.filteredQuestions = [];
+    },
+    resetCurrentQuestionsPage(state) {
+        state.currentQuestionsPage = [];
+    },
+    setDeletedQuestion(state, data) {
+        state.deleteQuestionId = data;
+    },
+    setCurrentQuestionsPage(state, data) {
+        state.currentQuestionsPage = data;
+    },
+    createQuestion(state, data) {
+        state.loadedQuestions.push(data.data);
+        const questions = state.questions[data.page] || [];
+        questions.push(data.data);
+        state.questions[data.page] = questions;
+    },
+    deleteQuestion(state, data) {
+        const questions = state.questions;
+        for(let key in questions) {
+            if(questions[key]) {
+                questions[key].forEach((item, index) => {
+                    if(item.iq === data) {
+                        state.questions[key].splice(index, 1);
+                    }
+                });
+            }
+        }
+    },
+    deleteFilteredQuestion(state, data) {
+        const questions = state.filteredQuestions;
+        questions.forEach((item, index) => {
+            if(item.iq === data) {
+                state.filteredQuestions.splice(index, 1);
+            }
         });
     },
-    RESET(state) {
+    setLastSnapshot(state, data) {
+        state.lastSnapshot = data;
+    },
+    RESETQuestions(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
             state[key] = newState[key];
@@ -46,20 +86,139 @@ const mutations = {
 }
 
 const actions = {
-    loadedQuestions({ commit }) {
+    loadQuestions({ commit }) {
         commit('setLoading', true);
-        let questions = [];
+        let data = [];
         db.collection('questions').get().then(querySnapshot => {
             querySnapshot.forEach(doc => {
-                questions.push(doc.data());
+                data.push(doc.data());
             });
-            commit('setLoadedQuestions', questions);
+            commit('setQuestions', data);
             commit('setLoading', false);
         })
     },
-    deleteQuestion({ commit }, payload) {
+    loadQuestionPage({ commit, state }, payload) {
         commit('setLoading', true);
-        const iq = payload;
+
+        const { page, itemsPerPage, type } = payload;
+        const data = [];
+
+        const pages = Object.keys(state.questions);
+
+        if(!pages.includes('p' + page)) {
+            let request = null;
+            const ref = db.collection('questions').orderBy('iq');
+
+            if(type === 'next') {
+                request = ref.startAfter(state.lastSnapshot[1]).limit(itemsPerPage).get();
+            } else {
+                request = ref.endBefore(state.lastSnapshot[0]).limitToLast(itemsPerPage).get();
+            }
+
+            let first = null,
+                last = null;
+
+            request.then(snapshot => {
+                    first = snapshot.docs[0].data().iq;
+                    last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+
+                    snapshot.forEach(doc => {
+                        data.push(doc.data());
+                    });
+                })
+                .then(() => {
+                    commit('setCurrentQuestionsPage', data);
+                    commit('setQuestionPage', { page: 'p' + page, data });
+                    commit('setLastSnapshot', [first, last]);
+                    commit('setLoading', false);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        } else {
+            const pageContent = state.questions['p' + page];
+            const first = pageContent[0].iq;
+            const last = pageContent[pageContent.length - 1].iq;
+
+            commit('setCurrentQuestionsPage', pageContent);
+            commit('setLastSnapshot', [first, last]);
+            commit('setLoading', false);
+        }
+    },
+    loadFOLQuestionPage({ commit, state }, payload) {
+        commit('setLoading', true);
+
+        const { page, itemsPerPage, mode } = payload;
+        const data = [];
+
+        const pages = Object.keys(state.questions);
+
+        if(!pages.includes('p' + page)) {
+            let request = null;
+            const ref = db.collection('questions').orderBy('iq');
+
+            if(mode === 'first') {
+                request = ref.limit(itemsPerPage).get();
+            } else {
+                request = ref.limitToLast(itemsPerPage).get();
+            }
+
+            let first = null,
+                last = null;
+
+            request.then(snapshot => {
+                    first = snapshot.docs[0].data().iq;
+                    last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+
+                    snapshot.forEach(doc => {
+                        data.push(doc.data());
+                    });
+                })
+                .then(() => {
+                    commit('setCurrentQuestionsPage', data);
+                    commit('setQuestionPage', { page: 'p' + page, data });
+                    commit('setLastSnapshot', [first, last]);
+                    commit('setLoading', false);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        } else {
+            const pageContent = state.questions['p' + page];
+            const first = pageContent[0].iq;
+            const last = pageContent[pageContent.length - 1].iq;
+
+            commit('setCurrentQuestionsPage', pageContent);
+            commit('setLastSnapshot', [first, last]);
+            commit('setLoading', false);
+        }
+    },
+    searchQuestions({ commit }, payload) {
+        commit('setLoading', true);
+
+        const data = [];
+
+        db.collection('questions').orderBy('iq')
+            .where('iq', '>=', payload.toUpperCase())
+            .where('iq', '<=', payload.toUpperCase() + '~')
+            .get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
+            })
+            .then(() => {
+                commit('setFilteredQuestions', data);
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    async deleteQuestion({ commit }, payload) {
+        commit('setLoading', true);
+        const { iq, isSearching } = payload;
+
         return db.collection("questions").where('iq', '==', iq).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
@@ -70,12 +229,41 @@ const actions = {
                         const child = decodeURIComponent(childImage);
                         storage.ref().child(child).delete();
                     }
+                    db.collection('data-size').get()
+                        .then(snap => {
+                            const document = snap.docs[0];
+                            const general = document.data().questions.general;
+                            const sub = doc.data().subject;
+                            const subSize = document.data().questions.subject[sub];
+
+                            const questions = {
+                                general: general - 1,
+                                subject: {
+                                    ...document.data().questions.subject,
+                                    [sub]: subSize - 1
+                                }
+                            }
+
+                            document.ref.update({ questions })
+                                .then(() => {
+                                    commit('addRemoveSize', { key: 'questions', data: questions });
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                });
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
                 });
             })
             .then(() => {
                 commit('setLoading', false);
                 commit('deleteQuestion', iq);
-                console.log("Document successfully deleted!");
+
+                if(isSearching) {
+                    commit('deleteFilteredQuestion', iq);
+                }
             })
             .catch(error => {
                 console.error("Error removing document: ", error);
@@ -155,7 +343,6 @@ const actions = {
             .add(editedQuestion)
             .then(() => {
                 commit('setLoading', false);
-                console.log("Success create edit");
             })
             .catch(error => {
                 console.error("Error writing document: ", error);
@@ -166,17 +353,49 @@ const actions = {
 
         const question = { ...payload, edited: [] }
 
+        const questionAmount = this.getters.getDataSize.questions.general;
+        const pageAmount =  Math.ceil(questionAmount / 8);
+        const pageQuestions = this.getters.getQuestionsByPage(pageAmount);
+        const amount = pageQuestions ? pageQuestions.length : 0;
+
         db.collection("questions").add(question)
             .then(() => {
                 commit('setLoading', false);
-                commit('createQuestion', question);
+                commit('createQuestion', { page: 'p' + (amount === 8 ? pageAmount + 1 : pageAmount), data: question });
+
+                db.collection('data-size').get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const general = document.data().questions.general;
+                        const sub = question.subject;
+                        const subSize = document.data().questions.subject[sub];
+
+                        const questions = {
+                            general: general + 1,
+                            subject: {
+                                ...document.data().questions.subject,
+                                [sub]: subSize + 1
+                            }
+                        }
+
+                        document.ref.update({ questions })
+                            .then(() => {
+                                commit('addRemoveSize', { key: 'questions', data: questions });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             })
             .catch(error => {
                 console.error("Error writing document: ", error);
             });
     },
-    reset({ commit }) {
-        commit('RESET');
+    resetQuestions({ commit }) {
+        commit('RESETQuestions');
     }
 }
 
@@ -184,25 +403,19 @@ const getters = {
     getSubjects(state) {
         return state.subjects;
     },
-    numberOfQuestions(state) {
-        return state.loadedQuestions.length;
+    getQuestions(state) {
+        return state.questions;
     },
-    loadedQuestions(state) {
-        return state.loadedQuestions;
+    getCurrentQuestionsPage(state) {
+        return state.currentQuestionsPage;
+    },
+    getFilteredQuestions(state) {
+        return state.filteredQuestions;
     },
     getAnswersById(state) {
         let aux = state.loadedQuestions.find(question => question.iq === iq);
         return { ...aux.answers }
-    },
-    getNumberOfQuestionBySubject: state => subject => {
-        let counter = 0;
-        state.loadedQuestions.forEach(question => {
-            if (question.subject === subject)
-                counter++;
-        });
-        return counter;
-    },
-    findQuestionByIq: state => iq => state.loadedQuestions.find(question => question.iq === iq)
+    }
 }
 
 export default {
