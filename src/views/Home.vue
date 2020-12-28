@@ -55,7 +55,7 @@
                 return statisticsObj;
             },
             numberOfQuestions() {
-                return this.$store.getters.numberOfQuestions;
+                return this.$store.getters.getDataSize.questions.general;
             },
             userClaims() {
                 return this.$store.getters.getUserClaims;
