@@ -191,3 +191,55 @@ exports.rearrangeQuestions = async (req, res) => {
 
     res.send('Done!');
 }
+
+exports.countData = async (req, res) => {
+    const collections = ['users', 'questions', 'question-requests', 'tests', 'papers'];
+    // const collections = ['question-requests', 'tests', 'papers'];
+    const data = {};
+    const questionsCounter = {
+        general: 0,
+        subject: {
+            "Teoria do Reator": 0,
+            "Termodinâmica": 0,
+            "Instrumentação e Controle": 0,
+            "Válvulas e Bombas": 0,
+            "Eletricidade": 0,
+            "Mecânica dos Fluidos": 0,
+            "Tratamento Qúimico Refrigerante": 0,
+            "Análise Integrada": 0,
+            "Instrumentação Nuclear": 0,
+            "Física Nuclear": 0,
+            "Transferência de Calor": 0,
+            "Materiais": 0
+        }
+    }
+
+    const promises = collections.map(collection => {
+        return (
+            db.collection(collection).get()
+                .then(snapshot => {
+                    if(collection === 'questions') {
+                        questionsCounter.general = snapshot.docs.length;
+                        snapshot.forEach(doc => {
+                            questionsCounter.subject[doc.data().subject] += 1;
+                        });
+                        data['questions'] = questionsCounter;
+                    } else {
+                        data[collection] = snapshot.docs.length;
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+        );
+    });
+
+    await Promise.all(promises);
+
+    await db.collection('data-size').add(data)
+        .catch(error => {
+            console.log(error);
+        });
+
+    res.send(data);
+}
