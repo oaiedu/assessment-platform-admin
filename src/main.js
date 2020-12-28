@@ -57,6 +57,6 @@ new Vue({
             }
         });
         this.$store.dispatch('clearError');
-        this.$store.dispatch('loadedQuestions');
+        this.$store.dispatch('loadDataSize');
     }
 }).$mount('#app');

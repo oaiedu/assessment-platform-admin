@@ -269,7 +269,19 @@
                 this.editItem = question;
             },
             checkQuestion(question) {
-                this.$store.dispatch('createQuestion', question)
+                const toCreate = {
+                    iq: question.iq,
+                    question: question.question,
+                    subject: question.subject,
+                    knowledge: question.knowledge,
+                    knowledgePWR: question.knowledgePWR,     // RELEVANCIA_OR
+                    knowledgeBWR: question.knowledgeBWR,     // RELEVANCIA_OSR
+                    answers: question.answers,
+                    image: question.image,
+                    imageSize: question.imageSize,
+                    edited: []
+                }
+                this.$store.dispatch('createQuestion', toCreate)
                     .then(() => {
                         this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', question });
                     });

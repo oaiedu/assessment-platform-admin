@@ -41,7 +41,7 @@ const mutations = {
 
         state.users = [...users];
     },
-    RESET(state) {
+    RESETUsers(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
             state[key] = newState[key];
@@ -109,6 +109,23 @@ const actions = {
                             .catch(error => {
                                 console.log(error);
                             });
+
+                        db.collection('data-size').get()
+                            .then(snap => {
+                                const document = snap.docs[0];
+                                const size = document.data().users;
+
+                                document.ref.update({ users: size + 1 })
+                                    .then(() => {
+                                        commit('addRemoveSize', { key: 'users', data: size + 1 });
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
                     })
                     .catch(error => {
                         commit('setLoading', false);
@@ -118,7 +135,6 @@ const actions = {
 
                 commit('setUser', newUser);
                 commit('setUserInfo', userInfo);
-                console.log('Success Auth');
             })
             .catch(error => {
                 commit('setLoading', false);
@@ -141,7 +157,6 @@ const actions = {
                     profileImages: userInfo.profileImages,
                     email: state.userInfo.email
                 });
-                console.log("Sucess Update");
             })
             .catch(error => {
                 commit('setLoading', false);
@@ -252,8 +267,8 @@ const actions = {
     user(state) {
         return state.user;
     },
-    reset({ commit }) {
-        commit('RESET');
+    resetUsers({ commit }) {
+        commit('RESETUsers');
     }
 }
 

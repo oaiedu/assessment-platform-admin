@@ -8,12 +8,14 @@
       <v-container>
         <v-container>
           <v-text-field
+            id='searchField'
             v-model="search"
+            @keydown="searchQuery($event)"
             filled
             rounded
             dense
             append-icon="mdi-magnify"
-            label="Search for IQ"
+            label="Procurar por IQ"
             single-line
             hide-details
           ></v-text-field>
@@ -24,15 +26,13 @@
         <v-card>
           <v-data-table
             :headers="headers"
-            :items="questions"
-            :page.sync="page"
+            :items="isSearching ? filteredQuestions : questions"
+            :page="isSearching ? searchPage : page"
             :items-per-page="itemsPerPage"
-            :search="search"
             :loading="loading"
             loading-text="Carregando questões..."
             hide-default-footer
             class="elevation-1"
-            @page-count="pageCount = $event"
           >
             <template v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
@@ -110,11 +110,10 @@
       </v-dialog>
 
       <div class="text-center pt-2">
-        <v-pagination
-          v-model="page"
-          :length="pageCount"
-          total-visible="7"
-        ></v-pagination>
+        <Paginator
+          :page='!isSearching ? page : searchPage'
+          :length='!isSearching ? pageAmount : Math.ceil(filteredQuestions.length / itemsPerPage)'
+          @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
       </div>
 
       <v-snackbar v-model="deleteQuestionSnackBar" light color="white" right top :timeout="15000">
@@ -140,7 +139,10 @@
 </template>
 
 <script>
+    import Paginator from '../Paginator';
+
     export default {
+        components: { Paginator },
         data() {
             return {
                 loadedPages: [1],
@@ -167,41 +169,49 @@
                 ],
                 showedQuestions: [],
                 search: "",
+                isSearching: false,
                 page: 1,
-                pageCount: 15,
+                searchPage: 1,
                 itemsPerPage: 8,
                 headers: [
-                    { text: "IQ", align: "left", sortable: false, value: "iq" },
+                    { text: "IQ", align: "left", value: "iq" },
                     { text: "Conhecimento", value: "knowledge" },
                     { text: "Relevância OR", value: "knowledgePWR" },
                     { text: "Relevância OSR", value: "knowledgeBWR" },
-                    { text: "Disciplina", value: "subject", sortable: false },
+                    { text: "Disciplina", value: "subject" },
                     { text: "Ações", align: "right", value: "actions", sortable: false },
                 ]
             }
         },
-    computed: {
-        loading() {
-            return this.$store.getters.loading;
-            this.$store.dispatch("clearLoading");
+        computed: {
+            loading() {
+                return this.$store.getters.loading;
+                this.$store.dispatch("clearLoading");
+            },
+            questions() {
+                return this.$store.getters.getCurrentQuestionsPage;
+            },
+            filteredQuestions() {
+                return this.$store.getters.getFilteredQuestions;
+            },
+            userClaims() {
+                return this.$store.getters.getUserClaims;
+            },
+            pageAmount() {
+                const questionAmount = this.$store.getters.getDataSize.questions.general;
+                return Math.ceil(questionAmount / this.itemsPerPage);
+            }
         },
-        questions() {
-        return this.$store.getters.loadedQuestions;
-        },
-        userClaims() {
-            return this.$store.getters.getUserClaims;
-        }
-    },
         watch: {
             selected(val) {
                 this.questions.forEach((element) => {
-                    for (let i = 0; i < this.selected.length; i++) {
-                        if (element.data.DISCIPLINA == this.selected[i]) {
+                    for(let i = 0; i < this.selected.length; i++) {
+                        if(element.data.DISCIPLINA == this.selected[i]) {
                             let aux = true;
                             for (let k = 0; k < this.showedQuestions.length; k++) {
-                                if (element === this.showedQuestions[k]) aux = false;
+                                if(element === this.showedQuestions[k]) aux = false;
                             }
-                            if (aux == true) this.showedQuestions.push(element);
+                            if(aux == true) this.showedQuestions.push(element);
                         }
                     }
                 });
@@ -217,12 +227,56 @@
                 this.dialogPDF = true;
             },
             deleteQuestion(iq) {
-                console.log(iq);
-                let aux = this.$store.dispatch("deleteQuestion", iq);
+                let aux = this.$store.dispatch("deleteQuestion", { iq, isSearching: this.isSearching });
                 aux.then(() => {
                     this.deleteQuestionSnackBar = false;
                 });
+            },
+            onPageChange(event) {
+                const payload = {
+                    page: this.page,
+                    itemsPerPage: this.itemsPerPage
+                }
+
+                if(!this.isSearching) {
+                    if(!event.mode) {
+                        this.$store.dispatch('loadQuestionPage', { ...payload, type: event.type });
+                    } else {
+                        this.$store.dispatch('loadFOLQuestionPage', { ...payload, mode: event.mode });
+                    }
+                }
+            },
+            searchQuery(event) {
+                if(event.key === 'Enter') {
+                    document.getElementById('searchField').blur();
+
+                    this.searchPage = 1;
+                    this.$store.commit('resetFilteredQuestions');
+
+                    if(this.search.length > 0) {
+                        this.isSearching = true;
+                        this.$store.dispatch('searchQuestions', this.search);
+                    } else {
+                        this.isSearching = false;
+                    }
+                }
             }
+        },
+        mounted() {
+            this.$store.dispatch('loadFOLQuestionPage', { page: 1, itemsPerPage: this.itemsPerPage, mode: 'first' });
+        },
+        beforeDestroy() {
+            this.search = '';
+            this.isSearching = false;
+            this.page = 1;
+            this.$store.commit('resetFilteredQuestions');
+            this.$store.commit('resetCurrentQuestionsPage');
         }
     }
 </script>
+
+<style>
+    li button.v-pagination__item:focus {
+        outline: none !important;
+    }
+</style>

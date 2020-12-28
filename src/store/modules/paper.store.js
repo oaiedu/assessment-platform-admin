@@ -28,7 +28,7 @@ const mutations = {
             state.loadedPapers.splice(index, 1);
         }
     },
-    RESET(state) {
+    RESETPapers(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
             state[key] = newState[key];
@@ -75,6 +75,23 @@ const actions = {
                         const child = decodeURIComponent(childImage);
                         storage.ref().child(child).delete();
                     }
+
+                    db.collection('data-size').get()
+                        .then(snap => {
+                            const document = snap.docs[0];
+                            const size = document.data().papers;
+
+                            document.ref.update({ papers: size - 1 })
+                                .then(() => {
+                                    commit('addRemoveSize', { key: 'papers', data: size - 1 });
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                });
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
                 });
             })
             .then(() => {
@@ -110,7 +127,23 @@ const actions = {
             .then(() => {
                 commit('createPaper', paper);
                 commit('setLoading', false);
-                console.log("Success");
+
+                db.collection('data-size').get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const size = document.data().papers;
+
+                        document.ref.update({ papers: size + 1 })
+                            .then(() => {
+                                commit('addRemoveSize', { key: 'papers', data: size + 1 });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             })
             .catch(error => {
                 console.error("Error writing document: ", error);
@@ -138,8 +171,8 @@ const actions = {
                 console.error("Error writing document: ", error);
             });
     },
-    reset({ commit }) {
-        commit('RESET');
+    resetPapers({ commit }) {
+        commit('RESETPapers');
     }
 }
 

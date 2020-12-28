@@ -8,7 +8,7 @@ const mutations = {
     setLayout (state, payload) {
         state.layout = payload;
     },
-    RESET(state) {
+    RESETLayout(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
             state[key] = newState[key];
@@ -17,8 +17,8 @@ const mutations = {
 }
 
 const actions = {
-    reset({ commit }) {
-        commit('RESET');
+    resetLayout({ commit }) {
+        commit('RESETLayout');
     }
 }
 
