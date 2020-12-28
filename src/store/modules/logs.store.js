@@ -15,7 +15,7 @@ const mutations = {
     clearError(state) {
         state.error = null;
     },
-    RESET(state) {
+    RESETLogs(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
             state[key] = newState[key];
@@ -30,8 +30,8 @@ const actions = {
     clearLoading({ commit }) {
         commit('setLoading', false);
     },
-    reset({ commit }) {
-        commit('RESET');
+    resetLogs({ commit }) {
+        commit('RESETLogs');
     }
 }
 

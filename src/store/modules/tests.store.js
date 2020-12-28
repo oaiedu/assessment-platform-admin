@@ -10,7 +10,7 @@ const mutations = {
     setLoadedTests(state, payload) {
         state.loadedTests = payload
     },
-    RESET(state) {
+    RESETTests(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
             state[key] = newState[key];
@@ -52,7 +52,23 @@ const actions = {
             .then(() => {
                 commit('setLoading', false);
                 dispatch("loadedTests");
-                console.log("Document successfully deleted!");
+
+                db.collection('data-size').get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const size = document.data().tests;
+
+                        document.ref.update({ tests: size - 1 })
+                            .then(() => {
+                                commit('addRemoveSize', { key: 'tests', data: size - 1 });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             })
             .catch(error => {
                 console.error("Error removing document: ", error);
@@ -81,7 +97,23 @@ const actions = {
             .then(() => {
                 commit('setLoading', false);
                 dispatch("loadedTests");
-                console.log("Success");
+
+                db.collection('data-size').get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const size = document.data().tests;
+
+                        document.ref.update({ tests: size + 1 })
+                            .then(() => {
+                                commit('addRemoveSize', { key: 'tests', data: size + 1 });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             })
             .catch(error => {
                 console.error("Error writing document: ", error);
@@ -117,8 +149,8 @@ const actions = {
                 console.error("Error writing document: ", error);
             });
     },
-    reset({ commit }) {
-        commit('RESET');
+    resetTests({ commit }) {
+        commit('RESETTests');
     }
 }
 

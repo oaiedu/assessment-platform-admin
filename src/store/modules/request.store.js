@@ -26,7 +26,7 @@ const mutations = {
             state.questionRequests.splice(index, 1);
         }
     },
-    RESET(state) {
+    RESETRequests(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
             state[key] = newState[key];
@@ -60,6 +60,23 @@ const actions = {
             .then(() => {
                 commit('addQuestionRequest', question);
                 commit('setLoading', false);
+
+                db.collection('data-size').get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const size = document.data()['question-requests'];
+
+                        document.ref.update({ ['question-requests']: size + 1 })
+                            .then(() => {
+                                commit('addRemoveSize', { key: 'question-requests', data: size + 1 });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             })
             .catch(error => {
                 console.error("Error writing request: ", error);
@@ -145,6 +162,23 @@ const actions = {
                             const child = decodeURIComponent(childImage);
                             storage.ref().child(child).delete();
                         }
+
+                        db.collection('data-size').get()
+                            .then(snap => {
+                                const document = snap.docs[0];
+                                const size = document.data()['question-requests'];
+
+                                document.ref.update({ ['question-requests']: size - 1 })
+                                    .then(() => {
+                                        commit('addRemoveSize', { key: 'question-requests', data: size - 1 });
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
                     })
                     .catch(error => {
                         console.log(error);
@@ -163,10 +197,30 @@ const actions = {
             .get()
             .then(snapshot => {
                 snapshot.docs[0].ref.delete();
+
+                db.collection('data-size').get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const size = document.data()['question-requests'];
+
+                        document.ref.update({ ['question-requests']: size - 1 })
+                            .then(() => {
+                                commit('addRemoveSize', { key: 'question-requests', data: size - 1 });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             })
             .catch(error => {
                 console.log(error);
             });
+    },
+    resetRequests({ commit }) {
+        commit('RESETRequests');
     }
 }
 

@@ -4,7 +4,7 @@ const AdmZip = require('adm-zip');
 
 import { db } from '../../main';
 
-const state = {
+const initialState = () => ({
     months: {
         '1': 'Janeiro',
         '2': 'Fevereiro',
@@ -20,7 +20,9 @@ const state = {
         '12': 'Dezembro'
     },
     backups: []
-}
+});
+
+const state = initialState();
 
 const mutations = {
     setBackups(state, data) {
@@ -36,6 +38,12 @@ const mutations = {
             state.backups.splice(index, 1);
             console.log(this.getBackups);
         }
+    },
+    RESETBackup(state) {
+        const newState = initialState();
+        Object.keys(newState).forEach(key => {
+            state[key] = newState[key];
+        });
     }
 }
 
@@ -261,6 +269,9 @@ const actions = {
             .catch(error => {
                 console.log(error + '');
             });
+    },
+    resetBackup({ commit }) {
+        commit('RESETBackup');
     }
 }
 
