@@ -257,6 +257,31 @@
           </v-card>
         </v-col>
       </v-row>
+
+      <v-snackbar
+        v-model="createErrorSnackBar"
+        light
+        color="red darken-2"
+        right
+        top
+        vertical
+        :timeout="15000" >
+        <span style='color: white; font-size: 1rem'>
+            Uma questão com este IQ já foi criada!
+            <br>
+            Por favor, mude o IQ.
+        </span>
+        <template v-slot:action='{ attrs }'>
+            <v-btn
+                dark
+                color="white"
+                text
+                v-bind='attrs'
+                @click="createErrorSnackBar = false" >
+                Fechar
+            </v-btn>
+        </template>
+      </v-snackbar>
     </v-container>
   </v-card>
 </template>
@@ -280,6 +305,7 @@ export default {
             imageSize: "1x",
             confirmTitle: false,
             questionDescription: "",
+            createErrorSnackBar: false,
             e1: 1,
             test: null,
             columns: null,
@@ -387,73 +413,83 @@ export default {
         onCreateQuestion() {
             console.log("value: ", this.answers[1].value);
 
-            if (this.images && this.images[0]) {
-                const imageToUpload = { iq: this.iq, image: this.images[0] };
-                const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
-
-                URL.then(result => {
-                    this.imagesAsURL = result;
-                    const questionData = {
-                        iq: this.iq.toUpperCase(),
-                        subject: this.subject,
-                        question: this.questionDescription,
-                        knowledge: this.knowledge,
-                        knowledgePWR: this.knowledgePWR,
-                        knowledgeBWR: this.knowledgeBWR,
-                        answers: this.answers,
-                        image: this.imagesAsURL,
-                        imageSize: this.imageSize,
-                    };
-
-                    let aux = null;
-
-                    if(this.userClaims['admin']) {
-                        aux = this.$store.dispatch("createQuestion", questionData);
+            this.$store.dispatch('questionExists', this.iq)
+                .then(exist => {
+                    console.log(exist);
+                    if(exist) {
+                        this.createErrorSnackBar = true;
                     } else {
-                        aux = this.$store.dispatch('createQuestionRequest', {
-                            ...questionData,
-                            name: this.userInfo.name,
-                            email: this.userInfo.email,
-                            status: 'Pendente'
-                        });
+                        if (this.images && this.images[0]) {
+                            const imageToUpload = { iq: this.iq, image: this.images[0] };
+                            const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
+
+                            URL.then(result => {
+                                this.imagesAsURL = result;
+                                const questionData = {
+                                    iq: this.iq.toUpperCase(),
+                                    subject: this.subject,
+                                    question: this.questionDescription,
+                                    knowledge: this.knowledge,
+                                    knowledgePWR: this.knowledgePWR,
+                                    knowledgeBWR: this.knowledgeBWR,
+                                    answers: this.answers,
+                                    image: this.imagesAsURL,
+                                    imageSize: this.imageSize,
+                                };
+
+                                let aux = null;
+
+                                if(this.userClaims['admin']) {
+                                    aux = this.$store.dispatch("createQuestion", questionData);
+                                } else {
+                                    aux = this.$store.dispatch('createQuestionRequest', {
+                                        ...questionData,
+                                        name: this.userInfo.name,
+                                        email: this.userInfo.email,
+                                        status: 'Pendente'
+                                    });
+                                }
+
+                                aux.then(() => {
+                                    this.setInitialData();
+                                    this.close();
+                                });
+                            });
+                        } else {
+                            const questionData = {
+                                iq: this.iq.toUpperCase(),
+                                subject: this.subject,
+                                question: this.questionDescription,
+                                knowledge: this.knowledge,
+                                knowledgePWR: this.knowledgePWR,
+                                knowledgeBWR: this.knowledgeBWR,
+                                answers: this.answers,
+                                image: "",
+                                imageSize: this.imageSize,
+                            };
+
+                            let aux = null;
+
+                            if(this.userClaims['admin']) {
+                                    aux = this.$store.dispatch("createQuestion", questionData);
+                            } else {
+                                aux = this.$store.dispatch('createQuestionRequest', {
+                                    ...questionData,
+                                    name: this.userInfo.name,
+                                    email: this.userInfo.email,
+                                    status: 'Pendente'
+                                });
+                            }
+
+                            aux.then(() => {
+                                this.setInitialData();
+                                this.close();
+                            });
+                        }
                     }
-
-                    aux.then(() => {
-                        this.setInitialData();
-                        this.close();
-                    });
                 });
-            } else {
-                const questionData = {
-                    iq: this.iq.toUpperCase(),
-                    subject: this.subject,
-                    question: this.questionDescription,
-                    knowledge: this.knowledge,
-                    knowledgePWR: this.knowledgePWR,
-                    knowledgeBWR: this.knowledgeBWR,
-                    answers: this.answers,
-                    image: "",
-                    imageSize: this.imageSize,
-                };
 
-                let aux = null;
 
-                if(this.userClaims['admin']) {
-                        aux = this.$store.dispatch("createQuestion", questionData);
-                } else {
-                    aux = this.$store.dispatch('createQuestionRequest', {
-                        ...questionData,
-                        name: this.userInfo.name,
-                        email: this.userInfo.email,
-                        status: 'Pendente'
-                    });
-                }
-
-                aux.then(() => {
-                    this.setInitialData();
-                    this.close();
-                });
-            }
         },
         setInitialData() {
             this.confirmTitle = false;

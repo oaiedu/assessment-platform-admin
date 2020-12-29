@@ -28,7 +28,7 @@
                           filled
                           outlined
                           dense
-                          label="Paper name"
+                          label="Título"
                           v-model="paperName"
                           required
                         ></v-text-field>
@@ -74,6 +74,31 @@
         </v-row>
       </v-container>
     </v-form>
+
+    <v-snackbar
+        v-model="createErrorSnackBar"
+        light
+        color="red darken-2"
+        right
+        top
+        vertical
+        :timeout="15000" >
+        <span style='color: white; font-size: 1rem'>
+            Um documento com este Título já foi criado!
+            <br>
+            Por favor, mude o Título.
+        </span>
+        <template v-slot:action='{ attrs }'>
+            <v-btn
+                dark
+                color="white"
+                text
+                v-bind='attrs'
+                @click="createErrorSnackBar = false" >
+                Fechar
+            </v-btn>
+        </template>
+      </v-snackbar>
   </v-card>
 </template>
 
@@ -82,6 +107,7 @@
 
     export default {
         data: () => ({
+            createErrorSnackBar: false,
             paperDescription: null,
             paperName: null,
             images: [],
@@ -108,32 +134,39 @@
                     return;
                 }
 
-                const id = uuid();
-                const paperData = {
-                    paperName: this.paperName,
-                    paperDescription: this.paperDescription,
-                    paperImage: this.paperImage,
-                    paperId: id
-                };
+                this.$store.dispatch('paperExists', this.paperName)
+                    .then(paper => {
+                        if(paper.exist) {
+                            this.createErrorSnackBar = true;
+                        } else {
+                            const id = uuid();
+                            const paperData = {
+                                paperName: this.paperName,
+                                paperDescription: this.paperDescription,
+                                paperImage: this.paperImage,
+                                paperId: id
+                            };
 
-                if(this.images && this.images[0]) {
-                    const imageToUpload = { id, name: this.paperName, images: this.images[0] }
-                    this.$store.dispatch("uploadImagePaper", imageToUpload)
-                        .then(result => {
-                            paperData.paperImage = result;
-                            this.$store.dispatch("createPaper", paperData)
-                                .then(() => {
-                                    this.$emit("load");
-                                    this.close();
-                            });
-                        });
-                } else {
-                    this.$store.dispatch("createPaper", paperData)
-                        .then(() => {
-                            this.$emit("load");
-                            this.close();
+                            if(this.images && this.images[0]) {
+                                const imageToUpload = { id, name: this.paperName, images: this.images[0] }
+                                this.$store.dispatch("uploadImagePaper", imageToUpload)
+                                    .then(result => {
+                                        paperData.paperImage = result;
+                                        this.$store.dispatch("createPaper", paperData)
+                                            .then(() => {
+                                                this.$emit("load");
+                                                this.close();
+                                        });
+                                    });
+                            } else {
+                                this.$store.dispatch("createPaper", paperData)
+                                    .then(() => {
+                                        this.$emit("load");
+                                        this.close();
+                                });
+                            }
+                        }
                     });
-                }
             }
         }
     }

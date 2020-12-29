@@ -1,12 +1,14 @@
 <template>
   <v-card>
-    <v-form ref="formRef" @submit.prevent="onEditTest()">
+    <v-form ref="formRef">
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="close()">
             <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
-        <v-btn dark text type="submit" height="100">Editar Teste</v-btn>
+        <v-toolbar-items>
+            <v-btn dark text @click="onEditTest()" height="100">Editar Teste</v-btn>
+        </v-toolbar-items>
       </v-toolbar>
       <v-row>
         <v-col>
@@ -34,12 +36,15 @@
           <v-container>
             <v-container>
               <v-text-field
+                id='searchFieldEdit'
                 v-model="search"
+                @keydown="searchQuery($event)"
+                clearable
                 filled
                 rounded
                 dense
                 append-icon="mdi-magnify"
-                label="Search for IQ"
+                label="Procurar por IQ"
                 single-line
                 hide-details
               ></v-text-field>
@@ -50,12 +55,14 @@
                 <v-data-table
                   v-model="selectedQuestions"
                   :headers="headers"
-                  :items="questions"
-                  :page.sync="page"
+                  :items="isSearching ? filteredQuestions : questions"
+                  :page="isSearching ? searchPage : page"
                   :items-per-page="itemsPerPage"
-                  :search="search"
+                  :loading="loading"
+                  no-data-text="Não há questões a serem mostradas"
+                  loading-text="Carregando questões..."
                   show-select
-                  item-key="id"
+                  item-key="iq"
                   hide-default-footer
                   class="elevation-1"
                   @page-count="pageCount = $event"
@@ -63,22 +70,54 @@
               </v-card>
             </v-container>
             <div class="text-center pt-2">
-              <v-pagination v-model="page" :length="pageCount"></v-pagination>
+              <Paginator
+                :page='!isSearching ? page : searchPage'
+                :length='!isSearching ? pageAmount : Math.ceil(filteredQuestions.length / itemsPerPage)'
+                @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
             </div>
           </v-container>
         </v-col>
       </v-row>
     </v-form>
+
+    <v-snackbar
+        v-model="createErrorSnackBar"
+        light
+        color="red darken-2"
+        right
+        top
+        vertical
+        :timeout="15000" >
+        <span style='color: white; font-size: 1rem'>
+            Uma prova com este Título já foi criada!
+            <br>
+            Por favor, mude o Título.
+        </span>
+        <template v-slot:action='{ attrs }'>
+            <v-btn
+                dark
+                color="white"
+                text
+                v-bind='attrs'
+                @click="createErrorSnackBar = false" >
+                Fechar
+            </v-btn>
+        </template>
+      </v-snackbar>
   </v-card>
 </template>
 
 <script>
+import Paginator from '../Paginator';
 
 export default {
+  name: 'EditTest',
+  components: { Paginator },
   props: ["test"],
   data() {
     return {
       randomQuestionsNumber: null,
+      createErrorSnackBar: false,
       selectedQuestions: [],
       testItems: [],
       testTitle: "",
@@ -103,9 +142,11 @@ export default {
       ],
       showedQuestions: [],
       search: "",
+      isSearching: '',
       page: 1,
+      searchPage: 1,
       pageCount: 15,
-      itemsPerPage: 10,
+      itemsPerPage: 8,
       headers: [
         { text: "IQ", align: "left", sortable: false, value: "iq" },
         { text: "Conhecimento", value: "knowledge" },
@@ -125,19 +166,26 @@ export default {
     };
   },
   computed: {
-    questions() {
-      return this.$store.getters.loadedQuestions;
+    loading() {
+        return this.$store.getters.loading;
     },
-    name(){
+    questions() {
+        return this.$store.getters.getCurrentQuestionsPage;
+    },
+    filteredQuestions() {
+        return this.$store.getters.getFilteredQuestions;
+    },
+    name() {
       let aux = this.test.title;
       this.testTitle = aux;
       return aux;
     },
-    loadQuestions() {
-      this.$store.dispatch("loadedQuestions");
-    },
     checkNumber() {
       return this.questions.length < this.randomQuestionsNumber ? 'Número de questões não existente' : ''
+    },
+    pageAmount() {
+        const questionAmount = this.$store.getters.getDataSize.questions.general;
+        return Math.ceil(questionAmount / this.itemsPerPage);
     }
   },
   watch: {
@@ -145,16 +193,53 @@ export default {
       if ( val <= this.questions.length)
         this.randomSelection(val)
     },
-    testTitle(val){
+    testTitle(val) {
       this.update();
+    },
+    search(text) {
+        if((text === null || text.length === 0) && this.isSearching) {
+            this.isSearching = false;
+            this.searchPage = 1;
+            this.$store.commit('resetFilteredQuestions');
+        }
     }
   },
   methods: {
+    onPageChange(event) {
+        const payload = {
+            page: this.page,
+            itemsPerPage: this.itemsPerPage
+        }
+
+        if(!this.isSearching) {
+            if(!event.mode) {
+                this.$store.dispatch('loadQuestionPage', { ...payload, type: event.type });
+            } else {
+                this.$store.dispatch('loadFOLQuestionPage', { ...payload, mode: event.mode });
+            }
+        }
+    },
+    searchQuery(event) {
+        if(event.key === 'Enter') {
+            document.getElementById('searchFieldEdit').blur();
+
+            this.searchPage = 1;
+            this.$store.commit('resetFilteredQuestions');
+
+            if(this.search.length > 0) {
+                this.isSearching = true;
+                this.$store.dispatch('searchQuestions', this.search);
+            } else {
+                this.isSearching = false;
+            }
+        }
+    },
     update(){
-      console.log("AAAAAAAAA");
-      this.test.questions.forEach(element=>{
-        var question = this.$store.getters.findQuestionById(element)
-        this.selectedQuestions.push(question)
+      this.test.questions.forEach(element => {
+        this.$store.dispatch('getQuestionByIQ', element)
+            .then(question => {
+                this.selectedQuestions.push(question);
+            });
       });
       this.testType = this.test.type;
       this.testName = this.test.title;
@@ -162,7 +247,6 @@ export default {
     },
     close() {
       this.setInitialData();
-      this.update();
       this.$emit("closeDialogNew");
     },
     setInitialData () {
@@ -214,35 +298,51 @@ export default {
         //   }
         // }
 
-        console.log("selected: ", this.selectedQuestions)
+        this.$store.dispatch('testExists', this.testTitle)
+            .then(exist => {
+                if(exist > 1) {
+                    this.createErrorSnackBar = true;
+                } else {
+                    console.log("selected: ", this.selectedQuestions)
 
-        this.selectedQuestions.forEach(element => {
-          this.testItems.push(element.id);
-        });
+                    this.selectedQuestions.forEach(element => {
+                      this.testItems.push(element.iq);
+                    });
 
-        const now = new Date();
-        const editedHour = parseInt(now.toLocaleTimeString().split(':')[0]);
-        const isAfterNoon = now.toLocaleString().split(':')[2].includes('PM');
-        const editedDate = now.toISOString().split('T')[0] + 'T'
-            + (isAfterNoon ? (editedHour + 12) : (editedHour < 10 ? '0' + editedHour : editedHour))
-            + now.toISOString().split('T')[1].slice(2);
+                    const now = new Date();
+                    const editedHour = parseInt(now.toLocaleTimeString().split(':')[0]);
+                    const isAfterNoon = now.toLocaleString().split(':')[2].includes('PM');
+                    const editedDate = now.toISOString().split('T')[0] + 'T'
+                        + (isAfterNoon ? (editedHour + 12) : (editedHour < 10 ? '0' + editedHour : editedHour))
+                        + now.toISOString().split('T')[1].slice(2);
 
-        const testData = {
-          title: this.testTitle,
-          questions: this.testItems,
-          type: this.testType,
-          user: this.test.user,
-          created: this.test.created,
-          edited: `${this.$store.getters.userInfo.name}`+'/'+`${editedDate}`,
-          purpose: this.purpose,
-          id: this.test.id
-        }
+                    const testData = {
+                      title: this.testTitle,
+                      questions: this.testItems,
+                      type: this.testType,
+                      user: this.test.user,
+                      created: this.test.created,
+                      edited: `${this.$store.getters.userInfo.name}`+'/'+`${editedDate}`,
+                      purpose: this.purpose,
+                      id: this.test.id
+                    }
 
-        this.close()
-        this.$store.dispatch("updateTest", testData);
-        this.$store.dispatch("loadedTests");
+                    this.close()
+                    this.$store.dispatch("updateTest", testData);
+                }
+            });
       }
     }
+  },
+  mounted() {
+    this.$store.dispatch('loadFOLQuestionPage', { page: 1, itemsPerPage: this.itemsPerPage, mode: 'first' });
+  },
+  beforeDestroy() {
+    this.search = '';
+    this.isSearching = false;
+    this.page = 1;
+    this.$store.commit('resetFilteredQuestions');
+    this.$store.commit('resetCurrentQuestionsPage');
   }
 };
 </script>

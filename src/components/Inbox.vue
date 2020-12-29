@@ -8,12 +8,15 @@
             <v-container>
                 <v-container>
                     <v-text-field
+                        id='searchField'
                         v-model="search"
+                        @keydown="searchQuery($event)"
+                        clearable
                         filled
                         rounded
                         dense
                         append-icon="mdi-magnify"
-                        label="Search for IQ"
+                        label="Procurar por IQ"
                         single-line
                         hide-details >
                     </v-text-field>
@@ -35,8 +38,8 @@
                 <v-card>
                     <v-data-table
                         :headers="headers"
-                        :items="questions"
-                        :page.sync="page"
+                        :items="isSearching ? filteredRequests : requests"
+                        :page="isSearching ? searchPage : page"
                         :items-per-page="itemsPerPage"
                         :search="search"
                         :loading="loading"
@@ -46,7 +49,7 @@
                         class="elevation-1"
                         @page-count="pageCount = $event"
                     >
-                        <template v-slot:[`item.status`]='{ item }' v-if="questions && questions.length > 0">
+                        <template v-slot:[`item.status`]='{ item }' v-if="requests && requests.length > 0">
                             <span
                                 :style='{ "color": item.status === "Pendente"
                                     ? "#ffaa00" : item.status === "Aprovado"
@@ -74,8 +77,8 @@
                                         v-on='on'
                                         v-bind='attrs'
                                         class="ml-3"
-                                        color="grey darken-2"
-                                        @click="printQuestion(item)" >
+                                        color="grey darken-1"
+                                        @click="printRequest(item)" >
                                         mdi-pdf-box
                                     </v-icon>
                                 </template>
@@ -90,7 +93,7 @@
                                         class="ml-3"
                                         color="green"
                                         :disabled='item.status === "Aprovado"'
-                                        @click="checkQuestion(item)" >
+                                        @click="checkRequest(item)" >
                                         mdi-check-bold
                                     </v-icon>
                                 </template>
@@ -105,7 +108,7 @@
                                         class="ml-3"
                                         color="amber darken-2"
                                         :disabled='item.status === "Aprovado"'
-                                        @click="editQuestion(item)" >
+                                        @click="editRequest(item)" >
                                         mdi-pencil
                                     </v-icon>
                                 </template>
@@ -121,7 +124,7 @@
                                         color="red"
                                         :disabled='userClaims["admin"] ? item.status === "Rejeitado" : item.status === "Aprovado"'
                                         @click="userClaims['admin']
-                                            ? rejectQuestion(item)
+                                            ? rejectRequest(item)
                                             : askDelete(item)" >
                                         {{ userClaims['admin'] ? 'mdi-close' : 'mdi-delete' }}
                                     </v-icon>
@@ -134,23 +137,22 @@
             </v-container>
 
             <div class="text-center pt-2">
-                <v-pagination
-                    v-model="page"
-                    :length="pageCount"
-                    total-visible="7" >
-                </v-pagination>
+                <Paginator
+                    :page='!isSearching ? page : searchPage'
+                    :length='!isSearching ? pageAmount : Math.ceil(filteredRequests.length / itemsPerPage)'
+                    @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
             </div>
 
             <v-dialog
                 fullscreen
                 hide-overlay
                 transition="dialog-bottom-transition"
-                v-model="dialogEditQuestion" >
+                v-model="dialogEditRequest" >
                 <EditQuestion
                     :question="editItem"
                     :userClaims='userClaims'
                     :userInfo='userInfo'
-                    @closeDialogEdit="dialogEditQuestion = false" >
+                    @closeDialogEdit="dialogEditRequest = false" >
                 </EditQuestion>
             </v-dialog>
 
@@ -166,7 +168,7 @@
             </v-dialog>
 
             <v-snackbar
-                v-model="deleteQuestionSnackBar"
+                v-model="deleteRequestSnackBar"
                 color="white"
                 right
                 top
@@ -186,7 +188,7 @@
                     dark
                     color="grey"
                     text
-                    @click="deleteQuestionSnackBar = false; deleteItem = null" >
+                    @click="deleteRequestSnackBar = false; deleteItem = null" >
                     Cancelar
                 </v-btn>
             </v-snackbar>
@@ -197,9 +199,10 @@
 <script>
     import Body from './Questions/PrintQuestion/Body';
     import EditQuestion from './Questions/EditQuestion';
+    import Paginator from './Paginator';
 
     export default {
-        components: { Body, EditQuestion },
+        components: { Body, EditQuestion, Paginator },
         data() {
             return {
                 deleteApproved: false,
@@ -207,12 +210,13 @@
                 pageCount: 15,
                 dialogPDF: false,
                 editItem: null,
-                dialogEditQuestion: false,
+                dialogEditRequest: false,
                 deleteItem: null,
-                deleteQuestionSnackBar: false,
+                deleteRequestSnackBar: false,
                 search: '',
+                isSearching: false,
                 page: 1,
-                pageCount: 15,
+                searchPage: 1,
                 itemsPerPage: 8
             };
         },
@@ -238,8 +242,11 @@
                 return this.$store.getters.loading;
                 this.$store.dispatch('clearLoading');
             },
-            questions() {
-                return this.$store.getters.getRequests;
+            requests() {
+                return this.$store.getters.getCurrentRequestsPage;
+            },
+            filteredRequests() {
+                return this.$store.getters.getFilteredRequests;
             },
             userClaims() {
                 return this.$store.getters.getUserClaims;
@@ -249,12 +256,17 @@
             },
             hasApprovedRequests() {
                 let itHas = false;
-                this.questions.forEach(question => {
-                    if(question.status === 'Aprovado') {
+                this.requests.forEach(request => {
+                    if(request.status === 'Aprovado') {
                         itHas = true;
                     }
                 });
                 return itHas;
+            },
+            pageAmount() {
+                const requestAmount = this.$store.getters.getDataSize['question-requests'];
+                const amount = this.userClaims['admin'] ? requestAmount.general : requestAmount.users[this.userInfo.email];
+                return Math.ceil(amount / this.itemsPerPage);
             }
         },
         methods: {
@@ -264,50 +276,106 @@
                 a.click();
                 a.remove();
             },
-            printQuestion(question) {
+            printRequest(request) {
                 this.dialogPDF = true;
-                this.editItem = question;
+                this.editItem = request;
             },
-            checkQuestion(question) {
+            checkRequest(request) {
                 const toCreate = {
-                    iq: question.iq,
-                    question: question.question,
-                    subject: question.subject,
-                    knowledge: question.knowledge,
-                    knowledgePWR: question.knowledgePWR,     // RELEVANCIA_OR
-                    knowledgeBWR: question.knowledgeBWR,     // RELEVANCIA_OSR
-                    answers: question.answers,
-                    image: question.image,
-                    imageSize: question.imageSize,
+                    iq: request.iq,
+                    question: request.question,
+                    subject: request.subject,
+                    knowledge: request.knowledge,
+                    knowledgePWR: request.knowledgePWR,     // RELEVANCIA_OR
+                    knowledgeBWR: request.knowledgeBWR,     // RELEVANCIA_OSR
+                    answers: request.answers,
+                    image: request.image,
+                    imageSize: request.imageSize,
                     edited: []
                 }
                 this.$store.dispatch('createQuestion', toCreate)
                     .then(() => {
-                        this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', question });
+                        this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
                     });
             },
-            editQuestion(question) {
-                this.dialogEditQuestion = true;
-                this.editItem = question;
+            editRequest(request) {
+                this.dialogEditRequest = true;
+                this.editItem = request;
             },
-            askDelete(question) {
-                this.deleteQuestionSnackBar = true;
-                this.deleteItem = question;
+            askDelete(request) {
+                this.deleteRequestSnackBar = true;
+                this.deleteItem = request;
             },
-            deleteQuestion(question) {
-                this.deleteQuestionSnackBar = false;
+            deleteRequest(request) {
+                this.deleteRequestSnackBar = false;
                 this.deleteItem = null;
-                this.$store.dispatch('deleteQuestionRequest', question);
+                this.$store.dispatch('deleteQuestionRequest', { request, isSearching: this.isSearching });
             },
-            rejectQuestion(question) {
-                this.$store.dispatch('deleteQuestion', question.iq)
+            rejectRequest(request) {
+                this.$store.dispatch('deleteQuestion', { iq: request.iq, isSearching: false })
                     .then(() => {
-                        this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', question });
+                        this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', request });
                     });
+            },
+            onPageChange(event) {
+                const payload = {
+                    page: this.page,
+                    itemsPerPage: this.itemsPerPage
+                }
+
+                if(!this.isSearching) {
+                    if(!event.mode) {
+                        this.$store.dispatch('loadRequestPage', {
+                            ...payload,
+                            type: event.type,
+                            claims: this.userClaims,
+                            userInfo: this.userInfo
+                        });
+                    } else {
+                        this.$store.dispatch('loadFOLRequestPage', {
+                            ...payload,
+                            mode: event.mode,
+                            claims: this.userClaims,
+                            userInfo: this.userInfo
+                        });
+                    }
+                }
+            },
+            searchQuery(event) {
+                if(event.key === 'Enter') {
+                    document.getElementById('searchField').blur();
+
+                    this.searchPage = 1;
+                    this.$store.commit('resetFilteredRequests');
+
+                    if(this.search.length > 0) {
+                        this.isSearching = true;
+                        this.$store.dispatch('searchRequests', {
+                            key: this.search,
+                            claims: this.userClaims,
+                            userInfo: this.userInfo
+                        });
+                    } else {
+                        this.isSearching = false;
+                    }
+                }
+            }
+        },
+        watch: {
+            search(text) {
+                if((text === null || text.length === 0) && this.isSearching) {
+                    this.isSearching = false;
+                    this.searchPage = 1;
+                    this.$store.commit('resetFilteredRequests');
+                }
             }
         },
         mounted() {
-            this.$store.dispatch('loadQuestionRequests', { claims: this.userClaims, userInfo: this.userInfo })
+            this.$store.dispatch('loadFOLRequestPage', {
+                    claims: this.userClaims,
+                    userInfo: this.userInfo,
+                    page: 1, itemsPerPage: this.itemsPerPage, mode: 'first'
+                })
                 .then(() => {
                     if(this.userClaims['appraiser'] && this.hasApprovedRequests) {
                         this.deleteApproved = true;

@@ -11,6 +11,7 @@
             id='searchField'
             v-model="search"
             @keydown="searchQuery($event)"
+            clearable
             filled
             rounded
             dense
@@ -30,6 +31,7 @@
             :page="isSearching ? searchPage : page"
             :items-per-page="itemsPerPage"
             :loading="loading"
+            no-data-text='Não há questões a serem mostradas'
             loading-text="Carregando questões..."
             hide-default-footer
             class="elevation-1"
@@ -37,17 +39,20 @@
             <template v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
                 <v-icon
+                  color="grey darken-1"
                   @click='dialogPDF = true; selectedEdit = item;' >
                   mdi-pdf-box
                 </v-icon>
                 <v-icon
                     class="ml-2"
+                    color="amber darken-2"
                     v-if='userClaims["admin"]'
                     @click="editQuestions(item)" >
                     mdi-pencil
                 </v-icon>
                 <v-icon
                     class="ml-2"
+                    color="red"
                     v-if='userClaims["admin"]'
                     @click='deleteQuestionSnackBar = true; deleteSelect = item;' >
                     mdi-delete
@@ -215,6 +220,13 @@
                         }
                     }
                 });
+            },
+            search(text) {
+                if((text === null || text.length === 0) && this.isSearching) {
+                    this.isSearching = false;
+                    this.searchPage = 1;
+                    this.$store.commit('resetFilteredQuestions');
+                }
             }
         },
         methods: {
@@ -227,8 +239,7 @@
                 this.dialogPDF = true;
             },
             deleteQuestion(iq) {
-                let aux = this.$store.dispatch("deleteQuestion", { iq, isSearching: this.isSearching });
-                aux.then(() => {
+                this.$store.dispatch("deleteQuestion", { iq, isSearching: this.isSearching }).then(() => {
                     this.deleteQuestionSnackBar = false;
                 });
             },
