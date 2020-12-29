@@ -18,6 +18,7 @@ exports.adjustImagesUrl = async (req, res) => {
                     // }
                 }
             });
+            return snapshot;
         })
         .catch(error => {
             console.log(error);
@@ -47,6 +48,8 @@ exports.adjustUsersIds = async (req, res) => {
                         console.log(error);
                     });
             });
+
+            return snapshot.users;
         })
         .catch(error => {
             console.log(error);
@@ -86,10 +89,13 @@ exports.deleteNonexistentReferences = async (req, res) => {
                                     }
                                 }
                             });
+                            return snapshot;
                         })
                         .catch(console.log);
                 }
-            })
+            });
+
+            return collections;
         })
         .catch(console.log);
 
@@ -184,6 +190,8 @@ exports.rearrangeQuestions = async (req, res) => {
 
                 doc.ref.set(newData);
             });
+
+            return snapshot;
         })
         .catch(error => {
             console.log(error);
@@ -227,6 +235,8 @@ exports.countData = async (req, res) => {
                     } else {
                         data[collection] = snapshot.docs.length;
                     }
+
+                    return snapshot;
                 })
                 .catch(error => {
                     console.log(error);

@@ -19,12 +19,16 @@ exports.copyFirestore = async (req, res) => {
                                 console.log(error);
                             });
                     });
+
+                    return snapshot;
                 })
                 .catch(error => {
                     console.log('Secondary DB Error');
                     console.log(error);
                 });
         });
+
+        return collections;
     })
     .catch(error => {
         console.log('DB Error');

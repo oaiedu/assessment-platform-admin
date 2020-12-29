@@ -39,6 +39,7 @@ exports.setRole = async (req, res) => {
                     .catch(error => {
                         console.log(error + '');
                     });
+                return { ...user, customClaims };
             })
             .catch(error => {
                 console.log(error);
@@ -63,6 +64,8 @@ exports.setDefaultRoleToAll = async (req, res) => {
                         });
                 }
             });
+
+            return true;
         })
         .catch(error => {
             console.log(error);
@@ -89,8 +92,11 @@ exports.importAuth = async (req, res) => {
         .then(results => {
             const error = results.errors.length > 0 ? results.errors[0].error : 'Ok!';
             console.log(error);
+            return error;
         })
-        .catch(console.log);
+        .catch(error => {
+            console.log(error);
+        });
 
     res.send('Authentication users imported!');
 }
@@ -101,6 +107,7 @@ exports.deleteAuth = async (req, res) => {
             snapshot.users.forEach(user => {
                 auth.deleteUser(user.uid);
             });
+            return snapshot.users;
         })
         .catch(console.log);
 

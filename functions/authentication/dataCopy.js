@@ -32,10 +32,13 @@ exports.copyAuth = async (req, res) => {
                     counter++;
                     const error = results.errors.length > 0 ? results.errors[0].error : 'Ok!';
                     console.log(error);
+                    return error;
                 })
                 .catch(error => {
                     console.log(error);
                 });
+
+            return users;
         })
         .catch(error => {
             console.log(error);

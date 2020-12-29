@@ -27,9 +27,13 @@ exports.moveEditedQuestionImages = async (req, res) => {
                                 console.log(`From: '${image}' to '${format}', available at: ${newLink}\n`);
                             }
                         });
+
+                        return files;
                     });
                 }
             });
+
+            return snapshot;
         })
         .catch(error => {
             console.log(error);
@@ -74,10 +78,14 @@ exports.moveQuestionImages = async (req, res) => {
                                 console.log(`From: '${image}' to '${format}', available at: ${newLink}\n`);
                             }
                         });
+
+                        return files
                     })
                     .catch(console.log);
                 }
             });
+
+            return snapshot;
         })
         .catch(error => {
             console.log(error);
@@ -121,12 +129,16 @@ exports.moveUserImages = async (req, res) => {
                                 console.log(`From: '${image}' to '${format}', available at: ${newLink}\n`);
                             }
                         });
+
+                        return files;
                     })
                     .catch(error => {
                         console.log(error);
                     });
                 }
             });
+
+            return snapshot;
         })
         .catch(error => {
             console.log(error);
@@ -170,9 +182,13 @@ exports.movePaperImages = async (req, res) => {
                                 console.log(`From: '${image}' to '${format}', available at: ${newLink}\n`);
                             }
                         });
+
+                        return files;
                     });
                 }
             });
+
+            return snapshot;
         })
         .catch(error => {
             console.log(error);
@@ -189,6 +205,8 @@ exports.deleteUnusedImages = async (req, res) => {
                     await storage.file(file.name).delete().catch(console.log);
                 }
             });
+
+            return files;
         })
         .catch(console.log);
 

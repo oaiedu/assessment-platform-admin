@@ -47,6 +47,8 @@ exports.downloadBackup = async (req, res) => {
                     res.send({ backup: null, error: err });
                 })
                 .pipe(dest);
+
+            return true;
         })
         .catch(error => console.log(error));
 }
@@ -194,6 +196,8 @@ exports.backupFirestoreAuth = async (req, res) => {
 
             zip.addFile(`auth-${now}.json`, jsonAuth);
             size += encodeURI(jsonAuth).split(/%..|./).length - 1;
+
+            return jsonAuth;
         })
         .catch(error => {
             console.log(error);
@@ -264,6 +268,8 @@ exports.backupFirestoreAuth = async (req, res) => {
 
                 zip.addFile(`db-${collection}-${now}.json`, json);
                 size += encodeURI(json).split(/%..|./).length - 1;
+
+                return json;
             })
             .catch(error => {
                 console.log(error);
@@ -319,6 +325,8 @@ exports.backupFirebase = async (req, res) => {
 
             fs.mkdirSync(path, { recursive: true });
             fs.writeFileSync(`${path}/${fileNameAuth}`, jsonAuth);
+
+            return jsonAuth;
         })
         .catch(error => {
             console.log(error);
@@ -345,6 +353,8 @@ exports.backupFirebase = async (req, res) => {
                                     firestoreData[doc.id] = doc.data();
                                 }
                             });
+
+                            return firestoreData;
                         })
                         .then(() => {
                             const jsonFirestore = JSON.stringify(firestoreData);
@@ -352,12 +362,16 @@ exports.backupFirebase = async (req, res) => {
 
                             fs.mkdirSync(`${path}/${folderFirestore}`, { recursive: true });
                             fs.writeFileSync(`${path}/${folderFirestore}/${fileName}`, jsonFirestore);
+
+                            return jsonFirestore;
                         })
                         .catch(error => {
                             console.log(error);
                         });
                 }
             });
+
+            return collections;
         })
         .catch(console.log);
 
@@ -403,11 +417,15 @@ exports.backupFirebase = async (req, res) => {
                         //         }
                         //     });
                         // }
+
+                        return format;
                     })
                     .catch(error => {
                         console.log(error);
                     });
                 });
+
+                return files;
             })
             .catch(error => {
                 console.log(error);
