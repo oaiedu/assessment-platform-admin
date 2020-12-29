@@ -167,6 +167,12 @@ const actions = {
     signUserIn({ commit, dispatch }, payload) {
         commit('setLoading', true);
         commit('clearError');
+
+        dispatch('resetPapers');
+        dispatch('resetQuestions');
+        dispatch('resetRequests');
+        dispatch('resetTests');
+
         auth.signInWithEmailAndPassword(payload.email, payload.password)
             .then(user => {
                     commit('setLoading', false);

@@ -50,12 +50,17 @@ new Vue({
     store,
     vuetify,
     render: h => h(App),
-    created () {
+    created() {
         auth.onAuthStateChanged((user) => {
             if (user) {
                 this.$store.dispatch('autoSignIn', user );
             }
         });
+        this.$store.dispatch('resetPapers');
+        this.$store.dispatch('resetQuestions');
+        this.$store.dispatch('resetRequests');
+        this.$store.dispatch('resetTests');
+
         this.$store.dispatch('clearError');
         this.$store.dispatch('loadDataSize');
     }
