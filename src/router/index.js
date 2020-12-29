@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import SignUp from '@/components/User/SignUp.vue';
-import SignIn from '@/components/User/SignIn.vue';
+import SignUser from '@/components/SignUser.vue';
 import Profile from '@/components/User/Profile.vue';
 import NewQuestion from '@/components/Questions/NewQuestion.vue';
 import Questions from '@/components/Questions/Questions.vue';
@@ -38,12 +37,12 @@ const routes = [
     },
     {
         path: '/signup',
-        component: SignUp,
+        component: SignUser,
         name: 'signup'
     },
     {
         path: '/signin',
-        component: SignIn,
+        component: SignUser,
         name: 'signin'
     },
     {
