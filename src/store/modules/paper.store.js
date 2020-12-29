@@ -2,31 +2,73 @@ import { db, storage } from '../../main';
 
 const initialState = () => ({
     loadedPapers: [],
-    deletePaperId: null
+    deletePaperId: null,
+    papers: {},
+    filteredPapers: [],
+    currentPapersPage: [],
+    lastPaperDocument: null
 });
 
 const state = initialState();
 
 const mutations = {
-    setLoadedPapers(state, payload) {
-        state.loadedPapers = payload;
+    setLoadedPapers(state, data) {
+        state.loadedPapers = data;
     },
-    createPaper(state, payload) {
-        state.loadedPapers.push(payload);
+    setPaperPage(state, data) {
+        state.papers[data.page] = data.data;
     },
-    updatePaper(state, payload) {
+    setFilteredPapers(state, data) {
+        state.filteredPapers = data;
+    },
+    resetFilteredPapers(state) {
+        state.filteredPapers = [];
+    },
+    resetCurrentPapersPage(state) {
+        state.currentPapersPage = [];
+    },
+    setCurrentPapersPage(state, data) {
+        state.currentPapersPage = data;
+    },
+    createPaper(state, data) {
+        const papers = state.papers[data.page] || [];
+        papers.push(data.data);
+        state.papers[data.page] = papers;
+    },
+    updatePaper(state, data) {
         const papers = state.loadedPapers;
-        for(let index = 0; index < papers.length; index++) {
-            if(papers[index].id === payload.id) {
-                state.loadedPapers[index] = payload;
+        for(let key in papers) {
+            if(papers[key]) {
+                papers[key].forEach((item, index) => {
+                    if(item.id === data.id) {
+                        state.papers[key][index] = data;
+                    }
+                });
             }
         }
     },
-    removePaper(state, payload) {
-        const index = state.loadedPapers.indexOf(payload);
-        if(index !== -1) {
-            state.loadedPapers.splice(index, 1);
+    removePaper(state, data) {
+        const papers = state.papers;
+        for(let key in papers) {
+            if(papers[key]) {
+                papers[key].forEach((item, index) => {
+                    if(item.id === data) {
+                        state.papers[key].splice(index, 1);
+                    }
+                });
+            }
         }
+    },
+    removeFilteredPaper(state, data) {
+        const papers = state.filteredPapers;
+        papers.forEach((item, index) => {
+            if(item.id === data) {
+                state.filteredPapers.splice(index, 1);
+            }
+        });
+    },
+    setLastPaperDocument(state, data) {
+        state.lastPaperDocument = data;
     },
     RESETPapers(state) {
         const newState = initialState();
@@ -63,9 +105,11 @@ const actions = {
         });
         return request;
     },
-    deletePaper({ commit, dispatch }, payload) {
+    deletePaper({ commit }, payload) {
         commit('setLoading', true);
-        db.collection("papers").where('id', '==', payload.id).get()
+        const { id, isSearching } = payload;
+
+        db.collection("papers").where('id', '==', id).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.delete();
@@ -95,7 +139,12 @@ const actions = {
                 });
             })
             .then(() => {
-                commit('removePaper', payload);
+                commit('removePaper', id);
+
+                if(isSearching) {
+                    commit('removeFilteredPaper', id);
+                }
+
                 commit('setLoading', false);
                 console.log("Document successfully deleted!");
             })
@@ -115,7 +164,169 @@ const actions = {
             commit('setLoading', false);
         });
     },
-    createPaper({ commit, dispatch }, payload) {
+    loadPaperPage({ commit, state }, payload) {
+        commit('setLoading', true);
+
+        const { page, itemsPerPage, type } = payload;
+        const data = [];
+
+        const pages = Object.keys(state.papers);
+
+        if(!pages.includes('p' + page)) {
+            let request = null;
+            const ref = db.collection('papers').orderBy('id');
+
+            if(type === 'next') {
+                request = ref.startAfter(state.lastPaperDocument[1]).limit(itemsPerPage).get();
+            } else {
+                request = ref.endBefore(state.lastPaperDocument[0]).limitToLast(itemsPerPage).get();
+            }
+
+            let first = null,
+                last = null;
+
+            request.then(snapshot => {
+                    first = snapshot.docs[0].data().id;
+                    last = snapshot.docs[snapshot.docs.length - 1].data().id;
+
+                    snapshot.forEach(doc => {
+                        data.push(doc.data());
+                    });
+                })
+                .then(() => {
+                    commit('setCurrentPapersPage', data);
+                    commit('setPaperPage', { page: 'p' + page, data });
+                    commit('setLastPaperDocument', [first, last]);
+                    commit('setLoading', false);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        } else {
+            const pageContent = state.papers['p' + page];
+            const first = pageContent[0].id;
+            const last = pageContent[pageContent.length - 1].id;
+
+            commit('setCurrentPapersPage', pageContent);
+            commit('setLastPaperDocument', [first, last]);
+            commit('setLoading', false);
+        }
+    },
+    loadFOLPaperPage({ commit, state }, payload) {
+        commit('setLoading', true);
+
+        const { page, itemsPerPage, mode } = payload;
+        const data = [];
+
+        const pages = Object.keys(state.papers);
+
+        if(!pages.includes('p' + page)) {
+            let request = null;
+            const ref = db.collection('papers').orderBy('id');
+
+            if(mode === 'first') {
+                request = ref.limit(itemsPerPage).get();
+            } else {
+                request = ref.limitToLast(itemsPerPage).get();
+            }
+
+            let first = null,
+                last = null;
+
+            request.then(snapshot => {
+                    first = snapshot.docs[0].data().id;
+                    last = snapshot.docs[snapshot.docs.length - 1].data().id;
+
+                    snapshot.forEach(doc => {
+                        data.push(doc.data());
+                    });
+                })
+                .then(() => {
+                    commit('setCurrentPapersPage', data);
+                    commit('setPaperPage', { page: 'p' + page, data });
+                    commit('setLastPaperDocument', [first, last]);
+                    commit('setLoading', false);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        } else {
+            const pageContent = state.papers['p' + page];
+            const first = pageContent[0].id;
+            const last = pageContent[pageContent.length - 1].id;
+
+            commit('setCurrentPapersPage', pageContent);
+            commit('setLastPaperDocument', [first, last]);
+            commit('setLoading', false);
+        }
+    },
+    searchPapers({ commit }, payload) {
+        commit('setLoading', true);
+
+        const data = [];
+
+        db.collection('papers').orderBy('name')
+            .where('name', '>=', payload.toLowerCase())
+            .where('name', '<=', payload.toLowerCase() + '~')
+            .get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
+            })
+            .then(() => {
+                db.collection('papers').orderBy('name')
+                    .where('name', '>=', payload.toUpperCase())
+                    .where('name', '<=', payload.toUpperCase() + '~')
+                    .get()
+                    .then(snapshot => {
+                        const ids = data.map(t => t.id);
+                        snapshot.forEach(doc => {
+                            if(!ids.includes(doc.data().id)) {
+                                data.push(doc.data());
+                            }
+                        });
+                    });
+            })
+            .then(() => {
+                db.collection('papers').orderBy('name')
+                    .where('name', '>=', payload)
+                    .where('name', '<=', payload + '~')
+                    .get()
+                    .then(snapshot => {
+                        const ids = data.map(t => t.id);
+                        snapshot.forEach(doc => {
+                            if(!ids.includes(doc.data().id)) {
+                                data.push(doc.data());
+                            }
+                        });
+                    });
+            })
+            .then(() => {
+                commit('setFilteredPapers', data);
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    async paperExists(store, payload) {
+        return new Promise((resolve, reject) => {
+            try {
+                db.collection('papers').where('name', '==', payload).get()
+                    .then(snapshot => {
+                        if(snapshot.docs.length > 0) resolve({ id: snapshot.docs[0].data().id, exist: true });
+                        else resolve({ id: null, exist: false });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            } catch {
+                reject();
+            }
+        });
+    },
+    createPaper({ commit }, payload) {
         const paper = {
             id: payload.paperId,
             name: payload.paperName,
@@ -179,7 +390,16 @@ const actions = {
 const getters = {
     loadedPapers(state) {
         return state.loadedPapers;
-    }
+    },
+    getPapersByPage: state => page => {
+        return state.papers['p' + page];
+    },
+    getCurrentPapersPage(state) {
+        return state.currentPapersPage;
+    },
+    getFilteredPapers(state) {
+        return state.filteredPapers;
+    },
 }
 
 export default {

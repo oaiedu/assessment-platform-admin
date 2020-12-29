@@ -8,12 +8,15 @@
       <v-container>
           <v-container>
             <v-text-field
+              id='searchField'
               v-model="search"
+              @keydown="searchQuery($event)"
+              clearable
               filled
               rounded
               dense
               append-icon="mdi-magnify"
-              label="Search for IQ"
+              label="Procurar por Nome"
               single-line
               hide-details
             ></v-text-field>
@@ -24,20 +27,28 @@
         <v-card>
           <v-data-table
             :headers="headers"
-            :items="papers"
-            :page.sync="page"
+            :items="isSearching ? filteredPapers : papers"
+            :page="isSearching ? searchPage : page"
             :items-per-page="itemsPerPage"
-            :search="search"
             :loading="loading"
+            no-data-text='Não há documentos a serem mostrados'
             loading-text="Carregando documentos..."
             hide-default-footer
             class="elevation-1"
-            @page-count="pageCount = $event"
           >
             <template small v-slot:[`item.actions`]="{ item }">
               <v-row justify="end">
-                <v-icon class="mr-2" @click="editPaper(item)">mdi-pencil</v-icon>
-                <v-icon @click="deletePaperSnackBar = true; deleteSelect = item" class="mr-2">mdi-delete</v-icon>
+                <v-icon
+                    color="amber darken-2"
+                    @click="editPaper(item)" >
+                    mdi-pencil
+                </v-icon>
+                <v-icon
+                    @click="deletePaperSnackBar = true; deleteSelect = item"
+                    color="red"
+                    class="ml-2" >
+                    mdi-delete
+                </v-icon>
               </v-row>
             </template>
           </v-data-table>
@@ -62,7 +73,10 @@
       </v-dialog>
 
       <div class="text-center pt-2">
-        <v-pagination v-model="page" :length="pageCount"></v-pagination>
+        <Paginator
+            :page='!isSearching ? page : searchPage'
+            :length='!isSearching ? pageAmount : Math.ceil(filteredPapers.length / itemsPerPage)'
+            @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
       </div>
       <v-snackbar v-model="deletePaperSnackBar" color="black" right top>
         Você realmente quer deletar este documento?
@@ -74,14 +88,12 @@
 </template>
 
 <script>
-    import NewPaper from './CreatePaper'
-    import EditPaper from './EditPaper'
+    import NewPaper from './CreatePaper';
+    import EditPaper from './EditPaper';
+    import Paginator from '../Paginator';
 
     export default {
-        components: {
-            NewPaper,
-            EditPaper
-        },
+        components: { NewPaper, EditPaper, Paginator },
         data: () => ({
             dialogNewPaper: false,
             dialogEditPaper: false,
@@ -91,9 +103,10 @@
                 { text: "Ações", align:"right", value: "actions", sortable: false }
             ],
             page: 1,
-            pageCount: 15,
+            searchPage: 1,
             itemsPerPage: 10,
-            search: "",
+            search: '',
+            isSearching: false,
             deletePaperSnackBar: false,
             deleteSelect: "",
         }),
@@ -103,10 +116,17 @@
                 this.$store.dispatch('clearLoading');
             },
             papers () {
-                return this.$store.getters.loadedPapers;
+                return this.$store.getters.getCurrentPapersPage;
+            },
+            filteredPapers() {
+                return this.$store.getters.getFilteredPapers;
             },
             userClaims() {
                 return this.$store.getters.getUserClaims;
+            },
+            pageAmount() {
+                const papersAmount = this.$store.getters.getDataSize.papers;
+                return Math.ceil(papersAmount / this.itemsPerPage);
             }
         },
         methods: {
@@ -115,12 +135,57 @@
                 this.dialogEditPaper = true;
             },
             deletePaper(paper) {
-                this.$store.dispatch("deletePaper", paper);
+                this.$store.dispatch("deletePaper", { id: paper.id, isSearching: this.isSearching });
                 this.deletePaperSnackBar = false;
+            },
+            onPageChange(event) {
+                const payload = {
+                    page: this.page,
+                    itemsPerPage: this.itemsPerPage
+                }
+
+                if(!this.isSearching) {
+                    if(!event.mode) {
+                        this.$store.dispatch('loadPaperPage', { ...payload, type: event.type });
+                    } else {
+                        this.$store.dispatch('loadFOLPaperPage', { ...payload, mode: event.mode });
+                    }
+                }
+            },
+            searchQuery(event) {
+                if(event.key === 'Enter') {
+                    document.getElementById('searchField').blur();
+
+                    this.searchPage = 1;
+                    this.$store.commit('resetFilteredPapers');
+
+                    if(this.search.length > 0) {
+                        this.isSearching = true;
+                        this.$store.dispatch('searchPapers', this.search);
+                    } else {
+                        this.isSearching = false;
+                    }
+                }
+            }
+        },
+        watch: {
+            search(text) {
+                if((text === null || text.length === 0) && this.isSearching) {
+                    this.isSearching = false;
+                    this.searchPage = 1;
+                    this.$store.commit('resetFilteredPapers');
+                }
             }
         },
         mounted() {
-            this.$store.dispatch("loadedPapers");
+            this.$store.dispatch("loadFOLPaperPage", { page: 1, itemsPerPage: this.itemsPerPage, mode: 'first' });
+        },
+        beforeDestroy() {
+            this.search = '';
+            this.isSearching = false;
+            this.page = 1;
+            this.$store.commit('resetFilteredPapers');
+            this.$store.commit('resetCurrentPapersPage');
         }
     }
 </script>
