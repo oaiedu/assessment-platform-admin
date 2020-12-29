@@ -2,7 +2,6 @@ import { db, storage } from '../../main';
 
 const initialState = () => ({
     deleteQuestionId: null,
-    loadedQuestions: [],
     questions: {},
     filteredQuestions: [],
     currentQuestionsPage: [],
@@ -21,14 +20,14 @@ const initialState = () => ({
         "Materiais"
     ],
     subjectsAmount: null,
-    lastSnapshot: null
+    lastQuestionDocument: null
 });
 
 const state = initialState();
 
 const mutations = {
     setQuestions(state, data) {
-        state.loadedQuestions = data;
+        state.questions = data;
     },
     setQuestionPage(state, data) {
         state.questions[data.page] = data.data;
@@ -49,10 +48,21 @@ const mutations = {
         state.currentQuestionsPage = data;
     },
     createQuestion(state, data) {
-        state.loadedQuestions.push(data.data);
         const questions = state.questions[data.page] || [];
         questions.push(data.data);
         state.questions[data.page] = questions;
+    },
+    updateQuestion(state, data) {
+        const questions = state.questions;
+        for(let key in questions) {
+            if(questions[key]) {
+                questions[key].forEach((item, index) => {
+                    if(item.iq === data.iq) {
+                        state.questions[key][index] = data;
+                    }
+                });
+            }
+        }
     },
     deleteQuestion(state, data) {
         const questions = state.questions;
@@ -74,8 +84,8 @@ const mutations = {
             }
         });
     },
-    setLastSnapshot(state, data) {
-        state.lastSnapshot = data;
+    setLastQuestionDocument(state, data) {
+        state.lastQuestionDocument = data;
     },
     RESETQuestions(state) {
         const newState = initialState();
@@ -110,9 +120,9 @@ const actions = {
             const ref = db.collection('questions').orderBy('iq');
 
             if(type === 'next') {
-                request = ref.startAfter(state.lastSnapshot[1]).limit(itemsPerPage).get();
+                request = ref.startAfter(state.lastQuestionDocument[1]).limit(itemsPerPage).get();
             } else {
-                request = ref.endBefore(state.lastSnapshot[0]).limitToLast(itemsPerPage).get();
+                request = ref.endBefore(state.lastQuestionDocument[0]).limitToLast(itemsPerPage).get();
             }
 
             let first = null,
@@ -129,7 +139,7 @@ const actions = {
                 .then(() => {
                     commit('setCurrentQuestionsPage', data);
                     commit('setQuestionPage', { page: 'p' + page, data });
-                    commit('setLastSnapshot', [first, last]);
+                    commit('setLastQuestionDocument', [first, last]);
                     commit('setLoading', false);
                 })
                 .catch(error => {
@@ -141,7 +151,7 @@ const actions = {
             const last = pageContent[pageContent.length - 1].iq;
 
             commit('setCurrentQuestionsPage', pageContent);
-            commit('setLastSnapshot', [first, last]);
+            commit('setLastQuestionDocument', [first, last]);
             commit('setLoading', false);
         }
     },
@@ -177,7 +187,7 @@ const actions = {
                 .then(() => {
                     commit('setCurrentQuestionsPage', data);
                     commit('setQuestionPage', { page: 'p' + page, data });
-                    commit('setLastSnapshot', [first, last]);
+                    commit('setLastQuestionDocument', [first, last]);
                     commit('setLoading', false);
                 })
                 .catch(error => {
@@ -189,7 +199,7 @@ const actions = {
             const last = pageContent[pageContent.length - 1].iq;
 
             commit('setCurrentQuestionsPage', pageContent);
-            commit('setLastSnapshot', [first, last]);
+            commit('setLastQuestionDocument', [first, last]);
             commit('setLoading', false);
         }
     },
@@ -298,17 +308,7 @@ const actions = {
     editQuestion({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
-        const question = {
-            iq: payload.questionData.iq,
-            question: payload.questionData.question,
-            subject: payload.questionData.subject,
-            knowledge: payload.questionData.knowledge,
-            knowledgePWR: payload.questionData.knowledgePWR,
-            knowledgeBWR: payload.questionData.knowledgeBWR,
-            answers: payload.questionData.answers,
-            images: payload.questionData.images,
-            imageSize: payload.questionData.imageSize,
-        }
+        const question = { ...payload.questionData }
 
         const today = new Date();
         const edition = payload.oldData.edited;
@@ -325,6 +325,8 @@ const actions = {
                 });
             })
             .then(() => {
+                commit('updateQuestion', { ...question, edited: edition });
+                commit('setLoading', false);
                 dispatch("createdEditedQuestion", payload.oldData);
                 console.log("Success edit");
             })
@@ -347,6 +349,28 @@ const actions = {
             .catch(error => {
                 console.error("Error writing document: ", error);
             });
+    },
+    async questionExists(store, payload) {
+        return new Promise((resolve, reject) => {
+            try {
+                db.collection('questions').where('iq', '==', payload).get()
+                    .then(snapshot => {
+                        if(snapshot.docs.length > 0) resolve(true);
+                        else {
+                            db.collection('question-requests').where('iq', '==', payload).get()
+                                .then(snap => {
+                                    if(snap.docs.length > 0) resolve(true);
+                                    else resolve(false);
+                                })
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            } catch {
+                reject();
+            }
+        });
     },
     createQuestion({ commit }, payload) {
         commit('setLoading', true);
@@ -394,6 +418,21 @@ const actions = {
                 console.error("Error writing document: ", error);
             });
     },
+    async getQuestionByIQ(store, payload) {
+        return new Promise((resolve, reject) => {
+            try {
+                db.collection('questions').where('iq', '==', payload).get()
+                    .then(snapshot => {
+                        resolve(snapshot.docs[0].data());
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            } catch {
+                reject();
+            }
+        });
+    },
     resetQuestions({ commit }) {
         commit('RESETQuestions');
     }
@@ -406,14 +445,24 @@ const getters = {
     getQuestions(state) {
         return state.questions;
     },
+    getQuestionsByPage: state => page => {
+        return state.questions['p' + page];
+    },
     getCurrentQuestionsPage(state) {
         return state.currentQuestionsPage;
     },
     getFilteredQuestions(state) {
         return state.filteredQuestions;
     },
-    getAnswersById(state) {
-        let aux = state.loadedQuestions.find(question => question.iq === iq);
+    getAnswersById: state => iq => {
+        let aux = [];
+
+        for(let key in state.questions) {
+            if(state.questions[key].iq === iq) {
+                aux = state.questions[key];
+            }
+        }
+
         return { ...aux.answers }
     }
 }
