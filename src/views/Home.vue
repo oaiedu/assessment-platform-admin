@@ -13,11 +13,12 @@
         </v-container>
 
         <v-row justify="center" align="center" v-else>
-            <v-col class="section-1" cols="9"/>
-            <v-col>
-                <v-container>
-                    <SignUser/>
-                </v-container>
+            <img class="background-image"
+                src="https://firebasestorage.googleapis.com/v0/b/pwr-quiz-generator.appspot.com/o/home-background.jpg?alt=media&token=9f763b10-06ae-450e-90d1-96bbc7667376"
+                alt="Image" >
+            <div class="background-overlay"></div>
+            <v-col class="sign-col" :cols="cardColums" >
+                <SignUser/>
             </v-col>
         </v-row>
     </div>
@@ -39,6 +40,17 @@
             profile
         },
         computed: {
+            cardColums() {
+                const width = window.innerWidth;
+
+                if(width < 600) return 12;
+                else if(width < 800) return 10;
+                else if(width < 1000) return 8;
+                else if(width < 1200) return 6;
+                else if(width < 1300) return 5;
+                else if(width < 1400) return 4;
+                else return 3;
+            },
             user() {
                 return this.$store.getters.user;
             },
@@ -65,8 +77,20 @@
 </script>
 
 <style>
-    .section-1 {
+    .sign-col {
+        position: absolute;
+    }
+
+    .background-overlay {
+        position: absolute;
         height: calc(100vh - 48px);
-        background: url("https://firebasestorage.googleapis.com/v0/b/pwr-quiz-generator.appspot.com/o/home-background.jpg?alt=media&token=9f763b10-06ae-450e-90d1-96bbc7667376");
+        width: 100%;
+        background-color: #0006;
+    }
+
+    .background-image {
+        height: calc(100vh - 48px);
+        width: 100%;
+        object-fit: cover;
     }
 </style>
