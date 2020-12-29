@@ -10,20 +10,20 @@
             CENTRO TECNOLÓGICO DA MARINHA EM SÃO PAULO
             <br><br>
           </b>
-            {{testTilte}}
+            {{ testTitle }}
             <br>
-            <b>{{currentDate}}</b>
+            <b>{{ currentDate }}</b>
             <br>
             <br>
         </p>
         <p class="left-text">
-          Responsável:    {{testCreator}}
+          Responsável:    {{ testCreator }}
           <br>
           <br>
-          Revisão:        {{testEditedDate}}
+          Revisão:        {{ testEditedDate }}
           <br>
           <br>
-          Propósito:      {{testPurpose}}
+          Propósito:      {{ testPurpose }}
           <br>
           <br>
           Alterações:
@@ -59,19 +59,19 @@
         <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
       </div>
 
-      <div v-for="(paper, index) in createdPapers" :key='index' class=" question-page">
+      <div v-for="(paper) in createdPapers" :key='paper.data.id' class=" question-page">
         <div v-if="paper.value">
           <v-row justify="center">
-            <viewer v-if="checkImage(paper.object.image)" :value="paper.object.description"/>
+            <viewer v-if="checkImage(paper.data.image)" :value="paper.data.description" />
 
-            <img v-else :src="paper.object.image" style="max-height: 1150px; max-width: 700px"/>
+            <img v-else :src="paper.data.image" style="max-height: 1150px; max-width: 700px"/>
           </v-row>
         </div>
       </div>
 
-      <div v-for="(question, index) in questions" :key="index">
+      <div v-for="(question, index) in questions" :key="question.iq">
         <div class="question-page">
-          QUESTÃO {{index+1}}
+          QUESTÃO {{ index + 1 }}
           <br>
           <br>
           DISCIPLINA: {{ question.subject }}
@@ -235,20 +235,20 @@
 
         <v-card-text style="height: 300px">
           <div>
-            <v-checkbox v-for="(item, index) in premadePapers" :key="index"
+            <v-checkbox v-for="(item) in premadePapers" :key="item.id"
                 class="ma-4"
                 :label="item.id"
                 :input-value="item.value"
                 v-model="item.value" />
           </div>
 
-          <div>
-            <v-checkbox v-for="(item, index) in createdPapers" :key="index"
+          <!-- <div>
+            <v-checkbox v-for="(item) in createdPapers" :key="item.data.id"
                 class="ma-4"
                 :label="item.id"
                 :input-value="item.value"
                 v-model="item.value" />
-          </div>
+          </div> -->
         </v-card-text>
 
         <v-divider></v-divider>
@@ -267,197 +267,188 @@
 
 
 <script>
-import StatisticsQuestions from '@/components/Questions/StatisticsQuestions';
-import VueMarkdown from 'vue-markdown';
-require('vue-markdown');
+    import StatisticsQuestions from '@/components/Questions/StatisticsQuestions';
+    import VueMarkdown from 'vue-markdown';
+    require('vue-markdown');
 
-export default {
-  components: {
-    'vue-markdown': VueMarkdown,
-    StatisticsQuestions,
-  },
-  data() {
-    return {
-      checkFirtPage: false,
-      fab: false,
-      tabs: null,
-      checkSecondPage: false,
-      checkThirdPage: false,
-      checkFinalPage: false,
-      printDialog: false,
-      testPurpose: "",
-      testCreator: "",
-      testEditedDate: "",
-      letters: ['A','B','C','D'],
-      testTilte: "",
-      confirmTitle: false
-    }
-  },
-  methods: {
-    cancel() {
-      this.premadePapers.forEach(element => {
-        element.value = false;
-      })
-      this.printDialog = false;
-    },
-    back() {
-      this.$router.push("/tests");
-    },
-    toPrint() {
-      window.print();
-    },
-    confirmImage(val) {
-      if (typeof val == 'undefined' || val == "")
-        return false
+    export default {
+        name: 'PrintTest',
+        components: { 'vue-markdown': VueMarkdown, StatisticsQuestions, },
+        data() {
+            return {
+                checkFirtPage: false,
+                fab: false,
+                tabs: null,
+                checkSecondPage: false,
+                checkThirdPage: false,
+                checkFinalPage: false,
+                printDialog: false,
+                testPurpose: "",
+                testCreator: "",
+                testEditedDate: "",
+                testQuestions: null,
+                letters: ['A','B','C','D'],
+                testTitle: "",
+                confirmTitle: false
+            }
+        },
+        methods: {
+            cancel() {
+                this.premadePapers.forEach(element => {
+                    element.value = false;
+                });
+                this.printDialog = false;
+            },
+            back() {
+                this.$router.push("/tests");
+            },
+            toPrint() {
+                window.print();
+            },
+            confirmImage(val) {
+                if(typeof val == 'undefined' || val == "") {
+                    return false;
+                } else {
+                    return true;
+                }
+            },
+            checkImage(item) {
+                if(item === '' || typeof item === 'undefined') {
+                    return true;
+                }
+            }
+        },
+        computed: {
+            createdPapers() {
+                let result = [];
+                let papers = JSON.parse(JSON.stringify(this.$store.getters.getPapersByPage(1)));
+                papers.forEach(paper => {
+                    result.push({ id: paper.name, value: false, data: paper });
+                });
+                return result;
+            },
+            premadePapers() {
+                const result = [
+                    {id: "Introdução", value: false, data: null},
+                    {id: "Questões", value:  false, data: null},
+                    {id: "Estatísticas", value:  false, data: null},
+                    {id: "Gabarito", value:  false, data: null}
+                ];
+                return result;
+            },
+            activeFab () {
+                switch (this.tabs) {
+                    case 'one': return { class: 'purple', icon: 'account_circle' }
+                    default: return {}
+                }
+            },
+            currentDate() {
+                var today = new Date();
+                var months = [
+                    "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
+                    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
+                ]
+                var result = months[today.getMonth()] + " DE " + today.getFullYear();
+                return result;
+            },
+            statistics() {
+                let statisticsObj = [];
+                const cat =  this.$store.getters.getSubjects;
+                cat.forEach(element => {
+                    const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubjectOnTest(element, this.questions);
+                    statisticsObj.push({ name: element, questions: numberOfQuestions });
+                })
+                return statisticsObj;
+            },
+            numberOfQuestions() {
+                return this.questions.length;
+            },
+            questions() {
+                return this.$store.getters.getTestQuestions;
+            },
+            table() {
+                const result = [];
 
-      else
-        return true
-    },
-    checkImage(item) {
-      if(item === '' || typeof item === 'undefined')
-        return true
-    }
-  },
-  computed: {
-    createdPapers() {
-      let result = [];
-      let papers = JSON.stringify(this.$store.getters.loadedPapers);
-      papers = JSON.parse(papers);
-      papers.forEach( element => {
-        result.push({id: element.name, value: false, object: element});
-      });
-      return result
-    },
-    premadePapers() {
-      let result = [];
-      let aux = [
-        {id: "Introdução", value: false, object: null},
-        {id: "Questões", value:  false, object: null},
-        {id: "Estatísticas", value:  false, object: null},
-        {id: "Gabarito", value:  false, object: null}
-      ];
-      aux.forEach( element => {
-        result.push(element);
-      });
-      return result;
-    },
-    activeFab () {
-      switch (this.tabs) {
-        case 'one': return { class: 'purple', icon: 'account_circle' }
-        default: return {}
-      }
-    },
-    currentDate() {
-      var today = new Date();
-      var months = [
-        "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
-        "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
-      ]
-      var result = months[today.getMonth()] + " DE " + today.getFullYear()
-      return result
-    },
-    statistics() {
-      let statisticsObj=[]
-      const cat =  this.$store.getters.getSubjects
-      cat.forEach(element=>{
-        console.log(element)
-        const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubjectOnTest(element, this.questions)
-        statisticsObj.push({name: element, questions: numberOfQuestions})
-        console.log(numberOfQuestions)
-      })
-      console.log(statisticsObj)
-      return statisticsObj
-    },
-    numberOfQuestions() {
-      return this.questions.length
-    },
-    questions() {
-      let questionsAux=[]
-      let test = this.$store.getters.findTestById(this.$route.params.testId)
-      this.testTilte = test.title.toUpperCase()
-      this.testPurpose = test.purpose
-      this.testEditedDate = test.edited
-      this.testCreator = test.user
-      test.questions.forEach(element=>{
-        var question = this.$store.getters.findQuestionByIq(element)
-        questionsAux.push(question)
-      })
-      console.log(questionsAux)
-      return questionsAux
-    },
-    table() {
-      var result = []
+                for ( let i = 0; i < this.questions.length; i++ ) {
+                    let data = { question: "", iq: "", answer: ""}
+                    data.question = i + 1;
+                    data.iq = this.questions[i].iq;
 
-      for ( let i = 0; i < this.questions.length; i++ ) {
-        let data = { question: "", iq: "", answer: ""}
-        data.question = i+1
-        data.iq = this.questions[i].iq
+                    for( let j = 0; j < 4; j++){
+                        if(this.questions[i].answers[j].value == true) {
+                            data.answer = this.letters[j];
+                        }
+                    }
+                    result.push(data);
+                }
 
-        for( let j = 0; j < 4; j++){
-          if(this.questions[i].answers[j].value == true) {
-            data.answer = this.letters[j]
-          }
+                return result;
+            },
+            infoTable() {
+                const result = [];
+
+                for ( let i = 0; i < this.questions.length; i++ ) {
+                    let data = { question: "", subject: "", iq: "", obs: ""}
+                    data.question = i + 1;
+                    data.subject = this.questions[i].subject;
+                    data.iq = this.questions[i].iq;
+                    result.push(data);
+                }
+
+                return result;
+            }
+        },
+        mounted() {
+            let questionsAux = [];
+            let test = this.$store.getters.findTestById(this.$route.params.testId);
+            this.testTitle = test.title.toUpperCase();
+            this.testPurpose = test.purpose;
+            this.testEditedDate = test.edited;
+            this.testCreator = test.user;
+
+            this.$store.dispatch('loadTestQuestions', test);
         }
-        result.push(data)
-      }
-
-      return result
-    },
-    infoTable() {
-      var result = []
-
-      for ( let i = 0; i < this.questions.length; i++ ) {
-        let data = { question: "", subject: "", iq: "", obs: ""}
-        data.question = i+1
-        data.subject = this.questions[i].subject
-        data.iq = this.questions[i].iq
-        result.push(data)
-      }
-
-      return result
     }
-  },
-}
 </script>
 
 <style>
-.centered-text {
-  text-align: center;
-}
+    .centered-text {
+        text-align: center;
+    }
 
-@media print {
-   header{
-    display:none !important
-   }
+    @media print {
+        header{
+            display:none !important
+        }
 
-   footer{
-     display: none !important
-   }
+        footer{
+            display: none !important
+        }
 
-  @page {
-      margin-top: 1cm;
-      margin-bottom: 1cm;
-      margin-left: 1cm;
-      margin-right: 1cm;
-  }
+        @page {
+            margin-top: 1cm;
+            margin-bottom: 1cm;
+            margin-left: 1cm;
+            margin-right: 1cm;
+        }
 
-  .question-page {
-      font-size: 13px;
-      page-break-after: always !important
-  }
+        .question-page {
+            font-size: 13px;
+            page-break-after: always !important
+        }
 
-  .buttonIsHidden {
-      visibility: hidden;
-  }
+        .buttonIsHidden {
+            visibility: hidden;
+        }
 
-  .img-container {
-      text-align: center !important;
-  }
+        .img-container {
+            text-align: center !important;
+        }
 
 
-  p {
-    font-size: 13px;
-    page-break-inside: avoid;
-  }
-}
+        p {
+            font-size: 13px;
+            page-break-inside: avoid;
+        }
+    }
 </style>
