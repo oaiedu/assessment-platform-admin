@@ -37,7 +37,7 @@ exports.setRole = async (req, res) => {
                 }
                 auth.setCustomUserClaims(user.uid, { ...customClaims, [role]: true })
                     .catch(error => {
-                        console.log(error + '');
+                        console.log(error);
                     });
                 return { ...user, customClaims };
             })

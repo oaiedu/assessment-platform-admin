@@ -92,40 +92,8 @@ exports.testAPI = async (req, res) => {
 
     const dv3 = google.drive({ version: 'v3', auth: jwtClient });
 
-    // const json = fs.readFileSync('../../backups/2020-12-09T19-40-40.732Z/auth-2020-12-09T19-40-40.732Z.json');
-
-    // const contentType = 'application/zip';
-
-    // const zip = new AdmZip();
-
-    // zip.addFile('json1.json', json);
-
-    // let data = null;
-
-    // fs.writeFileSync('./zipFile.zip', zip.toBuffer());
-
-    // const file = await dv3.files.create({
-    //     requestBody: {
-    //         name: 'zipFile.zip',
-    //         mimeType: contentType
-    //     },
-    //     media: {
-    //         mimeType: contentType,
-    //         body: fs.createReadStream('./zipFile.zip')
-    //     }
-    // });
-
-    // console.log(file.data);
-    // fs.rmSync('./zipFile.zip', { recursive: true });
-
-    // res.append('Access-Control-Allow-Origin', '*');
-    // res.send({ file: file.data });
-
-    // const folder = await dv3.files.list({});
-    // console.log(folder.data);
-
     dv3.files.list({}, (error, response) => {
-        if(error) console.log(error + '');
+        if(error) console.log(error);
         else {
             response.data.files.forEach(file => {
                 console.log(file.name + ' - ' + file.id);
@@ -135,29 +103,6 @@ exports.testAPI = async (req, res) => {
         res.append('Access-Control-Allow-Origin', '*');
         res.send('Ok');
     });
-
-    // dv3.files.delete({ fileId: '1vBiTVppHDhAYdchVyRP_qRoz9NV31K3u' });
-    // res.append('Access-Control-Allow-Origin', '*');
-    // res.send('ok');
-
-    // txt -> 1g7N9jGGsIWS0Pz84RYi3NQlAXmTBtedV
-    // json -> 1iaK_EGNXLQMA9fR9WkuIf0qCcRsOqXGW
-    // zip -> 1P5YD1VwOL_ajm4JmUejWaCOOijiSs6gR
-
-    // dv3.files.get({ fileId: '1xjmp6afHrNOtepNqLkEq97w7AHaihnf8' },
-    //     (e, r) => {
-    //         if(e) return console.log(e);
-    //         else {
-    //             data = r.data;
-    //             console.log(data);
-    //             // fs.writeFileSync('./data.zip', data);
-    //             // data = fs.createWriteStream('./data.zip');
-    //         }
-
-    //         res.append('Access-Control-Allow-Origin', '*');
-    //         // res.send({ backup: data });
-    //         res.end();
-    //     });
 }
 
 exports.backupFirestoreAuth = async (req, res) => {
@@ -395,7 +340,7 @@ exports.backupFirebase = async (req, res) => {
                         const pieces = image.split('.');
                         let type = pieces[pieces.length - 1];
 
-                        const hasType = (type != undefined && type.length > 2 && type.length < 5);
+                        const hasType = (type !== undefined && type.length > 2 && type.length < 5);
                         type = hasType ? type : 'jpeg';
 
                         const format = imagePath + imageFile + (hasType ? '' : `.${type}`);

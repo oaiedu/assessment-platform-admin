@@ -13,7 +13,7 @@ exports.adjustImagesUrl = async (req, res) => {
                         db.collection('edited questions').doc(doc.id).set({ ...doc.data(), image: newUrl })
                             .catch(error => {
                                 console.log('Set Data Error');
-                                console.log(error);;
+                                console.log(error);
                             });
                     // }
                 }
@@ -40,9 +40,13 @@ exports.adjustUsersIds = async (req, res) => {
                             db.collection('users').doc(uid).set(doc.data())
                                 .then(() => {
                                     doc.ref.delete();
+
+                                    return true;
                                 })
                                 .catch(console.log);
                         });
+
+                        return userDoc;
                     })
                     .catch(error => {
                         console.log(error);
@@ -82,13 +86,12 @@ exports.deleteNonexistentReferences = async (req, res) => {
                                     : undefined;
 
                                 if(image && image.length > 0) {
-                                    if(image.includes('questions/') || image.includes('users/') || image.includes('documents/') || image.includes('home-background')) {
-
-                                    } else {
+                                    if(!(image.includes('questions/') || image.includes('users/') || image.includes('documents/') || image.includes('home-background'))) {
                                         db.collection(cn).doc(doc.id).set({ ...doc.data(), image: '' }).catch(console.log);
                                     }
                                 }
                             });
+
                             return snapshot;
                         })
                         .catch(console.log);
