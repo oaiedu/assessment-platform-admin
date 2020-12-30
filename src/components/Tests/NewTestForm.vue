@@ -2,140 +2,158 @@
   <v-card>
     <v-form ref="formRef">
       <v-toolbar dark color="primary">
-        <v-btn icon dark @click="close()">
+        <v-btn icon dark @click="close()" class="mr-2">
           <v-icon>mdi-close</v-icon>
         </v-btn>
+        <h2>Criar nova prova</h2>
         <v-spacer></v-spacer>
-        <v-toolbar-items>
+        <!-- <v-toolbar-items>
           <v-btn dark text @click="onCreateTest()">Criar Teste</v-btn>
-        </v-toolbar-items>
+        </v-toolbar-items> -->
       </v-toolbar>
-      <v-row>
-        <v-col>
-          <v-container>
-            <v-row>
-              <v-col>
-                <v-text-field
-                  solo
-                  rounded
-                  flat
-                  filled
-                  outlined
-                  dense
-                  :rules="textRule"
-                  required
-                  label="Título"
-                  v-model="testName"
-                ></v-text-field>
-              </v-col>
-            </v-row>
 
-            <v-row>
-              <v-col>
-                <v-select
-                  solo
-                  rounded
-                  flat
-                  filled
-                  outlined
-                  dense
-                  disabled
-                  label="Tipo de prova"
-                  v-model="testType"
-                  :items="types"
-                ></v-select>
-              </v-col>
+      <v-tooltip left>
+        <template v-slot:activator='{ on }'>
+            <v-btn
+                color="blue darken-2"
+                v-on="on"
+                large
+                dark
+                fab
+                fixed
+                bottom
+                right
+                @click="onCreateTest()" >
+                <v-icon color="white">mdi-content-save</v-icon>
+            </v-btn>
+        </template>
+        <h3>Salvar</h3>
+      </v-tooltip>
 
-              <v-col v-if="testType=='Aleatório'">
-                <v-text-field
-                  dense
-                  outlined
-                  rounded
-                  name="randomQuestionsNumber"
-                  label="Número de Questões"
-                  id="randomQuestionsNumber"
-                  v-model="randomQuestionsNumber"
-                  type="number"
-                  :rules="rule"
-                ></v-text-field>
-              </v-col>
-            </v-row>
+      <v-container fluid class="pa-15 pt-10">
+        <v-row>
+            <v-col>
+                <v-row>
+                    <v-col>
+                        <v-text-field
+                            solo
+                            rounded
+                            flat
+                            filled
+                            outlined
+                            dense
+                            :rules="textRule"
+                            required
+                            label="Título"
+                            v-model="testName"
+                            ></v-text-field>
+                    </v-col>
+                </v-row>
 
-            <v-row>
-              <v-col>
-                <v-textarea
-                  outlined
-                  required
-                  :rules="textRule"
-                  v-model="purpose"
-                  label="Propósito"
-                ></v-textarea>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-col>
+                <v-row>
+                    <v-col>
+                        <v-select
+                            solo
+                            rounded
+                            flat
+                            filled
+                            outlined
+                            dense
+                            disabled
+                            label="Tipo de prova"
+                            v-model="testType"
+                            :items="types"
+                            ></v-select>
+                    </v-col>
 
-        <v-col>
-          <v-container>
-            <v-container>
-              <v-text-field
-                id='searchFieldNew'
-                v-model="search"
-                @keydown="searchQuery($event)"
-                clearable
-                filled
-                rounded
-                dense
-                append-icon="mdi-magnify"
-                label="Procurar por IQ"
-                single-line
-                hide-details
-              ></v-text-field>
-            </v-container>
+                    <v-col v-if="testType=='Aleatório'">
+                        <v-text-field
+                            dense
+                            outlined
+                            rounded
+                            name="randomQuestionsNumber"
+                            label="Número de Questões"
+                            id="randomQuestionsNumber"
+                            v-model="randomQuestionsNumber"
+                            type="number"
+                            :rules="rule"
+                            ></v-text-field>
+                    </v-col>
+                </v-row>
 
-            <v-container>
-              <v-card v-if="selectedSubjects.length == 0 ">
-                <v-data-table
-                  v-model="selectedQuestions"
-                  :headers="headers"
-                  :items="isSearching ? filteredQuestions : questions"
-                  :page="isSearching ? searchPage : page"
-                  :items-per-page="itemsPerPage"
-                  :loading='loading'
-                  no-data-text='Não há questões a serem mostradas'
-                  loading-text="Carregando questões..."
-                  show-select
-                  item-key="iq"
-                  hide-default-footer
-                  class="elevation-1"
-                ></v-data-table>
-              </v-card>
+                <v-row>
+                    <v-col>
+                        <v-textarea
+                            outlined
+                            required
+                            :rules="textRule"
+                            v-model="purpose"
+                            label="Propósito"
+                            ></v-textarea>
+                    </v-col>
+                </v-row>
+            </v-col>
 
-              <!-- <v-card v-else>
-                <v-data-table
-                  v-model="selectedQuestions"
-                  :headers="headers"
-                  :items="showedQuestions"
-                  :page.sync="page"
-                  :items-per-page="itemsPerPage"
-                  :loading='loading'
-                  show-select
-                  item-key="id"
-                  hide-default-footer
-                  class="elevation-1"
-                  @page-count="pageCount = $event"
-                ></v-data-table>
-              </v-card> -->
-            </v-container>
-            <div class="text-center pt-2">
-              <Paginator
-                :page='!isSearching ? page : searchPage'
-                :length='!isSearching ? pageAmount : Math.ceil(filteredQuestions.length / itemsPerPage)'
-                @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
-            </div>
-          </v-container>
-        </v-col>
-      </v-row>
+            <v-col>
+                <v-container>
+                    <v-text-field
+                        id='searchFieldNew'
+                        v-model="search"
+                        @keydown="searchQuery($event)"
+                        clearable
+                        filled
+                        rounded
+                        dense
+                        append-icon="mdi-magnify"
+                        label="Procurar por IQ"
+                        single-line
+                        hide-details
+                        ></v-text-field>
+                </v-container>
+
+                <v-container>
+                    <v-card v-if="selectedSubjects.length == 0 ">
+                        <v-data-table
+                            v-model="selectedQuestions"
+                            :headers="headers"
+                            :items="isSearching ? filteredQuestions : questions"
+                            :page="isSearching ? searchPage : page"
+                            :items-per-page="itemsPerPage"
+                            :loading='loading'
+                            no-data-text='Não há questões a serem mostradas'
+                            loading-text="Carregando questões..."
+                            show-select
+                            item-key="iq"
+                            hide-default-footer
+                            class="elevation-1"
+                            ></v-data-table>
+                    </v-card>
+
+                    <!-- <v-card v-else>
+                        <v-data-table
+                        v-model="selectedQuestions"
+                        :headers="headers"
+                        :items="showedQuestions"
+                        :page.sync="page"
+                        :items-per-page="itemsPerPage"
+                        :loading='loading'
+                        show-select
+                        item-key="id"
+                        hide-default-footer
+                        class="elevation-1"
+                        @page-count="pageCount = $event"
+                        ></v-data-table>
+                    </v-card> -->
+                </v-container>
+                <div class="text-center pt-2">
+                    <Paginator
+                        :page='!isSearching ? page : searchPage'
+                        :length='!isSearching ? pageAmount : Math.ceil(filteredQuestions.length / itemsPerPage)'
+                        @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
+                </div>
+            </v-col>
+        </v-row>
+      </v-container>
     </v-form>
 
     <v-snackbar

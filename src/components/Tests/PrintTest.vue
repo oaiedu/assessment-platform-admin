@@ -87,73 +87,67 @@
             <vue-markdown :source="question.question"/>
           <br>
 
-          <br>
-
           <div class="img-container" v-if="confirmImage(question.image)">
             <img :src="question.image" style="max-height: 250px; max-width: 180px"/>
           </div>
 
-          <v-main v-if="typeof question.answers[0].text !== 'string'">
-            <v-row>
-              <v-col cols="2"></v-col>
-              <v-col v-for="(item, index) in question.answers[0].text" :key="index" cols="2">
+          <div v-if="typeof question.answers[0].text !== 'string'">
+            <v-row class='answer-block' >
+              <v-col cols="1"></v-col>
+              <v-col v-for="(item, index) in question.answers[0].text" :key="index">
                 <vue-markdown :source="item.title"/>
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="2">A -</v-col>
+            <v-row class='answer-block' >
+              <v-col cols="1">A -</v-col>
               <v-col
                 v-for="(item, index) in question.answers[0].text"
                 :key="index"
-                cols="2"
               >
                 <vue-markdown :source="item.answerDescription"/>
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="2">B -</v-col>
+            <v-row class='answer-block' >
+              <v-col cols="1">B -</v-col>
               <v-col
                 v-for="(item, index) in question.answers[1].text"
                 :key="index"
-                cols="2"
                 >
                   <vue-markdown :source="item.answerDescription"/>
                 </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="2">C -</v-col>
+            <v-row class='answer-block' >
+              <v-col cols="1">C -</v-col>
               <v-col
                 v-for="(item, index) in question.answers[2].text"
                 :key="index"
-                cols="2"
                 >
                   <vue-markdown :source="item.answerDescription"/>
                 </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="2">D -</v-col>
+            <v-row class='answer-block' >
+              <v-col cols="1">D -</v-col>
               <v-col
                 v-for="(item, index) in question.answers[3].text"
                 :key="index"
-                cols="2"
                 >
                   <vue-markdown :source="item.answerDescription"/>
                 </v-col>
             </v-row>
-          </v-main>
+          </div>
 
-          <v-main v-else>
-            <v-row v-for="(item, index) in question.answers" :key="index">
-              <v-col cols="2">{{ letters[index] }} - </v-col>
+          <div v-else>
+            <v-row v-for="(item, index) in question.answers" :key="index" class='answer-block' >
+              <v-col cols="1">{{ letters[index] }} - </v-col>
               <v-col>
                 <vue-markdown :source="item.text"/>
               </v-col>
             </v-row>
-          </v-main>
+          </div>
         </div>
       </div>
 
@@ -321,7 +315,7 @@
         computed: {
             createdPapers() {
                 let result = [];
-                let papers = JSON.parse(JSON.stringify(this.$store.getters.getPapersByPage(1)));
+                let papers = this.$store.getters.getPapersByPage(1) || [];
                 papers.forEach(paper => {
                     result.push({ id: paper.name, value: false, data: paper });
                 });
@@ -412,6 +406,14 @@
 </script>
 
 <style>
+    .answer-block {
+        margin: 0 !important;
+    }
+
+    .answer-block .col {
+        padding: 0 10px 0 10px !important;
+    }
+
     .centered-text {
         text-align: center;
     }

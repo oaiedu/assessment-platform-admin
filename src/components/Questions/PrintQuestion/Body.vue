@@ -16,8 +16,6 @@
             <vue-markdown :source="question.question" />
             <br />
 
-            <br />
-
             <div class="img-container" v-if="confirmImage(question.image)">
               <v-main v-if="question.imageSize === '1x'">
                 <img :src="question.image" style="max-height: 40vh; max-width: 40vw" />
@@ -36,71 +34,66 @@
               </v-main>
             </div>
 
-            <v-main v-if="typeof question.answers[0].text !== 'string'">
-              <v-row>
-                <v-col cols="2"></v-col>
+            <div v-if="typeof question.answers[0].text !== 'string'">
+              <v-row class='answer-block' >
+                <v-col cols="1"></v-col>
                 <v-col
                   v-for="(item, index) in question.answers[0].text"
                   :key="index"
-                  cols="2"
                 >
                   <vue-markdown :source="item.title" />
                 </v-col>
               </v-row>
 
-              <v-row>
-                <v-col cols="2">A -</v-col>
+              <v-row class='answer-block' >
+                <v-col cols="1">A -</v-col>
                 <v-col
                   v-for="(item, index) in question.answers[0].text"
                   :key="index"
-                  cols="2"
                 >
                   <vue-markdown :source="item.answerDescription" />
                 </v-col>
               </v-row>
 
-              <v-row>
-                <v-col cols="2">B -</v-col>
+              <v-row class='answer-block' >
+                <v-col cols="1">B -</v-col>
                 <v-col
                   v-for="(item, index) in question.answers[1].text"
                   :key="index"
-                  cols="2"
                 >
                   <vue-markdown :source="item.answerDescription" />
                 </v-col>
               </v-row>
 
-              <v-row>
-                <v-col cols="2">C -</v-col>
+              <v-row class='answer-block' >
+                <v-col cols="1">C -</v-col>
                 <v-col
                   v-for="(item, index) in question.answers[2].text"
                   :key="index"
-                  cols="2"
                 >
                   <vue-markdown :source="item.answerDescription" />
                 </v-col>
               </v-row>
 
-              <v-row>
-                <v-col cols="2">D -</v-col>
+              <v-row class='answer-block' >
+                <v-col cols="1">D -</v-col>
                 <v-col
                   v-for="(item, index) in question.answers[3].text"
                   :key="index"
-                  cols="2"
                 >
                   <vue-markdown :source="item.answerDescription" />
                 </v-col>
               </v-row>
-            </v-main>
+            </div>
 
-            <v-main v-else>
-              <v-row v-for="(item, index) in question.answers" :key="index">
-                <v-col cols="2">{{ letters[index] }} -</v-col>
+            <div v-else>
+              <v-row v-for="(item, index) in question.answers" :key="index" class='answer-block' >
+                <v-col cols="1">{{ letters[index] }} -</v-col>
                 <v-col>
                   <vue-markdown :source="item.text" />
                 </v-col>
               </v-row>
-            </v-main>
+            </div>
 
             <v-btn
               class="buttonIsHidden"
@@ -158,6 +151,14 @@ export default {
 </script>
 
 <style>
+.answer-block {
+    margin: 0 !important;
+}
+
+.answer-block .col {
+    padding: 0 10px 0 10px !important;
+}
+
 .img-container {
   text-align: center;
 }

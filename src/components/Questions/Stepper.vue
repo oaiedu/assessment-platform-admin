@@ -2,32 +2,94 @@
   <v-card>
     <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
     <v-toolbar dark color="primary">
-      <v-btn icon dark @click="close()">
+      <v-btn icon dark @click="close()" class="mr-2">
         <v-icon>mdi-close</v-icon>
       </v-btn>
+      <h2>Criar nova questão</h2>
       <v-spacer></v-spacer>
-      <v-toolbar-items>
-        <v-btn dark text @click="e1 = 2" v-if="e1 == 1">Continue</v-btn>
-        <v-btn dark text @click="e1 = 3" v-if="e1 == 2">Continue</v-btn>
-        <v-btn dark text @click="onCreateQuestion()" v-if="e1 == 3">Criar Questão</v-btn>
-      </v-toolbar-items>
+      <!-- <v-toolbar-items>
+        <v-btn dark text @click="e1 = 2" v-if="e1 == 1">Continuar</v-btn>
+        <v-btn dark text @click="e1 = 3" v-if="e1 == 2">Continuar</v-btn>
+        <v-btn dark text @click="onCreateQuestion()" v-if="e1 == 3">Salvar</v-btn>
+      </v-toolbar-items> -->
     </v-toolbar>
+
+    <v-tooltip right v-if='e1 > 1'>
+        <template v-slot:activator='{ on }'>
+            <v-btn
+                color="grey lighten-3"
+                v-on="on"
+                large
+                dark
+                fab
+                fixed
+                bottom
+                left
+                @click="e1 = e1 - 1" >
+                <v-icon color="blue darken-2">mdi-arrow-left</v-icon>
+            </v-btn>
+        </template>
+        <h3>Voltar</h3>
+    </v-tooltip>
+
+    <v-tooltip left v-if='e1 < 3'>
+        <template v-slot:activator='{ on }'>
+            <v-btn
+                color="blue darken-2"
+                v-on="on"
+                large
+                dark
+                fab
+                fixed
+                bottom
+                right
+                @click="e1 == 1 ? e1 = 2 : e1 = 3" >
+                <v-icon color="white">mdi-arrow-right</v-icon>
+            </v-btn>
+        </template>
+        <h3>Continuar</h3>
+    </v-tooltip>
+
+    <v-tooltip left v-else>
+        <template v-slot:activator='{ on }'>
+            <v-btn
+                color="blue darken-2"
+                v-on="on"
+                large
+                dark
+                fab
+                fixed
+                bottom
+                right
+                @click="onCreateQuestion()" >
+                <v-icon color="white">mdi-content-save</v-icon>
+            </v-btn>
+        </template>
+        <h3>Salvar</h3>
+    </v-tooltip>
+
     <v-container fluid>
       <v-row>
         <v-col>
           <v-card>
             <form @submit.prevent="onCreateQuestion">
-              <v-stepper v-model="e1">
+              <v-stepper alt-labels v-model="e1">
                 <v-stepper-header>
-                  <v-stepper-step editable :complete="e1 > 1" step="1"></v-stepper-step>
+                  <v-stepper-step editable :complete="e1 > 1" step="1">
+                      Detalhes
+                  </v-stepper-step>
 
                   <v-divider></v-divider>
 
-                  <v-stepper-step editable :complete="e1 > 2" step="2"></v-stepper-step>
+                  <v-stepper-step editable :complete="e1 > 2" step="2">
+                      Enunciado
+                  </v-stepper-step>
 
                   <v-divider></v-divider>
 
-                  <v-stepper-step editable step="3"></v-stepper-step>
+                  <v-stepper-step editable step="3">
+                      Respostas
+                  </v-stepper-step>
                 </v-stepper-header>
 
                 <v-stepper-items>
@@ -205,54 +267,51 @@
               <vue-markdown :source="questionDescription" />
               <br />
 
-              <v-main v-if="confirmTitle">
-                <v-row>
-                  <v-col cols="2"></v-col>
-                  <v-col v-for="(item, index) in answers[0].text" :key="index" cols="2">
+              <div v-if="confirmTitle">
+                <v-row class='answer-block'>
+                  <v-col cols="1"></v-col>
+                  <v-col v-for="(item, index) in answers[0].text" :key="index">
                     <vue-markdown :source="item.title" />
                   </v-col>
                 </v-row>
 
-                <v-row>
-                  <v-col cols="2">A -</v-col>
-                  <v-col v-for="(item, index) in answers[0].text" :key="index" cols="2">
+                <v-row class='answer-block'>
+                  <v-col cols="1">A -</v-col>
+                  <v-col v-for="(item, index) in answers[0].text" :key="index">
                     <vue-markdown :source="item.answerDescription" />
                   </v-col>
                 </v-row>
-                <br />
 
-                <v-row>
-                  <v-col cols="2">B -</v-col>
-                  <v-col v-for="(item, index) in answers[1].text" :key="index" cols="2">
+                <v-row class='answer-block'>
+                  <v-col cols="1">B -</v-col>
+                  <v-col v-for="(item, index) in answers[1].text" :key="index">
                     <vue-markdown :source="item.answerDescription" />
                   </v-col>
                 </v-row>
-                <br />
 
-                <v-row>
-                  <v-col cols="2">C -</v-col>
-                  <v-col v-for="(item, index) in answers[2].text" :key="index" cols="2">
+                <v-row class='answer-block'>
+                  <v-col cols="1">C -</v-col>
+                  <v-col v-for="(item, index) in answers[2].text" :key="index">
                     <vue-markdown :source="item.answerDescription" />
                   </v-col>
                 </v-row>
-                <br />
 
-                <v-row>
-                  <v-col cols="2">D -</v-col>
-                  <v-col v-for="(item, index) in answers[3].text" :key="index" cols="2">
+                <v-row class='answer-block'>
+                  <v-col cols="1">D -</v-col>
+                  <v-col v-for="(item, index) in answers[3].text" :key="index">
                     <vue-markdown :source="item.answerDescription" />
                   </v-col>
                 </v-row>
-              </v-main>
+              </div>
 
-              <v-main v-else>
-                <v-row v-for="(item, index) in answers" :key="index">
+              <div v-else>
+                <v-row v-for="(item, index) in answers" :key="index" class='answer-block'>
                   <v-col cols="1">{{ letters[index] }} -</v-col>
                   <v-col>
                     <vue-markdown :source="item.text" />
                   </v-col>
                 </v-row>
-              </v-main>
+              </div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -360,12 +419,6 @@ export default {
         }
     },
     watch: {
-        e1(val) {
-            console.log(val);
-        },
-        images(val) {
-            console.log("images: ", val.length);
-        },
         number(val) {
             if (this.number > 1) {
             this.answers.forEach(element => {
@@ -411,8 +464,6 @@ export default {
             this.questionDescription = variable;
         },
         onCreateQuestion() {
-            console.log("value: ", this.answers[1].value);
-
             this.$store.dispatch('questionExists', this.iq)
                 .then(exist => {
                     console.log(exist);
@@ -550,3 +601,13 @@ export default {
     }
 };
 </script>
+
+<style>
+    .answer-block {
+        margin: 0 !important;
+    }
+
+    .answer-block .col {
+        padding: 0 10px 0 10px !important;
+    }
+</style>

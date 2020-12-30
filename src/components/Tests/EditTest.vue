@@ -2,82 +2,104 @@
   <v-card>
     <v-form ref="formRef">
       <v-toolbar dark color="primary">
-        <v-btn icon dark @click="close()">
+        <v-btn icon dark @click="close()" class="mr-2">
             <v-icon>mdi-close</v-icon>
         </v-btn>
+        <h2>Editar prova</h2>
         <v-spacer></v-spacer>
-        <v-toolbar-items>
+        <!-- <v-toolbar-items>
             <v-btn dark text @click="onEditTest()" height="100">Editar Teste</v-btn>
-        </v-toolbar-items>
+        </v-toolbar-items> -->
       </v-toolbar>
-      <v-row>
-        <v-col>
-          <v-container>
-            <v-row>
-              <v-col>
-                <v-card-title>{{name}}</v-card-title>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col>
-                <v-textarea
-                  outlined
-                  required
-                  :rules="textRule"
-                  v-model="purpose"
-                  label="Propósito"
-                ></v-textarea>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-col>
 
-        <v-col>
-          <v-container>
-            <v-container>
-              <v-text-field
-                id='searchFieldEdit'
-                v-model="search"
-                @keydown="searchQuery($event)"
-                clearable
-                filled
-                rounded
-                dense
-                append-icon="mdi-magnify"
-                label="Procurar por IQ"
-                single-line
-                hide-details
-              ></v-text-field>
-            </v-container>
+      <v-tooltip left>
+        <template v-slot:activator='{ on }'>
+            <v-btn
+                color="blue darken-2"
+                v-on="on"
+                large
+                dark
+                fab
+                fixed
+                bottom
+                right
+                @click="onEditTest()" >
+                <v-icon color="white">mdi-content-save</v-icon>
+            </v-btn>
+        </template>
+        <h3>Salvar</h3>
+      </v-tooltip>
 
-            <v-container>
-              <v-card>
-                <v-data-table
-                  v-model="selectedQuestions"
-                  :headers="headers"
-                  :items="isSearching ? filteredQuestions : questions"
-                  :page="isSearching ? searchPage : page"
-                  :items-per-page="itemsPerPage"
-                  :loading="loading"
-                  no-data-text="Não há questões a serem mostradas"
-                  loading-text="Carregando questões..."
-                  show-select
-                  item-key="iq"
-                  hide-default-footer
-                  class="elevation-1"
-                  @page-count="pageCount = $event"
-                ></v-data-table>
-              </v-card>
-            </v-container>
-            <div class="text-center pt-2">
-              <Paginator
-                :page='!isSearching ? page : searchPage'
-                :length='!isSearching ? pageAmount : Math.ceil(filteredQuestions.length / itemsPerPage)'
-                @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
-            </div>
-          </v-container>
-        </v-col>
-      </v-row>
+      <v-container fluid class="pa-15 pt-10">
+        <v-row>
+            <v-col>
+                <v-container>
+                    <v-row>
+                        <v-col>
+                            <v-card-title>{{ name }}</v-card-title>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col>
+                            <v-textarea
+                                outlined
+                                required
+                                :rules="textRule"
+                                v-model="purpose"
+                                label="Propósito"
+                                ></v-textarea>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-col>
+
+            <v-col>
+                <v-container>
+                    <v-container>
+                        <v-text-field
+                            id='searchFieldEdit'
+                            v-model="search"
+                            @keydown="searchQuery($event)"
+                            clearable
+                            filled
+                            rounded
+                            dense
+                            append-icon="mdi-magnify"
+                            label="Procurar por IQ"
+                            single-line
+                            hide-details
+                            ></v-text-field>
+                    </v-container>
+
+                    <v-container>
+                        <v-card>
+                            <v-data-table
+                                v-model="selectedQuestions"
+                                :headers="headers"
+                                :items="isSearching ? filteredQuestions : questions"
+                                :page="isSearching ? searchPage : page"
+                                :items-per-page="itemsPerPage"
+                                :loading="loading"
+                                no-data-text="Não há questões a serem mostradas"
+                                loading-text="Carregando questões..."
+                                show-select
+                                item-key="iq"
+                                hide-default-footer
+                                class="elevation-1"
+                                @page-count="pageCount = $event"
+                                ></v-data-table>
+                        </v-card>
+                    </v-container>
+                    <div class="text-center pt-2">
+                        <Paginator
+                            :page='!isSearching ? page : searchPage'
+                            :length='!isSearching ? pageAmount : Math.ceil(filteredQuestions.length / itemsPerPage)'
+                            @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
+                    </div>
+                </v-container>
+            </v-col>
+        </v-row>
+      </v-container>
     </v-form>
 
     <v-snackbar

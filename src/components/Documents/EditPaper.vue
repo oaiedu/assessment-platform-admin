@@ -2,12 +2,32 @@
   <v-card>
     <v-form ref="formRef" @submit.prevent="onEditPaper()">
       <v-toolbar dark color="primary">
-        <v-btn icon dark @click="close()">
+        <v-btn icon dark @click="close()" class="mr-2">
           <v-icon>mdi-close</v-icon>
         </v-btn>
+        <h2>Editar documento</h2>
         <v-spacer></v-spacer>
-          <v-btn dark text type="submit">Editar Documento</v-btn>
+          <!-- <v-btn dark text type="submit">Editar Documento</v-btn> -->
       </v-toolbar>
+
+      <v-tooltip left>
+        <template v-slot:activator='{ on }'>
+            <v-btn
+                color="blue darken-2"
+                v-on="on"
+                large
+                dark
+                fab
+                fixed
+                bottom
+                right
+                type="submit" >
+                <v-icon color="white">mdi-content-save</v-icon>
+            </v-btn>
+        </template>
+        <h3>Salvar</h3>
+      </v-tooltip>
+
       <v-container fluid>
         <v-row>
           <v-col>
