@@ -220,6 +220,9 @@ const actions = {
 
         const pages = Object.keys(state.papers);
 
+        const paperAmount = this.getters.getDataSize.papers;
+        const amount = paperAmount % 10;
+
         if(!pages.includes('p' + page)) {
             let request = null;
             const ref = db.collection('papers').orderBy('id');
@@ -227,7 +230,7 @@ const actions = {
             if(mode === 'first') {
                 request = ref.limit(itemsPerPage).get();
             } else {
-                request = ref.limitToLast(itemsPerPage).get();
+                request = ref.limitToLast(amount).get();
             }
 
             let first = null,
@@ -266,8 +269,8 @@ const actions = {
         const data = [];
 
         db.collection('papers').orderBy('name')
-            .where('name', '>=', payload.toLowerCase())
-            .where('name', '<=', payload.toLowerCase() + '~')
+            .where('name', '>=', payload)
+            .where('name', '<=', payload + '~')
             .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
@@ -290,8 +293,8 @@ const actions = {
             })
             .then(() => {
                 db.collection('papers').orderBy('name')
-                    .where('name', '>=', payload)
-                    .where('name', '<=', payload + '~')
+                    .where('name', '>=', payload.toLowerCase())
+                    .where('name', '<=', payload.toLowerCase() + '~')
                     .get()
                     .then(snapshot => {
                         const ids = data.map(t => t.id);
@@ -333,10 +336,14 @@ const actions = {
             image: payload.paperImage,
             description: payload.paperDescription
         }
-        console.log(paper);
+
+        const paperAmount = this.getters.getDataSize.papers;
+        const pageAmount = Math.ceil(paperAmount / 10);
+        const amount = paperAmount % 10;
+
         db.collection("papers").add(paper)
             .then(() => {
-                commit('createPaper', paper);
+                commit('createPaper', { page: 'p' + (amount === 10 ? pageAmount + 1 : pageAmount), data: paper });
                 commit('setLoading', false);
 
                 db.collection('data-size').get()

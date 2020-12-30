@@ -163,6 +163,9 @@ const actions = {
 
         const pages = Object.keys(state.questions);
 
+        const questionAmount = this.getters.getDataSize.questions.general;
+        const amount = questionAmount % 8;
+
         if(!pages.includes('p' + page)) {
             let request = null;
             const ref = db.collection('questions').orderBy('iq');
@@ -170,7 +173,7 @@ const actions = {
             if(mode === 'first') {
                 request = ref.limit(itemsPerPage).get();
             } else {
-                request = ref.limitToLast(itemsPerPage).get();
+                request = ref.limitToLast(amount || 1).get();
             }
 
             let first = null,
@@ -378,9 +381,8 @@ const actions = {
         const question = { ...payload, edited: [] }
 
         const questionAmount = this.getters.getDataSize.questions.general;
-        const pageAmount =  Math.ceil(questionAmount / 8);
-        const pageQuestions = this.getters.getQuestionsByPage(pageAmount);
-        const amount = pageQuestions ? pageQuestions.length : 0;
+        const pageAmount = Math.ceil(questionAmount / 8);
+        const amount = questionAmount % 8;
 
         db.collection("questions").add(question)
             .then(() => {

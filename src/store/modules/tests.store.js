@@ -167,6 +167,9 @@ const actions = {
 
         const pages = Object.keys(state.tests);
 
+        const testAmount = this.getters.getDataSize.tests;
+        const amount = testAmount % 10;
+
         if(!pages.includes('p' + page)) {
             let request = null;
             const ref = db.collection('tests').orderBy('id');
@@ -174,7 +177,7 @@ const actions = {
             if(mode === 'first') {
                 request = ref.limit(itemsPerPage).get();
             } else {
-                request = ref.limitToLast(itemsPerPage).get();
+                request = ref.limitToLast(amount).get();
             }
 
             let first = null,
@@ -229,8 +232,8 @@ const actions = {
         const data = [];
 
         db.collection('tests').orderBy('title')
-            .where('title', '>=', payload.toLowerCase())
-            .where('title', '<=', payload.toLowerCase() + '~')
+            .where('title', '>=', payload)
+            .where('title', '<=', payload + '~')
             .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
@@ -253,8 +256,8 @@ const actions = {
             })
             .then(() => {
                 db.collection('tests').orderBy('title')
-                    .where('title', '>=', payload)
-                    .where('title', '<=', payload + '~')
+                    .where('title', '>=', payload.toLowerCase())
+                    .where('title', '<=', payload.toLowerCase() + '~')
                     .get()
                     .then(snap => {
                         const ids = data.map(t => t.id);
@@ -329,14 +332,13 @@ const actions = {
         const test = { ...payload, id: uuid() }
 
         const testAmount = this.getters.getDataSize.tests;
-        const pageAmount =  Math.ceil(testAmount / 8);
-        const pageTests = this.getters.getTestsByPage(pageAmount);
-        const amount = pageTests ? pageTests.length : 0;
+        const pageAmount = Math.ceil(testAmount / 8);
+        const amount = testAmount % 10;
 
         db.collection("tests").add(test)
             .then(() => {
                 commit('setLoading', false);
-                commit('createTest', { page: 'p' + (amount === 8 ? pageAmount + 1 : pageAmount), data: test });
+                commit('createTest', { page: 'p' + (amount === 10 ? pageAmount + 1 : pageAmount), data: test });
 
                 db.collection('data-size').get()
                     .then(snap => {

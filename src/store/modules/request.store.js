@@ -99,9 +99,13 @@ const actions = {
             edited: []
         }
 
+        const requestAmount = this.getters.getDataSize['question-requests'].users[payload.email];
+        const pageAmount = Math.ceil(requestAmount / 8);
+        const amount = requestAmount % 8;
+
         db.collection('question-requests').add(request)
             .then(() => {
-                commit('addQuestionRequest', request);
+                commit('addRequest', { page: 'p' + (amount === 8 ? pageAmount + 1 : pageAmount), data: request });
                 commit('setLoading', false);
 
                 db.collection('data-size').get()
@@ -259,6 +263,9 @@ const actions = {
         const data = [];
         const pages = Object.keys(state.requests);
 
+        const requestAmount = this.getters.getDataSize['question-requests'].users[payload.email];
+        const amount = requestAmount % 8;
+
         if(!pages.includes('p' + page)) {
             let request = null;
             let ref = null;
@@ -272,7 +279,7 @@ const actions = {
             if(mode === 'first') {
                 request = ref.limit(itemsPerPage).get();
             } else {
-                request = ref.limitToLast(itemsPerPage).get();
+                request = ref.limitToLast(amount).get();
             }
 
             let first = null,
