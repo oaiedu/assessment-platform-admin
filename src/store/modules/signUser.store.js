@@ -168,6 +168,8 @@ const actions = {
         commit('setLoading', true);
         commit('clearError');
 
+        dispatch('deleteQuestions');
+        dispatch('loadDataSize');
         dispatch('resetPapers');
         dispatch('resetQuestions');
         dispatch('resetRequests');

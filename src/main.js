@@ -56,6 +56,8 @@ new Vue({
                 this.$store.dispatch('autoSignIn', user );
             }
         });
+
+        this.$store.dispatch('deleteQuestions');
         this.$store.dispatch('resetPapers');
         this.$store.dispatch('resetQuestions');
         this.$store.dispatch('resetRequests');
