@@ -177,7 +177,7 @@ const actions = {
             if(mode === 'first') {
                 request = ref.limit(itemsPerPage).get();
             } else {
-                request = ref.limitToLast(amount).get();
+                request = ref.limitToLast(amount || 10).get();
             }
 
             let first = null,
@@ -405,9 +405,11 @@ const getters = {
         return counter;
     },
     findTestById: state => id => {
+        let test = null;
         for(let key in state.tests) {
-            return state.tests[key].find(t => t.id == id);
+            test = state.tests[key].find(t => t.id == id);
         }
+        return test;
     }
 }
 

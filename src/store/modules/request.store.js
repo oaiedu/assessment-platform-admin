@@ -279,7 +279,7 @@ const actions = {
             if(mode === 'first') {
                 request = ref.limit(itemsPerPage).get();
             } else {
-                request = ref.limitToLast(amount).get();
+                request = ref.limitToLast(amount || 8).get();
             }
 
             let first = null,
@@ -338,60 +338,6 @@ const actions = {
             })
             .catch(error => {
                 console.log(error);
-            });
-    },
-    async deleteQuestion({ commit }, payload) {
-        commit('setLoading', true);
-        const { iq, isSearching } = payload;
-
-        return db.collection("questions").where('iq', '==', iq).get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    doc.ref.delete();
-                    if(doc.data().image && doc.data().image.length > 0) {
-                        const image = doc.data().image;
-                        const childImage = image.split('?alt=media')[0].split('/o/')[1];
-                        const child = decodeURIComponent(childImage);
-                        storage.ref().child(child).delete();
-                    }
-                    db.collection('data-size').get()
-                        .then(snap => {
-                            const document = snap.docs[0];
-                            const general = document.data().questions.general;
-                            const sub = doc.data().subject;
-                            const subSize = document.data().questions.subject[sub];
-
-                            const questions = {
-                                general: general - 1,
-                                subject: {
-                                    ...document.data().questions.subject,
-                                    [sub]: subSize - 1
-                                }
-                            }
-
-                            document.ref.update({ questions })
-                                .then(() => {
-                                    commit('addRemoveSize', { key: 'questions', data: questions });
-                                })
-                                .catch(error => {
-                                    console.log(error);
-                                });
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        });
-                });
-            })
-            .then(() => {
-                commit('setLoading', false);
-                commit('deleteQuestion', iq);
-
-                if(isSearching) {
-                    commit('deleteFilteredQuestion', iq);
-                }
-            })
-            .catch(error => {
-                console.error("Error removing document: ", error);
             });
     },
     deleteQuestionRequest({ commit }, payload) {

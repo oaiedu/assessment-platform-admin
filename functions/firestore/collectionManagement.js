@@ -225,6 +225,11 @@ exports.countData = async (req, res) => {
         }
     }
 
+    const qRequestCounter = {
+        general: 0,
+        users: {}
+    }
+
     const promises = collections.map(collection => {
         return (
             db.collection(collection).get()
@@ -235,6 +240,16 @@ exports.countData = async (req, res) => {
                             questionsCounter.subject[doc.data().subject] += 1;
                         });
                         data['questions'] = questionsCounter;
+                    } else if(collection === 'question-requests') {
+                        qRequestCounter.general = snapshot.docs.length;
+                        snapshot.forEach(doc => {
+                            if(qRequestCounter.users[doc.data().user.email]) {
+                                qRequestCounter.users[doc.data().user.email] += 1;
+                            } else {
+                                qRequestCounter.users[doc.data().user.email] = 1;
+                            }
+                        });
+                        data['question-requests'] = qRequestCounter;
                     } else {
                         data[collection] = snapshot.docs.length;
                     }

@@ -230,7 +230,7 @@ const actions = {
             if(mode === 'first') {
                 request = ref.limit(itemsPerPage).get();
             } else {
-                request = ref.limitToLast(amount).get();
+                request = ref.limitToLast(amount || 10).get();
             }
 
             let first = null,
