@@ -23,6 +23,47 @@
         </v-container>
       </v-container>
 
+      <v-container v-if='hasDeleteMarkQuestions && (userClaims["admin"])'>
+        <v-alert
+            v-if='deleteConfirmed'
+            text
+            prominent
+            type='warning'
+            color="red"
+            icon='mdi-alert' >
+            Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
+        </v-alert>
+
+        <v-alert
+            v-if='hasTrueMarkStatus'
+            text
+            prominent
+            type='warning'
+            color="red"
+            icon='mdi-alert' >
+            As seguintes questões foram marcadas para exclusão:
+            <br>
+            {{ markedQuestionsByUser }}
+        </v-alert>
+
+        <v-row justify="start" v-if='hasTrueMarkStatus'>
+            <v-btn
+                class='ml-10'
+                color='red'
+                dark
+                @click="deleteConfirmed = true; deleteQuestions()" >
+                Confirmar
+            </v-btn>
+            <v-btn
+                class='ml-3'
+                color='grey darken-1'
+                dark
+                @click="restoreAll()" >
+                Restaurar
+            </v-btn>
+        </v-row>
+      </v-container>
+
       <v-container>
         <v-card>
           <v-data-table
@@ -34,10 +75,11 @@
             no-data-text='Não há questões a serem mostradas'
             loading-text="Carregando questões..."
             hide-default-footer
+            :item-class="itemRowStyle"
             class="elevation-1"
           >
             <template v-slot:[`item.actions`]="{ item }">
-              <v-row justify="end">
+              <v-row justify="end" v-if='!item.toDelete'>
                 <v-icon
                   color="grey darken-1"
                   @click='dialogPDF = true; selectedEdit = item;' >
@@ -57,6 +99,25 @@
                     @click='deleteQuestionSnackBar = true; deleteSelect = item;' >
                     mdi-delete
                 </v-icon>
+              </v-row>
+
+              <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
+                  <v-btn
+                    style="padding: 0 !important; font-weight: bold !important;"
+                    color='red'
+                    text
+                    @click='restoreQuestion(item)' >
+                    Restaurar
+                  </v-btn>
+              </v-row>
+
+              <v-row justify="end" v-else>
+                  <v-btn
+                    style="padding: 0 !important; font-weight: bold !important;"
+                    disabled
+                    text >
+                    Excluída
+                  </v-btn>
               </v-row>
             </template>
           </v-data-table>
@@ -87,7 +148,7 @@
         transition="dialog-bottom-transition"
         v-model="dialogNewQuestion"
       >
-        <Stepper @closeDialogNew="dialogNewQuestion = false"></Stepper>
+        <Stepper :page='page' @closeDialogNew="dialogNewQuestion = false"></Stepper>
       </v-dialog>
 
       <v-dialog
@@ -121,7 +182,13 @@
           @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
       </div>
 
-      <v-snackbar v-model="deleteQuestionSnackBar" light color="white" right top :timeout="15000">
+      <v-snackbar
+        v-model="deleteQuestionSnackBar"
+        light
+        color="white"
+        right
+        top
+        :timeout="15000">
         Você realmente quer excluir esta questão?
         <v-btn
             dark
@@ -139,6 +206,33 @@
             Cancelar
         </v-btn>
       </v-snackbar>
+
+      <v-snackbar
+        v-model="deleteErrorSnackBar"
+        light
+        color="red darken-2"
+        right
+        top
+        vertical
+        :timeout="15000" >
+        <span style='color: white; font-size: 1rem'>
+            Esta questão está sendo usada nas seguintes provas:
+            <br>
+            {{ getQuestionTests }}
+            <br><br>
+            Só será possível excluí-la quando não se encontrar em nenhum teste.
+        </span>
+        <template v-slot:action='{ attrs }'>
+            <v-btn
+                dark
+                color="white"
+                text
+                v-bind='attrs'
+                @click="deleteErrorSnackBar = false" >
+                Fechar
+            </v-btn>
+        </template>
+      </v-snackbar>
     </v-container>
   </div>
 </template>
@@ -153,6 +247,9 @@
                 loadedPages: [1],
                 deleteSelect: "",
                 selectedEdit: {},
+                questionTests: [],
+                deleteConfirmed: false,
+                deleteErrorSnackBar: false,
                 deleteQuestionSnackBar: false,
                 selected: [],
                 dialogNewQuestion: false,
@@ -191,10 +288,33 @@
         computed: {
             loading() {
                 return this.$store.getters.loading;
-                this.$store.dispatch("clearLoading");
             },
             questions() {
                 return this.$store.getters.getCurrentQuestionsPage;
+            },
+            deleteMarkQuestions() {
+                return this.$store.getters.getDeleteMarkQuestions;
+            },
+            markedQuestionsByUser() {
+                const isAdmin = this.userClaims['admin'];
+                const questions = isAdmin
+                    ? this.deleteMarkQuestions
+                    : this.deleteMarkQuestions.map(q => q.toDelete.userEmail === this.userInfo.email);
+
+                const iqs = [];
+
+                if(isAdmin) {
+                    iqs.push(...questions.filter(q => q.toDelete && q.toDelete.status));
+                }
+
+                return iqs.map(q => `${q.iq} (${q.toDelete.userEmail})`).join(', ');
+            },
+            hasDeleteMarkQuestions() {
+                return this.deleteMarkQuestions && this.deleteMarkQuestions.length > 0;
+            },
+            hasTrueMarkStatus() {
+                const questions = this.deleteMarkQuestions.map(q => q.toDelete.status);
+                return questions.includes(true);
             },
             filteredQuestions() {
                 return this.$store.getters.getFilteredQuestions;
@@ -202,9 +322,17 @@
             userClaims() {
                 return this.$store.getters.getUserClaims;
             },
+            userInfo() {
+                return this.$store.getters.userInfo;
+            },
             pageAmount() {
                 const questionAmount = this.$store.getters.getDataSize.questions.general;
                 return Math.ceil(questionAmount / this.itemsPerPage);
+            },
+            getQuestionTests() {
+                const titles = this.questionTests.map(t => "'" + t.title + "'");
+                titles.sort((t1, t2) => t1 > t2 ? 1 : -1);
+                return titles.join(', ');
             }
         },
         watch: {
@@ -239,8 +367,27 @@
                 this.dialogPDF = true;
             },
             deleteQuestion(iq) {
-                this.$store.dispatch("deleteQuestion", { iq, isSearching: this.isSearching }).then(() => {
-                    this.deleteQuestionSnackBar = false;
+                this.deleteQuestionSnackBar = false;
+                this.$store.dispatch('checkQuestioninTests', { iq })
+                    .then(result => {
+                        this.questionTests = result;
+                        if(result.length === 0) {
+                            this.$store.dispatch('deleteMarkQuestion', {
+                                iq,
+                                isSearching: this.isSearching,
+                                userEmail: this.userInfo.email
+                            });
+                        } else {
+                            this.deleteErrorSnackBar = true;
+                        }
+                    });
+            },
+            deleteQuestions() {
+                const questions = this.deleteMarkQuestions;
+                questions.forEach(question => {
+                    if(question.toDelete.status){
+                        this.$store.dispatch("changeDeleteStatusQuestions", { iq: question.iq, isSearching: this.isSearching });
+                    }
                 });
             },
             onPageChange(event) {
@@ -271,9 +418,20 @@
                         this.isSearching = false;
                     }
                 }
+            },
+            itemRowStyle(item) {
+                return item.toDelete ? (item.toDelete.status ? 'item-to-delete' : 'item-deleted') : '';
+            },
+            restoreQuestion(item) {
+                this.$store.dispatch('restoreMarkedQuestion', { iq: item.iq, isSearching: this.isSearching });
+            },
+            restoreAll() {
+                this.$store.dispatch('restoreAllMarkedQuestions', { isSearching: this.isSearching });
             }
         },
         mounted() {
+            this.deleteConfirmed = false;
+            this.$store.dispatch('checkDeleteMarkQuestions');
             this.$store.dispatch('loadFOLQuestionPage', { page: 1, itemsPerPage: this.itemsPerPage, mode: 'first' });
         },
         beforeDestroy() {
@@ -282,6 +440,12 @@
             this.page = 1;
             this.$store.commit('resetFilteredQuestions');
             this.$store.commit('resetCurrentQuestionsPage');
+
+            if(this.deleteConfirmed) {
+                this.$store.dispatch('deleteQuestions');
+                this.$store.dispatch('resetQuestions');
+                this.$store.dispatch('loadDataSize');
+            }
         }
     }
 </script>
@@ -289,5 +453,13 @@
 <style>
     li button.v-pagination__item:focus {
         outline: none !important;
+    }
+
+    .item-to-delete {
+        color: #f00;
+    }
+
+    .item-deleted {
+        color: #c4c4c4;
     }
 </style>
