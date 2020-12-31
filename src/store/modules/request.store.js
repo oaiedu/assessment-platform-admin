@@ -5,7 +5,8 @@ const initialState = () => ({
     requests: {},
     filteredRequests: [],
     currentRequestsPage: [],
-    lastRequestDocument: null
+    lastRequestDocument: null,
+    deleteMarkQuestions: []
 });
 
 const state = initialState();
@@ -29,6 +30,50 @@ const mutations = {
     setCurrentRequestsPage(state, data) {
         state.currentRequestsPage = data;
     },
+    addDeleteMarkRequest(state, data) {
+        state.deleteMarkRequests.push(data);
+    },
+    updateDeleteMarkRequest(state, data) {
+        const requests = [...state.deleteMarkRequests];
+        requests.forEach((item, index) => {
+            if(item.iq === data.iq) {
+                requests[index] = data;
+            }
+        });
+        state.deleteMarkRequests = requests;
+    },
+    removeDeleteMarkRequest(state, data) {
+        const requests = [...state.deleteMarkRequests];
+        requests.forEach((item, index) => {
+            if(item.iq === data) {
+                state.deleteMarkRequests.splice(index, 1);
+            }
+        })
+    },
+    setDeleteMarkRequests(state, data) {
+        state.deleteMarkRequests = data;
+    },
+    setDeleteMarkRequest(state, data) {
+        const requests = state.requests;
+        for(let key in requests) {
+            if(requests[key]) {
+                requests[key].forEach((item, index) => {
+                    if(item.iq === data.iq) {
+                        state.requests[key][index] = { ...item, toDelete: data.toDelete };
+                    }
+                });
+            }
+        }
+    },
+    setDeleteMarkFilteredRequest(state, data) {
+        const requests = [...state.filteredRequests];
+        requests.forEach((item, index) => {
+            if(item.iq === data.iq) {
+                requests[index] = { ...item, toDelete: data.toDelete };
+            }
+        });
+        state.filteredRequests = requests;
+    },
     addRequest(state, data) {
         const requests = state.requests[data.page] || [];
         requests.push(data.data);
@@ -45,6 +90,24 @@ const mutations = {
                 });
             }
         }
+    },
+    updateFilteredRequest(state, data) {
+        const requests = [...state.filteredRequests];
+        requests.forEach((item, index) => {
+            if(item.iq === data.iq) {
+                requests[index] = data;
+            }
+        });
+        state.filteredRequests = requests;
+    },
+    updateCurrentRequestsPage(state, data) {
+        const requests = [...state.currentRequestsPage];
+        requests.forEach((item, index) => {
+            if(item.iq === data.iq) {
+                requests[index] = data;
+            }
+        });
+        state.currentRequestsPage = requests;
     },
     removeRequest (state, data) {
         const requests = state.requests;
@@ -105,7 +168,7 @@ const actions = {
 
         db.collection('question-requests').add(request)
             .then(() => {
-                commit('addRequest', { page: 'p' + (amount === 8 ? pageAmount + 1 : pageAmount), data: request });
+                commit('addRequest', { page: 'p' + (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: request });
                 commit('setLoading', false);
 
                 db.collection('data-size').get()
@@ -141,24 +204,24 @@ const actions = {
     },
     updateQuestionRequest({ commit }, payload) {
         commit('setLoading', true);
-        const { mode, question } = payload;
+        const { mode, request } = payload;
 
-        db.collection('question-requests').where('iq', '==', question.iq).get()
+        db.collection('question-requests').where('iq', '==', request.iq).get()
             .then(snapshot => {
                 if(mode === 'sttUpdate') {
                     snapshot.docs[0].ref.update({ status: payload.status })
                         .then(() => {
-                            question.status = payload.status;
-                            commit('updateQuestionRequest', question);
+                            request.status = payload.status;
+                            commit('updateRequest', request);
                             commit('setLoading', false);
                         })
                         .catch(error => {
                             console.log(error);
                         });
                 } else {
-                    snapshot.docs[0].ref.update(question)
+                    snapshot.docs[0].ref.update(request)
                         .then(() => {
-                            commit('updateQuestionRequest', question);
+                            commit('updateRequest', request);
                             commit('setLoading', false);
                         })
                         .catch(error => {
@@ -170,39 +233,6 @@ const actions = {
                 console.log(error);
             });
     },
-    // loadQuestionRequests({ commit }, payload) {
-    //     return new Promise((resolve, reject) => {
-    //         try {
-    //             commit('setLoading', true);
-    //             const { claims, userInfo } = payload;
-
-    //             const data = [];
-    //             let dbRequest = null;
-
-    //             if(claims['admin']) {
-    //                 dbRequest = db.collection('question-requests').get();
-    //             } else {
-    //                 dbRequest = db.collection('question-requests').where('user.email', '==', userInfo.email).get();
-    //             }
-
-    //             dbRequest.then(snapshot => {
-    //                 snapshot.forEach(doc => {
-    //                     data.push(doc.data());
-    //                 });
-    //             })
-    //             .then(() => {
-    //                 commit('setQuestionRequests', data);
-    //                 commit('setLoading', false);
-    //                 resolve();
-    //             })
-    //             .catch(error => {
-    //                 console.log(error);
-    //             });
-    //         } catch {
-    //             reject('Error');
-    //         }
-    //     });
-    // },
     loadRequestPage({ commit, state }, payload) {
         commit('setLoading', true);
 
@@ -273,7 +303,7 @@ const actions = {
             if(claims['admin']) {
                 ref = db.collection('question-requests').orderBy('iq');
             } else {
-                ref = db.collection('question-requests').orderBy('iq').where('user.email', '==', userInfo.email);
+                ref = db.collection('question-requests').where('user.email', '==', userInfo.email);
             }
 
             if(mode === 'first') {
@@ -286,17 +316,18 @@ const actions = {
                 last = null;
 
             request.then(snapshot => {
-                    first = snapshot.docs[0].data().iq;
-                    last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+                if(snapshot.docs.length > 0) {
+                        first = snapshot.docs.length > 0 ? snapshot.docs[0].data().iq : '';
+                        last = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1].data().iq : '';
 
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
-                    });
-                })
-                .then(() => {
-                    commit('setCurrentRequestsPage', data);
-                    commit('setRequestPage', { page: 'p' + page, data });
-                    commit('setLastRequestDocument', [first, last]);
+                        snapshot.forEach(doc => {
+                            data.push(doc.data());
+                        });
+
+                        commit('setCurrentRequestsPage', data);
+                        commit('setRequestPage', { page: 'p' + page, data });
+                        commit('setLastRequestDocument', [first, last]);
+                    }
                     commit('setLoading', false);
                 })
                 .catch(error => {
@@ -338,6 +369,205 @@ const actions = {
             })
             .catch(error => {
                 console.log(error);
+            });
+    },
+    checkDeleteMarkRequests({ commit }) {
+        const data = [];
+
+        db.collection('question-requests').where('toDelete.status', '==', true).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
+            })
+            .then(() => {
+                commit('setDeleteMarkRequests', data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    deleteMarkRequest({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { iq, isSearching, userEmail } = payload;
+
+        db.collection('question-requests').where('iq', '==', iq).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+
+                const toDelete = {
+                    status: true,
+                    userEmail
+                }
+
+                doc.ref.update({ toDelete });
+
+                commit('setDeleteMarkRequest', { iq, toDelete });
+
+                if(isSearching) {
+                    commit('setDeleteMarkFilteredRequest', { iq, toDelete });
+                }
+
+                commit('updateCurrentRequestsPage', { ...doc.data(), toDelete });
+                commit('addDeleteMarkRequest', { ...doc.data(), toDelete });
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    restoreMarkedRequest({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { iq, isSearching } = payload;
+
+        db.collection('question-requests').where('iq', '==', iq).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+                const data = doc.data();
+
+                const request = {
+                    iq: data.iq,
+                    subject: data.subject,
+                    question: data.question,
+                    knowledge: data.knowledge,
+                    knowledgePWR: data.knowledgePWR,
+                    knowledgeBWR: data.knowledgeBWR,
+                    answers: data.answers,
+                    image: data.image,
+                    imageSize: data.imageSize,
+                    edited: data.edited || [],
+                    status: data.status,
+                    user: data.user
+                };
+
+                doc.ref.set(request);
+                commit('updateRequest', request);
+
+                if(isSearching) {
+                    commit('updateFilteredRequest', request);
+                }
+
+                commit('removeDeleteMarkRequest', iq);
+                commit('updateCurrentRequestsPage', request);
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    restoreAllMarkedRequests({ commit, state }, payload) {
+        commit('setLoading', true);
+
+        const { isSearching, user } = payload;
+
+        db.collection('question-requests').where('toDelete.status', '==', true)
+            .where('toDelete.userEmail', '==', user.email).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+
+                    const request = {
+                        iq: data.iq,
+                        subject: data.subject,
+                        question: data.question,
+                        knowledge: data.knowledge,
+                        knowledgePWR: data.knowledgePWR,
+                        knowledgeBWR: data.knowledgeBWR,
+                        answers: data.answers,
+                        image: data.image,
+                        imageSize: data.imageSize,
+                        edited: data.edited || [],
+                        status: data.status,
+                        user: data.user
+                    };
+
+                    doc.ref.set(request);
+                    const falseMarkedRequests = state.deleteMarkRequests.filter(q => !q.toDelete.status);
+                    commit('setDeleteMarkRequests', falseMarkedRequests);
+                    commit('updateRequest', request);
+                    commit('updateCurrentRequestsPage', request);
+                    if(isSearching) commit('updateFilteredRequest', request);
+                });
+            })
+            .then(() => commit('setLoading', false))
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    changeDeleteStatusRequests({ commit }, payload) {
+        commit('setLoading', true);
+        const { iq, isSearching } = payload;
+
+        db.collection('question-requests').where('iq', '==', iq).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+                const toDelete = {
+                    status: false
+                }
+
+                doc.ref.update({ ...doc.data(), toDelete: { status: false } });
+
+                commit('updateCurrentRequestsPage', { ...doc.data(), toDelete });
+                commit('updateRequest', { ...doc.data(), toDelete });
+                commit('updateDeleteMarkRequest', { ...doc.data(), toDelete });
+                if(isSearching) commit('updateFilteredRequest', { ...doc.data(), toDelete });
+
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    deleteRequests({ commit }) {
+        db.collection("question-requests").where('toDelete.status', '==', false).get()
+            .then(snapshot => {
+                const users = {}
+                snapshot.forEach(doc => {
+                    doc.ref.delete();
+                    if(doc.data().image && doc.data().image.length > 0) {
+                        const image = doc.data().image;
+                        const childImage = image.split('?alt=media')[0].split('/o/')[1];
+                        const child = decodeURIComponent(childImage);
+                        storage.ref().child(child).delete();
+                    }
+                    if(users[doc.data().user.email]) {
+                        users[doc.data().user.email] += 1;
+                    } else {
+                        users[doc.data().user.email] = 1;
+                    }
+                });
+                db.collection('data-size').get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const general = document.data()['question-requests'].general;
+
+                        const questionRequests = {
+                            general: general - snapshot.docs.length,
+                            users: {
+                                ...document.data()['question-requests'].users
+                            }
+                        }
+
+                        for(let key in questionRequests.users) {
+                            questionRequests.users[key] -= users[key];
+                        }
+
+                        document.ref.update({ ['question-requests']: questionRequests })
+                            .then(() => {
+                                commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            })
+            .catch(error => {
+                console.error("Error removing document: ", error);
             });
     },
     deleteQuestionRequest({ commit }, payload) {
@@ -451,6 +681,9 @@ const actions = {
 const getters = {
     getRequests(state) {
         return state.questionRequests;
+    },
+    getDeleteMarkRequests(state) {
+        return state.deleteMarkRequests;
     },
     getRequestsByPage: state => page => {
         return state.requests['p' + page];

@@ -123,10 +123,20 @@
                             no-data-text='Não há questões a serem mostradas'
                             loading-text="Carregando questões..."
                             show-select
+                            @toggle-select-all="selectAllToggle"
                             item-key="iq"
+                            :item-class="itemRowStyle"
                             hide-default-footer
-                            class="elevation-1"
-                            ></v-data-table>
+                            class="elevation-1" >
+                            <template v-slot:[`item.data-table-select`]='{ item, isSelected, select }'>
+                                <v-simple-checkbox
+                                    :value='isSelected'
+                                    :readonly='!!item.toDelete'
+                                    :disabled='!!item.toDelete'
+                                    @input='select($event)' >
+                                </v-simple-checkbox>
+                            </template>
+                            </v-data-table>
                     </v-card>
 
                     <!-- <v-card v-else>
@@ -185,8 +195,10 @@
 
 <script>
     import Paginator from '../Paginator';
+    import Ripple from 'vuetify/lib/directives/ripple';
 
     export default {
+        directives: { Ripple },
         components: { Paginator },
         data() {
             return {
@@ -247,6 +259,9 @@
             },
             questions() {
                 return this.$store.getters.getCurrentQuestionsPage;
+            },
+            disabledCount() {
+                return this.questions.filter(q => !!q.toDelete).length;
             },
             filteredQuestions() {
                 return this.$store.getters.getFilteredQuestions;
@@ -414,7 +429,10 @@
                                     title: this.testName,
                                     questions: this.testItems,
                                     type: this.testType,
-                                    user: this.$store.getters.userInfo.name,
+                                    user: {
+                                        name: this.$store.getters.userInfo.name,
+                                        email: this.$store.getters.userInfo.email
+                                    },
                                     created: createdDate,
                                     edited: "",
                                     purpose: this.purpose
@@ -426,6 +444,19 @@
                             }
                         });
                 }
+            },
+            itemRowStyle(item) {
+                return item.toDelete ? (item.toDelete.status ? 'item-to-delete' : 'item-deleted') : '';
+            },
+            selectAllToggle(props) {
+                if(this.selectedQuestions.length != this.questions.length - this.disabledCount) {
+                    this.selectedQuestions = [];
+                    props.items.forEach(item => {
+                    if(!item.toDelete) {
+                        this.selectedQuestions.push(item);
+                    }
+                    });
+                } else this.selectedQuestions = [];
             }
         },
         mounted() {
@@ -440,3 +471,13 @@
         }
     }
 </script>
+
+<style>
+    .item-to-delete {
+        color: #f00;
+    }
+
+    .item-deleted {
+        color: #c4c4c4;
+    }
+</style>

@@ -23,6 +23,74 @@
           </v-container>
       </v-container>
 
+      <v-container v-if='hasDeleteMarkTests && (userClaims["admin"] ||
+        (markedTestsByUser && markedTestsByUser.length > 0) ||
+        (deleteMarkTests.filter(t => t.toDelete.userEmail === userInfo.email)))'>
+        <v-alert
+            v-if='deleteConfirmed'
+            text
+            prominent
+            type='warning'
+            color="red"
+            icon='mdi-alert' >
+            Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
+        </v-alert>
+
+        <v-alert
+            v-if='hasTrueMarkStatus && (userClaims["admin"] || markedTestsByUser)'
+            text
+            prominent
+            type='warning'
+            color="red"
+            icon='mdi-alert' >
+            As seguintes provas foram marcadas para exclusão:
+            <br>
+            {{ markedTestsByUser }}
+
+            <div v-if="userClaims['admin']">
+                <br>
+                Marcadas por você:
+                <br>
+                {{ markedTestsAdmin }}
+            </div>
+        </v-alert>
+
+        <v-row justify="start" v-if='hasTrueMarkStatus && (userClaims["admin"] || markedTestsByUser)'>
+            <v-btn
+                class='ml-10'
+                color='red'
+                :dark='!(userClaims["admin"] && markedTestsAdmin.length === 0)'
+                :disabled="userClaims['admin'] && markedTestsAdmin.length === 0"
+                @click="deleteConfirmed = true; deleteTests(false)" >
+                Confirmar
+            </v-btn>
+            <v-btn
+                v-if="userClaims['admin']"
+                class='ml-3'
+                color='red'
+                dark
+                @click="deleteConfirmed = true; deleteTests(true)" >
+                Confirmar Todos
+            </v-btn>
+            <v-btn
+                class='ml-3'
+                color='grey darken-1'
+                :dark='!(userClaims["admin"] && markedTestsAdmin.length === 0)'
+                :disabled="userClaims['admin'] && markedTestsAdmin.length === 0"
+                @click="restoreAll(false)" >
+                Restaurar
+            </v-btn>
+            <v-btn
+                v-if="userClaims['admin']"
+                class='ml-3'
+                color='grey darken-1'
+                dark
+                @click="restoreAll(true)" >
+                Restaurar Todos
+            </v-btn>
+        </v-row>
+      </v-container>
+
       <v-container>
         <v-card>
           <v-data-table
@@ -41,8 +109,11 @@
             </template>
 
             <template small v-slot:[`item.actions`]="{ item }">
-              <v-row justify="end">
-                <router-link style="text-decoration: none;" :to="`/tests/${item.id}`" replace>
+              <v-row justify="end" v-if='!item.toDelete'>
+                <router-link
+                    style="text-decoration: none;"
+                    :to="`/tests/${item.id}`"
+                    replace>
                   <v-icon color="grey darken-1">mdi-pdf-box</v-icon>
                 </router-link>
                 <v-icon
@@ -59,6 +130,26 @@
                     color="red" >
                     mdi-delete
                 </v-icon>
+              </v-row>
+
+              <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
+                  <v-btn
+                    style="padding: 0 !important; font-weight: bold !important;"
+                    color='red'
+                    text
+                    :disabled='userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email'
+                    @click='restoreTest(item)' >
+                    {{ userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email ? 'Indisponível' : 'Restaurar' }}
+                  </v-btn>
+              </v-row>
+
+              <v-row justify="end" v-else>
+                  <v-btn
+                    style="padding: 0 !important; font-weight: bold !important;"
+                    disabled
+                    text >
+                    Excluída
+                  </v-btn>
               </v-row>
             </template>
           </v-data-table>
@@ -114,6 +205,7 @@
             return {
                 search: '',
                 isSearching: false,
+                deleteConfirmed: false,
                 deleteTestSnackBar: false,
                 dialogNewTest: false,
                 dialogHtmlTest: false,
@@ -133,16 +225,45 @@
         computed: {
             loading () {
                 return this.$store.getters.loading;
-                this.$store.dispatch('clearLoading');
             },
             tests() {
                 return this.$store.getters.getCurrentTestsPage;
+            },
+            deleteMarkTests() {
+                return this.$store.getters.getDeleteMarkTests;
+            },
+            markedTestsAdmin() {
+                const tests = this.deleteMarkTests.filter(t => t.toDelete.userEmail === this.userInfo.email);
+                const titles = tests.filter(t => t.toDelete && t.toDelete.status);
+                return titles.map(t => t.title).join(', ');
+            },
+            markedTestsByUser() {
+                const isAdmin = this.userClaims['admin'];
+                const tests = isAdmin
+                    ? this.deleteMarkTests
+                    : this.deleteMarkTests.filter(t => t.toDelete.userEmail === this.userInfo.email);
+
+                const titles = [];
+
+                titles.push(...tests.filter(t => t.toDelete && t.toDelete.status));
+
+                return titles.map(t => isAdmin ? `${t.title} (${t.toDelete.userEmail})` : t.title).join(', ');
+            },
+            hasDeleteMarkTests() {
+                return this.deleteMarkTests && this.deleteMarkTests.length > 0;
+            },
+            hasTrueMarkStatus() {
+                const tests = this.deleteMarkTests.map(t => t.toDelete.status);
+                return tests.includes(true);
             },
             filteredTests() {
                 return this.$store.getters.getFilteredTests;
             },
             userClaims() {
                 return this.$store.getters.getUserClaims;
+            },
+            userInfo() {
+                return this.$store.getters.userInfo;
             },
             pageAmount() {
                 const testsAmount = this.$store.getters.getDataSize.tests;
@@ -155,8 +276,19 @@
                 this.dialogEditTest = true;
             },
             deleteTest(id) {
-                this.$store.dispatch("deleteTest", { id, isSearching: this.isSearching }).then(() => {
-                    this.deleteTestSnackBar = false;
+                this.deleteTestSnackBar = false;
+                this.$store.dispatch('deleteMarkTest', {
+                    id,
+                    isSearching: this.isSearching,
+                    userEmail: this.userInfo.email
+                });
+            },
+            deleteTests(all) {
+                const tests = this.deleteMarkTests;
+                tests.forEach(test => {
+                    if(test.toDelete.status && (this.userInfo.email === test.toDelete.userEmail || all)) {
+                        this.$store.dispatch("changeDeleteStatusTests", { id: test.id, isSearching: this.isSearching });
+                    }
                 });
             },
             onPageChange(event) {
@@ -187,6 +319,15 @@
                         this.isSearching = false;
                     }
                 }
+            },
+            itemRowStyle(item) {
+                return item.toDelete ? (item.toDelete.status ? 'item-to-delete' : 'item-deleted') : '';
+            },
+            restoreTest(item) {
+                this.$store.dispatch('restoreMarkedTest', { id: item.id, isSearching: this.isSearching });
+            },
+            restoreAll(all) {
+                this.$store.dispatch('restoreAllMarkedTests', { all, user: this.userInfo, isSearching: this.isSearching });
             }
         },
         watch: {
@@ -199,6 +340,8 @@
             }
         },
         mounted() {
+            this.deleteConfirmed = false;
+            this.$store.dispatch('checkDeleteMarkTests');
             this.$store.dispatch("loadFOLTestPage", { page: 1, itemsPerPage: this.itemsPerPage, mode: 'first' });
         },
         beforeDestroy() {
@@ -207,6 +350,22 @@
             this.page = 1;
             this.$store.commit('resetFilteredTests');
             this.$store.commit('resetCurrentTestsPage');
+
+            if(this.deleteConfirmed) {
+                this.$store.dispatch('deleteTests');
+                this.$store.dispatch('resetTests');
+                this.$store.dispatch('loadDataSize');
+            }
         }
     };
 </script>
+
+<style>
+    .item-to-delete {
+        color: #f00;
+    }
+
+    .item-deleted {
+        color: #c4c4c4;
+    }
+</style>

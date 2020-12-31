@@ -58,6 +58,9 @@ new Vue({
         });
 
         this.$store.dispatch('deleteQuestions');
+        this.$store.dispatch('deleteRequests');
+        this.$store.dispatch('deletePapers');
+        this.$store.dispatch('deleteTests');
         this.$store.dispatch('resetPapers');
         this.$store.dispatch('resetQuestions');
         this.$store.dispatch('resetRequests');
