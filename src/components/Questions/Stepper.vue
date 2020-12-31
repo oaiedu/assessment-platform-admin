@@ -355,7 +355,7 @@ export default {
         Editor,
         "vue-markdown": VueMarkdown
     },
-    props: ['questionRequest'],
+    props: ['questionRequest', 'page'],
     data() {
         return {
             letters: ["A", "B", "C", "D"],
@@ -522,7 +522,7 @@ export default {
                             let aux = null;
 
                             if(this.userClaims['admin']) {
-                                    aux = this.$store.dispatch("createQuestion", questionData);
+                                    aux = this.$store.dispatch("createQuestion", { question: questionData, page: this.page });
                             } else {
                                 aux = this.$store.dispatch('createQuestionRequest', {
                                     ...questionData,
