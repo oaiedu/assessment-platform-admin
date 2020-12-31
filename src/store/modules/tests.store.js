@@ -1,4 +1,3 @@
-import * as firebase from 'firebase';
 import uuid from 'uuid-random';
 
 import { db, storage } from '../../main';
@@ -9,7 +8,8 @@ const initialState = () => ({
     filteredTests: [],
     currentTestsPage: [],
     lastTestDocument: null,
-    testQuestions: []
+    testQuestions: [],
+    deleteMarkTests: []
 });
 
 const state = initialState();
@@ -33,6 +33,50 @@ const mutations = {
     setCurrentTestsPage(state, data) {
         state.currentTestsPage = data;
     },
+    addDeleteMarkTest(state, data) {
+        state.deleteMarkTests.push(data);
+    },
+    updateDeleteMarkTest(state, data) {
+        const tests = [...state.deleteMarkTests];
+        tests.forEach((item, index) => {
+            if(item.id === data.id) {
+                tests[index] = data;
+            }
+        });
+        state.deleteMarkTests = tests;
+    },
+    removeDeleteMarkTest(state, data) {
+        const tests = [...state.deleteMarkTests];
+        tests.forEach((item, index) => {
+            if(item.id === data) {
+                state.deleteMarkTests.splice(index, 1);
+            }
+        })
+    },
+    setDeleteMarkTests(state, data) {
+        state.deleteMarkTests = data;
+    },
+    setDeleteMarkTest(state, data) {
+        const tests = state.tests;
+        for(let key in tests) {
+            if(tests[key]) {
+                tests[key].forEach((item, index) => {
+                    if(item.id === data.id) {
+                        state.tests[key][index] = { ...item, toDelete: data.toDelete };
+                    }
+                });
+            }
+        }
+    },
+    setDeleteMarkFilteredTest(state, data) {
+        const tests = [...state.filteredTests];
+        tests.forEach((item, index) => {
+            if(item.id === data.id) {
+                tests[index] = { ...item, toDelete: data.toDelete };
+            }
+        });
+        state.filteredTests = tests;
+    },
     setTestQuestions(state, data) {
         state.testQuestions = data;
     },
@@ -52,6 +96,24 @@ const mutations = {
                 });
             }
         }
+    },
+    updateFilteredTest(state, data) {
+        const tests = [...state.filteredTests];
+        tests.forEach((item, index) => {
+            if(item.id === data.id) {
+                tests[index] = data;
+            }
+        });
+        state.filteredTests = tests;
+    },
+    updateCurrentTestsPage(state, data) {
+        const tests = [...state.currentTestsPage];
+        tests.forEach((item, index) => {
+            if(item.id === data.id) {
+                tests[index] = data;
+            }
+        });
+        state.currentTestsPage = tests;
     },
     deleteTest(state, data) {
         const tests = state.tests;
@@ -290,33 +352,174 @@ const actions = {
 
         commit('setTestQuestions', data);
     },
-    deleteTest({ commit }, payload) {
-        commit('setLoading', true);
-        const { id, isSearching } = payload;
-        db.collection("tests").where('id', '==', id).get()
+    checkDeleteMarkTests({ commit }) {
+        const data = [];
+
+        db.collection('tests').where('toDelete.status', '==', true).get()
             .then(snapshot => {
-                snapshot.docs[0].ref.delete();
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
             })
             .then(() => {
-                commit('setLoading', false);
-                commit('deleteTest', id);
+                commit('setDeleteMarkTests', data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    deleteMarkTest({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { id, isSearching, userEmail } = payload;
+
+        db.collection('tests').where('id', '==', id).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+
+                const toDelete = {
+                    status: true,
+                    userEmail
+                }
+
+                doc.ref.update({ toDelete });
+
+                commit('setDeleteMarkTest', { id, toDelete });
 
                 if(isSearching) {
-                    commit('deleteFilteredTest', id);
+                    commit('setDeleteMarkFilteredTest', { id, toDelete });
                 }
+
+                commit('updateCurrentTestsPage', { ...doc.data(), toDelete });
+                commit('addDeleteMarkTest', { ...doc.data(), toDelete });
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    restoreMarkedTest({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { id, isSearching } = payload;
+
+        db.collection('tests').where('id', '==', id).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+                const data = doc.data();
+
+                const test = {
+                    id: data.id,
+                    title: data.title,
+                    questions: data.questions,
+                    type: data.type,
+                    user: data.user,
+                    created: data.created,
+                    edited: data.edited,
+                    purpose: data.purpose
+                }
+
+                doc.ref.set(test);
+                commit('updateTest', test);
+
+                if(isSearching) {
+                    commit('updateFilteredTest', test);
+                }
+
+                commit('removeDeleteMarkTest', id);
+                commit('updateCurrentTestsPage', test);
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    restoreAllMarkedTests({ commit, state }, payload) {
+        commit('setLoading', true);
+
+        const { all, isSearching, user } = payload;
+
+        const ref = db.collection('tests').where('toDelete.status', '==', true);
+        let request = null;
+
+        if(all) {
+            request = ref;
+        } else {
+            request = ref.where('toDelete.userEmail', '==', user.email);
+        }
+
+        request.get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+
+                    const test = {
+                        id: data.id,
+                        title: data.title,
+                        questions: data.questions,
+                        type: data.type,
+                        user: data.user,
+                        created: data.created,
+                        edited: data.edited,
+                        purpose: data.purpose
+                    }
+
+                    doc.ref.set(test);
+                    if(all) {
+                        const falseMarkedTests = state.deleteMarkTests.filter(t => !t.toDelete.status);
+                        commit('setDeleteMarkTests', falseMarkedTests);
+                    } else {
+                        const markedTests = state.deleteMarkTests.filter(t => t.id !== test.id);
+                        commit('setDeleteMarkTests', markedTests);
+                    }
+                    commit('updateTest', test);
+                    commit('updateCurrentTestsPage', test);
+                    if(isSearching) commit('updateFilteredTest', test);
+                });
+            })
+            .then(() => commit('setLoading', false))
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    changeDeleteStatusTests({ commit }, payload) {
+        commit('setLoading', true);
+        const { id, isSearching } = payload;
+
+        db.collection('tests').where('id', '==', id).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+                const toDelete = {
+                    status: false
+                }
+
+                doc.ref.update({ ...doc.data(), toDelete: { status: false } });
+
+                commit('updateCurrentTestsPage', { ...doc.data(), toDelete });
+                commit('updateTest', { ...doc.data(), toDelete });
+                commit('updateDeleteMarkTest', { ...doc.data(), toDelete });
+                if(isSearching) commit('updateFilteredTest', { ...doc.data(), toDelete });
+
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    deleteTests({ commit }) {
+        db.collection("tests").where('toDelete.status', '==', false).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    doc.ref.delete();
+                });
 
                 db.collection('data-size').get()
                     .then(snap => {
                         const document = snap.docs[0];
                         const size = document.data().tests;
 
-                        document.ref.update({ tests: size - 1 })
-                            .then(() => {
-                                commit('addRemoveSize', { key: 'tests', data: size - 1 });
-                            })
-                            .catch(error => {
-                                console.log(error);
-                            });
+                        document.ref.update({ tests: size - snapshot.docs.length });
+                        commit('addRemoveSize', { key: 'tests', data: size - snapshot.docs.length });
                     })
                     .catch(error => {
                         console.log(error);
@@ -338,7 +541,7 @@ const actions = {
         db.collection("tests").add(test)
             .then(() => {
                 commit('setLoading', false);
-                commit('createTest', { page: 'p' + (amount === 10 ? pageAmount + 1 : pageAmount), data: test });
+                commit('createTest', { page: 'p' + (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount), data: test });
 
                 db.collection('data-size').get()
                     .then(snap => {
@@ -383,6 +586,12 @@ const actions = {
 const getters = {
     loadedTests(state) {
         return state.loadedTests;
+    },
+    getTests(state) {
+        return state.tests;
+    },
+    getDeleteMarkTests(state) {
+        return state.deleteMarkTests;
     },
     getTestsByPage: state => page => {
         return state.tests['p' + page];
