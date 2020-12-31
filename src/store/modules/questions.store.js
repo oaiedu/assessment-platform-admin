@@ -296,7 +296,7 @@ const actions = {
                 console.log(error);
             });
     },
-    async checkQuestioninTests(store, payload) {
+    async checkQuestionInTests(store, payload) {
         const { iq } = payload;
 
         return new Promise((resolve, reject) => {

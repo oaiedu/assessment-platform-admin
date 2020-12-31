@@ -106,8 +106,9 @@
                     style="padding: 0 !important; font-weight: bold !important;"
                     color='red'
                     text
+                    :disabled="!userClaims['admin']"
                     @click='restoreQuestion(item)' >
-                    Restaurar
+                    {{ userClaims['admin'] ? 'Restaurar' : 'Indisponível' }}
                   </v-btn>
               </v-row>
 
@@ -299,7 +300,7 @@
                 const isAdmin = this.userClaims['admin'];
                 const questions = isAdmin
                     ? this.deleteMarkQuestions
-                    : this.deleteMarkQuestions.map(q => q.toDelete.userEmail === this.userInfo.email);
+                    : this.deleteMarkQuestions.filter(q => q.toDelete.userEmail === this.userInfo.email);
 
                 const iqs = [];
 
@@ -368,7 +369,7 @@
             },
             deleteQuestion(iq) {
                 this.deleteQuestionSnackBar = false;
-                this.$store.dispatch('checkQuestioninTests', { iq })
+                this.$store.dispatch('checkQuestionInTests', { iq })
                     .then(result => {
                         this.questionTests = result;
                         if(result.length === 0) {
