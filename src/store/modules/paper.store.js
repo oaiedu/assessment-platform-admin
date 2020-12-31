@@ -6,7 +6,8 @@ const initialState = () => ({
     papers: {},
     filteredPapers: [],
     currentPapersPage: [],
-    lastPaperDocument: null
+    lastPaperDocument: null,
+    deleteMarkPapers: []
 });
 
 const state = initialState();
@@ -30,6 +31,50 @@ const mutations = {
     setCurrentPapersPage(state, data) {
         state.currentPapersPage = data;
     },
+    addDeleteMarkPaper(state, data) {
+        state.deleteMarkPapers.push(data);
+    },
+    updateDeleteMarkPaper(state, data) {
+        const papers = [...state.deleteMarkPapers];
+        papers.forEach((item, index) => {
+            if(item.id === data.id) {
+                papers[index] = data;
+            }
+        });
+        state.deleteMarkPapers = papers;
+    },
+    removeDeleteMarkPaper(state, data) {
+        const papers = [...state.deleteMarkPapers];
+        papers.forEach((item, index) => {
+            if(item.id === data) {
+                state.deleteMarkPapers.splice(index, 1);
+            }
+        })
+    },
+    setDeleteMarkPapers(state, data) {
+        state.deleteMarkPapers = data;
+    },
+    setDeleteMarkPaper(state, data) {
+        const papers = state.papers;
+        for(let key in papers) {
+            if(papers[key]) {
+                papers[key].forEach((item, index) => {
+                    if(item.id === data.id) {
+                        state.papers[key][index] = { ...item, toDelete: data.toDelete };
+                    }
+                });
+            }
+        }
+    },
+    setDeleteMarkFilteredPaper(state, data) {
+        const papers = [...state.filteredPapers];
+        papers.forEach((item, index) => {
+            if(item.id === data.id) {
+                papers[index] = { ...item, toDelete: data.toDelete };
+            }
+        });
+        state.filteredPapers = papers;
+    },
     createPaper(state, data) {
         const papers = state.papers[data.page] || [];
         papers.push(data.data);
@@ -46,6 +91,24 @@ const mutations = {
                 });
             }
         }
+    },
+    updateFilteredPaper(state, data) {
+        const papers = [...state.filteredPapers];
+        papers.forEach((item, index) => {
+            if(item.id === data.id) {
+                papers[index] = data;
+            }
+        });
+        state.filteredPapers = papers;
+    },
+    updateCurrentPapersPage(state, data) {
+        const papers = [...state.currentPapersPage];
+        papers.forEach((item, index) => {
+            if(item.id === data.id) {
+                papers[index] = data;
+            }
+        });
+        state.currentPapersPage = papers;
     },
     removePaper(state, data) {
         const papers = state.papers;
@@ -329,6 +392,181 @@ const actions = {
             }
         });
     },
+    checkDeleteMarkPapers({ commit }) {
+        const data = [];
+
+        db.collection('papers').where('toDelete.status', '==', true).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
+            })
+            .then(() => {
+                commit('setDeleteMarkPapers', data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    deleteMarkPaper({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { id, isSearching, userEmail } = payload;
+
+        db.collection('papers').where('id', '==', id).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+
+                const toDelete = {
+                    status: true,
+                    userEmail
+                }
+
+                doc.ref.update({ toDelete });
+
+                commit('setDeleteMarkPaper', { id, toDelete });
+
+                if(isSearching) {
+                    commit('setDeleteMarkFilteredPaper', { id, toDelete });
+                }
+
+                commit('updateCurrentPapersPage', { ...doc.data(), toDelete });
+                commit('addDeleteMarkPaper', { ...doc.data(), toDelete });
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    restoreMarkedPaper({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { id, isSearching } = payload;
+
+        db.collection('papers').where('id', '==', id).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+                const data = doc.data();
+
+                const paper = {
+                    id: data.id,
+                    image: data.image,
+                    description: data.description,
+                    name: data.name
+                }
+
+                doc.ref.set(paper);
+                commit('updatePaper', paper);
+
+                if(isSearching) {
+                    commit('updateFilteredPaper', paper);
+                }
+
+                commit('removeDeleteMarkPaper', id);
+                commit('updateCurrentPapersPage', paper);
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    restoreAllMarkedPapers({ commit, state }, payload) {
+        commit('setLoading', true);
+
+        const { all, isSearching, user } = payload;
+
+        const ref = db.collection('papers').where('toDelete.status', '==', true);
+        let request = null;
+
+        if(all) {
+            request = ref;
+        } else {
+            request = ref.where('toDelete.userEmail', '==', user.email);
+        }
+
+        request.get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+
+                    const paper = {
+                        id: data.id,
+                        image: data.image,
+                        description: data.description,
+                        name: data.name
+                    }
+
+                    doc.ref.set(paper);
+                    if(all) {
+                        const falseMarkedPapers = state.deleteMarkPapers.filter(t => !t.toDelete.status);
+                        commit('setDeleteMarkPapers', falseMarkedPapers);
+                    } else {
+                        const markedPapers = state.deleteMarkPapers.filter(t => t.id !== paper.id);
+                        commit('setDeleteMarkPapers', markedPapers);
+                    }
+                    commit('updatePaper', paper);
+                    commit('updateCurrentPapersPage', paper);
+                    if(isSearching) commit('updateFilteredPaper', paper);
+                });
+            })
+            .then(() => commit('setLoading', false))
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    changeDeleteStatusPapers({ commit }, payload) {
+        commit('setLoading', true);
+        const { id, isSearching } = payload;
+
+        db.collection('papers').where('id', '==', id).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+                const toDelete = {
+                    status: false
+                }
+
+                doc.ref.update({ ...doc.data(), toDelete: { status: false } });
+
+                commit('updateCurrentPapersPage', { ...doc.data(), toDelete });
+                commit('updatePaper', { ...doc.data(), toDelete });
+                commit('updateDeleteMarkPaper', { ...doc.data(), toDelete });
+                if(isSearching) commit('updateFilteredPaper', { ...doc.data(), toDelete });
+
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    deletePapers({ commit }) {
+        db.collection("papers").where('toDelete.status', '==', false).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    doc.ref.delete();
+                    if(doc.data().image && doc.data().image.length > 0) {
+                        const image = doc.data().image;
+                        const childImage = image.split('?alt=media')[0].split('/o/')[1];
+                        const child = decodeURIComponent(childImage);
+                        storage.ref().child(child).delete();
+                    }
+                });
+
+                db.collection('data-size').get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const size = document.data().papers;
+
+                        document.ref.update({ papers: size - snapshot.docs.length });
+                        commit('addRemoveSize', { key: 'papers', data: size - snapshot.docs.length });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            })
+            .catch(error => {
+                console.error("Error removing document: ", error);
+            });
+    },
     createPaper({ commit }, payload) {
         const paper = {
             id: payload.paperId,
@@ -343,7 +581,7 @@ const actions = {
 
         db.collection("papers").add(paper)
             .then(() => {
-                commit('createPaper', { page: 'p' + (amount === 10 ? pageAmount + 1 : pageAmount), data: paper });
+                commit('createPaper', { page: 'p' + (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount), data: paper });
                 commit('setLoading', false);
 
                 db.collection('data-size').get()
@@ -397,6 +635,12 @@ const actions = {
 const getters = {
     loadedPapers(state) {
         return state.loadedPapers;
+    },
+    getPapers(state) {
+        return state.papers;
+    },
+    getDeleteMarkPapers(state) {
+        return state.deleteMarkPapers;
     },
     getPapersByPage: state => page => {
         return state.papers['p' + page];
