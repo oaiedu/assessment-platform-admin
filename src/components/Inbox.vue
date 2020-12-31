@@ -34,8 +34,8 @@
                 </v-alert>
             </v-container>
 
-            <v-container v-if='(hasDeleteMarkRequests && (markedRequestsByUser && userClaims["appraiser"]) ||
-                                deleteMarkRequests.filter(r => r.toDelete.userEmail === userInfo.email))'>
+            <v-container v-if='(hasDeleteMarkRequests && userClaims["appraiser"] && (markedRequestsByUser ||
+                                deleteMarkRequests.filter(r => r.toDelete.userEmail === userInfo.email)))'>
                 <v-alert
                     v-if='deleteConfirmed'
                     text
@@ -344,11 +344,15 @@
                 return this.$store.getters.getDeleteMarkRequests;
             },
             markedRequestsByUser() {
-                const requests = this.deleteMarkRequests.filter(r => r.toDelete.userEmail === this.userInfo.email);
+                if(this.hasDeleteMarkRequests) {
+                    const requests = this.deleteMarkRequests.filter(r => r.toDelete.userEmail === this.userInfo.email);
 
-                const iqs = requests.filter(r => r.toDelete && r.toDelete.status);
+                    const iqs = requests.filter(r => r.toDelete && r.toDelete.status);
 
-                return iqs.map(r => r.iq).join(', ');
+                    return iqs.map(r => r.iq).join(', ');
+                } else {
+                    return [];
+                }
             },
             hasDeleteMarkRequests() {
                 return this.deleteMarkRequests && this.deleteMarkRequests.length > 0;
