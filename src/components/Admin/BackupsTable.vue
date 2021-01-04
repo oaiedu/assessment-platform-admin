@@ -186,7 +186,7 @@
                 return this.currentMonth - 1 === 0 ? 12 : this.currentMonth - 1;
             },
             twoMonthsAgo() {
-                return this.currentMonth - 2 === 0 ? 12 : this.currentMonth - 2;
+                return this.currentMonth - 2 === 0 ? 12 : (this.currentMonth - 2 < 0 ? 11 : this.currentMonth - 2);
             },
             pastMonths() {
                 return [this.months[this.lastMonth], this.months[this.twoMonthsAgo]];
