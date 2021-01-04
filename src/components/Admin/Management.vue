@@ -22,7 +22,7 @@
             <span>Fazer Backup</span>
         </v-tooltip>
 
-        <v-btn
+        <!-- <v-btn
             color="orange"
             dark
             x-large
@@ -31,7 +31,7 @@
             style="bottom: 120px; right: 30px;"
             @click="testAPI" >
             <v-icon>mdi-share</v-icon>
-        </v-btn>
+        </v-btn> -->
 
         <template>
             <v-tabs
