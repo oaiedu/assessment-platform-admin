@@ -98,9 +98,13 @@ const mutations = {
         state.currentQuestionsPage = data;
     },
     createQuestion(state, data) {
-        const questions = state.questions[data.page] || [];
-        questions.push(data.data);
-        state.questions[data.page] = questions;
+        const page = data.page;
+        const questions = state.questions['p' + page] || [];
+        const oneBefore = state.questions['p' + (page - 1)] || [];
+        if(questions.length > 0 || oneBefore.length === 8) {
+            questions.push(data.data);
+            state.questions['p' + page] = [...questions];
+        }
     },
     updateQuestion(state, data) {
         const questions = state.questions;
@@ -451,7 +455,7 @@ const actions = {
                     status: false
                 }
 
-                doc.ref.update({ ...doc.data(), toDelete: { status: false } });
+                if(doc) doc.ref.update({ ...doc.data(), toDelete: { status: false } });
 
                 commit('updateCurrentQuestionsPage', { ...doc.data(), toDelete });
                 commit('updateQuestion', { ...doc.data(), toDelete });
@@ -629,7 +633,7 @@ const actions = {
         db.collection("questions").add(question)
             .then(() => {
                 commit('setLoading', false);
-                commit('createQuestion', { page: 'p' + (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: question });
+                commit('createQuestion', { page: (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: question });
 
                 db.collection('data-size').get()
                     .then(snap => {
@@ -667,7 +671,8 @@ const actions = {
             try {
                 db.collection('questions').where('iq', '==', payload).get()
                     .then(snapshot => {
-                        resolve(snapshot.docs[0].data());
+                        if(snapshot.docs.length > 0) resolve(snapshot.docs[0].data());
+                        else resolve(null);
                     })
                     .catch(error => {
                         console.log(error);
