@@ -109,7 +109,7 @@ exports.importFirestore = async (req, res) => {
     const folderRootName = 'backups';
     const timestamp = '2020-11-27T16-43-04.696Z';
     const path = `../../${folderRootName}/${timestamp}/firestore`;
-    const collections = ['users', 'questions', 'question-requests', 'edited questions', 'tests', 'papers'];
+    const collections = ['users', 'questions', 'question requests', 'edited questions', 'tests', 'papers'];
     // const collections = ['edited questions'];
 
     collections.forEach(cn => {
@@ -118,43 +118,75 @@ exports.importFirestore = async (req, res) => {
         const json = JSON.parse(file);
         const data = [];
 
+        // for (const key in json) {
+        //     if(cn.includes('question')) {
+        //         const toPush = {
+        //             ...json[key],
+        //             question: decodeURIComponent(json[key].question),
+        //             subject: decodeURIComponent(json[key].subject),
+        //             answers: json[key].answers.map(ans => {
+        //                 return {
+        //                     ...ans,
+        //                     text: decodeURIComponent(ans.text)
+        //                 }
+        //             })
+        //         }
+
+        //         if(cn === 'question requests') {
+        //             toPush.user.name = decodeURIComponent(json[key].user.name);
+        //         }
+
+        //         data.push([key, toPush]);
+        //     } else if(cn.includes('papers')) {
+        //         data.push([key, {
+        //             image: json[key].image,
+        //             description: decodeURIComponent(json[key].description),
+        //             name: decodeURIComponent(json[key].name)
+        //         }]);
+        //     } else if(cn.includes('tests')) {
+        //         data.push([key, {
+        //             ...json[key],
+        //             created: decodeURIComponent(json[key].created),
+        //             purpose: decodeURIComponent(json[key].purpose),
+        //             title: decodeURIComponent(json[key].title),
+        //             user: decodeURIComponent(json[key].user)
+        //         }])
+        //     } else if(cn.includes('users')) {
+        //         data.push([key, {
+        //             email: decodeURIComponent(json[key].email),
+        //             name: decodeURIComponent(json[key].name),
+        //             profileImages: json[key].profileImages
+        //         }])
+        //     } else {
+        //         data.push([key, json[key]]);
+        //     }
+        // }
+
         for (const key in json) {
             if(cn.includes('question')) {
                 const toPush = {
-                    ...json[key],
-                    question: decodeURIComponent(json[key].question),
-                    subject: decodeURIComponent(json[key].subject),
-                    answers: json[key].answers.map(ans => {
-                        return {
-                            ...ans,
-                            text: decodeURIComponent(ans.text)
-                        }
-                    })
-                }
-
-                if(cn === 'question requests') {
-                    toPush.user.name = decodeURIComponent(json[key].user.name);
+                    ...json[key]
                 }
 
                 data.push([key, toPush]);
             } else if(cn.includes('papers')) {
                 data.push([key, {
                     image: json[key].image,
-                    description: decodeURIComponent(json[key].description),
-                    name: decodeURIComponent(json[key].name)
+                    description: json[key].description,
+                    name: json[key].name
                 }]);
             } else if(cn.includes('tests')) {
                 data.push([key, {
                     ...json[key],
-                    created: decodeURIComponent(json[key].created),
-                    purpose: decodeURIComponent(json[key].purpose),
-                    title: decodeURIComponent(json[key].title),
-                    user: decodeURIComponent(json[key].user)
+                    created: json[key].created,
+                    purpose: json[key].purpose,
+                    title: json[key].title,
+                    user: json[key].user
                 }])
             } else if(cn.includes('users')) {
                 data.push([key, {
-                    email: decodeURIComponent(json[key].email),
-                    name: decodeURIComponent(json[key].name),
+                    email: json[key].email,
+                    name: json[key].name,
                     profileImages: json[key].profileImages
                 }])
             } else {
@@ -171,12 +203,13 @@ exports.importFirestore = async (req, res) => {
 }
 
 exports.rearrangeQuestions = async (req, res) => {
-    await db.collection('questions').get()
+    const cn = 'edited questions';
+    await db.collection(cn).get()
         .then(snapshot => {
+            console.log(snapshot.docs.length);
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const newData = {
-                    ...data,
                     iq: data.iq || data.IQ,
                     question: data.question || data.PERGUNTA,
                     subject: data.subject || data.DISCIPLINA,
@@ -185,6 +218,10 @@ exports.rearrangeQuestions = async (req, res) => {
                     knowledgeBWR: data.knowledgeBWR || data.RELEVANCIA_OSR,
                     answers: data.answers || data.RESPOSTAS,
                     image: data.image || data.IMAGENS || ''
+                }
+
+                if(cn === 'questions') {
+                    newData['edited'] = data.edited || [];
                 }
 
                 if(data.imageSize || data.TAMANHO_IMAGEM) {
@@ -205,7 +242,7 @@ exports.rearrangeQuestions = async (req, res) => {
 
 exports.countData = async (req, res) => {
     const collections = ['users', 'questions', 'question-requests', 'tests', 'papers'];
-    // const collections = ['question-requests', 'tests', 'papers'];
+    // const collections = ['question-requests'];
     const data = {};
     const questionsCounter = {
         general: 0,
@@ -237,7 +274,11 @@ exports.countData = async (req, res) => {
                     if(collection === 'questions') {
                         questionsCounter.general = snapshot.docs.length;
                         snapshot.forEach(doc => {
-                            questionsCounter.subject[doc.data().subject] += 1;
+                            if(doc.data().subject) {
+                                questionsCounter.subject[doc.data().subject] += 1;
+                            } else {
+                                questionsCounter.subject[doc.data().DISCIPLINA] += 1;
+                            }
                         });
                         data['questions'] = questionsCounter;
                     } else if(collection === 'question-requests') {
