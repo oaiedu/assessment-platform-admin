@@ -431,9 +431,19 @@
                     imageSize: request.imageSize,
                     edited: []
                 }
-                this.$store.dispatch('createQuestion', { question: toCreate })
-                    .then(() => {
-                        this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
+                this.$store.dispatch('getQuestionByIQ', request.iq)
+                    .then(fQuestion => {
+                        if(fQuestion && fQuestion.toDelete && !fQuestion.toDelete.status) {
+                            this.$store.dispatch('restoreMarkedQuestion', { iq: fQuestion.iq, isSearching: false })
+                                .then(() => {
+                                    this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
+                                })
+                        } else {
+                            this.$store.dispatch('createQuestion', { question: toCreate })
+                                .then(() => {
+                                    this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
+                                });
+                        }
                     });
             },
             editRequest(request) {
@@ -540,8 +550,6 @@
             if(this.deleteApproved) {
                 this.$store.dispatch('deleteApprovedRequests', { userInfo: this.userInfo });
             }
-
-            this.$store.dispatch('deleteQuestions');
 
             if(this.deleteConfirmed) {
                 this.$store.dispatch('deleteRequests');

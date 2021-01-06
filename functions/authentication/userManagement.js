@@ -55,7 +55,7 @@ exports.setDefaultRoleToAll = async (req, res) => {
     await db.collection('users').get()
         .then(snapshot => {
             snapshot.forEach(doc => {
-                if(!doc.data().role.admin){
+                if(!(doc.data().role.admin || doc.data().role.teacher || doc.data().role.appraiser)) {
                     doc.ref.update({ role: 'student' });
 
                     auth.setCustomUserClaims(doc.id, { admin: false, appraiser: false, teacher: false, student: true })
@@ -76,7 +76,7 @@ exports.setDefaultRoleToAll = async (req, res) => {
 
 exports.importAuth = async (req, res) => {
     const folderRootName = 'backups';
-    const timestamp = '2020-11-25T16-23-01.553Z';
+    const timestamp = '2020-11-27T16-43-04.696Z';
     const path = `../../${folderRootName}/${timestamp}`;
 
     const jsonPath = `${path}/auth-${timestamp}.json`;

@@ -75,9 +75,13 @@ const mutations = {
         state.filteredRequests = requests;
     },
     addRequest(state, data) {
-        const requests = state.requests[data.page] || [];
-        requests.push(data.data);
-        state.requests[data.page] = requests;
+        const page = data.page;
+        const requests = state.requests['p' + page] || [];
+        const oneBefore = state.requests['p' + (page - 1)] || [];
+        if(requests.length > 0 || oneBefore.length === 8) {
+            requests.push(data.data);
+            state.requests['p' + page] = [...requests];
+        }
     },
     updateRequest(state, data) {
         const requests = state.requests;
@@ -168,7 +172,7 @@ const actions = {
 
         db.collection('question-requests').add(request)
             .then(() => {
-                commit('addRequest', { page: 'p' + (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: request });
+                commit('addRequest', { page: (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: request });
                 commit('setLoading', false);
 
                 db.collection('data-size').get()
@@ -550,7 +554,7 @@ const actions = {
                             }
                         }
 
-                        for(let key in questionRequests.users) {
+                        for(let key in users) {
                             questionRequests.users[key] -= users[key];
                         }
 

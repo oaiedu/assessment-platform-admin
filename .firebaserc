@@ -1,6 +1,7 @@
 {
   "projects": {
     "default": "pwr-quiz-generator",
-    "develop": "pwr-quiz-generator-develop"
+    "develop": "pwr-quiz-generator-develop",
+    "stage": "stage-pwr-quiz-generator"
   }
 }
