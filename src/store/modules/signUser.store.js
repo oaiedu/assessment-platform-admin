@@ -100,8 +100,10 @@ const actions = {
                 if(process.env.NODE_ENV === 'development') {
                     url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-userDefaultRole';
                 } else if(process.env.NODE_ENV === 'production') {
-                    url = 'http://localhost:5001/pwr-quiz-generator/us-central1/authentication-userDefaultRole';
-                };
+                    url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole';
+                } else {
+                    url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole';
+                }
 
                 db.collection("users").doc(newUser.id).set(userInfo)
                     .then(async () => {
@@ -243,7 +245,9 @@ const actions = {
         if(process.env.NODE_ENV === 'development') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-setRole';
         } else if(process.env.NODE_ENV === 'production') {
-            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/authentication-setRole';
+            url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-setRole';
+        } else {
+            url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-setRole';
         }
 
         axios.post(url, {

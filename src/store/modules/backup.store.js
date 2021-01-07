@@ -56,8 +56,10 @@ const actions = {
         if(process.env.NODE_ENV === 'development') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
         } else if(process.env.NODE_ENV === 'production') {
-            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
-        };
+            url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
+        } else {
+            url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
+        }
 
         const bkp = {
             id: '',
@@ -144,7 +146,9 @@ const actions = {
         if(process.env.NODE_ENV === 'development') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-downloadBackup?id=' + payload.cloudId;
         } else if(process.env.NODE_ENV === 'production') {
-            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/backup-downloadBackup?id=' + payload.cloudId;
+            url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/backup-downloadBackup?id=' + payload.cloudId;
+        } else {
+            url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/backup-downloadBackup?id=' + payload.cloudId;
         }
 
         axios.get(url)
@@ -233,7 +237,9 @@ const actions = {
         if(process.env.NODE_ENV === 'development') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-deleteBackup?id=' + payload.id;
         } else if(process.env.NODE_ENV === 'production') {
-            url = 'http://localhost:5001/pwr-quiz-generator/us-central1/backup-deleteBackup?id=' + payload.id;
+            url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/backup-deleteBackup?id=' + payload.id;
+        } else {
+            url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/backup-deleteBackup?id=' + payload.id;
         }
 
         await axios.get(url)
