@@ -2,6 +2,21 @@ const fs = require('fs');
 const { auth, db } = require('../admin');
 const { hash } = require('../.env');
 
+exports.checkAuthUser = async (req, res) => {
+    const uid = req.body['uid'];
+
+    await auth.getUser(uid)
+        .then(user => {
+            console.log(user);
+            return user;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+
+    res.send({ uid });
+}
+
 exports.userDefaultRole = async (req, res) => {
     const uid = req.headers['uid'];
 
@@ -55,7 +70,7 @@ exports.setDefaultRoleToAll = async (req, res) => {
     await db.collection('users').get()
         .then(snapshot => {
             snapshot.forEach(doc => {
-                if(!(doc.data().role.admin || doc.data().role.teacher || doc.data().role.appraiser)) {
+                if(!doc.data().role || doc.data().role === 'student') {
                     doc.ref.update({ role: 'student' });
 
                     auth.setCustomUserClaims(doc.id, { admin: false, appraiser: false, teacher: false, student: true })
