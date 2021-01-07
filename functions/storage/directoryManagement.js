@@ -61,7 +61,7 @@ exports.moveQuestionImages = async (req, res) => {
                     }
                 }
 
-                const iq = doc.data().IQ || doc.id;
+                const iq = doc.data().IQ || doc.data().iq || doc.data().id;
                 const format = `questions/question-${iq}.${type}`;
 
                 if(image && image !== format) {
@@ -74,7 +74,7 @@ exports.moveQuestionImages = async (req, res) => {
                                 const middle = '?alt=media&token=';
                                 const newLink = link.replace('www.googleapis.com/storage/v1', 'firebasestorage.googleapis.com/v0')
                                     + middle + token;
-                                db.collection('questions').doc(doc.id).set({...doc.data(), IMAGENS: newLink});
+                                db.collection('questions').doc(doc.id).update({ image: newLink });
                                 console.log(`From: '${image}' to '${format}', available at: ${newLink}\n`);
                             }
                         });
@@ -125,7 +125,7 @@ exports.moveUserImages = async (req, res) => {
                                 const middle = '?alt=media&token=';
                                 const newLink = link.replace('www.googleapis.com/storage/v1', 'firebasestorage.googleapis.com/v0')
                                     + middle + token;
-                                db.collection('users').doc(doc.id).set({...doc.data(), profileImages: newLink});
+                                db.collection('users').doc(doc.id).update({ profileImages: newLink });
                                 console.log(`From: '${image}' to '${format}', available at: ${newLink}\n`);
                             }
                         });
@@ -178,7 +178,7 @@ exports.movePaperImages = async (req, res) => {
                                 const middle = '?alt=media&token=';
                                 const newLink = link.replace('www.googleapis.com/storage/v1', 'firebasestorage.googleapis.com/v0')
                                     + middle + token;
-                                db.collection('papers').doc(doc.id).set({...doc.data(), image: newLink});
+                                db.collection('papers').doc(doc.id).update({ image: newLink });
                                 console.log(`From: '${image}' to '${format}', available at: ${newLink}\n`);
                             }
                         });
