@@ -97,9 +97,9 @@ const actions = {
 
                 let url = '';
 
-                if(process.env.NODE_ENV === 'development') {
+                if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
                     url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-userDefaultRole';
-                } else if(process.env.NODE_ENV === 'production') {
+                } else if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator') {
                     url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole';
                 } else {
                     url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole';
@@ -242,9 +242,9 @@ const actions = {
 
         let url = '';
 
-        if(process.env.NODE_ENV === 'development') {
+        if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-setRole';
-        } else if(process.env.NODE_ENV === 'production') {
+        } else if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator') {
             url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-setRole';
         } else {
             url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-setRole';

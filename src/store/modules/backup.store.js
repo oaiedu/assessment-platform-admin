@@ -53,9 +53,9 @@ const actions = {
 
         let url = '';
 
-        if(process.env.NODE_ENV === 'development') {
+        if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
-        } else if(process.env.NODE_ENV === 'production') {
+        } else if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator') {
             url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
         } else {
             url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
@@ -143,9 +143,9 @@ const actions = {
     downloadBackup(store, payload) {
         let url = ''
 
-        if(process.env.NODE_ENV === 'development') {
+        if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-downloadBackup?id=' + payload.cloudId;
-        } else if(process.env.NODE_ENV === 'production') {
+        } else if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator') {
             url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/backup-downloadBackup?id=' + payload.cloudId;
         } else {
             url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/backup-downloadBackup?id=' + payload.cloudId;
@@ -234,9 +234,9 @@ const actions = {
     },
     async deleteBackup({ commit }, payload) {
         let url = '';
-        if(process.env.NODE_ENV === 'development') {
+        if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-deleteBackup?id=' + payload.id;
-        } else if(process.env.NODE_ENV === 'production') {
+        } else if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator') {
             url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/backup-deleteBackup?id=' + payload.id;
         } else {
             url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/backup-deleteBackup?id=' + payload.id;
