@@ -13,17 +13,20 @@
                 <v-row>
                 <v-col>
                     <v-row justify="center">
-                    <v-file-input id="fileUpload" @change="sendImage()" v-model="avatarImage" style="visibility: hidden; max-height: 1px" />
+                    <v-file-input id="fileUpload" @change="readUrl" v-model="avatarImage" style="visibility: hidden; max-height: 1px" />
                     </v-row>
                     <v-row justify="center">
-                    <v-avatar size="150" @click="addImage()" clickable :class="{ 'avatar-edit': this.$route.path == '/profile' }">
-                        <img
-                        src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-                        v-if=" imagesAsURL === null "
-                        />
-                        <img :src="imagesAsURL" v-else />
-                    </v-avatar>
+                        <v-avatar size="150" @click="addImage()" clickable :class="{ 'avatar-edit': this.$route.path == '/profile' }">
+                            <img
+                            src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                            v-if=" imagesAsURL === null "
+                            />
+                            <img :src="imagesAsURL" v-else />
+                        </v-avatar>
                     </v-row>
+                    <v-container>
+                        <h4 class="text-center grey--text">{{ roleName }}</h4>
+                    </v-container>
                 </v-col>
                 </v-row>
             </div>
@@ -91,9 +94,9 @@
             <v-btn
                 color="primary"
                 text
-                @click="submit()"
+                @click="submit(); sendImage();"
             >
-                Salvar Alterações
+                Salvar
             </v-btn>
             </v-card-actions>
         </v-card>
@@ -119,27 +122,48 @@ export default {
       return this.editedPassword !== this.confirmNewPassword ? 'Passwords do not match' : ''
     },
     user() {
-      var val = this.$store.getters.userInfo
+      const user = this.$store.getters.userInfo
 
-      if ( val.name !== "")
-        this.nickName = val.name
+      if ( user.name !== "")
+        this.nickName = user.name
 
-      if ( val.profileImages !== "")
-        this.imagesAsURL = val.profileImages
+      if ( user.profileImages !== "")
+        this.imagesAsURL = user.profileImages
 
-      return val;
+      return user;
     },
+    roleName() {
+        const role = this.user.role;
+        if(role === 'admin') return 'Administrador';
+        else if(role === 'appraiser') return 'Avaliador';
+        else if(role === 'teacher') return 'Professor';
+        else return 'Aluno';
+    }
   },
   methods: {
-    cancel(){
+    cancel() {
       this.$router.back();
     },
     addImage() {
       document.getElementById("fileUpload").click();
     },
+    readUrl(imageFile) {
+        if(!imageFile.type.match(/image.*/)) {
+            alert('The file is not an image!');
+            return;
+        } else if (imageFile.size > 2000000) {
+            alert('O tamanho da imagem deve ser no MÁXIMO 2 MB!');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            this.imagesAsURL = e.target.result;
+        }
+        reader.readAsDataURL(imageFile);
+    },
     sendImage() {
       const imageToUpload = { images: this.avatarImage };
-      console.log("sla mano: ", imageToUpload);
       var URL = this.$store.dispatch("uploadAvatar", imageToUpload);
       URL.then(result => {
         this.imagesAsURL = result;
