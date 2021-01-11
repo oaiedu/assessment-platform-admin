@@ -12,7 +12,7 @@
           <template v-slot:activator="{ on }">
             <v-btn
               v-model="fab"
-              color="blue darken-2"
+              color="blue darken-1"
               v-on="on"
               dark
               fab
@@ -34,7 +34,7 @@
             small
             v-on="on"
             @click="toQuestions"
-            color="cyan darken-3"
+            color="blue darken-1"
           >
             <v-icon>mdi-file-question-outline</v-icon>
           </v-btn>
@@ -50,7 +50,7 @@
             small
             v-on="on"
             @click="toTests"
-            color="cyan darken-3"
+            color="blue darken-1"
           >
             <v-icon>mdi-file-multiple-outline</v-icon>
           </v-btn>
