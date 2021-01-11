@@ -102,15 +102,47 @@
               fab
               bottom
               right
-              color="red"
+              color="blue darken-1"
               @click="toPrint()"
             >
               <v-icon>mdi-file-outline</v-icon>
             </v-btn>
 
-            <v-btn fixed fab bottom left class="buttonIsHidden" @click="back()">
-              <v-icon>mdi-arrow-left</v-icon>
-            </v-btn>
+            <v-tooltip left>
+                <template v-slot:activator='{ on, attrs }'>
+                    <v-btn
+                        class="buttonIsHidden"
+                        v-on="on"
+                        v-bind="attrs"
+                        fixed
+                        dark
+                        fab
+                        bottom
+                        right
+                        color="blue darken-1"
+                        @click="toPrint()" >
+                        <v-icon>mdi-file-outline</v-icon>
+                    </v-btn>
+                </template>
+                <span>Gerar PDF</span>
+            </v-tooltip>
+
+            <v-tooltip right>
+                <template v-slot:activator='{ on, attrs }'>
+                    <v-btn
+                        v-on="on"
+                        v-bind="attrs"
+                        fixed
+                        fab
+                        bottom
+                        left
+                        class="buttonIsHidden"
+                        @click="back()" >
+                        <v-icon>mdi-arrow-left</v-icon>
+                    </v-btn>
+                </template>
+                <span>Voltar</span>
+            </v-tooltip>
           </div>
         </div>
       </v-row>

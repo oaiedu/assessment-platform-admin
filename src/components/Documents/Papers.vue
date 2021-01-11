@@ -106,17 +106,28 @@
           >
             <template small v-slot:[`item.actions`]="{ item }">
               <v-row justify="end" v-if='!item.toDelete'>
-                <v-icon
-                    color="amber darken-2"
-                    @click="editPaper(item)" >
-                    mdi-pencil
-                </v-icon>
-                <v-icon
-                    @click="deletePaperSnackBar = true; deleteSelect = item"
-                    color="red"
-                    class="ml-2" >
-                    mdi-delete
-                </v-icon>
+                    <v-tooltip top>
+                        <template v-slot:activator='{ on }'>
+                            <v-icon
+                                v-on="on"
+                                @click="editPaper(item)" >
+                                mdi-pencil
+                            </v-icon>
+                        </template>
+                        <span>Editar</span>
+                    </v-tooltip>
+
+                    <v-tooltip top>
+                        <template v-slot:activator='{ on }'>
+                            <v-icon
+                                v-on="on"
+                                @click="deletePaperSnackBar = true; deleteSelect = item"
+                                class="ml-2" >
+                                mdi-delete
+                            </v-icon>
+                        </template>
+                        <span>Excluir</span>
+                    </v-tooltip>
               </v-row>
 
               <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
@@ -145,7 +156,15 @@
 
       <v-tooltip left>
         <template v-slot:activator="{ on }">
-          <v-btn v-on="on" fixed dark fab bottom right color="cyan" @click.stop="dialogNewPaper = true">
+          <v-btn
+            v-on="on"
+            fixed
+            dark
+            fab
+            bottom
+            right
+            color="blue darken-1"
+            @click.stop="dialogNewPaper = true" >
             <v-icon>mdi-plus</v-icon>
           </v-btn>
         </template>
@@ -166,10 +185,10 @@
             :length='!isSearching ? pageAmount : Math.ceil(filteredPapers.length / itemsPerPage)'
             @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
       </div>
-      <v-snackbar v-model="deletePaperSnackBar" color="black" right top>
-        Você realmente quer deletar este documento?
-        <v-btn dark color="yellow" text @click="deletePaper(deleteSelect)">Ok</v-btn>
-        <v-btn dark color="yellow" text @click="deletePaperSnackBar = false">Cancelar</v-btn>
+      <v-snackbar v-model="deletePaperSnackBar" color="white" light right top>
+        Você realmente quer excluir este documento?
+        <v-btn dark color="blue" text @click="deletePaper(deleteSelect)">Excluir</v-btn>
+        <v-btn dark color="grey" text @click="deletePaperSnackBar = false">Cancelar</v-btn>
       </v-snackbar>
     </v-container>
   </div>
@@ -202,7 +221,6 @@
         computed: {
             loading () {
                 return this.$store.getters.loading;
-                this.$store.dispatch('clearLoading');
             },
             papers () {
                 return this.$store.getters.getCurrentPapersPage;

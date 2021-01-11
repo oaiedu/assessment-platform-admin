@@ -107,7 +107,6 @@
                                         <v-icon
                                             v-on='on'
                                             v-bind='attrs'
-                                            color="teal darken-2"
                                             @click="sendEmail(item.user.email)" >
                                             mdi-email
                                         </v-icon>
@@ -121,7 +120,6 @@
                                             v-on='on'
                                             v-bind='attrs'
                                             class="ml-3"
-                                            color="grey darken-1"
                                             @click="printRequest(item)" >
                                             mdi-pdf-box
                                         </v-icon>
@@ -135,7 +133,6 @@
                                             v-on='on'
                                             v-bind='attrs'
                                             class="ml-3"
-                                            color="green"
                                             :disabled='item.status === "Aprovado"'
                                             @click="checkRequest(item)" >
                                             mdi-check-bold
@@ -150,7 +147,6 @@
                                             v-on='on'
                                             v-bind='attrs'
                                             class="ml-3"
-                                            color="amber darken-2"
                                             :disabled='item.status === "Aprovado"'
                                             @click="editRequest(item)" >
                                             mdi-pencil
@@ -165,7 +161,6 @@
                                             v-on='on'
                                             v-bind='attrs'
                                             class="ml-3"
-                                            color="red"
                                             :disabled='userClaims["admin"] ? item.status === "Rejeitado" : item.status === "Aprovado"'
                                             @click="userClaims['admin']
                                                 ? rejectRequest(item)
@@ -335,7 +330,6 @@
             },
             loading() {
                 return this.$store.getters.loading;
-                this.$store.dispatch('clearLoading');
             },
             requests() {
                 return this.$store.getters.getCurrentRequestsPage;
