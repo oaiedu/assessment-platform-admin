@@ -114,22 +114,39 @@
                     style="text-decoration: none;"
                     :to="`/tests/${item.id}`"
                     replace>
-                  <v-icon color="grey darken-1">mdi-pdf-box</v-icon>
+                    <v-tooltip top>
+                        <template v-slot:activator='{ on }'>
+                            <v-icon v-on="on">mdi-pdf-box</v-icon>
+                        </template>
+                        <span>Visualizar PDF</span>
+                    </v-tooltip>
                 </router-link>
-                <v-icon
-                    v-if='!userClaims["student"]'
-                    @click="editTest(item)"
-                    class="ml-2"
-                    color="amber darken-2" >
-                    mdi-pencil
-                </v-icon>
-                <v-icon
-                    v-if='!userClaims["student"]'
-                    @click="deleteTestSnackBar = true; deleteSelect = item"
-                    class="ml-2"
-                    color="red" >
-                    mdi-delete
-                </v-icon>
+
+                <v-tooltip top>
+                    <template v-slot:activator='{ on }'>
+                        <v-icon
+                            v-if='!userClaims["student"]'
+                            v-on="on"
+                            @click="editTest(item)"
+                            class="ml-2" >
+                            mdi-pencil
+                        </v-icon>
+                    </template>
+                    <span>Editar</span>
+                </v-tooltip>
+
+                <v-tooltip top>
+                    <template v-slot:activator='{ on }'>
+                        <v-icon
+                            v-if='!userClaims["student"]'
+                            v-on="on"
+                            @click="deleteTestSnackBar = true; deleteSelect = item"
+                            class="ml-2" >
+                            mdi-delete
+                        </v-icon>
+                    </template>
+                    <span>Excluir</span>
+                </v-tooltip>
               </v-row>
 
               <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
@@ -158,7 +175,15 @@
 
       <v-tooltip left v-if='!userClaims["student"]'>
         <template v-slot:activator="{ on }">
-          <v-btn v-on="on" fixed dark fab bottom right color="cyan" @click.stop="dialogNewTest = true">
+          <v-btn
+            v-on="on"
+            fixed
+            dark
+            fab
+            bottom
+            right
+            color="blue darken-1"
+            @click.stop="dialogNewTest = true" >
             <v-icon>mdi-plus</v-icon>
           </v-btn>
         </template>
@@ -183,10 +208,10 @@
             :length='!isSearching ? pageAmount : Math.ceil(filteredTests.length / itemsPerPage)'
             @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
       </div>
-      <v-snackbar v-model="deleteTestSnackBar" color="black" right top>
-        Você realmente quer deletar esta prova?
-        <v-btn dark color="yellow" text @click="deleteTest(deleteSelect.id)">Ok</v-btn>
-        <v-btn dark color="yellow" text @click="deleteTestSnackBar = false">Cancelar</v-btn>
+      <v-snackbar v-model="deleteTestSnackBar" color="white" light right top>
+        Você realmente quer excluir esta prova?
+        <v-btn dark color="blue" text @click="deleteTest(deleteSelect.id)">Excluir</v-btn>
+        <v-btn dark color="grey" text @click="deleteTestSnackBar = false">Cancelar</v-btn>
       </v-snackbar>
     </v-container>
   </div>

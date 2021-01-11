@@ -2,7 +2,7 @@
     <v-container>
         <v-data-table
             :items='users'
-            class="elevation-1 mt-10"
+            class="elevation-1 mt-2"
             :headers="headers"
             :loading="loading"
             loading-text="Carregando usuários..." >
@@ -22,7 +22,6 @@
                         <v-icon
                             v-on='on'
                             v-bind='attrs'
-                            color="amber darken-2"
                             :disabled='currentUser.email === item.email'
                             @click="editDialog = true; setEditItem(item);" >
                             mdi-account-edit
@@ -37,7 +36,6 @@
                             v-on='on'
                             v-bind='attrs'
                             class="ml-3"
-                            color="teal darken-2"
                             :disabled='currentUser.email === item.email'
                             @click="sendEmail(item.email)" >
                             mdi-email

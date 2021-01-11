@@ -19,25 +19,24 @@
             <v-btn
                 color="grey lighten-3"
                 v-on="on"
-                large
                 dark
                 fab
                 fixed
                 bottom
                 left
                 @click="e1 = e1 - 1" >
-                <v-icon color="blue darken-2">mdi-arrow-left</v-icon>
+                <v-icon color="blue darken-1">mdi-arrow-left</v-icon>
             </v-btn>
         </template>
-        <h3>Voltar</h3>
+        <span>Voltar</span>
     </v-tooltip>
 
     <v-tooltip left v-if='e1 < 3'>
         <template v-slot:activator='{ on }'>
             <v-btn
-                color="blue darken-2"
+                color="blue darken-1"
+                class="mr-4"
                 v-on="on"
-                large
                 dark
                 fab
                 fixed
@@ -47,15 +46,15 @@
                 <v-icon color="white">mdi-arrow-right</v-icon>
             </v-btn>
         </template>
-        <h3>Continuar</h3>
+        <span>Continuar</span>
     </v-tooltip>
 
     <v-tooltip left v-else>
         <template v-slot:activator='{ on }'>
             <v-btn
-                color="blue darken-2"
+                color="blue darken-1"
+                class="mr-4"
                 v-on="on"
-                large
                 dark
                 fab
                 fixed
@@ -65,7 +64,7 @@
                 <v-icon color="white">mdi-content-save</v-icon>
             </v-btn>
         </template>
-        <h3>Salvar</h3>
+        <span>Salvar</span>
     </v-tooltip>
 
     <v-container fluid>

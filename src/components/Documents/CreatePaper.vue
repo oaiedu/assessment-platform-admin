@@ -16,9 +16,9 @@
       <v-tooltip left>
         <template v-slot:activator='{ on }'>
             <v-btn
-                color="blue darken-2"
+                color="blue darken-1"
+                class="mr-4"
                 v-on="on"
-                large
                 dark
                 fab
                 fixed

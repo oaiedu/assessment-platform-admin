@@ -80,25 +80,43 @@
           >
             <template v-slot:[`item.actions`]="{ item }">
               <v-row justify="end" v-if='!item.toDelete'>
-                <v-icon
-                  color="grey darken-1"
-                  @click='dialogPDF = true; selectedEdit = item;' >
-                  mdi-pdf-box
-                </v-icon>
-                <v-icon
-                    class="ml-2"
-                    color="amber darken-2"
-                    v-if='userClaims["admin"]'
-                    @click="editQuestions(item)" >
-                    mdi-pencil
-                </v-icon>
-                <v-icon
-                    class="ml-2"
-                    color="red"
-                    v-if='userClaims["admin"]'
-                    @click='deleteQuestionSnackBar = true; deleteSelect = item;' >
-                    mdi-delete
-                </v-icon>
+                <v-tooltip top>
+                    <template v-slot:activator='{ on, attrs }'>
+                        <v-icon
+                            v-on='on'
+                            v-bind='attrs'
+                            @click='dialogPDF = true; selectedEdit = item;' >
+                            mdi-pdf-box
+                        </v-icon>
+                    </template>
+                    <span>Visualizar PDF</span>
+                </v-tooltip>
+
+                <v-tooltip top v-if='userClaims["admin"]'>
+                    <template v-slot:activator='{ on, attrs }'>
+                        <v-icon
+                            v-on='on'
+                            v-bind='attrs'
+                            class="ml-2"
+                            @click="editQuestions(item)" >
+                            mdi-pencil
+                        </v-icon>
+                    </template>
+                    <span>Editar</span>
+                </v-tooltip>
+
+                <v-tooltip top v-if='userClaims["admin"]'>
+                    <template v-slot:activator='{ on, attrs }'>
+                        <v-icon
+                            v-on='on'
+                            v-bind='attrs'
+                            class="ml-2"
+                            @click='deleteQuestionSnackBar = true; deleteSelect = item;' >
+                            mdi-delete
+                        </v-icon>
+                    </template>
+                    <span>Excluir</span>
+                </v-tooltip>
               </v-row>
 
               <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
@@ -134,7 +152,7 @@
             fab
             bottom
             right
-            color="cyan"
+            color="blue darken-1"
             @click.stop="dialogNewQuestion = true"
           >
             <v-icon>mdi-plus</v-icon>

@@ -174,50 +174,65 @@
     </div>
 
     <v-row>
-      <v-btn
-        fixed
-        fab
-        bottom
-        left
-        class="buttonIsHidden"
-        @click="back()"
-      >
-        <v-icon>
-          mdi-arrow-left
-        </v-icon>
-      </v-btn>
+        <v-tooltip right>
+            <template v-slot:activator='{ on }'>
+                <v-btn
+                    v-on="on"
+                    fixed
+                    fab
+                    bottom
+                    left
+                    class="buttonIsHidden"
+                    @click="back()" >
+                    <v-icon>
+                    mdi-arrow-left
+                    </v-icon>
+                </v-btn>
+            </template>
+            <span>Voltar</span>
+        </v-tooltip>
     </v-row>
 
     <v-row>
-      <v-btn
-        class="buttonIsHidden"
-        fab
-        dark
-        fixed
-        bottom
-        right
-        color="indigo"
-        @click="toPrint()"
-      >
-        <v-icon>mdi-file-outline</v-icon>
-      </v-btn>
+        <v-tooltip left>
+            <template v-slot:activator='{ on }'>
+                <v-btn
+                    v-on="on"
+                    class="buttonIsHidden"
+                    fab
+                    dark
+                    fixed
+                    bottom
+                    right
+                    color="blue darken-1"
+                    @click="toPrint()" >
+                    <v-icon>mdi-file-outline</v-icon>
+                </v-btn>
+            </template>
+            <span>Gerar PDF</span>
+        </v-tooltip>
 
     </v-row>
 
     <v-row>
-      <v-btn
-        class="buttonIsHidden"
-        fab
-        dark
-        fixed
-        bottom
-        right
-        style="margin-bottom: 80px;"
-        color="grey"
-        @click="printDialog = true"
-      >
-        <v-icon>mdi-pencil</v-icon>
-      </v-btn>
+        <v-tooltip left>
+            <template v-slot:activator='{ on }'>
+                <v-btn
+                    v-on="on"
+                    class="buttonIsHidden"
+                    fab
+                    dark
+                    fixed
+                    bottom
+                    right
+                    style="margin-bottom: 80px;"
+                    color="grey darken-1"
+                    @click="printDialog = true" >
+                    <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+            </template>
+            <span>Editar</span>
+        </v-tooltip>
 
     </v-row>
 
