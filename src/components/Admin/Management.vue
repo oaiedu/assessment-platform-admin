@@ -4,24 +4,6 @@
             <h1 class="blue--text">Administração</h1>
         </div>
 
-        <v-tooltip left>
-            <template v-slot:activator='{ on, attrs }' >
-                <v-btn
-                    color="green"
-                    dark
-                    x-large
-                    fab
-                    v-bind='attrs'
-                    v-on='on'
-                    fixed
-                    style="bottom: 30px; right: 30px;"
-                    @click="backup()" >
-                    <v-icon>mdi-cloud-upload</v-icon>
-                </v-btn>
-            </template>
-            <span>Fazer Backup</span>
-        </v-tooltip>
-
         <!-- <v-btn
             color="orange"
             dark
@@ -80,10 +62,6 @@
             }
         },
         methods: {
-            backup() {
-                const now = new Date().toISOString();
-                this.$store.dispatch('backupFirebase', { now });
-            },
             testAPI() {
                 this.$store.dispatch('testAPI');
             }
