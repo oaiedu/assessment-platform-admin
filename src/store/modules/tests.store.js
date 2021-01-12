@@ -162,16 +162,16 @@ const actions = {
             commit('setLoading', false);
         })
     },
-    findImageTests({ commit },payload) {
+    findImageTests({ commit }, payload) {
         const pathReference = storage.refFromURL(`gs://pwr-quiz-generator.appspot.com/${payload}`);
 
-        const imageURL =  pathReference.getDownloadURL()
+        const imageURL = pathReference.getDownloadURL()
             .then(url => {
                 console.log("URL",url);
                 return url;
             })
             .catch(error => {
-                console.error("Error downloading the image", error);
+                commit('setError', error);
             });
 
         console.log("After Download: ", imageURL);
@@ -339,21 +339,12 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
-    async loadTestQuestions({ commit, dispatch }, payload) {
-        const data = [];
-
-        const promises = payload.questions.map(element => {
-            return dispatch('getQuestionByIQ', element)
-                .then(question => {
-                    data.push(question);
-                });
-        });
-
-        await Promise.all(promises);
-
+    async loadTestQuestions({ commit }, payload) {
+        const data = [...payload.questions];
         commit('setTestQuestions', data);
     },
     checkDeleteMarkTests({ commit }) {
@@ -399,7 +390,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     restoreMarkedTest({ commit }, payload) {
@@ -433,9 +425,11 @@ const actions = {
                 commit('removeDeleteMarkTest', id);
                 commit('updateCurrentTestsPage', test);
                 commit('setLoading', false);
+                commit('setSuccess', 'Prova restaurada com sucesso!');
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     restoreAllMarkedTests({ commit, state }, payload) {
@@ -479,11 +473,13 @@ const actions = {
                     commit('updateTest', test);
                     commit('updateCurrentTestsPage', test);
                     if(isSearching) commit('updateFilteredTest', test);
+                    commit('setSuccess', 'Provas restauradas com sucesso!');
                 });
             })
             .then(() => commit('setLoading', false))
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     changeDeleteStatusTests({ commit }, payload) {
@@ -505,9 +501,10 @@ const actions = {
                 if(isSearching) commit('updateFilteredTest', { ...doc.data(), toDelete });
 
                 commit('setLoading', false);
+                commit('setSuccess', 'Prova excluída com sucesso!');
             })
             .catch(error => {
-                console.log(error);
+                commit('setError', error);
             });
     },
     deleteTests({ commit }) {
@@ -546,6 +543,7 @@ const actions = {
             .then(() => {
                 commit('setLoading', false);
                 commit('createTest', { page: (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount), data: test });
+                commit('setSuccess', 'Prova criada com sucesso!');
 
                 db.collection('data-size').get()
                     .then(snap => {
@@ -565,7 +563,8 @@ const actions = {
                     });
             })
             .catch(error => {
-                console.error("Error writing document: ", error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     updateTest({ commit }, payload) {
@@ -573,13 +572,14 @@ const actions = {
         db.collection("tests").where('id', '==', test.id).get()
             .then(snapshot => {
                 snapshot.docs[0].ref.update(test);
-            })
-            .then(() => {
-                commit('updateTest', payload);
+                commit('updateTest', test);
+                commit('updateCurrentTestsPage', test);
                 commit('setLoading', false);
+                commit('setSuccess', 'Prova editada com sucesso!');
             })
             .catch(error => {
-                console.error("Error writing document: ", error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     resetTests({ commit }) {
