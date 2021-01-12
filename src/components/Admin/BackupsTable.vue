@@ -5,6 +5,7 @@
                 color="green"
                 dark
                 class="mt-2"
+                :loading='loading'
                 @click="backup()" >
                 Fazer Backup
                 <v-icon right dark>mdi-cloud-upload</v-icon>
