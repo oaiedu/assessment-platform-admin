@@ -66,6 +66,7 @@ new Vue({
         this.$store.dispatch('resetRequests');
         this.$store.dispatch('resetTests');
 
+        this.$store.dispatch('clearSuccess');
         this.$store.dispatch('clearError');
         this.$store.dispatch('loadDataSize');
     }
