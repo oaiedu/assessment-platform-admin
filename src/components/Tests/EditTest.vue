@@ -273,10 +273,7 @@ export default {
     },
     update(){
       this.test.questions.forEach(element => {
-        this.$store.dispatch('getQuestionByIQ', element)
-            .then(question => {
-                this.selectedQuestions.push(question);
-            });
+        this.selectedQuestions.push(element);
       });
       this.testType = this.test.type;
       this.testName = this.test.title;

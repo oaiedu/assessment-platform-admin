@@ -415,7 +415,7 @@
                                 }
 
                                 this.selectedQuestions.forEach(element => {
-                                    this.testItems.push(element.iq);
+                                    this.testItems.push(element);
                                 });
 
                                 const now = new Date();
