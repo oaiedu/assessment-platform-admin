@@ -36,7 +36,6 @@ const mutations = {
         console.log(index);
         if(index !== -1) {
             state.backups.splice(index, 1);
-            console.log(this.getBackups);
         }
     },
     RESETBackup(state) {
@@ -49,6 +48,7 @@ const mutations = {
 
 const actions = {
     async backupFirebase({ commit, state }, payload) {
+        commit('setLoading', true);
         const now = payload.now;
 
         let url = '';
@@ -76,7 +76,10 @@ const actions = {
                 bkp.cloudId = res.data.cloudId;
 
                 console.log('Backup realizado com sucesso!');
-            }).catch(error => console.log(error));
+            }).catch(error => {
+                commit('setLoading', false);
+                commit('setError', error);
+            });
 
         db.collection('backups').get()
             .then(snapshot => {
@@ -115,11 +118,14 @@ const actions = {
                 db.collection('backups').add(bkp)
                     .then(() => {
                         commit('newBackup', bkp);
+                        commit('setLoading', false);
+                        commit('setSuccess', 'Backup realizado com sucesso!');
                     })
                     .catch(error => console.log(error));
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     loadBackups({ commit }) {
@@ -137,7 +143,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     downloadBackup(store, payload) {
@@ -229,10 +236,12 @@ const actions = {
                 // }
             })
             .catch(error => {
-                console.log(error + '');
+                commit('setError', error);
             });
     },
     async deleteBackup({ commit }, payload) {
+        commit('setLoading', true);
+
         let url = '';
         if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
             url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-deleteBackup?id=' + payload.id;
@@ -251,18 +260,22 @@ const actions = {
                             snapshot.forEach(doc => {
                                 doc.ref.delete();
                                 commit('removeBackup', doc.data());
-                                alert('Backup excluído com sucesso!');
+                                commit('setLoading', false);
+                                commit('setSuccess', 'Backup excluído com sucesso!');
                             });
                         })
                         .catch(error => {
-                            console.log(error);
+                            commit('setLoading', false);
+                            commit('setError', error);
                         });
                 } else {
-                    alert('Um erro ocorreu ao excluir o backup!');
+                    commit('setLoading', false);
+                    commit('setError', { message: 'Um erro ocorreu ao excluir o backup!' });
                 }
             })
             .catch(error => {
-                console.log(error + '');
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     testAPI(store) {

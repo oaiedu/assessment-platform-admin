@@ -178,6 +178,8 @@
       >
         <EditQuestion
           :question="selectedEdit"
+          :userClaims="userClaims"
+          :userInfo="userInfo"
           @closeDialogEdit="dialogEditQuestion = false"
         ></EditQuestion>
       </v-dialog>

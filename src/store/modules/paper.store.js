@@ -1,7 +1,6 @@
 import { db, storage } from '../../main';
 
 const initialState = () => ({
-    loadedPapers: [],
     deletePaperId: null,
     papers: {},
     filteredPapers: [],
@@ -85,16 +84,17 @@ const mutations = {
         }
     },
     updatePaper(state, data) {
-        const papers = state.loadedPapers;
+        const papers = {...state.papers};
         for(let key in papers) {
             if(papers[key]) {
                 papers[key].forEach((item, index) => {
                     if(item.id === data.id) {
-                        state.papers[key][index] = data;
+                        papers[key][index] = data;
                     }
                 });
             }
         }
+        state.papers = papers;
     },
     updateFilteredPaper(state, data) {
         const papers = [...state.filteredPapers];
@@ -163,8 +163,7 @@ const actions = {
                         });
                     })
                     .catch(error => {
-                        console.error("Error uploading file", error);
-                        resolve(error);
+                        commit('setError', error);
                     });
             } catch{
                 reject();
@@ -213,23 +212,12 @@ const actions = {
                 }
 
                 commit('setLoading', false);
-                console.log("Document successfully deleted!");
+                commit('setSuccess', 'Documento excluído com sucesso!');
             })
             .catch(function (error) {
-                console.error("Error removing document: ", error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
-    },
-    loadedPapers({ commit }) {
-        commit('setLoading', true);
-        let papers = [];
-        db.collection("papers").get()
-            .then(querySnapshot => {
-                querySnapshot.forEach(doc => {
-                    papers.push(doc.data());
-            });
-            commit('setLoadedPapers', papers);
-            commit('setLoading', false);
-        });
     },
     loadPaperPage({ commit, state }, payload) {
         commit('setLoading', true);
@@ -267,7 +255,8 @@ const actions = {
                     commit('setLoading', false);
                 })
                 .catch(error => {
-                    console.log(error);
+                    commit('setLoading', false);
+                    commit('setError', error);
                 });
         } else {
             const pageContent = state.papers['p' + page];
@@ -318,7 +307,8 @@ const actions = {
                     commit('setLoading', false);
                 })
                 .catch(error => {
-                    console.log(error);
+                    commit('setLoading', false);
+                    commit('setError', error);
                 });
         } else {
             const pageContent = state.papers['p' + page];
@@ -377,7 +367,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     async paperExists(store, payload) {
@@ -439,7 +430,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     restoreMarkedPaper({ commit }, payload) {
@@ -469,9 +461,11 @@ const actions = {
                 commit('removeDeleteMarkPaper', id);
                 commit('updateCurrentPapersPage', paper);
                 commit('setLoading', false);
+                commit('setSuccess', 'Documento restaurado com sucesso!');
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     restoreAllMarkedPapers({ commit, state }, payload) {
@@ -511,11 +505,13 @@ const actions = {
                     commit('updatePaper', paper);
                     commit('updateCurrentPapersPage', paper);
                     if(isSearching) commit('updateFilteredPaper', paper);
+                    commit('setSuccess', 'Documentos restaurados com sucesso!');
                 });
             })
             .then(() => commit('setLoading', false))
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     changeDeleteStatusPapers({ commit }, payload) {
@@ -537,9 +533,10 @@ const actions = {
                 if(isSearching) commit('updateFilteredPaper', { ...doc.data(), toDelete });
 
                 commit('setLoading', false);
+                commit('setSuccess', 'Documento excluído com sucesso!');
             })
             .catch(error => {
-                console.log(error);
+                commit('setError', error);
             });
     },
     deletePapers({ commit }) {
@@ -596,6 +593,7 @@ const actions = {
                         document.ref.update({ papers: size + 1 })
                             .then(() => {
                                 commit('addRemoveSize', { key: 'papers', data: size + 1 });
+                                commit('setSuccess', 'Documento criado com sucesso!');
                             })
                             .catch(error => {
                                 console.log(error);
@@ -606,7 +604,8 @@ const actions = {
                     });
             })
             .catch(error => {
-                console.error("Error writing document: ", error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     updatePaper({ commit }, payload) {
@@ -618,17 +617,15 @@ const actions = {
         }
         db.collection("papers").where('id', '==', paper.id).get()
             .then(snapshot => {
-                snapshot.forEach(doc => {
-                    doc.ref.update(paper);
-                });
-            })
-            .then(() => {
+                snapshot.docs[0].ref.update(paper);
                 commit('updatePaper', paper);
+                commit('updateCurrentPapersPage', paper);
                 commit('setLoading', false);
-                console.log("Success");
+                commit('setSuccess', 'Documento editado com sucesso!');
             })
             .catch(error => {
-                console.error("Error writing document: ", error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     resetPapers({ commit }) {
@@ -637,9 +634,6 @@ const actions = {
 }
 
 const getters = {
-    loadedPapers(state) {
-        return state.loadedPapers;
-    },
     getPapers(state) {
         return state.papers;
     },
@@ -654,7 +648,7 @@ const getters = {
     },
     getFilteredPapers(state) {
         return state.filteredPapers;
-    },
+    }
 }
 
 export default {

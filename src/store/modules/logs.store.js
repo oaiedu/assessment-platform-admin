@@ -1,19 +1,26 @@
 const initialState = () => ({
     loading: false,
-    error: null
+    error: null,
+    success: null
 });
 
 const state = initialState();
 
 const mutations = {
-    setLoading(state, payload) {
-        state.loading = payload;
+    setLoading(state, data) {
+        state.loading = data;
     },
-    setError(state, payload) {
-        state.error = payload;
+    setError(state, data) {
+        state.error = data;
     },
     clearError(state) {
         state.error = null;
+    },
+    setSuccess(state, data) {
+        state.success = data;
+    },
+    clearSuccess(state) {
+        state.success = null;
     },
     RESETLogs(state) {
         const newState = initialState();
@@ -26,6 +33,9 @@ const mutations = {
 const actions = {
     clearError({ commit }) {
         commit('clearError');
+    },
+    clearSuccess({ commit }) {
+        commit('clearSuccess');
     },
     clearLoading({ commit }) {
         commit('setLoading', false);
@@ -41,6 +51,9 @@ const getters = {
     },
     error(state) {
         return state.error;
+    },
+    success(state) {
+        return state.success;
     }
 }
 

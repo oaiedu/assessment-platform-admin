@@ -40,7 +40,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     resetDataSize({ commit }) {

@@ -140,7 +140,7 @@
             </v-row>
           </div>
 
-          <div v-else>
+          <div v-else-if="question && question.answers">
             <v-row v-for="(item, index) in question.answers" :key="index" class='answer-block' >
               <v-col cols="1">{{ letters[index] }} - </v-col>
               <v-col>
@@ -408,8 +408,7 @@
             }
         },
         mounted() {
-            let questionsAux = [];
-            let test = this.$store.getters.findTestById(this.$route.params.testId);
+            const test = this.$store.getters.findTestById(this.$route.params.testId);
             this.testTitle = test.title.toUpperCase();
             this.testPurpose = test.purpose;
             this.testEditedDate = test.edited;

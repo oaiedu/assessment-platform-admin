@@ -168,17 +168,6 @@ const mutations = {
 }
 
 const actions = {
-    loadQuestions({ commit }) {
-        commit('setLoading', true);
-        let data = [];
-        db.collection('questions').get().then(querySnapshot => {
-            querySnapshot.forEach(doc => {
-                data.push(doc.data());
-            });
-            commit('setQuestions', data);
-            commit('setLoading', false);
-        })
-    },
     loadQuestionPage({ commit, state }, payload) {
         commit('setLoading', true);
 
@@ -215,7 +204,8 @@ const actions = {
                     commit('setLoading', false);
                 })
                 .catch(error => {
-                    console.log(error);
+                    commit('setLoading', false);
+                    commit('setError', error);
                 });
         } else {
             const pageContent = state.questions['p' + page];
@@ -266,7 +256,8 @@ const actions = {
                     commit('setLoading', false);
                 })
                 .catch(error => {
-                    console.log(error);
+                    commit('setLoading', false);
+                    commit('setError', error);
                 });
         } else {
             const pageContent = state.questions['p' + page];
@@ -297,7 +288,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     async checkQuestionInTests(store, payload) {
@@ -367,7 +359,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     restoreMarkedQuestion({ commit }, payload) {
@@ -403,9 +396,11 @@ const actions = {
                 commit('removeDeleteMarkQuestion', iq);
                 commit('updateCurrentQuestionsPage', question);
                 commit('setLoading', false);
+                commit('setSuccess', 'Questão restaurada com sucesso!');
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     restoreAllMarkedQuestions({ commit, state }, payload) {
@@ -437,11 +432,13 @@ const actions = {
                     commit('updateQuestion', question);
                     commit('updateCurrentQuestionsPage', question);
                     if(isSearching) commit('updateFilteredQuestion', question);
+                    commit('setSuccess', 'Questões restauradas com sucesso!');
                 });
             })
             .then(() => commit('setLoading', false))
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     changeDeleteStatusQuestions({ commit }, payload) {
@@ -463,9 +460,10 @@ const actions = {
                 if(isSearching) commit('updateFilteredQuestion', { ...doc.data(), toDelete });
 
                 commit('setLoading', false);
+                commit('setSuccess', 'Questão excluída com sucesso!');
             })
             .catch(error => {
-                console.log(error);
+                commit('setError', error);
             });
     },
     deleteQuestions({ commit }) {
@@ -546,8 +544,7 @@ const actions = {
                         });
                     })
                     .catch(error => {
-                        console.error("Error uploading file", error);
-                        resolve(error);
+                        commit('setError', error);
                     });
             } catch {
                 reject();
@@ -575,19 +572,21 @@ const actions = {
             })
             .then(() => {
                 commit('updateQuestion', { ...question, edited: edition });
+                commit('updateCurrentQuestionsPage', { ...question, edited: edition });
                 commit('setLoading', false);
+                commit('setSuccess', 'Questão editada com sucesso!');
                 dispatch("createdEditedQuestion", payload.oldData);
-                console.log("Success edit");
             })
             .catch(error => {
-                console.error("Error writing document: ", error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     createdEditedQuestion({ commit }, payload) {
         commit('setLoading', true);
 
         const editedQuestion = {
-            ...question,
+            ...payload,
             iq: payload.iq + '-' + payload.edited.length
         }
         db.collection("edited questions")
@@ -614,7 +613,8 @@ const actions = {
                         }
                     })
                     .catch(error => {
-                        console.log(error);
+                        commit('setLoading', false);
+                        commit('setError', error);
                     });
             } catch {
                 reject();
@@ -634,6 +634,7 @@ const actions = {
             .then(() => {
                 commit('setLoading', false);
                 commit('createQuestion', { page: (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: question });
+                commit('setSuccess', 'Questão criada com sucesso!');
 
                 db.collection('data-size').get()
                     .then(snap => {
@@ -663,7 +664,8 @@ const actions = {
                     });
             })
             .catch(error => {
-                console.error("Error writing document: ", error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     async getQuestionByIQ(store, payload) {
@@ -675,7 +677,7 @@ const actions = {
                         else resolve(null);
                     })
                     .catch(error => {
-                        console.log(error);
+                        commit('setError', error);
                     });
             } catch {
                 reject();

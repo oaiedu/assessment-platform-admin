@@ -174,6 +174,7 @@ const actions = {
             .then(() => {
                 commit('addRequest', { page: (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: request });
                 commit('setLoading', false);
+                commit('setSuccess', 'Solicitação criada com sucesso!');
 
                 db.collection('data-size').get()
                     .then(snap => {
@@ -203,7 +204,8 @@ const actions = {
                     });
             })
             .catch(error => {
-                console.error("Error writing request: ", error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     updateQuestionRequest({ commit }, payload) {
@@ -217,7 +219,9 @@ const actions = {
                         .then(() => {
                             request.status = payload.status;
                             commit('updateRequest', request);
+                            commit('updateCurrentRequestsPage', request);
                             commit('setLoading', false);
+                            commit('setSuccess', 'Solicitação editada com sucesso!');
                         })
                         .catch(error => {
                             console.log(error);
@@ -226,7 +230,9 @@ const actions = {
                     snapshot.docs[0].ref.update(request)
                         .then(() => {
                             commit('updateRequest', request);
+                            commit('updateCurrentRequestsPage', request);
                             commit('setLoading', false);
+                            commit('setSuccess', 'Solicitação editada com sucesso!');
                         })
                         .catch(error => {
                             console.log(error);
@@ -234,7 +240,8 @@ const actions = {
                 }
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     loadRequestPage({ commit, state }, payload) {
@@ -278,7 +285,8 @@ const actions = {
                     commit('setLoading', false);
                 })
                 .catch(error => {
-                    console.log(error);
+                    commit('setLoading', false);
+                    commit('setError', error);
                 });
         } else {
             const pageContent = state.request['p' + page];
@@ -335,7 +343,8 @@ const actions = {
                     commit('setLoading', false);
                 })
                 .catch(error => {
-                    console.log(error);
+                    commit('setLoading', false);
+                    commit('setError', error);
                 });
         } else {
             const pageContent = state.requests['p' + page];
@@ -372,7 +381,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     checkDeleteMarkRequests({ commit }) {
@@ -418,7 +428,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     restoreMarkedRequest({ commit }, payload) {
@@ -456,9 +467,11 @@ const actions = {
                 commit('removeDeleteMarkRequest', iq);
                 commit('updateCurrentRequestsPage', request);
                 commit('setLoading', false);
+                commit('setSuccess', 'Solicitação restaurada com sucesso!');
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     restoreAllMarkedRequests({ commit, state }, payload) {
@@ -493,11 +506,13 @@ const actions = {
                     commit('updateRequest', request);
                     commit('updateCurrentRequestsPage', request);
                     if(isSearching) commit('updateFilteredRequest', request);
+                    commit('setSuccess', 'Solicitações restauradas com sucesso!');
                 });
             })
             .then(() => commit('setLoading', false))
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     changeDeleteStatusRequests({ commit }, payload) {
@@ -519,9 +534,10 @@ const actions = {
                 if(isSearching) commit('updateFilteredRequest', { ...doc.data(), toDelete });
 
                 commit('setLoading', false);
+                commit('setSuccess', 'Solicitação excluída com sucesso!');
             })
             .catch(error => {
-                console.log(error);
+                commit('setError', error);
             });
     },
     deleteRequests({ commit }) {
@@ -591,6 +607,7 @@ const actions = {
                         }
 
                         commit('setLoading', false);
+                        commit('setSuccess', 'Solicitação excluída com sucesso!');
                         if(doc.data().image && doc.data().image.length > 0) {
                             const image = doc.data().image;
                             const childImage = image.split('?alt=media')[0].split('/o/')[1];
@@ -630,7 +647,8 @@ const actions = {
                     });
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     deleteApprovedRequests({ commit }, payload) {
@@ -674,7 +692,8 @@ const actions = {
                     });
             })
             .catch(error => {
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     resetRequests({ commit }) {
