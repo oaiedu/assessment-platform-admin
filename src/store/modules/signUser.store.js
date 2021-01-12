@@ -68,8 +68,7 @@ const actions = {
                         });
                     })
                     .catch(error => {
-                        console.error("Error uploading file", error);
-                        resolve(error);
+                        commit('setError', error);
                     });
             } catch {
                 reject();
@@ -132,7 +131,6 @@ const actions = {
                     .catch(error => {
                         commit('setLoading', false);
                         commit('setError', error);
-                        console.error(error);
                     });
 
                 commit('setUser', newUser);
@@ -141,34 +139,38 @@ const actions = {
             .catch(error => {
                 commit('setLoading', false);
                 commit('setError', error);
-                console.error(error);
             });
     },
     updateUser({ commit, state }, payload) {
+        commit('setLoading', true);
+
         const userInfo = {
             name: payload.name,
             profileImages: payload.profileImages
         }
         db.collection("users").doc(state.user.id).update({
-            name: userInfo.name,
-            profileImages: userInfo.profileImages
-        })
+                name: userInfo.name,
+                profileImages: userInfo.profileImages
+            })
             .then(() => {
                 commit('setUserInfo', {
                     name: userInfo.name,
                     profileImages: userInfo.profileImages,
-                    email: state.userInfo.email
+                    email: state.userInfo.email,
+                    role: state.userInfo.role
                 });
+                commit('setLoading', false);
+                commit('setSuccess', `'${userInfo.name || userInfo.email}' editado(a) com sucesso!`);
             })
             .catch(error => {
                 commit('setLoading', false);
                 commit('setError', error);
-                console.error(error);
-            })
+            });
     },
     signUserIn({ commit, dispatch }, payload) {
         commit('setLoading', true);
         commit('clearError');
+        commit('clearSuccess');
 
         dispatch('deleteQuestions');
         dispatch('deleteRequests');
@@ -260,6 +262,7 @@ const actions = {
 
                 commit('setUserRole', payload);
                 commit('setLoading', false);
+                commit('setSuccess', `'${doc.data().name || email}' editado(a) com sucesso!`);
 
                 axios.post(url, {
                     data: {
@@ -268,12 +271,12 @@ const actions = {
                     }
                 })
                 .catch(error => {
-                    console.log('Auth error: ' + error);
-                });
+                    commit('setError', error);
+                })
             })
             .catch(error => {
-                console.log('Database error!');
-                console.log(error);
+                commit('setLoading', false);
+                commit('setError', error);
             });
     },
     logout({ commit }) {
