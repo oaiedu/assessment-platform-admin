@@ -54,18 +54,20 @@
     </v-app-bar>
 
     <v-main>
-      <Error/>
+      <Error />
+      <Success />
       <router-view></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
-    import Error from '../components/Error'
+    import Error from '../components/Error';
+    import Success from '../components/Success';
 
     export default {
         props: { source: String },
-        components: {Error},
+        components: { Error, Success },
         data: () => ({
             drawer: null,
         }),
