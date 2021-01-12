@@ -144,11 +144,19 @@
                       </v-row>
 
                       <v-row>
-                        <v-file-input chips multiple label="Imagem" v-model="images" />
+                        <v-file-input
+                            chips
+                            clearable
+                            multiple
+                            label="Imagem"
+                            placeholder="Escolha uma imagem"
+                            v-model="images"
+                            @change="checkImageType"
+                            accept='image/png, image/jpeg, image/bmp' />
                       </v-row>
 
                       <v-main
-                        v-if="this.editedImages !== '' && typeof this.editedImages !== 'undefined'"
+                        v-if="editedImages"
                       >
                         <v-row justify="center">
                           <v-radio-group v-model="editedImageSize" row>
@@ -219,9 +227,9 @@
               <v-row
                 justify="center"
                 style="margin-top: 20px"
-                v-if="this.editedImages !== '' && typeof this.editedImages !== 'undefined'"
+                v-if="editedImages"
               >
-                <img style="max-height: 250px; max-width: 180px" :src="this.editedImages" />
+                <img v-if="editedImages" style="max-height: 250px; max-width: 180px" :src="editedImages" alt='image' />
               </v-row>
 
               <div v-if="confirmTitle">
@@ -564,6 +572,17 @@ export default {
       this.editedKnowledgeBWR = null;
       this.editedImageSize = null;
       this.number = 0;
+    },
+    checkImageType(event) {
+        if(event && event[0] && event[0].type) {
+            if(!event[0].type.match(/image.*/)) {
+                this.$store.commit('setError', { message: 'O arquivo inserido NÃO é uma imagem!' });
+                this.images = this.editedImages || [];
+            } else if (event[0].size > 2000000) {
+                this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
+                this.images = this.editedImages || [];
+            }
+        }
     },
     close() {
       this.setInitialData();
