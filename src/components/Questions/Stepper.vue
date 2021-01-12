@@ -585,10 +585,10 @@ export default {
         checkImageType(event) {
             if(event && event[0] && event[0].type) {
                 if(!event[0].type.match(/image.*/)) {
-                    alert('O arquivo inserido NÃO é uma imagem!');
+                    this.$store.commit('setError', { message: 'O arquivo inserido NÃO é uma imagem!' });
                     this.images = [];
                 } else if (event[0].size > 2000000) {
-                    alert('O tamanho da imagem deve ser no MÁXIMO 2 MB!');
+                    this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
                     this.images = [];
                 }
             }
