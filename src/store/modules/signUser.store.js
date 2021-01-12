@@ -238,6 +238,8 @@ const actions = {
             });
     },
     setUserRole({ commit }, payload) {
+        commit('setLoading', true);
+
         const { email, role } = payload;
 
         let url = '';
@@ -250,25 +252,29 @@ const actions = {
             url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-setRole';
         }
 
-        axios.post(url, {
-            data: {
-                email,
-                role
-            }
-        }).then(res => {
-            if(res.data.uid) {
-                db.collection('users').doc(res.data.uid).update({ role })
-                    .then(() => {
-                        commit('setUserRole', payload);
-                    })
-                    .catch(error => {
-                        console.log('Database error!');
-                        console.log(error);
-                    });
-            }
-        }).catch(error => {
-            console.log(error);
-        });
+        db.collection('users').where('email', '==', email).get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+
+                doc.ref.update({ role });
+
+                commit('setUserRole', payload);
+                commit('setLoading', false);
+
+                axios.post(url, {
+                    data: {
+                        email,
+                        role
+                    }
+                })
+                .catch(error => {
+                    console.log('Auth error: ' + error);
+                });
+            })
+            .catch(error => {
+                console.log('Database error!');
+                console.log(error);
+            });
     },
     logout({ commit }) {
         auth.signOut();
