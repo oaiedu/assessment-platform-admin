@@ -37,25 +37,25 @@
           <template v-slot:default>
             <thead>
               <tr>
-                <th class="text-left">QUESTÃO</th>
-                <th class="text-left">DISCIPLINA</th>
-                <th class="text-left">QUESTÃO DE REFERÊNCIA</th>
-                <th class="text-left">Obs.</th>
+                <th class="text-center">QUESTÃO</th>
+                <th class="text-center">DISCIPLINA</th>
+                <th class="text-center">QUESTÃO DE REFERÊNCIA</th>
+                <th class="text-center">Obs.</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in infoTable" :key="item.iq">
-                <td>{{ item.question }}</td>
-                <td>{{ item.subject }}</td>
-                <td>{{ item.iq }}</td>
-                <td>{{ item.obs }}</td>
+                <td class="text-center">{{ item.question }}</td>
+                <td class="text-center">{{ item.subject }}</td>
+                <td class="text-center">{{ item.iq }}</td>
+                <td class="text-center">{{ item.obs }}</td>
               </tr>
             </tbody>
           </template>
         </v-simple-table>
       </div>
 
-      <div v-if="premadePapers[3].value" class="question-page">
+      <div v-if="premadePapers[2].value" class="question-page">
         <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
       </div>
 
@@ -214,7 +214,7 @@
 
     </v-row>
 
-    <v-row>
+    <v-row v-if="!userClaims.student">
         <v-tooltip left>
             <template v-slot:activator='{ on }'>
                 <v-btn
@@ -282,7 +282,7 @@
 
     export default {
         name: 'PrintTest',
-        components: { 'vue-markdown': VueMarkdown, StatisticsQuestions, },
+        components: { 'vue-markdown': VueMarkdown, StatisticsQuestions },
         data() {
             return {
                 checkFirtPage: false,
@@ -328,6 +328,9 @@
             }
         },
         computed: {
+            userClaims() {
+                return this.$store.getters.getUserClaims;
+            },
             createdPapers() {
                 let result = [];
                 let papers = this.$store.getters.getPapersByPage(1) || [];
@@ -362,8 +365,8 @@
             },
             statistics() {
                 let statisticsObj = [];
-                const cat =  this.$store.getters.getSubjects;
-                cat.forEach(element => {
+                const subject =  this.$store.getters.getSubjects;
+                subject.forEach(element => {
                     const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubjectOnTest(element, this.questions);
                     statisticsObj.push({ name: element, questions: numberOfQuestions });
                 })
@@ -412,7 +415,7 @@
             this.testTitle = test.title.toUpperCase();
             this.testPurpose = test.purpose;
             this.testEditedDate = test.edited;
-            this.testCreator = test.user;
+            this.testCreator = test.user.name;
 
             this.$store.dispatch('loadTestQuestions', test);
         }
