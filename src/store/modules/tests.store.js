@@ -501,7 +501,7 @@ const actions = {
                 if(isSearching) commit('updateFilteredTest', { ...doc.data(), toDelete });
 
                 commit('setLoading', false);
-                commit('setSuccess', 'Prova excluída com sucesso!');
+                commit('setSuccess', 'Provas excluídas com sucesso!');
             })
             .catch(error => {
                 commit('setError', error);
@@ -581,6 +581,26 @@ const actions = {
                 commit('setLoading', false);
                 commit('setError', error);
             });
+    },
+    async getSubjectIQS({ commit }, payload) {
+        const subject = payload;
+
+        return new Promise((resolve, reject) => {
+            try {
+                db.collection('question-subjects')
+                    .where('name', '==', subject)
+                    .get()
+                    .then(snapshot => {
+                        const questions = snapshot.docs[0].data().questions;
+                        resolve(questions);
+                    })
+                    .catch(error => {
+                        commit('setError', error);
+                    });
+            } catch {
+                reject('getSubjectIQS');
+            }
+        });
     },
     resetTests({ commit }) {
         commit('RESETTests');
