@@ -124,7 +124,7 @@
                                             mdi-pdf-box
                                         </v-icon>
                                     </template>
-                                    <span>Gerar PDF</span>
+                                    <span>Visualizar PDF</span>
                                 </v-tooltip>
 
                                 <v-tooltip top v-if='userClaims["admin"]'>
