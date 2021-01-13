@@ -13,14 +13,14 @@
                 <tr v-for="item in statistics" :key="item.name" style="height: 40px">
                     <td class="text-left">{{ item.name }}</td>
                     <td class="text-center">{{ item.questions }}</td>
-                    <td class="text-center">{{ ((item.questions * 100)/ numberOfQuestions).toFixed(2) }}%</td>
+                    <td class="text-center">{{ numberOfQuestions > 0 ? ((item.questions * 100) / numberOfQuestions).toFixed(2) : '0' }}%</td>
                 </tr>
                 </tbody>
                 <thead class="grey lighten-2">
                     <tr>
                         <th class="text-right">TOTAL</th>
                         <th class="text-center">{{numberOfQuestions}}</th>
-                        <th class="text-center">100</th>
+                        <th class="text-center">{{ numberOfQuestions > 0 ? '100' : '0' }}%</th>
                     </tr>
                 </thead>
             </template>
