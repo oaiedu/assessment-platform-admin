@@ -344,11 +344,7 @@ export default {
                     });
 
                     const now = new Date();
-                    const editedHour = parseInt(now.toLocaleTimeString().split(':')[0]);
-                    const isAfterNoon = now.toLocaleString().split(':')[2].includes('PM');
-                    const editedDate = now.toISOString().split('T')[0] + 'T'
-                        + (isAfterNoon ? (editedHour + 12) : (editedHour < 10 ? '0' + editedHour : editedHour))
-                        + now.toISOString().split('T')[1].slice(2);
+                    const editedDate = now.toLocaleString().split('/');
 
                     const testData = {
                       title: this.testTitle,
@@ -356,7 +352,7 @@ export default {
                       type: this.testType,
                       user: this.test.user,
                       created: this.test.created,
-                      edited: `${this.$store.getters.userInfo.name}`+'/'+`${editedDate}`,
+                      edited: `${this.$store.getters.userInfo.name}` + ' - ' + `${editedDate[1]}/${editedDate[0].padStart(2, '0')}/${editedDate[2].split(',')[0]}`,
                       purpose: this.purpose,
                       id: this.test.id
                     }
