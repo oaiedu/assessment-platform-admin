@@ -93,6 +93,7 @@
 
       <v-container>
         <v-card>
+            <v-card-title>Documentos Criados</v-card-title>
           <v-data-table
             :headers="headers"
             :items="isSearching ? filteredPapers : papers"
@@ -106,6 +107,17 @@
           >
             <template small v-slot:[`item.actions`]="{ item }">
               <v-row justify="end" v-if='!item.toDelete'>
+                    <v-tooltip top>
+                        <template v-slot:activator='{ on }'>
+                            <v-icon
+                                v-on="on"
+                                @click="item = item" >
+                                mdi-pdf-box
+                            </v-icon>
+                        </template>
+                        <span>Visualizar PDF</span>
+                    </v-tooltip>
+
                     <v-tooltip top>
                         <template v-slot:activator='{ on }'>
                             <v-icon
@@ -185,6 +197,73 @@
             :length='!isSearching ? pageAmount : Math.ceil(filteredPapers.length / itemsPerPage)'
             @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
       </div>
+
+      <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+        v-model="dialogIntro" >
+        <v-card>
+            <Intro @closeDialogIntro="dialogIntro = false" />
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+        v-model="dialogQuestions" >
+        <v-card>
+            <PPQuestions @closeDialogQuestions="dialogQuestions = false" />
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+        v-model="dialogStatistics" >
+        <v-card>
+            <PPStatistics @closeDialogStatistics="dialogStatistics = false" />
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+        v-model="dialogAnswers" >
+        <v-card>
+            <ListOfAnswers @closeDialogAnswers="dialogAnswers = false" />
+        </v-card>
+      </v-dialog>
+
+      <v-container class="mb-10">
+        <v-card>
+            <v-card-title>
+                Documentos Prontos
+            </v-card-title>
+            <v-data-table
+                :headers="headers"
+                :items="premadePapers"
+                hide-default-footer
+                class="elevation-1">
+                <template small v-slot:[`item.actions`]="{ item }">
+                    <v-tooltip top>
+                        <template v-slot:activator='{ on }'>
+                            <v-icon
+                                v-on="on"
+                                @click="openDialogView(item.name)" >
+                                mdi-eye
+                            </v-icon>
+                        </template>
+                        <span>Visualizar</span>
+                    </v-tooltip>
+                </template>
+            </v-data-table>
+        </v-card>
+      </v-container>
+
       <v-snackbar v-model="deletePaperSnackBar" color="white" light right top>
         Você realmente quer excluir este documento?
         <v-btn dark color="blue" text @click="deletePaper(deleteSelect)">Excluir</v-btn>
@@ -198,10 +277,27 @@
     import NewPaper from './CreatePaper';
     import EditPaper from './EditPaper';
     import Paginator from '../Paginator';
+    import Intro from './PrintPremadePapers/Intro';
+    import Questions from './PrintPremadePapers/Questions';
+    import Statistics from './PrintPremadePapers/Statistics';
+    import ListOfAnswers from './PrintPremadePapers/ListOfAnswers';
 
     export default {
-        components: { NewPaper, EditPaper, Paginator },
+        name: 'Papers',
+        components: {
+            NewPaper,
+            EditPaper,
+            Paginator,
+            Intro,
+            PPQuestions: Questions,
+            PPStatistics: Statistics,
+            ListOfAnswers
+        },
         data: () => ({
+            dialogIntro: false,
+            dialogQuestions: false,
+            dialogStatistics: false,
+            dialogAnswers: false,
             dialogNewPaper: false,
             dialogEditPaper: false,
             selectedEdit: {},
@@ -217,6 +313,12 @@
             deleteConfirmed: false,
             deletePaperSnackBar: false,
             deleteSelect: "",
+            premadePapers: [
+                { name: "Introdução" },
+                { name: "Questões" },
+                { name: "Estatísticas" },
+                { name: "Gabarito" }
+            ]
         }),
         computed: {
             loading () {
@@ -286,6 +388,17 @@
                         this.$store.dispatch("changeDeleteStatusPapers", { id: paper.id, isSearching: this.isSearching });
                     }
                 });
+            },
+            openDialogView(item) {
+                if(item === 'Introdução') {
+                    this.dialogIntro = true;
+                } else if(item === 'Questões') {
+                    this.dialogQuestions = true;
+                } else if(item === 'Estatísticas') {
+                    this.dialogStatistics = true;
+                } else {
+                    this.dialogAnswers = true;
+                }
             },
             onPageChange(event) {
                 const payload = {
