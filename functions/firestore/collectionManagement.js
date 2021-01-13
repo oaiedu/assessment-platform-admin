@@ -312,3 +312,41 @@ exports.countData = async (req, res) => {
 
     res.send(data);
 }
+
+exports.questionSubjectsIQS = async (req, res) => {
+    const subjects = {
+        "Teoria do Reator": [],
+        "Termodinâmica": [],
+        "Instrumentação e Controle": [],
+        "Válvulas e Bombas": [],
+        "Eletricidade": [],
+        "Mecânica dos Fluidos": [],
+        "Tratamento Qúimico Refrigerante": [],
+        "Análise Integrada": [],
+        "Instrumentação Nuclear": [],
+        "Física Nuclear": [],
+        "Transferência de Calor": [],
+        "Materiais": []
+    }
+
+    await db.collection('questions').get()
+        .then(snapshot => {
+            snapshot.forEach(doc => {
+                subjects[doc.data().subject].push(doc.data().iq);
+            });
+
+            return subjects;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+
+    for(let key in subjects) {
+        await db.collection('question-subjects').add({ name: key, questions: subjects[key] })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+    res.send(subjects);
+}

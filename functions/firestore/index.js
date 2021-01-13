@@ -8,6 +8,7 @@ const {
     deleteNonexistentReferences,
     importFirestore,
     importQuestions,
+    questionSubjectsIQS,
     rearrangeQuestions
 } = require('./collectionManagement');
 const { copyFirestore } = require('./dataCopy');
@@ -22,5 +23,6 @@ module.exports = {
     importFirestore: functions.https.onRequest(importFirestore),
     importQuestions: functions.https.onRequest(importQuestions),
     auxQuestions: functions.https.onRequest(auxQuestions),
+    questionSubjectsIQS: functions.https.onRequest(questionSubjectsIQS),
     rearrangeQuestions: functions.https.onRequest(rearrangeQuestions),
 }
