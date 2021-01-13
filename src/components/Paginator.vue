@@ -26,7 +26,7 @@
                 </v-btn>
 
                 <v-btn
-                    color='light-blue'
+                    color='blue darken-1'
                     dark
                     width="35px"
                     min-width="0"
