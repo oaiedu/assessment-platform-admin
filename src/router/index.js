@@ -63,9 +63,9 @@ const routes = [
         beforeEnter: AuthGuard
     },
     {
-        path: '/createpaper',
+        path: '/papers',
         component: Papers,
-        name: 'createpaper',
+        name: 'papers',
         beforeEnter: AuthGuard
     },
     {

@@ -13,6 +13,8 @@ export default (to, from, next) => {
             next('/');
         } else if(to.path === '/questions' && claims && claims.student) {
             next('/');
+        } else if(to.path === '/papers' && !(claims && (claims.teacher || claims.admin))) {
+            next('/');
         } else {
             next();
         }

@@ -10,8 +10,8 @@
                             <img
                                 src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
                                 v-if="user.profileImages === '' || user.profileImages === null"
-                            />
-                            <img :src="user.profileImages" v-else />
+                                alt='image' />
+                            <img :src="user.profileImages" v-else alt='image' />
                         </v-avatar>
                     </v-row>
                 </v-list-item>
@@ -113,8 +113,8 @@
                         {
                             icon: "mdi-file-document",
                             title: "Gerenciar Documentos",
-                            link: "/createpaper",
-                            grantAccess: ['admin', 'appraiser', 'teacher']
+                            link: "/papers",
+                            grantAccess: ['admin', 'teacher']
                         },
                         {
                             icon: "mdi-inbox",
