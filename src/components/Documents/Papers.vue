@@ -122,7 +122,8 @@
                         <template v-slot:activator='{ on }'>
                             <v-icon
                                 v-on="on"
-                                @click="editPaper(item)" >
+                                @click="editPaper(item)"
+                                class="ml-2" >
                                 mdi-pencil
                             </v-icon>
                         </template>
