@@ -194,7 +194,7 @@ export default {
       ],
       rule: [
         v => (v <= 50) || 'Máximo de 50 questões',
-        v => (v <= this.questions.length) || 'Número de questões inexistente',
+        v => (v <= this.checkNumber) || 'Número de questões inexistente',
         v => (v >= 0) || 'Apenas números positivos'
       ]
     };
@@ -218,7 +218,7 @@ export default {
       return aux;
     },
     checkNumber() {
-      return this.questions.length < this.randomQuestionsNumber ? 'Número de questões não existente' : ''
+      return this.$store.getters.getDataSize.questions.general;
     },
     pageAmount() {
         const questionAmount = this.$store.getters.getDataSize.questions.general;
@@ -340,7 +340,7 @@ export default {
                     console.log("selected: ", this.selectedQuestions)
 
                     this.selectedQuestions.forEach(element => {
-                      this.testItems.push(element.iq);
+                      this.testItems.push(element);
                     });
 
                     const now = new Date();
