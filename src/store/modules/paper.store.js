@@ -293,12 +293,14 @@ const actions = {
                 last = null;
 
             request.then(snapshot => {
-                    first = snapshot.docs[0].data().id;
-                    last = snapshot.docs[snapshot.docs.length - 1].data().id;
+                    if(snapshot.docs.length > 0) {
+                        first = snapshot.docs[0].data().id;
+                        last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
-                    });
+                        snapshot.forEach(doc => {
+                            data.push(doc.data());
+                        });
+                    }
                 })
                 .then(() => {
                     commit('setCurrentPapersPage', data);

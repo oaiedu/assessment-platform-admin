@@ -250,12 +250,14 @@ const actions = {
                 last = null;
 
             request.then(snapshot => {
-                    first = snapshot.docs[0].data().id;
-                    last = snapshot.docs[snapshot.docs.length - 1].data().id;
+                    if(snapshot.docs.length > 0) {
+                        first = snapshot.docs[0].data().id;
+                        last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
-                    });
+                        snapshot.forEach(doc => {
+                            data.push(doc.data());
+                        });
+                    }
                 })
                 .then(() => {
                     commit('setCurrentTestsPage', data);
@@ -343,7 +345,7 @@ const actions = {
                 commit('setError', error);
             });
     },
-    async loadTestQuestions({ commit }, payload) {
+    loadTestQuestions({ commit }, payload) {
         const data = [...payload.questions];
         commit('setTestQuestions', data);
     },
