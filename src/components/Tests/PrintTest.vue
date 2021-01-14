@@ -276,10 +276,7 @@
         </v-card-actions>
 
         <v-card-actions v-else>
-          <v-btn color="blue darken-1" text @click="cancel()">Cancelar</v-btn>
-
           <v-spacer/>
-
           <v-btn color="blue darken-1" text @click="saveDocs()">Salvar</v-btn>
         </v-card-actions>
       </v-card>
@@ -341,11 +338,16 @@
                 const toAdd = [];
 
                 this.$store.commit('setLoading', true);
+
+                const included = this.papers.map(p => p.id);
+                const toKeep = [...this.papers];
                 this.papers = [];
 
                 docs.forEach(doc => {
-                    if(doc.value) {
+                    if(doc.value && !included.includes(doc.data.id)) {
                         toAdd.push(doc.data.id);
+                    } else if(doc.value) {
+                        this.papers.push(toKeep.find(p => p.id === doc.data.id));
                     }
                 });
 
@@ -454,12 +456,17 @@
         },
         mounted() {
             const test = this.$store.getters.findTestById(this.$route.params.testId);
-            this.testTitle = test.title.toUpperCase();
-            this.testPurpose = test.purpose;
-            this.testEditedDate = test.edited;
-            this.testCreator = test.user.name;
+            if(!test) {
+                this.$store.commit('setError', { message: 'Test ID not found!' });
+                this.$router.push('/tests');
+            } else {
+                this.testTitle = test.title.toUpperCase();
+                this.testPurpose = test.purpose;
+                this.testEditedDate = test.edited;
+                this.testCreator = test.user.name;
 
-            this.$store.dispatch('loadTestQuestions', test);
+                this.$store.dispatch('loadTestQuestions', test);
+            }
         }
     }
 </script>
