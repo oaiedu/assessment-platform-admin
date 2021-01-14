@@ -77,10 +77,14 @@ const mutations = {
     addRequest(state, data) {
         const page = data.page;
         const requests = state.requests['p' + page] || [];
+        const amount = data.amount;
         const oneBefore = state.requests['p' + (page - 1)] || [];
-        if(requests.length > 0 || oneBefore.length === 8) {
+        if(requests.length > 0 || oneBefore.length === 8 || amount === 0) {
             requests.push(data.data);
             state.requests['p' + page] = [...requests];
+            if(amount === 0) {
+                state.currentRequestsPage.push(data.data);
+            }
         }
     },
     updateRequest(state, data) {

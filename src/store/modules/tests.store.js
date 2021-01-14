@@ -83,10 +83,14 @@ const mutations = {
     createTest(state, data) {
         const page = data.page;
         const tests = state.tests['p' + page] || [];
+        const amount = data.amount;
         const oneBefore = state.tests['p' + (page - 1)] || [];
-        if(tests.length > 0 || oneBefore.length === 8) {
+        if(tests.length > 0 || oneBefore.length === 8 || amount === 0) {
             tests.push(data.data);
             state.tests['p' + page] = [...tests];
+            if(amount === 0) {
+                state.currentTestsPage.push(data.data);
+            }
         }
     },
     updateTest(state, data) {
@@ -546,7 +550,11 @@ const actions = {
         db.collection("tests").add(test)
             .then(() => {
                 commit('setLoading', false);
-                commit('createTest', { page: (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount), data: test });
+                commit('createTest', {
+                    page: (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount),
+                    data: test,
+                    amount: testAmount
+                });
                 commit('setSuccess', 'Prova criada com sucesso!');
 
                 db.collection('data-size').get()

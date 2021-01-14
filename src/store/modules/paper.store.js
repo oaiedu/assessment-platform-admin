@@ -77,10 +77,14 @@ const mutations = {
     createPaper(state, data) {
         const page = data.page;
         const papers = state.papers['p' + page] || [];
+        const amount = data.amount;
         const oneBefore = state.papers['p' + (page - 1)] || [];
-        if(papers.length > 0 || oneBefore.length === 8) {
+        if(papers.length > 0 || oneBefore.length === 8 || amount === 0) {
             papers.push(data.data);
             state.papers['p' + page] = [...papers];
+            if(amount === 0) {
+                state.currentPapersPage.push(data.data);
+            }
         }
     },
     updatePaper(state, data) {
@@ -606,7 +610,11 @@ const actions = {
 
         db.collection("papers").add(paper)
             .then(() => {
-                commit('createPaper', { page: (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount), data: paper });
+                commit('createPaper', {
+                    page: (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount),
+                    data: paper,
+                    amount: paperAmount
+                });
                 commit('setLoading', false);
 
                 db.collection('data-size').get()
