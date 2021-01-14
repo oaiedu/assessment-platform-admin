@@ -111,7 +111,7 @@
                         <template v-slot:activator='{ on }'>
                             <v-icon
                                 v-on="on"
-                                @click="item = item" >
+                                @click="selectedEdit = item; dialogPDF = true" >
                                 mdi-pdf-box
                             </v-icon>
                         </template>
@@ -239,6 +239,19 @@
         </v-card>
       </v-dialog>
 
+      <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+        v-model="dialogPDF" >
+        <v-card>
+            <PrintPaper
+                :paper="selectedEdit"
+                @closeDialogPrint="dialogPDF = false; selectedEdit = {}"
+            ></PrintPaper>
+        </v-card>
+      </v-dialog>
+
       <v-container class="mb-10">
         <v-card>
             <v-card-title>
@@ -282,6 +295,7 @@
     import Questions from './PrintPremadePapers/Questions';
     import Statistics from './PrintPremadePapers/Statistics';
     import ListOfAnswers from './PrintPremadePapers/ListOfAnswers';
+    import PrintPaper from './PrintPaper';
 
     export default {
         name: 'Papers',
@@ -292,9 +306,11 @@
             Intro,
             PPQuestions: Questions,
             PPStatistics: Statistics,
-            ListOfAnswers
+            ListOfAnswers,
+            PrintPaper
         },
         data: () => ({
+            dialogPDF: false,
             dialogIntro: false,
             dialogQuestions: false,
             dialogStatistics: false,
