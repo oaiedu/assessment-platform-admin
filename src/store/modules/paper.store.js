@@ -303,9 +303,11 @@ const actions = {
                     }
                 })
                 .then(() => {
-                    commit('setCurrentPapersPage', data);
-                    commit('setPaperPage', { page: 'p' + page, data });
-                    commit('setLastPaperDocument', [first, last]);
+                    if(data.length > 0) {
+                        commit('setCurrentPapersPage', data);
+                        commit('setPaperPage', { page: 'p' + page, data });
+                        commit('setLastPaperDocument', [first, last]);
+                    }
                     commit('setLoading', false);
                 })
                 .catch(error => {
