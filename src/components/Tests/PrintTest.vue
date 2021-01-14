@@ -59,14 +59,17 @@
         <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
       </div>
 
-      <div v-for="(paper) in createdPapers" :key='paper.data.id' class=" question-page">
-        <div v-if="paper.value">
-          <v-row justify="center">
-            <viewer v-if="checkImage(paper.data.image)" :value="paper.data.description" />
-
-            <img v-else :src="paper.data.image" style="max-height: 1150px; max-width: 700px"/>
+      <div v-for="(paper) in papers" :key='paper.id' class="question-page">
+          <v-row justify="start">
+            <viewer :value="paper.description" />
           </v-row>
-        </div>
+
+          <v-row justify="center">
+            <img v-if="paper.image && paper.image.length > 0"
+            :src="paper.image"
+            alt="image"
+            style="max-height: 800px; max-width: 350px"/>
+          </v-row>
       </div>
 
       <div v-for="(question, index) in questions" :key="question.iq">
@@ -211,7 +214,6 @@
             </template>
             <span>Gerar PDF</span>
         </v-tooltip>
-
     </v-row>
 
     <v-row v-if="!userClaims.student">
@@ -228,10 +230,10 @@
                     style="margin-bottom: 80px;"
                     color="grey darken-1"
                     @click="printDialog = true" >
-                    <v-icon>mdi-pencil</v-icon>
+                    <v-icon>mdi-file-document-edit-outline</v-icon>
                 </v-btn>
             </template>
-            <span>Editar</span>
+            <span>Editar Documentos</span>
         </v-tooltip>
 
     </v-row>
@@ -251,23 +253,34 @@
                 v-model="item.value" />
           </div>
 
-          <!-- <div>
+          <div>
             <v-checkbox v-for="(item) in createdPapers" :key="item.data.id"
                 class="ma-4"
                 :label="item.id"
                 :input-value="item.value"
                 v-model="item.value" />
-          </div> -->
+          </div>
         </v-card-text>
 
         <v-divider></v-divider>
 
-        <v-card-actions>
+        <v-card-actions v-if="loading">
+            <v-container>
+                <v-row justify="center">
+                    <v-progress-circular
+                        color="blue darken-1"
+                        indeterminate >
+                    </v-progress-circular>
+                </v-row>
+            </v-container>
+        </v-card-actions>
+
+        <v-card-actions v-else>
           <v-btn color="blue darken-1" text @click="cancel()">Cancelar</v-btn>
 
           <v-spacer/>
 
-          <v-btn color="blue darken-1" text @click="printDialog = false">Salvar</v-btn>
+          <v-btn color="blue darken-1" text @click="saveDocs()">Salvar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -279,10 +292,11 @@
     import StatisticsQuestions from '@/components/Questions/StatisticsQuestions';
     import VueMarkdown from 'vue-markdown';
     require('vue-markdown');
+    import { Viewer } from '@toast-ui/vue-editor';
 
     export default {
         name: 'PrintTest',
-        components: { 'vue-markdown': VueMarkdown, StatisticsQuestions },
+        components: { 'vue-markdown': VueMarkdown, StatisticsQuestions, 'viewer': Viewer },
         data() {
             return {
                 checkFirtPage: false,
@@ -298,7 +312,8 @@
                 testQuestions: null,
                 letters: ['A','B','C','D'],
                 testTitle: "",
-                confirmTitle: false
+                confirmTitle: false,
+                papers: []
             }
         },
         methods: {
@@ -321,22 +336,49 @@
                     return true;
                 }
             },
-            checkImage(item) {
-                if(item === '' || typeof item === 'undefined') {
-                    return true;
-                }
+            async saveDocs() {
+                const docs = this.createdPapers;
+                const toAdd = [];
+
+                this.$store.commit('setLoading', true);
+                this.papers = [];
+
+                docs.forEach(doc => {
+                    if(doc.value) {
+                        toAdd.push(doc.data.id);
+                    }
+                });
+
+                const promises = toAdd.map(id => {
+                    return this.$store.dispatch('getPaperById', id)
+                        .then(paper => {
+                            this.papers.push(paper);
+                        });
+                });
+
+                await Promise.all(promises);
+
+                this.$store.commit('setLoading', false);
+                this.printDialog = false;
             }
         },
         computed: {
+            loading() {
+                return this.$store.getters.loading;
+            },
             userClaims() {
                 return this.$store.getters.getUserClaims;
             },
             createdPapers() {
-                let result = [];
-                let papers = this.$store.getters.getPapersByPage(1) || [];
-                papers.forEach(paper => {
-                    result.push({ id: paper.name, value: false, data: paper });
-                });
+                const result = [];
+
+                this.$store.dispatch('getPaperNames')
+                    .then(papers => {
+                        papers.forEach(p => {
+                            result.push({ id: p.name, value: false, data: p  });
+                        });
+                    });
+
                 return result;
             },
             premadePapers() {
@@ -436,11 +478,11 @@
     }
 
     @media print {
-        header{
+        header {
             display:none !important
         }
 
-        footer{
+        footer {
             display: none !important
         }
 
@@ -463,7 +505,6 @@
         .img-container {
             text-align: center !important;
         }
-
 
         p {
             font-size: 13px;

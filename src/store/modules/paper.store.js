@@ -525,7 +525,25 @@ const actions = {
                     status: false
                 }
 
-                doc.ref.update({ ...doc.data(), toDelete: { status: false } });
+                doc.ref.update({ ...doc.data(), toDelete });
+
+                db.collection('paper-names').get()
+                    .then(snapNames => {
+                        const docNames = snapNames.docs[0];
+                        const dPapers = docNames.data().papers;
+                        let newPapers = [...dPapers];
+
+                        dPapers.forEach((p, i) => {
+                            if(p.id === id) {
+                                newPapers.splice(i, 1);
+                            }
+                        });
+
+                        docNames.ref.update({ papers: newPapers });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
 
                 commit('updateCurrentPapersPage', { ...doc.data(), toDelete });
                 commit('updatePaper', { ...doc.data(), toDelete });
@@ -542,8 +560,10 @@ const actions = {
     deletePapers({ commit }) {
         db.collection("papers").where('toDelete.status', '==', false).get()
             .then(snapshot => {
+                const data = [];
                 snapshot.forEach(doc => {
                     doc.ref.delete();
+                    data.push(doc.data());
                     if(doc.data().image && doc.data().image.length > 0) {
                         const image = doc.data().image;
                         const childImage = image.split('?alt=media')[0].split('/o/')[1];
@@ -603,6 +623,19 @@ const actions = {
                         console.log(error);
                     });
             })
+            .then(() => {
+                db.collection('paper-names').get()
+                    .then(snapshot => {
+                        const doc = snapshot.docs[0];
+                        const dPapers = doc.data().papers;
+
+                        dPapers.push({ id: paper.id, name: paper.name });
+                        doc.ref.update({ papers: dPapers });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            })
             .catch(error => {
                 commit('setLoading', false);
                 commit('setError', error);
@@ -617,7 +650,27 @@ const actions = {
         }
         db.collection("papers").where('id', '==', paper.id).get()
             .then(snapshot => {
-                snapshot.docs[0].ref.update(paper);
+                const doc = snapshot.docs[0];
+                doc.ref.update(paper);
+
+                db.collection('paper-names').get()
+                    .then(snapNames => {
+                        const docNames = snapNames.docs[0];
+                        const dPapers = docNames.data().papers;
+                        let newPapers = [...dPapers];
+
+                        dPapers.forEach((p, i) => {
+                            if(p.id === paper.id) {
+                                newPapers[i] = { id: paper.id, name: paper.name };
+                            }
+                        });
+
+                        docNames.ref.update({ papers: newPapers });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+
                 commit('updatePaper', paper);
                 commit('updateCurrentPapersPage', paper);
                 commit('setLoading', false);
@@ -627,6 +680,40 @@ const actions = {
                 commit('setLoading', false);
                 commit('setError', error);
             });
+    },
+    async getPaperNames({ commit }) {
+        return new Promise((resolve, reject) => {
+            try {
+                db.collection('paper-names').get()
+                    .then(snapshot => {
+                        const data = snapshot.docs[0].data();
+                        resolve(data.papers);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            } catch {
+                reject('getPaperNames error');
+            }
+        });
+    },
+    async getPaperById({ commit }, payload) {
+        const id = payload;
+
+        return new Promise((resolve, reject) => {
+            try {
+                db.collection('papers').where('id', '==', id).get()
+                    .then(snapshot => {
+                        const doc = snapshot.docs[0];
+                        resolve(doc.data());
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            } catch {
+                reject('getPaperById error')
+            }
+        });
     },
     resetPapers({ commit }) {
         commit('RESETPapers');
