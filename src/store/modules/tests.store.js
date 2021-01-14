@@ -260,9 +260,11 @@ const actions = {
                     }
                 })
                 .then(() => {
-                    commit('setCurrentTestsPage', data);
-                    commit('setTestPage', { page: 'p' + page, data });
-                    commit('setLastTestDocument', [first, last]);
+                    if(data.length > 0) {
+                        commit('setCurrentTestsPage', data);
+                        commit('setTestPage', { page: 'p' + page, data });
+                        commit('setLastTestDocument', [first, last]);
+                    }
                     commit('setLoading', false);
                 })
                 .catch(error => {
