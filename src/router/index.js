@@ -7,7 +7,6 @@ import Questions from '@/components/Questions/Questions.vue';
 import EditQuestion from '@/components/Questions/EditQuestion.vue';
 import NewTestForm from '@/components/Tests/NewTestForm.vue';
 import Tests from '@/components/Tests/Tests.vue';
-import HtmlTest from '@/components/Tests/HtmlToPdfTest.vue';
 import PrintTest from '@/components/Tests/PrintTest.vue';
 import PrintQuestions from '@/components/Questions/PrintQuestion/Body.vue';
 import Papers from '@/components/Documents/Papers.vue';
@@ -44,11 +43,6 @@ const routes = [
         path: '/signin',
         component: SignUser,
         name: 'signin'
-    },
-    {
-        path: '/htmltest/:id',
-        component: HtmlTest,
-        name: 'htmltest',
     },
     {
         path: '/profile',
