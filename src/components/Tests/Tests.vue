@@ -194,10 +194,6 @@
         <NewTest @closeDialogNew="dialogNewTest = false"></NewTest>
       </v-dialog>
 
-      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogHtmlTest">
-        <HtmlTest :test="selectedTest"></HtmlTest>
-      </v-dialog>
-
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditTest">
         <EditTest @closeDialogNew="dialogEditTest = false" :test="selectedTest"></EditTest>
       </v-dialog>
@@ -219,13 +215,12 @@
 
 <script>
     import NewTest from './NewTestForm';
-    import HtmlTest from './HtmlToPdfTest';
     import EditTest from './EditTest';
     import Paginator from '../Paginator';
 
     export default {
         name: 'Tests',
-        components: { NewTest, HtmlTest, EditTest, Paginator },
+        components: { NewTest, EditTest, Paginator },
         data() {
             return {
                 search: '',
@@ -233,7 +228,6 @@
                 deleteConfirmed: false,
                 deleteTestSnackBar: false,
                 dialogNewTest: false,
-                dialogHtmlTest: false,
                 dialogEditTest: false,
                 page: 1,
                 searchPage: 1,
