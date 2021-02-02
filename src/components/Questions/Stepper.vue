@@ -7,11 +7,6 @@
       </v-btn>
       <h2>Criar nova questão</h2>
       <v-spacer></v-spacer>
-      <!-- <v-toolbar-items>
-        <v-btn dark text @click="e1 = 2" v-if="e1 == 1">Continuar</v-btn>
-        <v-btn dark text @click="e1 = 3" v-if="e1 == 2">Continuar</v-btn>
-        <v-btn dark text @click="onCreateQuestion()" v-if="e1 == 3">Salvar</v-btn>
-      </v-toolbar-items> -->
     </v-toolbar>
 
     <v-tooltip right v-if='e1 > 1'>
@@ -252,67 +247,14 @@
         </v-col>
 
         <v-col>
-          <v-card fill>
-            <v-card-title>Preview</v-card-title>
-            <v-card-text>
-              DISCIPLINA: {{ subject }}
-              <br />
-              CONHECIMENTO: {{ knowledge }} [{{ knowledgePWR }}/{{ knowledgeBWR }}]
-              <br />
-              IQ: {{ iq }}
-              <br />
-
-              <br />
-              <vue-markdown :source="questionDescription" />
-              <br />
-
-              <div v-if="confirmTitle">
-                <v-row class='answer-block'>
-                  <v-col cols="1"></v-col>
-                  <v-col v-for="(item, index) in answers[0].text" :key="index">
-                    <vue-markdown :source="item.title" />
-                  </v-col>
-                </v-row>
-
-                <v-row class='answer-block'>
-                  <v-col cols="1">A -</v-col>
-                  <v-col v-for="(item, index) in answers[0].text" :key="index">
-                    <vue-markdown :source="item.answerDescription" />
-                  </v-col>
-                </v-row>
-
-                <v-row class='answer-block'>
-                  <v-col cols="1">B -</v-col>
-                  <v-col v-for="(item, index) in answers[1].text" :key="index">
-                    <vue-markdown :source="item.answerDescription" />
-                  </v-col>
-                </v-row>
-
-                <v-row class='answer-block'>
-                  <v-col cols="1">C -</v-col>
-                  <v-col v-for="(item, index) in answers[2].text" :key="index">
-                    <vue-markdown :source="item.answerDescription" />
-                  </v-col>
-                </v-row>
-
-                <v-row class='answer-block'>
-                  <v-col cols="1">D -</v-col>
-                  <v-col v-for="(item, index) in answers[3].text" :key="index">
-                    <vue-markdown :source="item.answerDescription" />
-                  </v-col>
-                </v-row>
-              </div>
-
-              <div v-else>
-                <v-row v-for="(item, index) in answers" :key="index" class='answer-block'>
-                  <v-col cols="1">{{ letters[index] }} -</v-col>
-                  <v-col>
-                    <vue-markdown :source="item.text" />
-                  </v-col>
-                </v-row>
-              </div>
-            </v-card-text>
-          </v-card>
+          <Preview
+            :iq='iq'
+            :subject='subject'
+            :knowledge='knowledge'
+            :knowledgePWR='knowledgePWR'
+            :knowledgeBWR='knowledgeBWR'
+            :questionDesc='questionDescription'
+            :answers='answers' />
         </v-col>
       </v-row>
 
@@ -346,18 +288,16 @@
 
 <script>
 import { Editor } from "@toast-ui/vue-editor";
-import VueMarkdown from "vue-markdown";
-require("vue-markdown");
+import Preview from './Preview';
 
 export default {
     components: {
         Editor,
-        "vue-markdown": VueMarkdown
+        Preview
     },
     props: ['questionRequest', 'page'],
     data() {
         return {
-            letters: ["A", "B", "C", "D"],
             images: [],
             imagesAsURL: "",
             imageSize: "1x",
@@ -418,29 +358,40 @@ export default {
         }
     },
     watch: {
-        number(val) {
-            if (this.number > 1) {
-            this.answers.forEach(element => {
-                let aux = [];
-                for (var i = 0; i < this.number; i++) {
-                    aux.push({ title: "", answerDescription: "" });
-                }
-                element.text = aux;
-            });
-            this.confirmTitle = true;
+        number(val, oldVal) {
+            console.log(oldVal);
+            console.log(this.answers);
+            if (val > 1) {
+                this.answers.forEach(element => {
+                    const aux = [];
+                    for (let i = 0; i < val; i++) {
+                        const text = element.text[i] && element.text[i].answerDescription
+                            ? element.text[i].answerDescription
+                            : (i === 0 && oldVal === 1 ? element.text : '');
+                        const title = element.text[i] && element.text[i].title
+                            ? element.text[i].title : '';
+                        aux.push({ title: title || this.auxTitle[i] || "", answerDescription: text || "" });
+                    }
+                    console.log(aux);
+                    element.text = aux;
+                });
+
+                this.confirmTitle = true;
             } else {
                 this.answers.forEach(element => {
-                    element.text = "";
+                    element.text = element.text[0].answerDescription || "";
                 });
                 this.confirmTitle = false;
             }
         },
         auxTitle(val) {
-            this.answers.forEach(element => {
-                for (var i = 0; i < this.number; i++) {
-                    element.text[i].title = this.auxTitle[i];
-                }
-            });
+            if(this.auxTitle.length > 0) {
+                this.answers.forEach(element => {
+                    for (let i = 0; i < this.number; i++) {
+                        element.text[i].title = this.auxTitle[i];
+                    }
+                });
+            }
         },
         radios(val) {
             this.answers.forEach(element => {
@@ -454,10 +405,14 @@ export default {
     },
     methods: {
         decreaseColumns() {
-            if (this.number > 1) this.number--;
+            if (this.number > 1) {
+                this.number--;
+            }
         },
         increaseColumns() {
-            if (this.number < 5) this.number++;
+            if (this.number < 5) {
+                this.number++;
+            }
         },
         updateData(variable) {
             this.questionDescription = variable;
