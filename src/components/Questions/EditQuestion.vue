@@ -298,7 +298,7 @@ export default {
     Editor,
     "vue-markdown": VueMarkdown
   },
-  props: ['question', 'userClaims', 'userInfo'],
+  props: ['question', 'userClaims', 'userInfo', 'isSearching'],
   data() {
     return {
       letters: ["A", "B", "C", "D"],
@@ -527,13 +527,11 @@ export default {
 
         if(this.userClaims['admin']) {
             const sendInfo = {
-                oldData: {},
-                questionData: {},
-                user: ""
+                oldData,
+                questionData,
+                user: this.$store.getters.user.id,
+                isSearching: this.isSearching
             }
-            sendInfo.oldData = oldData;
-            sendInfo.questionData = questionData;
-            sendInfo.user = this.$store.getters.user.id;
 
             aux = this.$store.dispatch("editQuestion", sendInfo);
           } else {

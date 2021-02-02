@@ -86,6 +86,7 @@
           :question="selectedEdit"
           :userClaims="userClaims"
           :userInfo="userInfo"
+          :isSearching="isSearching"
           @closeDialogEdit="dialogEditQuestion = false" />
       </v-dialog>
 
