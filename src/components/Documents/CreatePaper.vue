@@ -87,10 +87,9 @@
 
             <v-row>
               <v-col cols="12">
-                <v-card>
-                  <v-card-title>{{paperName}}</v-card-title>
-                  <v-card-text>{{paperDescription}}</v-card-text>
-                </v-card>
+                <Preview
+                    :title='paperName'
+                    :description='paperDescription' />
               </v-col>
             </v-row>
           </v-col>
@@ -127,8 +126,11 @@
 
 <script>
     import uuid from 'uuid-random';
+    import Preview from './Preview';
 
     export default {
+        name: 'CreatePaper',
+        components: { Preview },
         data: () => ({
             createErrorSnackBar: false,
             paperDescription: null,
