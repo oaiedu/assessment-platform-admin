@@ -106,7 +106,7 @@
                         },
                         {
                             icon: "mdi-file-multiple-outline",
-                            title: "Gerenciar provas",
+                            title: "Gerenciar Provas",
                             link: "/tests",
                             grantAccess: ['admin', 'teacher', 'student']
                         },
