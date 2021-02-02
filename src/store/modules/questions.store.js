@@ -366,7 +366,7 @@ const actions = {
     restoreMarkedQuestion({ commit }, payload) {
         commit('setLoading', true);
 
-        const { iq, isSearching } = payload;
+        const { iq, isSearching, isRequest } = payload;
 
         db.collection('questions').where('iq', '==', iq).get()
             .then(snapshot => {
@@ -396,7 +396,7 @@ const actions = {
                 commit('removeDeleteMarkQuestion', iq);
                 commit('updateCurrentQuestionsPage', question);
                 commit('setLoading', false);
-                commit('setSuccess', 'Questão restaurada com sucesso!');
+                if(!isRequest) commit('setSuccess', 'Questão restaurada com sucesso!');
             })
             .catch(error => {
                 commit('setLoading', false);
@@ -422,7 +422,7 @@ const actions = {
                         knowledgeBWR: data.knowledgeBWR,
                         answers: data.answers,
                         image: data.image,
-                        imageSize: data.imageSize,
+                        imageSize: data.imageSize || '1x',
                         edited: data.edited || []
                     };
 
@@ -460,7 +460,6 @@ const actions = {
                 if(isSearching) commit('updateFilteredQuestion', { ...doc.data(), toDelete });
 
                 commit('setLoading', false);
-                commit('setSuccess', 'Questão excluída com sucesso!');
             })
             .catch(error => {
                 commit('setError', error);
@@ -634,7 +633,7 @@ const actions = {
             .then(() => {
                 commit('setLoading', false);
                 commit('createQuestion', { page: (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: question });
-                commit('setSuccess', 'Questão criada com sucesso!');
+                if(!payload.isRequest) commit('setSuccess', 'Questão criada com sucesso!');
 
                 db.collection('data-size').get()
                     .then(snap => {
