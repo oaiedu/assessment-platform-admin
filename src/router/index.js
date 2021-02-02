@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import SignUser from '@/components/SignUser.vue';
+import SignUser from '@/components/User/SignUser.vue';
 import Profile from '@/components/User/Profile.vue';
 import NewQuestion from '@/components/Questions/NewQuestion.vue';
 import Questions from '@/components/Questions/Questions.vue';
@@ -10,7 +10,7 @@ import Tests from '@/components/Tests/Tests.vue';
 import PrintTest from '@/components/Tests/PrintTest.vue';
 import PrintQuestions from '@/components/Questions/PrintQuestion/Body.vue';
 import Papers from '@/components/Documents/Papers.vue';
-import Inbox from '@/components/Inbox.vue';
+import Inbox from '@/components/Requests/Inbox.vue';
 import Home from '@/views/Home.vue';
 import AuthGuard from './auth-guard';
 import Management from '@/components/Admin/Management.vue';
