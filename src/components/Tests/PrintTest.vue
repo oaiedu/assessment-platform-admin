@@ -2,58 +2,16 @@
   <v-container>
     <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css">
     <div id="example-1">
-      <div v-if="premadePapers[0].value" class="question-page">
-        <p class="centered-text">
-          <b>
-            MARINHA DO BRASIL
-            <br>
-            CENTRO TECNOLÓGICO DA MARINHA EM SÃO PAULO
-            <br><br>
-          </b>
-            {{ testTitle }}
-            <br>
-            <b>{{ currentDate }}</b>
-            <br>
-            <br>
-        </p>
-        <p class="left-text">
-          Responsável:    {{ testCreator }}
-          <br>
-          <br>
-          Revisão:        {{ testEditedDate }}
-          <br>
-          <br>
-          Propósito:      {{ testPurpose }}
-          <br>
-          <br>
-          Alterações:
-          <br>
-          <br>
-        </p>
-      </div>
+      <Definition
+        v-if="premadePapers[0].value"
+        :title="testTitle"
+        :creator="testCreator"
+        :editedDate="testEditedDate"
+        :purpose="testPurpose" />
 
-      <div v-if="premadePapers[1].value" class="question-page">
-        <v-simple-table>
-          <template v-slot:default>
-            <thead>
-              <tr>
-                <th class="text-center">QUESTÃO</th>
-                <th class="text-center">DISCIPLINA</th>
-                <th class="text-center">QUESTÃO DE REFERÊNCIA</th>
-                <th class="text-center">Obs.</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in infoTable" :key="item.iq">
-                <td class="text-center">{{ item.question }}</td>
-                <td class="text-center">{{ item.subject }}</td>
-                <td class="text-center">{{ item.iq }}</td>
-                <td class="text-center">{{ item.obs }}</td>
-              </tr>
-            </tbody>
-          </template>
-        </v-simple-table>
-      </div>
+      <QuestionsList
+        v-if="premadePapers[1].value"
+        :questions='questions' />
 
       <div v-if="premadePapers[2].value" class="question-page">
         <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
@@ -72,108 +30,11 @@
           </v-row>
       </div>
 
-      <div v-for="(question, index) in questions" :key="question.iq">
-        <div class="question-page">
-          QUESTÃO {{ index + 1 }}
-          <br>
-          <br>
-          DISCIPLINA: {{ question.subject }}
-          <br>
+      <TestQuestions :questions='questions' />
 
-          CONHECIMENTO: {{ question.knowledge }} [ {{ question.knowledgePWR }} / {{ question.knowledgeBWR }} ]
-          <br>
-
-          IQ: {{ question.iq }}
-          <br>
-
-          <br>
-            <vue-markdown :source="question.question"/>
-          <br>
-
-          <div class="img-container" v-if="confirmImage(question.image)">
-            <img :src="question.image" style="max-height: 250px; max-width: 180px"/>
-          </div>
-
-          <div v-if="typeof question.answers[0].text !== 'string'">
-            <v-row class='answer-block' >
-              <v-col cols="1"></v-col>
-              <v-col v-for="(item, index) in question.answers[0].text" :key="index">
-                <vue-markdown :source="item.title"/>
-              </v-col>
-            </v-row>
-
-            <v-row class='answer-block' >
-              <v-col cols="1">A -</v-col>
-              <v-col
-                v-for="(item, index) in question.answers[0].text"
-                :key="index"
-              >
-                <vue-markdown :source="item.answerDescription"/>
-              </v-col>
-            </v-row>
-
-            <v-row class='answer-block' >
-              <v-col cols="1">B -</v-col>
-              <v-col
-                v-for="(item, index) in question.answers[1].text"
-                :key="index"
-                >
-                  <vue-markdown :source="item.answerDescription"/>
-                </v-col>
-            </v-row>
-
-            <v-row class='answer-block' >
-              <v-col cols="1">C -</v-col>
-              <v-col
-                v-for="(item, index) in question.answers[2].text"
-                :key="index"
-                >
-                  <vue-markdown :source="item.answerDescription"/>
-                </v-col>
-            </v-row>
-
-            <v-row class='answer-block' >
-              <v-col cols="1">D -</v-col>
-              <v-col
-                v-for="(item, index) in question.answers[3].text"
-                :key="index"
-                >
-                  <vue-markdown :source="item.answerDescription"/>
-                </v-col>
-            </v-row>
-          </div>
-
-          <div v-else-if="question && question.answers">
-            <v-row v-for="(item, index) in question.answers" :key="index" class='answer-block' >
-              <v-col cols="1">{{ letters[index] }} - </v-col>
-              <v-col>
-                <vue-markdown :source="item.text"/>
-              </v-col>
-            </v-row>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="premadePapers[3].value" class="question-page">
-        <v-simple-table>
-          <template v-slot:default>
-            <thead>
-              <tr>
-                <th class="text-left">Questão</th>
-                <th class="text-left">IQ</th>
-                <th class="text-left">Resposta</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in table" :key="item.iq">
-                <td>{{ item.question }}</td>
-                <td>{{ item.iq }}</td>
-                <td>{{ item.answer }}</td>
-              </tr>
-            </tbody>
-          </template>
-        </v-simple-table>
-      </div>
+      <ListOfAnswers
+        v-if="premadePapers[3].value"
+        :questions='questions' />
     </div>
 
     <v-row>
@@ -290,10 +151,22 @@
     import VueMarkdown from 'vue-markdown';
     require('vue-markdown');
     import { Viewer } from '@toast-ui/vue-editor';
+    import Definition from './Definition';
+    import ListOfAnswers from './ListOfAnswers';
+    import TestQuestions from './TestQuestions';
+    import QuestionsList from './QuestionsList';
 
     export default {
         name: 'PrintTest',
-        components: { 'vue-markdown': VueMarkdown, StatisticsQuestions, 'viewer': Viewer },
+        components: {
+            'vue-markdown': VueMarkdown,
+            StatisticsQuestions,
+            'viewer': Viewer,
+            Definition,
+            TestQuestions,
+            QuestionsList,
+            ListOfAnswers
+        },
         data() {
             return {
                 checkFirtPage: false,
@@ -307,7 +180,6 @@
                 testCreator: "",
                 testEditedDate: "",
                 testQuestions: null,
-                letters: ['A','B','C','D'],
                 testTitle: "",
                 confirmTitle: false,
                 papers: []
@@ -325,13 +197,6 @@
             },
             toPrint() {
                 window.print();
-            },
-            confirmImage(val) {
-                if(typeof val == 'undefined' || val == "") {
-                    return false;
-                } else {
-                    return true;
-                }
             },
             async saveDocs() {
                 const docs = this.createdPapers;
@@ -398,15 +263,6 @@
                     default: return {}
                 }
             },
-            currentDate() {
-                var today = new Date();
-                var months = [
-                    "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
-                    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
-                ]
-                var result = months[today.getMonth()] + " DE " + today.getFullYear();
-                return result;
-            },
             statistics() {
                 let statisticsObj = [];
                 const subject =  this.$store.getters.getSubjects;
@@ -421,37 +277,6 @@
             },
             questions() {
                 return this.$store.getters.getTestQuestions;
-            },
-            table() {
-                const result = [];
-
-                for ( let i = 0; i < this.questions.length; i++ ) {
-                    let data = { question: "", iq: "", answer: ""}
-                    data.question = i + 1;
-                    data.iq = this.questions[i].iq;
-
-                    for( let j = 0; j < 4; j++){
-                        if(this.questions[i].answers[j].value == true) {
-                            data.answer = this.letters[j];
-                        }
-                    }
-                    result.push(data);
-                }
-
-                return result;
-            },
-            infoTable() {
-                const result = [];
-
-                for ( let i = 0; i < this.questions.length; i++ ) {
-                    let data = { question: "", subject: "", iq: "", obs: ""}
-                    data.question = i + 1;
-                    data.subject = this.questions[i].subject;
-                    data.iq = this.questions[i].iq;
-                    result.push(data);
-                }
-
-                return result;
             }
         },
         mounted() {
