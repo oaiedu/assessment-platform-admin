@@ -11,10 +11,7 @@ import Combined from './components/Shared/Combined';
 import NewQuestion from './components/Questions/NewQuestion';
 import EditQuestion from './components/Questions/EditQuestion';
 import Stepper from './components/Questions/Stepper';
-import DefinitionBlock from './components/Questions/PrintQuestion/Definition';
-import ImageBlock from './components/Questions/PrintQuestion/Image';
-import AnswerBlock from './components/Questions/PrintQuestion/Answers';
-import Body from './components/Questions/PrintQuestion/Body';
+import PrintQuestion from './components/Questions/PrintQuestion';
 
 Vue.config.productionTip = false;
 
@@ -23,10 +20,7 @@ Vue.component('Combined', Combined);
 Vue.component('NewQuestion', NewQuestion);
 Vue.component('EditQuestion', EditQuestion);
 Vue.component('Stepper', Stepper);
-Vue.component('Body', Body);
-Vue.component('def-block', DefinitionBlock);
-Vue.component('img-block', ImageBlock);
-Vue.component('ans-block', AnswerBlock);
+Vue.component('Body', PrintQuestion);
 
 const firebaseConfig = {
     apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
