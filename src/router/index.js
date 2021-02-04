@@ -8,7 +8,7 @@ import EditQuestion from '@/components/Questions/EditQuestion.vue';
 import NewTestForm from '@/components/Tests/NewTestForm.vue';
 import Tests from '@/components/Tests/Tests.vue';
 import PrintTest from '@/components/Tests/PrintTest.vue';
-import PrintQuestions from '@/components/Questions/PrintQuestion/Body.vue';
+import PrintQuestion from '@/components/Questions/PrintQuestion.vue';
 import Papers from '@/components/Documents/Papers.vue';
 import Inbox from '@/components/Requests/Inbox.vue';
 import Home from '@/views/Home.vue';
@@ -82,7 +82,7 @@ const routes = [
     },
     {
         path: '/printquestion/:questionId',
-        component: PrintQuestions,
+        component: PrintQuestion,
         name: 'printquestion',
         beforeEnter: AuthGuard
     },
