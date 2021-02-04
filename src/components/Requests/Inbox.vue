@@ -131,7 +131,7 @@
 </template>
 
 <script>
-    import Body from '../Questions/PrintQuestion/Body';
+    import Body from '../Questions/PrintQuestion';
     import EditQuestion from '../Questions/EditQuestion';
     import RequestsTable from './RequestsTable';
     import Paginator from '../Paginator';
