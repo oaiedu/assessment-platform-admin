@@ -1,27 +1,6 @@
 <template>
     <v-container>
-        <div class="question-page">
-            <v-simple-table>
-                <template v-slot:default>
-                    <thead>
-                        <tr>
-                            <th class="text-center">QUESTÃO</th>
-                            <th class="text-center">DISCIPLINA</th>
-                            <th class="text-center">QUESTÃO DE REFERÊNCIA</th>
-                            <th class="text-center">Obs.</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in infoTable" :key="item.iq">
-                            <td class="text-center">{{ item.question }}</td>
-                            <td class="text-center">{{ item.subject }}</td>
-                            <td class="text-center">{{ item.iq }}</td>
-                            <td class="text-center">{{ item.obs }}</td>
-                        </tr>
-                    </tbody>
-                </template>
-            </v-simple-table>
-        </div>
+        <QuestionsList :questions='questions' />
 
         <v-tooltip right>
             <template v-slot:activator='{ on, attrs }'>
@@ -42,34 +21,29 @@
 </template>
 
 <script>
+    import QuestionsList from '../../Tests/QuestionsList';
+
     export default {
         name: 'PPQuestions',
+        components: { QuestionsList },
         computed: {
-            infoTable() {
+            questions() {
                 return [
                     {
-                        question: 1,
                         subject: 'Disciplina 1',
-                        iq: 'P0001',
-                        obs: ''
+                        iq: 'P0001'
                     },
                     {
-                        question: 2,
                         subject: 'Disciplina 2',
-                        iq: 'P0002',
-                        obs: ''
+                        iq: 'P0002'
                     },
                     {
-                        question: 3,
                         subject: 'Disciplina 3',
-                        iq: 'P0003',
-                        obs: ''
+                        iq: 'P0003'
                     },
                     {
-                        question: 4,
                         subject: 'Disciplina 4',
-                        iq: 'P0004',
-                        obs: ''
+                        iq: 'P0004'
                     }
                 ]
             }
