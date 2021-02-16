@@ -1,4 +1,5 @@
 import { db, storage } from '../../main';
+import { showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     deleteQuestionId: null,
@@ -205,7 +206,8 @@ const actions = {
                 })
                 .catch(error => {
                     commit('setLoading', false);
-                    commit('setError', error);
+                    const errorModel = showErrorMessage('load', 'Questões', error.message);
+                    commit('setError', { message: errorModel });
                 });
         } else {
             const pageContent = state.questions['p' + page];
@@ -257,7 +259,8 @@ const actions = {
                 })
                 .catch(error => {
                     commit('setLoading', false);
-                    commit('setError', error);
+                    const errorModel = showErrorMessage('load', 'Questões', error.message);
+                    commit('setError', { message: errorModel });
                 });
         } else {
             const pageContent = state.questions['p' + page];
@@ -289,7 +292,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('load', 'Questões', 'Searching error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     async checkQuestionInTests(store, payload) {
@@ -329,7 +333,8 @@ const actions = {
                 commit('setDeleteMarkQuestions', data);
             })
             .catch(error => {
-                console.log(error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deleteMarkQuestion({ commit, state }, payload) {
@@ -373,7 +378,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     restoreMarkedQuestion({ commit }, payload) {
@@ -425,7 +431,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                    commit('setError', { message: errorModel });
             });
     },
     restoreAllMarkedQuestions({ commit, state }, payload) {
@@ -485,7 +492,8 @@ const actions = {
             .then(() => commit('setLoading', false))
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                    commit('setError', { message: errorModel });
             });
     },
     changeDeleteStatusQuestions({ commit }, payload) {
@@ -509,7 +517,8 @@ const actions = {
                 commit('setLoading', false);
             })
             .catch(error => {
-                commit('setError', error);
+                const errorModel = showErrorMessage('exclusion', 'Questão', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deleteQuestions({ commit }) {
@@ -590,7 +599,8 @@ const actions = {
                         });
                     })
                     .catch(error => {
-                        commit('setError', error);
+                        const errorModel = showErrorMessage('connection', '', 'Image upload error - ' + error.message);
+                        commit('setError', { message: errorModel });
                     });
             } catch {
                 reject();
@@ -686,7 +696,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('edition', 'Questão', error.message);
+                    commit('setError', { message: errorModel });
             });
     },
     createdEditedQuestion({ commit }, payload) {
@@ -721,7 +732,8 @@ const actions = {
                     })
                     .catch(error => {
                         commit('setLoading', false);
-                        commit('setError', error);
+                        const errorModel = showErrorMessage('connection', '', error.message);
+                        commit('setError', { message: errorModel });
                     });
             } catch {
                 reject();
@@ -783,7 +795,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('creation', 'Questão', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     async getQuestionByIQ(store, payload) {
@@ -795,7 +808,8 @@ const actions = {
                         else resolve(null);
                     })
                     .catch(error => {
-                        commit('setError', error);
+                        const errorModel = showErrorMessage('load', 'Questão', error.message);
+                        commit('setError', { message: errorModel });
                     });
             } catch {
                 reject();

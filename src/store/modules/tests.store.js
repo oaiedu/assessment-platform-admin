@@ -1,6 +1,7 @@
 import uuid from 'uuid-random';
 
 import { db, storage } from '../../main';
+import { showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     loadedTests: [],
@@ -171,14 +172,13 @@ const actions = {
 
         const imageURL = pathReference.getDownloadURL()
             .then(url => {
-                console.log("URL",url);
                 return url;
             })
             .catch(error => {
-                commit('setError', error);
+                const errorModel = showErrorMessage('load', 'Prova', 'Image loading error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
 
-        console.log("After Download: ", imageURL);
         return imageURL;
     },
     loadTestPage({ commit, state }, payload) {
@@ -217,7 +217,9 @@ const actions = {
                     commit('setLoading', false);
                 })
                 .catch(error => {
-                    console.log(error);
+                    commit('setLoading', false);
+                    const errorModel = showErrorMessage('load', 'Provas', error.message);
+                    commit('setError', { message: errorModel });
                 });
         } else {
             const pageContent = state.tests['p' + page];
@@ -272,7 +274,9 @@ const actions = {
                     commit('setLoading', false);
                 })
                 .catch(error => {
-                    console.log(error);
+                    commit('setLoading', false);
+                    const errorModel = showErrorMessage('load', 'Provas', error.message);
+                    commit('setError', { message: errorModel });
                 });
         } else {
             const pageContent = state.tests['p' + page];
@@ -348,7 +352,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('load', 'Provas', 'Searching error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     loadTestQuestions({ commit }, payload) {
@@ -368,7 +373,8 @@ const actions = {
                 commit('setDeleteMarkTests', data);
             })
             .catch(error => {
-                console.log(error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deleteMarkTest({ commit }, payload) {
@@ -399,7 +405,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     restoreMarkedTest({ commit }, payload) {
@@ -437,7 +444,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     restoreAllMarkedTests({ commit, state }, payload) {
@@ -487,7 +495,8 @@ const actions = {
             .then(() => commit('setLoading', false))
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     changeDeleteStatusTests({ commit }, payload) {
@@ -512,7 +521,8 @@ const actions = {
                 commit('setSuccess', 'Provas excluídas com sucesso!');
             })
             .catch(error => {
-                commit('setError', error);
+                const errorModel = showErrorMessage('exclusion', 'Provas', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deleteTests({ commit }) {
@@ -576,7 +586,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('creation', 'Prova', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     updateTest({ commit }, payload) {
@@ -591,7 +602,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('edition', 'Prova', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     async getSubjectIQS({ commit }, payload) {
@@ -599,15 +611,14 @@ const actions = {
 
         return new Promise((resolve, reject) => {
             try {
-                db.collection('question-subjects')
-                    .where('name', '==', subject)
-                    .get()
+                db.collection('question-subjects').where('name', '==', subject).get()
                     .then(snapshot => {
                         const questions = snapshot.docs[0].data().questions;
                         resolve(questions);
                     })
                     .catch(error => {
-                        commit('setError', error);
+                        const errorModel = showErrorMessage('load', 'IQs' + error.message);
+                        commit('setError', { message: errorModel });
                     });
             } catch {
                 reject('getSubjectIQS');

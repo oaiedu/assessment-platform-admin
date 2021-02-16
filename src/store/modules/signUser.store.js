@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { auth, db, storage } from '../../main';
+import { showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     user: null,
@@ -68,7 +69,8 @@ const actions = {
                         });
                     })
                     .catch(error => {
-                        commit('setError', error);
+                        const errorModel = showErrorMessage('connection', '', 'Avatar upload error - ' + error.message);
+                        commit('setError', { message: errorModel });
                     });
             } catch {
                 reject();
@@ -138,7 +140,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('default', '', 'Sign up error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     updateUser({ commit, state }, payload) {
@@ -164,7 +167,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('default', '', 'User update error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     signUserIn({ commit, dispatch }, payload) {
@@ -194,16 +198,16 @@ const actions = {
             )
             .catch(error => {
                     commit('setLoading', false);
-                    commit('setError', error);
-                    console.log(error);
+                    const errorModel = showErrorMessage('default', '', 'Login error - ' + error.message);
+                    commit('setError', { message: errorModel });
                 }
             );
     },
     loadUserInfo({ commit }, payload) {
         commit('setLoading', true);
         let user = {};
-        db.collection("users").get().then(querySnapshot => {
-            querySnapshot.forEach(doc => {
+        db.collection("users").get().then(snapshot => {
+            snapshot.forEach(doc => {
                 if(doc.id === payload) {
                     user = doc.data();
                 }
@@ -220,7 +224,8 @@ const actions = {
                 }
             })
             .catch(error => {
-                console.log(error);
+                const errorModel = showErrorMessage('load', 'User Claims', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     loadUsers({ commit }) {
@@ -236,7 +241,8 @@ const actions = {
                 commit('setUsers', users);
             })
             .catch(error => {
-                console.log(error + '');
+                const errorModel = showErrorMessage('load', 'Usuários', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     setUserRole({ commit }, payload) {
@@ -276,7 +282,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('edition', 'Cargo de Usuário', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     logout({ commit }) {

@@ -167,7 +167,8 @@ const actions = {
                         });
                     })
                     .catch(error => {
-                        commit('setError', error);
+                        const errorModel = showErrorMessage('connection', '', 'Image upload error - ' + error.message);
+                        commit('setError', { message: errorModel });
                     });
             } catch{
                 reject();
@@ -218,9 +219,10 @@ const actions = {
                 commit('setLoading', false);
                 commit('setSuccess', 'Documento excluído com sucesso!');
             })
-            .catch(function (error) {
+            .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('exclusion', 'Documento', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     loadPaperPage({ commit, state }, payload) {
@@ -260,7 +262,8 @@ const actions = {
                 })
                 .catch(error => {
                     commit('setLoading', false);
-                    commit('setError', error);
+                    const errorModel = showErrorMessage('load', 'Documentos', error.message);
+                    commit('setError', { message: errorModel });
                 });
         } else {
             const pageContent = state.papers['p' + page];
@@ -316,7 +319,8 @@ const actions = {
                 })
                 .catch(error => {
                     commit('setLoading', false);
-                    commit('setError', error);
+                    const errorModel = showErrorMessage('load', 'Documentos', error.message);
+                    commit('setError', { message: errorModel });
                 });
         } else {
             const pageContent = state.papers['p' + page];
@@ -339,7 +343,7 @@ const actions = {
             .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
-                    data.push(doc.data());
+                    data.push(doc.algo.data());
                 });
             })
             .then(() => {
@@ -376,7 +380,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('load', 'Documentos', 'Searching error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     async paperExists(store, payload) {
@@ -388,7 +393,8 @@ const actions = {
                         else resolve({ id: null, exist: false });
                     })
                     .catch(error => {
-                        console.log(error);
+                        const errorModel = showErrorMessage('connection', '', error.message);
+                        commit('setError', { message: errorModel });
                     });
             } catch {
                 reject();
@@ -408,7 +414,8 @@ const actions = {
                 commit('setDeleteMarkPapers', data);
             })
             .catch(error => {
-                console.log(error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deleteMarkPaper({ commit }, payload) {
@@ -439,7 +446,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     restoreMarkedPaper({ commit }, payload) {
@@ -473,7 +481,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     restoreAllMarkedPapers({ commit, state }, payload) {
@@ -519,7 +528,8 @@ const actions = {
             .then(() => commit('setLoading', false))
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     changeDeleteStatusPapers({ commit }, payload) {
@@ -562,7 +572,8 @@ const actions = {
                 commit('setSuccess', 'Documento excluído com sucesso!');
             })
             .catch(error => {
-                commit('setError', error);
+                const errorModel = showErrorMessage('exclusion', 'Documento', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deletePapers({ commit }) {
@@ -650,7 +661,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('creation', 'Document', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     updatePaper({ commit }, payload) {
@@ -690,7 +702,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('edition', 'Document', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     async getPaperNames({ commit }) {
