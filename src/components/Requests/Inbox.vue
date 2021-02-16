@@ -7,19 +7,10 @@
 
             <v-container>
                 <v-container>
-                    <v-text-field
-                        id='searchField'
-                        v-model="search"
-                        @keydown="searchQuery($event)"
-                        clearable
-                        filled
-                        rounded
-                        dense
-                        append-icon="mdi-magnify"
-                        label="Procurar por IQ"
-                        single-line
-                        hide-details >
-                    </v-text-field>
+                    <SearchBox
+                        label='Procurar por IQ'
+                        @enter='searchQuery($event)'
+                        @textChange='searchTextChange($event)' />
                 </v-container>
             </v-container>
 
@@ -36,27 +27,11 @@
 
             <v-container v-if='(hasDeleteMarkRequests && userClaims["appraiser"] && (markedRequestsByUser ||
                                 deleteMarkRequests.filter(r => r.toDelete.userEmail === userInfo.email)))'>
-                <v-alert
-                    v-if='deleteConfirmed'
-                    text
-                    prominent
-                    type='warning'
-                    color="red"
-                    icon='mdi-alert' >
-                    Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
-                </v-alert>
-
-                <v-alert
-                    v-if='hasTrueMarkStatus && markedRequestsByUser'
-                    text
-                    prominent
-                    type='warning'
-                    color="red"
-                    icon='mdi-alert' >
-                    As seguintes questões foram marcadas para exclusão:
-                    <br>
-                    {{ markedRequestsByUser }}
-                </v-alert>
+                <DeleteAlert
+                    :confirmCondition='deleteConfirmed'
+                    :itemsCondition='hasTrueMarkStatus && markedRequestsByUser'
+                    itemsText='As seguintes solicitações foram marcadas para exclusão:'
+                    :items='markedRequestsByUser' />
 
                 <v-row justify="start" v-if='hasTrueMarkStatus && markedRequestsByUser'>
                     <v-btn
@@ -76,125 +51,17 @@
                 </v-row>
             </v-container>
 
-            <v-container>
-                <v-card>
-                    <v-data-table
-                        :headers="headers"
-                        :items="isSearching ? filteredRequests : requests"
-                        :page="isSearching ? searchPage : page"
-                        :items-per-page="itemsPerPage"
-                        :search="search"
-                        :loading="loading"
-                        loading-text="Carregando solicitações..."
-                        no-data-text="Não há solicitações"
-                        hide-default-footer
-                        :item-class="itemRowStyle"
-                        class="elevation-1"
-                        @page-count="pageCount = $event"
-                    >
-                        <template v-slot:[`item.status`]='{ item }' v-if="requests && requests.length > 0">
-                            <span
-                                :style='{ "color": item.status === "Pendente"
-                                    ? "#ffaa00" : item.status === "Aprovado"
-                                    ? "#00cc66" : "#ff0000" }'
-                                >{{ item.status }}</span>
-                        </template>
-
-                        <template v-slot:[`item.actions`]="{ item }">
-                            <v-row justify="end" v-if='!item.toDelete'>
-                                <v-tooltip top v-if='userClaims["admin"]'>
-                                    <template v-slot:activator='{ on, attrs }'>
-                                        <v-icon
-                                            v-on='on'
-                                            v-bind='attrs'
-                                            @click="sendEmail(item.user.email)" >
-                                            mdi-email
-                                        </v-icon>
-                                    </template>
-                                    <span>Enviar e-mail</span>
-                                </v-tooltip>
-
-                                <v-tooltip top>
-                                    <template v-slot:activator='{ on, attrs }'>
-                                        <v-icon
-                                            v-on='on'
-                                            v-bind='attrs'
-                                            class="ml-3"
-                                            @click="printRequest(item)" >
-                                            mdi-pdf-box
-                                        </v-icon>
-                                    </template>
-                                    <span>Visualizar PDF</span>
-                                </v-tooltip>
-
-                                <v-tooltip top v-if='userClaims["admin"]'>
-                                    <template v-slot:activator='{ on, attrs }'>
-                                        <v-icon
-                                            v-on='on'
-                                            v-bind='attrs'
-                                            class="ml-3"
-                                            :disabled='item.status === "Aprovado"'
-                                            @click="checkRequest(item)" >
-                                            mdi-check-bold
-                                        </v-icon>
-                                    </template>
-                                    <span>Aprovar</span>
-                                </v-tooltip>
-
-                                <v-tooltip top v-if='userClaims["appraiser"]'>
-                                    <template v-slot:activator='{ on, attrs }'>
-                                        <v-icon
-                                            v-on='on'
-                                            v-bind='attrs'
-                                            class="ml-3"
-                                            :disabled='item.status === "Aprovado"'
-                                            @click="editRequest(item)" >
-                                            mdi-pencil
-                                        </v-icon>
-                                    </template>
-                                    <span>Editar</span>
-                                </v-tooltip>
-
-                                <v-tooltip top>
-                                    <template v-slot:activator='{ on, attrs }'>
-                                        <v-icon
-                                            v-on='on'
-                                            v-bind='attrs'
-                                            class="ml-3"
-                                            :disabled='userClaims["admin"] ? item.status === "Rejeitado" : item.status === "Aprovado"'
-                                            @click="userClaims['admin']
-                                                ? rejectRequest(item)
-                                                : askDelete(item)" >
-                                            {{ userClaims['admin'] ? 'mdi-close' : 'mdi-delete' }}
-                                        </v-icon>
-                                    </template>
-                                    <span>{{ userClaims['admin'] ? 'Rejeitar' : 'Excluir' }}</span>
-                                </v-tooltip>
-                            </v-row>
-
-                            <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
-                                <v-btn
-                                    style="padding: 0 !important; font-weight: bold !important;"
-                                    color='red'
-                                    text
-                                    :disabled="!userClaims['appraiser']"
-                                    @click='restoreRequest(item)' >
-                                    {{ userClaims['appraiser'] ? 'Restaurar' : 'Indisponível' }}
-                                </v-btn>
-                            </v-row>
-
-                            <v-row justify="end" v-else>
-                                <v-btn
-                                    style="padding: 0 !important; font-weight: bold !important;"
-                                    disabled
-                                    text >
-                                    Excluída
-                                </v-btn>
-                            </v-row>
-                        </template>
-                    </v-data-table>
-                </v-card>
-            </v-container>
+            <RequestsTable
+                :items='isSearching ? filteredRequests : requests'
+                :page='isSearching ? searchPage : page'
+                :itemsPerPage='itemsPerPage'
+                @emailClick='sendEmail($event)'
+                @pdfClick='printRequest($event)'
+                @checkClick='checkRequest($event)'
+                @editClick='editRequest($event)'
+                @rejectClick='rejectRequest($event)'
+                @deleteClick='askDelete($event)'
+                @restoreClick='restoreRequest($event)' />
 
             <div class="text-center pt-2">
                 <Paginator
@@ -227,31 +94,11 @@
                 </Body>
             </v-dialog>
 
-            <v-snackbar
-                v-model="deleteRequestSnackBar"
-                color="white"
-                right
-                top
-                :timeout="15000" >
-                <span class="snackbar-text">Tem certeza de que deseja excluir esta solicitação?</span>
-
-                <v-btn
-                    dark
-                    class="ml-3"
-                    color="blue"
-                    text
-                    @click="deleteRequest(deleteItem)" >
-                    Excluir
-                </v-btn>
-
-                <v-btn
-                    dark
-                    color="grey"
-                    text
-                    @click="deleteRequestSnackBar = false; deleteItem = null" >
-                    Cancelar
-                </v-btn>
-            </v-snackbar>
+            <DeleteWarning
+                label='Tem certeza de que deseja excluir esta solicitação?'
+                :state='deleteRequestSnackBar'
+                @confirm='deleteRequest(deleteItem); deleteRequestSnackBar = false;'
+                @cancel='deleteRequestSnackBar = false; deleteItem = null' />
 
             <v-snackbar
                 v-model="rejectErrorSnackBar"
@@ -284,12 +131,24 @@
 </template>
 
 <script>
-    import Body from './Questions/PrintQuestion/Body';
-    import EditQuestion from './Questions/EditQuestion';
-    import Paginator from './Paginator';
+    import Body from '../Questions/PrintQuestion';
+    import EditQuestion from '../Questions/EditQuestion';
+    import RequestsTable from './RequestsTable';
+    import Paginator from '../Paginator';
+    import DeleteWarning from '../Shared/DeleteWarning';
+    import DeleteAlert from './DeleteAlertRequests';
+    import SearchBox from '../Shared/SearchBox';
 
     export default {
-        components: { Body, EditQuestion, Paginator },
+        components: {
+            Body,
+            EditQuestion,
+            Paginator,
+            RequestsTable,
+            DeleteWarning,
+            DeleteAlert,
+            SearchBox
+        },
         data() {
             return {
                 deleteApproved: false,
@@ -301,7 +160,6 @@
                 deleteItem: null,
                 deleteConfirmed: false,
                 deleteRequestSnackBar: false,
-                search: '',
                 isSearching: false,
                 page: 1,
                 searchPage: 1,
@@ -428,14 +286,16 @@
                 this.$store.dispatch('getQuestionByIQ', request.iq)
                     .then(fQuestion => {
                         if(fQuestion && fQuestion.toDelete && !fQuestion.toDelete.status) {
-                            this.$store.dispatch('restoreMarkedQuestion', { iq: fQuestion.iq, isSearching: false })
+                            this.$store.dispatch('restoreMarkedQuestion', { iq: fQuestion.iq, isSearching: false, isRequest: true })
                                 .then(() => {
                                     this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
+                                    this.$store.commit('setSuccess', 'Solicitação aprovada com sucesso!');
                                 })
                         } else {
-                            this.$store.dispatch('createQuestion', { question: toCreate })
+                            this.$store.dispatch('createQuestion', { question: toCreate, isRequest: true })
                                 .then(() => {
                                     this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
+                                    this.$store.commit('setSuccess', 'Solicitação aprovada com sucesso!');
                                 });
                         }
                     });
@@ -456,6 +316,7 @@
                             this.$store.dispatch('changeDeleteStatusQuestions', { iq: request.iq, isSearching: false })
                                 .then(() => {
                                     this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', request });
+                                    this.$store.commit('setSuccess', 'Solicitação rejeitada com sucesso!');
                                 });
                         } else {
                             this.rejectErrorSnackBar = true;
@@ -486,23 +347,26 @@
                     }
                 }
             },
-            searchQuery(event) {
-                if(event.key === 'Enter') {
-                    document.getElementById('searchField').blur();
-
+            searchTextChange(text) {
+                if((text === null || text.length === 0) && this.isSearching) {
+                    this.isSearching = false;
                     this.searchPage = 1;
                     this.$store.commit('resetFilteredRequests');
+                }
+            },
+            searchQuery(text) {
+                this.searchPage = 1;
+                this.$store.commit('resetFilteredRequests');
 
-                    if(this.search.length > 0) {
-                        this.isSearching = true;
-                        this.$store.dispatch('searchRequests', {
-                            key: this.search,
-                            claims: this.userClaims,
-                            userInfo: this.userInfo
-                        });
-                    } else {
-                        this.isSearching = false;
-                    }
+                if(text && text.length > 0) {
+                    this.isSearching = true;
+                    this.$store.dispatch('searchRequests', {
+                        key: text,
+                        claims: this.userClaims,
+                        userInfo: this.userInfo
+                    });
+                } else {
+                    this.isSearching = false;
                 }
             },
             itemRowStyle(item) {

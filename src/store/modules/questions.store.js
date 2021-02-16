@@ -356,6 +356,19 @@ const actions = {
 
                 commit('updateCurrentQuestionsPage', { ...doc.data(), toDelete });
                 commit('addDeleteMarkQuestion', { ...doc.data(), toDelete });
+
+                db.collection('question-subjects').where('name', '==', doc.data().subject).get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const index = document.data().questions.indexOf(iq);
+                        const questions = document.data().questions;
+                        if(index !== -1) questions.splice(index, 1);
+                        document.ref.update({ questions });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+
                 commit('setLoading', false);
             })
             .catch(error => {
@@ -366,7 +379,7 @@ const actions = {
     restoreMarkedQuestion({ commit }, payload) {
         commit('setLoading', true);
 
-        const { iq, isSearching } = payload;
+        const { iq, isSearching, isRequest } = payload;
 
         db.collection('questions').where('iq', '==', iq).get()
             .then(snapshot => {
@@ -395,8 +408,20 @@ const actions = {
 
                 commit('removeDeleteMarkQuestion', iq);
                 commit('updateCurrentQuestionsPage', question);
+
+                db.collection('question-subjects').where('name', '==', question.subject).get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const questions = [...document.data().questions, iq];
+                        questions.sort((q1, q2) => q1 > q2 ? 1 : -1)
+                        document.ref.update({ questions });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+
                 commit('setLoading', false);
-                commit('setSuccess', 'Questão restaurada com sucesso!');
+                if(!isRequest) commit('setSuccess', 'Questão restaurada com sucesso!');
             })
             .catch(error => {
                 commit('setLoading', false);
@@ -407,6 +432,7 @@ const actions = {
         commit('setLoading', true);
 
         const { isSearching } = payload;
+        const questionsData = {};
 
         db.collection('questions').where('toDelete.status', '==', true).get()
             .then(snapshot => {
@@ -422,9 +448,16 @@ const actions = {
                         knowledgeBWR: data.knowledgeBWR,
                         answers: data.answers,
                         image: data.image,
-                        imageSize: data.imageSize,
+                        imageSize: data.imageSize || '1x',
                         edited: data.edited || []
                     };
+
+                    if(questionsData[question.subject]) {
+                        questionsData[question.subject] = [...questionsData[question.subject], question.iq];
+                    }
+                    else {
+                        questionsData[question.subject] = [question.iq];
+                    }
 
                     doc.ref.set(question);
                     const falseMarkedQuestions = state.deleteMarkQuestions.filter(q => !q.toDelete.status);
@@ -434,6 +467,20 @@ const actions = {
                     if(isSearching) commit('updateFilteredQuestion', question);
                     commit('setSuccess', 'Questões restauradas com sucesso!');
                 });
+            })
+            .then(() => {
+                for(let subject in questionsData) {
+                    db.collection('question-subjects').where('name', '==', subject).get()
+                        .then(snapshot => {
+                            const doc = snapshot.docs[0];
+                            const questions = [...doc.data().questions, ...questionsData[subject]];
+                            questions.sort((q1, q2) => q1 > q2 ? 1 : -1);
+                            doc.ref.update({ questions });
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                }
             })
             .then(() => commit('setLoading', false))
             .catch(error => {
@@ -460,7 +507,6 @@ const actions = {
                 if(isSearching) commit('updateFilteredQuestion', { ...doc.data(), toDelete });
 
                 commit('setLoading', false);
-                commit('setSuccess', 'Questão excluída com sucesso!');
             })
             .catch(error => {
                 commit('setError', error);
@@ -564,15 +610,76 @@ const actions = {
             question: payload.oldData.iq + "-" + (payload.oldData.edited.length + 1)
         });
 
+        let oldSubject = null;
+
         db.collection("questions").where('iq', '==', question.iq).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
+                    if(question.subject !== doc.data().subject) {
+                        oldSubject = doc.data().subject;
+                    }
                     doc.ref.update({ ...question, edited: edition });
                 });
             })
             .then(() => {
                 commit('updateQuestion', { ...question, edited: edition });
                 commit('updateCurrentQuestionsPage', { ...question, edited: edition });
+                if(payload.isSearching) commit('updateFilteredQuestion', question);
+
+                if(oldSubject) {
+                    db.collection('data-size').get()
+                        .then(snap => {
+                            const document = snap.docs[0];
+                            const general = document.data().questions.general;
+                            const sub = question.subject;
+                            const subSize = document.data().questions.subject[sub];
+                            const oldSubSize = document.data().questions.subject[oldSubject];
+
+                            const questions = {
+                                general,
+                                subject: {
+                                    ...document.data().questions.subject,
+                                    [sub]: subSize + 1,
+                                    [oldSubject]: oldSubSize - 1
+                                }
+                            }
+
+                            document.ref.update({ questions })
+                                .then(() => {
+                                    commit('addRemoveSize', { key: 'questions', data: questions });
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                });
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+
+                    db.collection('question-subjects').where('name', '==', question.subject).get()
+                        .then(snapshot => {
+                            const doc = snapshot.docs[0];
+                            const questions = [...doc.data().questions, question.iq];
+                            questions.sort((q1, q2) => q1 > q2 ? 1 : -1)
+                            doc.ref.update({ questions });
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+
+                    db.collection('question-subjects').where('name', '==', oldSubject).get()
+                        .then(snapshot => {
+                            const doc = snapshot.docs[0];
+                            const index = doc.data().questions.indexOf(question.iq);
+                            const questions = doc.data().questions;
+                            if(index !== -1) questions.splice(index, 1);
+                            doc.ref.update({ questions });
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                }
+
                 commit('setLoading', false);
                 commit('setSuccess', 'Questão editada com sucesso!');
                 dispatch("createdEditedQuestion", payload.oldData);
@@ -634,7 +741,7 @@ const actions = {
             .then(() => {
                 commit('setLoading', false);
                 commit('createQuestion', { page: (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: question });
-                commit('setSuccess', 'Questão criada com sucesso!');
+                if(!payload.isRequest) commit('setSuccess', 'Questão criada com sucesso!');
 
                 db.collection('data-size').get()
                     .then(snap => {
@@ -658,6 +765,17 @@ const actions = {
                             .catch(error => {
                                 console.log(error);
                             });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+
+                db.collection('question-subjects').where('name', '==', question.subject).get()
+                    .then(snap => {
+                        const document = snap.docs[0];
+                        const questions = [...document.data().questions, question.iq];
+                        questions.sort((q1, q2) => q1 > q2 ? 1 : -1);
+                        document.ref.update({ questions });
                     })
                     .catch(error => {
                         console.log(error);

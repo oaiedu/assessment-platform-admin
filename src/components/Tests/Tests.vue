@@ -7,53 +7,23 @@
 
       <v-container>
           <v-container>
-            <v-text-field
-              id='searchField'
-              v-model="search"
-              @keydown="searchQuery($event)"
-              clearable
-              filled
-              rounded
-              dense
-              append-icon="mdi-magnify"
+            <SearchBox
               label='Procurar por Nome'
-              single-line
-              hide-details
-            ></v-text-field>
+              @enter='searchQuery($event)'
+              @textChange='searchTextChange($event)' />
           </v-container>
       </v-container>
 
       <v-container v-if='hasDeleteMarkTests && (userClaims["admin"] ||
         (markedTestsByUser && markedTestsByUser.length > 0) ||
         (deleteMarkTests.filter(t => t.toDelete.userEmail === userInfo.email)))'>
-        <v-alert
-            v-if='deleteConfirmed'
-            text
-            prominent
-            type='warning'
-            color="red"
-            icon='mdi-alert' >
-            Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
-        </v-alert>
-
-        <v-alert
-            v-if='hasTrueMarkStatus && (userClaims["admin"] || markedTestsByUser)'
-            text
-            prominent
-            type='warning'
-            color="red"
-            icon='mdi-alert' >
-            As seguintes provas foram marcadas para exclusão:
-            <br>
-            {{ markedTestsByUser }}
-
-            <div v-if="userClaims['admin']">
-                <br>
-                Marcadas por você:
-                <br>
-                {{ markedTestsAdmin }}
-            </div>
-        </v-alert>
+        <DeleteAlert
+            :confirmCondition='deleteConfirmed'
+            :itemsCondition='hasTrueMarkStatus'
+            itemsText='As seguintes provas foram marcadas para exclusão:'
+            :items='markedTestsByUser'
+            :isAdmin='userClaims["admin"]'
+            :adminItems='markedTestsAdmin' />
 
         <v-row justify="start" v-if='hasTrueMarkStatus && (userClaims["admin"] || markedTestsByUser)'>
             <v-btn
@@ -62,7 +32,7 @@
                 :dark='!(userClaims["admin"] && markedTestsAdmin.length === 0)'
                 :disabled="userClaims['admin'] && markedTestsAdmin.length === 0"
                 @click="deleteConfirmed = true; deleteTests(false)" >
-                Confirmar
+                {{ userClaims['admin'] ? 'Confirmar Meus' : 'Confirmar' }}
             </v-btn>
             <v-btn
                 v-if="userClaims['admin']"
@@ -78,7 +48,7 @@
                 :dark='!(userClaims["admin"] && markedTestsAdmin.length === 0)'
                 :disabled="userClaims['admin'] && markedTestsAdmin.length === 0"
                 @click="restoreAll(false)" >
-                Restaurar
+                {{ userClaims['admin'] ? 'Restaurar Meus' : 'Restaurar' }}
             </v-btn>
             <v-btn
                 v-if="userClaims['admin']"
@@ -91,87 +61,14 @@
         </v-row>
       </v-container>
 
-      <v-container>
-        <v-card>
-          <v-data-table
-            :headers="headers"
-            :items="isSearching ? filteredTests : tests"
-            :page="isSearching ? searchPage : page"
-            :items-per-page="itemsPerPage"
-            :loading="loading"
-            no-data-text='Não há provas a serem mostradas'
-            loading-text="Carregando provas..."
-            hide-default-footer
-            class="elevation-1"
-          >
-            <template v-slot:[`item.type`]='{ item }'>
-                {{ item.type === 'selected' ? 'Selecionado' : 'Aleatório' }}
-            </template>
-
-            <template small v-slot:[`item.actions`]="{ item }">
-              <v-row justify="end" v-if='!item.toDelete'>
-                <router-link
-                    style="text-decoration: none;"
-                    :to="`/tests/${item.id}`"
-                    replace>
-                    <v-tooltip top>
-                        <template v-slot:activator='{ on }'>
-                            <v-icon v-on="on">mdi-pdf-box</v-icon>
-                        </template>
-                        <span>Visualizar PDF</span>
-                    </v-tooltip>
-                </router-link>
-
-                <v-tooltip top>
-                    <template v-slot:activator='{ on }'>
-                        <v-icon
-                            v-if='!userClaims["student"]'
-                            v-on="on"
-                            @click="editTest(item)"
-                            class="ml-2" >
-                            mdi-pencil
-                        </v-icon>
-                    </template>
-                    <span>Editar</span>
-                </v-tooltip>
-
-                <v-tooltip top>
-                    <template v-slot:activator='{ on }'>
-                        <v-icon
-                            v-if='!userClaims["student"]'
-                            v-on="on"
-                            @click="deleteTestSnackBar = true; deleteSelect = item"
-                            class="ml-2" >
-                            mdi-delete
-                        </v-icon>
-                    </template>
-                    <span>Excluir</span>
-                </v-tooltip>
-              </v-row>
-
-              <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
-                  <v-btn
-                    style="padding: 0 !important; font-weight: bold !important;"
-                    color='red'
-                    text
-                    :disabled='userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email'
-                    @click='restoreTest(item)' >
-                    {{ userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email ? 'Indisponível' : 'Restaurar' }}
-                  </v-btn>
-              </v-row>
-
-              <v-row justify="end" v-else>
-                  <v-btn
-                    style="padding: 0 !important; font-weight: bold !important;"
-                    disabled
-                    text >
-                    Excluída
-                  </v-btn>
-              </v-row>
-            </template>
-          </v-data-table>
-        </v-card>
-      </v-container>
+      <TestsTable
+        :items="isSearching ? filteredTests : tests"
+        :page="isSearching ? searchPage : page"
+        :itemsPerPage='itemsPerPage'
+        @pdfClick='printTest($event)'
+        @editClick='dialogEditTest = true; selectedTest = $event;'
+        @deleteClick='deleteTestSnackBar = true; deleteSelect = $event;'
+        @restoreClick='restoreTest($event)' />
 
       <v-tooltip left v-if='!userClaims["student"]'>
         <template v-slot:activator="{ on }">
@@ -194,10 +91,6 @@
         <NewTest @closeDialogNew="dialogNewTest = false"></NewTest>
       </v-dialog>
 
-      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogHtmlTest">
-        <HtmlTest :test="selectedTest"></HtmlTest>
-      </v-dialog>
-
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditTest">
         <EditTest @closeDialogNew="dialogEditTest = false" :test="selectedTest"></EditTest>
       </v-dialog>
@@ -208,32 +101,34 @@
             :length='!isSearching ? pageAmount : Math.ceil(filteredTests.length / itemsPerPage)'
             @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
       </div>
-      <v-snackbar v-model="deleteTestSnackBar" color="white" light right top>
-        Você realmente quer excluir esta prova?
-        <v-btn dark color="blue" text @click="deleteTest(deleteSelect.id)">Excluir</v-btn>
-        <v-btn dark color="grey" text @click="deleteTestSnackBar = false">Cancelar</v-btn>
-      </v-snackbar>
+
+      <DeleteWarning
+        label='Tem certeza de que deseja excluir esta prova?'
+        :state='deleteTestSnackBar'
+        @confirm='deleteTest(deleteSelect.id); deleteTestSnackBar = false;'
+        @cancel='deleteTestSnackBar = false' />
     </v-container>
   </div>
 </template>
 
 <script>
     import NewTest from './NewTestForm';
-    import HtmlTest from './HtmlToPdfTest';
     import EditTest from './EditTest';
     import Paginator from '../Paginator';
+    import TestsTable from './TestsTable';
+    import DeleteWarning from '../Shared/DeleteWarning';
+    import DeleteAlert from './DeleteAlertTests';
+    import SearchBox from '../Shared/SearchBox';
 
     export default {
         name: 'Tests',
-        components: { NewTest, HtmlTest, EditTest, Paginator },
+        components: { NewTest, EditTest, Paginator, TestsTable, DeleteWarning, DeleteAlert, SearchBox },
         data() {
             return {
-                search: '',
                 isSearching: false,
                 deleteConfirmed: false,
                 deleteTestSnackBar: false,
                 dialogNewTest: false,
-                dialogHtmlTest: false,
                 dialogEditTest: false,
                 page: 1,
                 searchPage: 1,
@@ -296,9 +191,8 @@
             }
         },
         methods: {
-            editTest(item){
-                this.selectedTest = item;
-                this.dialogEditTest = true;
+            printTest(item) {
+                this.$router.push('/tests/' + item);
             },
             deleteTest(id) {
                 this.deleteTestSnackBar = false;
@@ -330,19 +224,22 @@
                     }
                 }
             },
-            searchQuery(event) {
-                if(event.key === 'Enter') {
-                    document.getElementById('searchField').blur();
-
+            searchTextChange(text) {
+                if((text === null || text.length === 0) && this.isSearching) {
+                    this.isSearching = false;
                     this.searchPage = 1;
                     this.$store.commit('resetFilteredTests');
+                }
+            },
+            searchQuery(text) {
+                this.searchPage = 1;
+                this.$store.commit('resetFilteredTests');
 
-                    if(this.search.length > 0) {
-                        this.isSearching = true;
-                        this.$store.dispatch('searchTests', this.search);
-                    } else {
-                        this.isSearching = false;
-                    }
+                if(text && text.length > 0) {
+                    this.isSearching = true;
+                    this.$store.dispatch('searchTests', text);
+                } else {
+                    this.isSearching = false;
                 }
             },
             itemRowStyle(item) {
@@ -353,15 +250,6 @@
             },
             restoreAll(all) {
                 this.$store.dispatch('restoreAllMarkedTests', { all, user: this.userInfo, isSearching: this.isSearching });
-            }
-        },
-        watch: {
-            search(text) {
-                if((text === null || text.length === 0) && this.isSearching) {
-                    this.isSearching = false;
-                    this.searchPage = 1;
-                    this.$store.commit('resetFilteredTests');
-                }
             }
         },
         mounted() {

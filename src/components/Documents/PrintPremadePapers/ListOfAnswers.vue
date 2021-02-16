@@ -1,25 +1,6 @@
 <template>
     <v-container>
-        <div class="question-page">
-            <v-simple-table>
-            <template v-slot:default>
-                <thead>
-                <tr>
-                    <th class="text-left">Questão</th>
-                    <th class="text-left">IQ</th>
-                    <th class="text-left">Resposta</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="item in table" :key="item.iq">
-                    <td>{{ item.question }}</td>
-                    <td>{{ item.iq }}</td>
-                    <td>{{ item.answer }}</td>
-                </tr>
-                </tbody>
-            </template>
-            </v-simple-table>
-        </div>
+        <ListOfAnswersTest :questions='questions' />
 
         <v-tooltip right>
             <template v-slot:activator='{ on, attrs }'>
@@ -40,15 +21,18 @@
 </template>
 
 <script>
+    import ListOfAnswersTest from '../../Tests/ListOfAnswers';
+
     export default {
         name: 'ListOfAnswers',
+        components: { ListOfAnswersTest },
         computed: {
-            table() {
+            questions() {
                 return [
-                    { question: 1, iq: 'P0001', answer: 'A' },
-                    { question: 2, iq: 'P0002', answer: 'B' },
-                    { question: 3, iq: 'P0003', answer: 'C' },
-                    { question: 4, iq: 'P0004', answer: 'D' }
+                    { iq: 'P0001', answers: [{ value: true }, { value: false }, { value: false }, { value: false }] },
+                    { iq: 'P0002', answers: [{ value: false }, { value: true }, { value: false }, { value: false }] },
+                    { iq: 'P0003', answers: [{ value: false }, { value: false }, { value: true }, { value: false }] },
+                    { iq: 'P0004', answers: [{ value: false }, { value: false }, { value: false }, { value: true }] }
                 ]
             }
         },

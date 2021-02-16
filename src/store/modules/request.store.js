@@ -117,7 +117,7 @@ const mutations = {
         });
         state.currentRequestsPage = requests;
     },
-    removeRequest (state, data) {
+    removeRequest(state, data) {
         const requests = state.requests;
         for(let key in requests) {
             if(requests[key]) {
@@ -225,7 +225,6 @@ const actions = {
                             commit('updateRequest', request);
                             commit('updateCurrentRequestsPage', request);
                             commit('setLoading', false);
-                            commit('setSuccess', 'Solicitação editada com sucesso!');
                         })
                         .catch(error => {
                             console.log(error);

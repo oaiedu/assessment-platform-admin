@@ -28,8 +28,8 @@
     // @ is an alias to /src
     import Fab from '@/components/Fab.vue'
     import StatisticsQuestions from '@/components/Questions/StatisticsQuestions'
-    import profile from '@/components/DisplayProfile'
-    import SignUser from '@/components/SignUser'
+    import profile from '@/components/User/DisplayProfile'
+    import SignUser from '@/components/User/SignUser'
 
     export default {
         name: 'home',

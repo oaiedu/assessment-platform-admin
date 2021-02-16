@@ -7,53 +7,23 @@
 
       <v-container>
           <v-container>
-            <v-text-field
-              id='searchField'
-              v-model="search"
-              @keydown="searchQuery($event)"
-              clearable
-              filled
-              rounded
-              dense
-              append-icon="mdi-magnify"
-              label="Procurar por Nome"
-              single-line
-              hide-details
-            ></v-text-field>
+            <SearchBox
+              label='Procurar por Nome'
+              @enter='searchQuery($event)'
+              @textChange='searchTextChange($event)' />
           </v-container>
       </v-container>
 
       <v-container v-if='hasDeleteMarkPapers && (userClaims["admin"] ||
         (markedPapersByUser && markedPapersByUser.length > 0) ||
-        (deleteMarkPapers.filter(p => p.toDelete.userEmail === userInfo.email)))'>
-        <v-alert
-            v-if='deleteConfirmed'
-            text
-            prominent
-            type='warning'
-            color="red"
-            icon='mdi-alert' >
-            Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
-        </v-alert>
-
-        <v-alert
-            v-if='hasTrueMarkStatus && (userClaims["admin"] || markedPapersByUser)'
-            text
-            prominent
-            type='warning'
-            color="red"
-            icon='mdi-alert' >
-            Os seguintes documentos foram marcados para exclusão:
-            <br>
-            {{ markedPapersByUser }}
-
-            <div v-if="userClaims['admin']">
-                <br>
-                Marcadas por você:
-                <br>
-                {{ markedPapersAdmin }}
-            </div>
-        </v-alert>
+        (deleteMarkPapers.filter(p => p.toDelete.userEmail === userInfo.email)))' >
+        <DeleteAlert
+            :confirmCondition='deleteConfirmed'
+            :itemsCondition='hasTrueMarkStatus'
+            itemsText='Os seguintes documentos foram marcados para exclusão:'
+            :items='markedPapersByUser'
+            :isAdmin='userClaims["admin"]'
+            :adminItems='markedPapersAdmin' />
 
         <v-row justify="start" v-if='hasTrueMarkStatus && (userClaims["admin"] || markedPapersByUser)'>
             <v-btn
@@ -62,7 +32,7 @@
                 :dark='!(userClaims["admin"] && markedPapersAdmin.length === 0)'
                 :disabled="userClaims['admin'] && markedPapersAdmin.length === 0"
                 @click="deleteConfirmed = true; deletePapers(false)" >
-                Confirmar
+                {{ userClaims['admin'] ? 'Confirmar Meus' : 'Confirmar'}}
             </v-btn>
             <v-btn
                 v-if="userClaims['admin']"
@@ -78,7 +48,7 @@
                 :dark='!(userClaims["admin"] && markedPapersAdmin.length === 0)'
                 :disabled="userClaims['admin'] && markedPapersAdmin.length === 0"
                 @click="restoreAll(false)" >
-                Restaurar
+                {{ userClaims['admin'] ? 'Restaurar Meus' : 'Restaurar' }}
             </v-btn>
             <v-btn
                 v-if="userClaims['admin']"
@@ -91,81 +61,14 @@
         </v-row>
       </v-container>
 
-      <v-container>
-        <v-card>
-            <v-card-title>Documentos Criados</v-card-title>
-          <v-data-table
-            :headers="headers"
-            :items="isSearching ? filteredPapers : papers"
-            :page="isSearching ? searchPage : page"
-            :items-per-page="itemsPerPage"
-            :loading="loading"
-            no-data-text='Não há documentos a serem mostrados'
-            loading-text="Carregando documentos..."
-            hide-default-footer
-            class="elevation-1"
-          >
-            <template small v-slot:[`item.actions`]="{ item }">
-              <v-row justify="end" v-if='!item.toDelete'>
-                    <v-tooltip top>
-                        <template v-slot:activator='{ on }'>
-                            <v-icon
-                                v-on="on"
-                                @click="selectedEdit = item; dialogPDF = true" >
-                                mdi-pdf-box
-                            </v-icon>
-                        </template>
-                        <span>Visualizar PDF</span>
-                    </v-tooltip>
-
-                    <v-tooltip top>
-                        <template v-slot:activator='{ on }'>
-                            <v-icon
-                                v-on="on"
-                                @click="editPaper(item)"
-                                class="ml-2" >
-                                mdi-pencil
-                            </v-icon>
-                        </template>
-                        <span>Editar</span>
-                    </v-tooltip>
-
-                    <v-tooltip top>
-                        <template v-slot:activator='{ on }'>
-                            <v-icon
-                                v-on="on"
-                                @click="deletePaperSnackBar = true; deleteSelect = item"
-                                class="ml-2" >
-                                mdi-delete
-                            </v-icon>
-                        </template>
-                        <span>Excluir</span>
-                    </v-tooltip>
-              </v-row>
-
-              <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
-                  <v-btn
-                    style="padding: 0 !important; font-weight: bold !important;"
-                    color='red'
-                    text
-                    :disabled='userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email'
-                    @click='restorePaper(item)' >
-                    {{ userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email ? 'Indisponível' : 'Restaurar' }}
-                  </v-btn>
-              </v-row>
-
-              <v-row justify="end" v-else>
-                  <v-btn
-                    style="padding: 0 !important; font-weight: bold !important;"
-                    disabled
-                    text >
-                    Excluído
-                  </v-btn>
-              </v-row>
-            </template>
-          </v-data-table>
-        </v-card>
-      </v-container>
+      <PapersTable
+        :items="isSearching ? filteredPapers : papers"
+        :page="isSearching ? searchPage : page"
+        :itemsPerPage="itemsPerPage"
+        @pdfClick='dialogPDF = true; selectedEdit = $event;'
+        @editClick='dialogEditPaper = true; selectedEdit = $event;'
+        @deleteClick='deletePaperSnackBar = true; deleteSelect = $event;'
+        @restoreClick='restorePaper($event)' />
 
       <v-tooltip left>
         <template v-slot:activator="{ on }">
@@ -253,36 +156,15 @@
       </v-dialog>
 
       <v-container class="mb-10">
-        <v-card>
-            <v-card-title>
-                Documentos Prontos
-            </v-card-title>
-            <v-data-table
-                :headers="headers"
-                :items="premadePapers"
-                hide-default-footer
-                class="elevation-1">
-                <template small v-slot:[`item.actions`]="{ item }">
-                    <v-tooltip top>
-                        <template v-slot:activator='{ on }'>
-                            <v-icon
-                                v-on="on"
-                                @click="openDialogView(item.name)" >
-                                mdi-eye
-                            </v-icon>
-                        </template>
-                        <span>Visualizar</span>
-                    </v-tooltip>
-                </template>
-            </v-data-table>
-        </v-card>
+        <PremadePapersTable
+            @eyeClick='openDialogView($event)' />
       </v-container>
 
-      <v-snackbar v-model="deletePaperSnackBar" color="white" light right top>
-        Você realmente quer excluir este documento?
-        <v-btn dark color="blue" text @click="deletePaper(deleteSelect)">Excluir</v-btn>
-        <v-btn dark color="grey" text @click="deletePaperSnackBar = false">Cancelar</v-btn>
-      </v-snackbar>
+      <DeleteWarning
+        label='Tem certeza de que deseja excluir este documento?'
+        :state='deletePaperSnackBar'
+        @confirm='deletePaper(deleteSelect); deletePaperSnackBar = false;'
+        @cancel='deletePaperSnackBar = false' />
     </v-container>
   </div>
 </template>
@@ -290,24 +172,34 @@
 <script>
     import NewPaper from './CreatePaper';
     import EditPaper from './EditPaper';
+    import PapersTable from './PapersTable';
     import Paginator from '../Paginator';
     import Intro from './PrintPremadePapers/Intro';
     import Questions from './PrintPremadePapers/Questions';
     import Statistics from './PrintPremadePapers/Statistics';
     import ListOfAnswers from './PrintPremadePapers/ListOfAnswers';
     import PrintPaper from './PrintPaper';
+    import SearchBox from '../Shared/SearchBox';
+    import DeleteAlert from './DeleteAlertPapers';
+    import DeleteWarning from '../Shared/DeleteWarning';
+    import PremadePapersTable from './PremadePapersTable';
 
     export default {
         name: 'Papers',
         components: {
             NewPaper,
             EditPaper,
+            PapersTable,
             Paginator,
             Intro,
             PPQuestions: Questions,
             PPStatistics: Statistics,
             ListOfAnswers,
-            PrintPaper
+            PrintPaper,
+            SearchBox,
+            DeleteAlert,
+            DeleteWarning,
+            PremadePapersTable
         },
         data: () => ({
             dialogPDF: false,
@@ -318,24 +210,13 @@
             dialogNewPaper: false,
             dialogEditPaper: false,
             selectedEdit: {},
-            headers: [
-                { text: "Nome", align: "left",  value: "name", sortable: true },
-                { text: "Ações", align:"right", value: "actions", sortable: false }
-            ],
             page: 1,
             searchPage: 1,
             itemsPerPage: 10,
-            search: '',
             isSearching: false,
             deleteConfirmed: false,
             deletePaperSnackBar: false,
-            deleteSelect: "",
-            premadePapers: [
-                { name: "Introdução" },
-                { name: "Questões" },
-                { name: "Estatísticas" },
-                { name: "Gabarito" }
-            ]
+            deleteSelect: ""
         }),
         computed: {
             loading () {
@@ -386,10 +267,6 @@
             }
         },
         methods: {
-            editPaper(val){
-                this.selectedEdit = val;
-                this.dialogEditPaper = true;
-            },
             deletePaper({ id }) {
                 this.deletePaperSnackBar = false;
                 this.$store.dispatch('deleteMarkPaper', {
@@ -431,19 +308,22 @@
                     }
                 }
             },
-            searchQuery(event) {
-                if(event.key === 'Enter') {
-                    document.getElementById('searchField').blur();
-
+            searchTextChange(text) {
+                if((text === null || text.length === 0) && this.isSearching) {
+                    this.isSearching = false;
                     this.searchPage = 1;
                     this.$store.commit('resetFilteredPapers');
+                }
+            },
+            searchQuery(text) {
+                this.searchPage = 1;
+                this.$store.commit('resetFilteredPapers');
 
-                    if(this.search.length > 0) {
-                        this.isSearching = true;
-                        this.$store.dispatch('searchPapers', this.search);
-                    } else {
-                        this.isSearching = false;
-                    }
+                if(text && text.length > 0) {
+                    this.isSearching = true;
+                    this.$store.dispatch('searchPapers', text);
+                } else {
+                    this.isSearching = false;
                 }
             },
             itemRowStyle(item) {
@@ -454,15 +334,6 @@
             },
             restoreAll(all) {
                 this.$store.dispatch('restoreAllMarkedPapers', { all, user: this.userInfo, isSearching: this.isSearching });
-            }
-        },
-        watch: {
-            search(text) {
-                if((text === null || text.length === 0) && this.isSearching) {
-                    this.isSearching = false;
-                    this.searchPage = 1;
-                    this.$store.commit('resetFilteredPapers');
-                }
             }
         },
         mounted() {

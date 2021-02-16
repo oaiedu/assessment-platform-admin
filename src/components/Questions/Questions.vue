@@ -7,44 +7,19 @@
 
       <v-container>
         <v-container>
-          <v-text-field
-            id='searchField'
-            v-model="search"
-            @keydown="searchQuery($event)"
-            clearable
-            filled
-            rounded
-            dense
-            append-icon="mdi-magnify"
-            label="Procurar por IQ"
-            single-line
-            hide-details
-          ></v-text-field>
+          <SearchBox
+            label='Procurar por IQ'
+            @enter='searchQuery($event)'
+            @textChange='searchTextChange($event)' />
         </v-container>
       </v-container>
 
       <v-container v-if='hasDeleteMarkQuestions && (userClaims["admin"])'>
-        <v-alert
-            v-if='deleteConfirmed'
-            text
-            prominent
-            type='warning'
-            color="red"
-            icon='mdi-alert' >
-            Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
-        </v-alert>
-
-        <v-alert
-            v-if='hasTrueMarkStatus'
-            text
-            prominent
-            type='warning'
-            color="red"
-            icon='mdi-alert' >
-            As seguintes questões foram marcadas para exclusão:
-            <br>
-            {{ markedQuestionsByUser }}
-        </v-alert>
+        <DeleteAlert
+            :confirmCondition='deleteConfirmed'
+            :itemsCondition='hasTrueMarkStatus'
+            itemsText='As seguintes questões foram marcadas para exclusão:'
+            :items='markedQuestionsByUser' />
 
         <v-row justify="start" v-if='hasTrueMarkStatus'>
             <v-btn
@@ -64,84 +39,15 @@
         </v-row>
       </v-container>
 
-      <v-container>
-        <v-card>
-          <v-data-table
-            :headers="headers"
-            :items="isSearching ? filteredQuestions : questions"
-            :page="isSearching ? searchPage : page"
-            :items-per-page="itemsPerPage"
-            :loading="loading"
-            no-data-text='Não há questões a serem mostradas'
-            loading-text="Carregando questões..."
-            hide-default-footer
-            :item-class="itemRowStyle"
-            class="elevation-1"
-          >
-            <template v-slot:[`item.actions`]="{ item }">
-              <v-row justify="end" v-if='!item.toDelete'>
-                <v-tooltip top>
-                    <template v-slot:activator='{ on, attrs }'>
-                        <v-icon
-                            v-on='on'
-                            v-bind='attrs'
-                            @click='dialogPDF = true; selectedEdit = item;' >
-                            mdi-pdf-box
-                        </v-icon>
-                    </template>
-                    <span>Visualizar PDF</span>
-                </v-tooltip>
-
-                <v-tooltip top v-if='userClaims["admin"]'>
-                    <template v-slot:activator='{ on, attrs }'>
-                        <v-icon
-                            v-on='on'
-                            v-bind='attrs'
-                            class="ml-2"
-                            @click="editQuestions(item)" >
-                            mdi-pencil
-                        </v-icon>
-                    </template>
-                    <span>Editar</span>
-                </v-tooltip>
-
-                <v-tooltip top v-if='userClaims["admin"]'>
-                    <template v-slot:activator='{ on, attrs }'>
-                        <v-icon
-                            v-on='on'
-                            v-bind='attrs'
-                            class="ml-2"
-                            @click='deleteQuestionSnackBar = true; deleteSelect = item;' >
-                            mdi-delete
-                        </v-icon>
-                    </template>
-                    <span>Excluir</span>
-                </v-tooltip>
-              </v-row>
-
-              <v-row justify="end" v-else-if='item.toDelete && item.toDelete.status'>
-                  <v-btn
-                    style="padding: 0 !important; font-weight: bold !important;"
-                    color='red'
-                    text
-                    :disabled="!userClaims['admin']"
-                    @click='restoreQuestion(item)' >
-                    {{ userClaims['admin'] ? 'Restaurar' : 'Indisponível' }}
-                  </v-btn>
-              </v-row>
-
-              <v-row justify="end" v-else>
-                  <v-btn
-                    style="padding: 0 !important; font-weight: bold !important;"
-                    disabled
-                    text >
-                    Excluída
-                  </v-btn>
-              </v-row>
-            </template>
-          </v-data-table>
-        </v-card>
-      </v-container>
+      <QuestionsTable
+        :items="isSearching ? filteredQuestions : questions"
+        :page="isSearching ? searchPage : page"
+        :itemsPerPage='itemsPerPage'
+        :isActionsAvailable='true'
+        @pdfClick='dialogPDF = true; selectedEdit = $event;'
+        @editClick='dialogEditQuestion = true; selectedEdit = $event;'
+        @deleteClick='deleteQuestionSnackBar = true; deleteSelect = $event;'
+        @restoreClick='restoreQuestion($event)' />
 
       <v-tooltip left v-if='userClaims["appraiser"] || userClaims["admin"]' >
         <template v-slot:activator="{ on }">
@@ -165,23 +71,23 @@
         fullscreen
         hide-overlay
         transition="dialog-bottom-transition"
-        v-model="dialogNewQuestion"
-      >
-        <Stepper :page='page' @closeDialogNew="dialogNewQuestion = false"></Stepper>
+        v-model="dialogNewQuestion" >
+        <Stepper
+            :page='page'
+            @closeDialogNew="dialogNewQuestion = false" />
       </v-dialog>
 
       <v-dialog
         fullscreen
         hide-overlay
         transition="dialog-bottom-transition"
-        v-model="dialogEditQuestion"
-      >
+        v-model="dialogEditQuestion" >
         <EditQuestion
           :question="selectedEdit"
           :userClaims="userClaims"
           :userInfo="userInfo"
-          @closeDialogEdit="dialogEditQuestion = false"
-        ></EditQuestion>
+          :isSearching="isSearching"
+          @closeDialogEdit="dialogEditQuestion = false" />
       </v-dialog>
 
       <v-dialog
@@ -203,30 +109,11 @@
           @pageChange='!isSearching ? page = $event.page : searchPage = $event.page; onPageChange($event)' />
       </div>
 
-      <v-snackbar
-        v-model="deleteQuestionSnackBar"
-        light
-        color="white"
-        right
-        top
-        :timeout="15000">
-        Você realmente quer excluir esta questão?
-        <v-btn
-            dark
-            class="ml-2"
-            color="blue"
-            text
-            @click="deleteQuestion(deleteSelect.iq)" >
-            Excluir
-        </v-btn>
-        <v-btn
-            dark
-            color="grey"
-            text
-            @click="deleteQuestionSnackBar = false" >
-            Cancelar
-        </v-btn>
-      </v-snackbar>
+      <DeleteWarning
+        label='Tem certeza de que deseja excluir esta questâo?'
+        :state='deleteQuestionSnackBar'
+        @confirm='deleteQuestion(deleteSelect.iq); deleteQuestionSnackBar = false;'
+        @cancel='deleteQuestionSnackBar = false' />
 
       <v-snackbar
         v-model="deleteErrorSnackBar"
@@ -260,9 +147,14 @@
 
 <script>
     import Paginator from '../Paginator';
+    import QuestionsTable from './QuestionsTable';
+    import DeleteWarning from '../Shared/DeleteWarning';
+    import DeleteAlert from './DeleteAlertQuestions';
+    import SearchBox from '../Shared/SearchBox';
 
     export default {
-        components: { Paginator },
+        name: 'Questions',
+        components: { Paginator, QuestionsTable, DeleteWarning, DeleteAlert, SearchBox },
         data() {
             return {
                 loadedPages: [1],
@@ -369,13 +261,6 @@
                         }
                     }
                 });
-            },
-            search(text) {
-                if((text === null || text.length === 0) && this.isSearching) {
-                    this.isSearching = false;
-                    this.searchPage = 1;
-                    this.$store.commit('resetFilteredQuestions');
-                }
             }
         },
         methods: {
@@ -406,10 +291,11 @@
             deleteQuestions() {
                 const questions = this.deleteMarkQuestions;
                 questions.forEach(question => {
-                    if(question.toDelete.status){
+                    if(question.toDelete.status) {
                         this.$store.dispatch("changeDeleteStatusQuestions", { iq: question.iq, isSearching: this.isSearching });
                     }
                 });
+                this.$store.commit('setSuccess', 'Questões excluídas com sucesso!');
             },
             onPageChange(event) {
                 const payload = {
@@ -425,19 +311,22 @@
                     }
                 }
             },
-            searchQuery(event) {
-                if(event.key === 'Enter') {
-                    document.getElementById('searchField').blur();
-
+            searchTextChange(text) {
+                if((text === null || text.length === 0) && this.isSearching) {
+                    this.isSearching = false;
                     this.searchPage = 1;
                     this.$store.commit('resetFilteredQuestions');
+                }
+            },
+            searchQuery(text) {
+                this.searchPage = 1;
+                this.$store.commit('resetFilteredQuestions');
 
-                    if(this.search.length > 0) {
-                        this.isSearching = true;
-                        this.$store.dispatch('searchQuestions', this.search);
-                    } else {
-                        this.isSearching = false;
-                    }
+                if(text && text.length > 0) {
+                    this.isSearching = true;
+                    this.$store.dispatch('searchQuestions', text);
+                } else {
+                    this.isSearching = false;
                 }
             },
             itemRowStyle(item) {
