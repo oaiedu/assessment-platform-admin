@@ -4,17 +4,6 @@
             <h1 class="blue--text">Administração</h1>
         </div>
 
-        <!-- <v-btn
-            color="orange"
-            dark
-            x-large
-            fab
-            fixed
-            style="bottom: 120px; right: 30px;"
-            @click="testAPI" >
-            <v-icon>mdi-share</v-icon>
-        </v-btn> -->
-
         <template>
             <v-tabs
                 v-model='tab'
@@ -59,11 +48,6 @@
         data() {
             return {
                 tab: null
-            }
-        },
-        methods: {
-            testAPI() {
-                this.$store.dispatch('testAPI');
             }
         },
         created() {

@@ -1,4 +1,5 @@
 import { db, storage } from '../../main';
+import { showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     questionRequests: [],
@@ -209,7 +210,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('creation', 'Solicitação', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     updateQuestionRequest({ commit }, payload) {
@@ -225,9 +227,6 @@ const actions = {
                             commit('updateRequest', request);
                             commit('updateCurrentRequestsPage', request);
                             commit('setLoading', false);
-                        })
-                        .catch(error => {
-                            console.log(error);
                         });
                 } else {
                     snapshot.docs[0].ref.update(request)
@@ -236,15 +235,13 @@ const actions = {
                             commit('updateCurrentRequestsPage', request);
                             commit('setLoading', false);
                             commit('setSuccess', 'Solicitação editada com sucesso!');
-                        })
-                        .catch(error => {
-                            console.log(error);
                         });
                 }
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('edition', 'Solicitação', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     loadRequestPage({ commit, state }, payload) {
@@ -289,7 +286,8 @@ const actions = {
                 })
                 .catch(error => {
                     commit('setLoading', false);
-                    commit('setError', error);
+                    const errorModel = showErrorMessage('load', 'Solicitações', error.message);
+                    commit('setError', { message: errorModel });
                 });
         } else {
             const pageContent = state.request['p' + page];
@@ -347,7 +345,8 @@ const actions = {
                 })
                 .catch(error => {
                     commit('setLoading', false);
-                    commit('setError', error);
+                    const errorModel = showErrorMessage('load', 'Solicitações', error.message);
+                    commit('setError', { message: errorModel });
                 });
         } else {
             const pageContent = state.requests['p' + page];
@@ -385,7 +384,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('load', 'Solicitações', 'Searching error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     checkDeleteMarkRequests({ commit }) {
@@ -401,7 +401,8 @@ const actions = {
                 commit('setDeleteMarkRequests', data);
             })
             .catch(error => {
-                console.log(error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deleteMarkRequest({ commit }, payload) {
@@ -432,7 +433,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     restoreMarkedRequest({ commit }, payload) {
@@ -474,7 +476,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     restoreAllMarkedRequests({ commit, state }, payload) {
@@ -515,7 +518,8 @@ const actions = {
             .then(() => commit('setLoading', false))
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     changeDeleteStatusRequests({ commit }, payload) {
@@ -540,7 +544,8 @@ const actions = {
                 commit('setSuccess', 'Solicitação excluída com sucesso!');
             })
             .catch(error => {
-                commit('setError', error);
+                const errorModel = showErrorMessage('exclusion', 'Solicitação', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deleteRequests({ commit }) {
@@ -651,7 +656,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('exclusion', 'Solicitação', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     deleteApprovedRequests({ commit }, payload) {
@@ -696,7 +702,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', 'Requests auto delete error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     resetRequests({ commit }) {

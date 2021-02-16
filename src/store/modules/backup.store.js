@@ -3,6 +3,7 @@ const unzip = require('unzip-js');
 const AdmZip = require('adm-zip');
 
 import { db } from '../../main';
+import { showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     months: {
@@ -78,7 +79,9 @@ const actions = {
                 console.log('Backup realizado com sucesso!');
             }).catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+
+                const errorModel = showErrorMessage('creation', 'Backup', error.message);
+                commit('setError', { message: errorModel });
             });
 
         db.collection('backups').get()
@@ -125,7 +128,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('creation', 'Backup', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     loadBackups({ commit }) {
@@ -144,7 +148,8 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
+                const errorModel = showErrorMessage('load', 'Backup', error.message);
+                commit('setError', { message: errorModel });
             });
     },
     downloadBackup(store, payload) {
@@ -216,27 +221,10 @@ const actions = {
                         });
                     });
                 });
-
-                // if(data) {
-                //     const toBlob = Buffer.from(data);
-                //     const contentType = 'application/zip';
-                //     const blob = new Blob([toBlob], { type: contentType });
-
-                //     if(data) {
-                //         const url = URL.createObjectURL(blob);
-                //         const a = document.createElement('a');
-                //         a.href = url;
-                //         a.download = `${payload.id.toUpperCase()}-${payload.date}.zip`;
-                //         a.click();
-                //         a.remove();
-                //     }
-                // } else {
-                //     const error = res.data.error;
-                //     alert('Ocorrou um erro ao baixar o arquivo: ', error);
-                // }
             })
             .catch(error => {
-                commit('setError', error);
+                const errorModel = showErrorMessage('connection', '', 'Download error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     async deleteBackup({ commit }, payload) {
@@ -270,23 +258,14 @@ const actions = {
                         });
                 } else {
                     commit('setLoading', false);
-                    commit('setError', { message: 'Um erro ocorreu ao excluir o backup!' });
+                    const errorModel = showErrorMessage('exclusion', 'Backup', error.message);
+                    commit('setError', { message: errorModel });
                 }
             })
             .catch(error => {
                 commit('setLoading', false);
-                commit('setError', error);
-            });
-    },
-    testAPI(store) {
-        const url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/backup-testAPI';
-
-        axios.get(url)
-            .then(res => {
-                console.log(res.data.file);
-            })
-            .catch(error => {
-                console.log(error + '');
+                const errorModel = showErrorMessage('connection', '', 'Delete error - ' + error.message);
+                commit('setError', { message: errorModel });
             });
     },
     resetBackup({ commit }) {

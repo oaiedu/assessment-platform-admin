@@ -282,7 +282,6 @@
         mounted() {
             const test = this.$store.getters.findTestById(this.$route.params.testId);
             if(!test) {
-                this.$store.commit('setError', { message: 'Test ID not found!' });
                 this.$router.push('/tests');
             } else {
                 this.testTitle = test.title.toUpperCase();
