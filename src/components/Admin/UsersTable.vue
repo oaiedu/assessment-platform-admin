@@ -108,7 +108,7 @@
                     {
                         text: 'Função',
                         value: 'role',
-                        align: 'center',
+                        align: 'left',
                         sortable: true
                     },
                     {
