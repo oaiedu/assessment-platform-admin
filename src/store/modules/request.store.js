@@ -1,5 +1,5 @@
 import { db, storage } from '../../main';
-import { showErrorMessage } from '../../utils/errors';
+import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     questionRequests: [],
@@ -212,6 +212,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Solicitação', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request DB Insert', new Date().toISOString(), error.message, { payload, requestAmount });
             });
     },
     updateQuestionRequest({ commit }, payload) {
@@ -242,6 +243,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Solicitação', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request DB Update', new Date().toISOString(), error.message, { payload });
             });
     },
     loadRequestPage({ commit, state }, payload) {
@@ -288,6 +290,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Solicitações', error.message);
                     commit('setError', { message: errorModel });
+                    createErrorLog('Request Page Load', new Date().toISOString(), error.message, { payload, data });
                 });
         } else {
             const pageContent = state.request['p' + page];
@@ -347,6 +350,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Solicitações', error.message);
                     commit('setError', { message: errorModel });
+                    createErrorLog('Request FOL Page Load', new Date().toISOString(), error.message, { payload, data, requestAmount });
                 });
         } else {
             const pageContent = state.requests['p' + page];
@@ -386,6 +390,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Solicitações', 'Searching error - ' + error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request Searching', new Date().toISOString(), error.message, { payload, data });
             });
     },
     checkDeleteMarkRequests({ commit }) {
@@ -403,6 +408,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request Mark Check', new Date().toISOString(), error.message, { data });
             });
     },
     deleteMarkRequest({ commit }, payload) {
@@ -435,17 +441,20 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request Delete Mark', new Date().toISOString(), error.message, { payload });
             });
     },
     restoreMarkedRequest({ commit }, payload) {
         commit('setLoading', true);
 
         const { iq, isSearching } = payload;
+        let docData = null;
 
         db.collection('question-requests').where('iq', '==', iq).get()
             .then(snapshot => {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
+                docData = data;
 
                 const request = {
                     iq: data.iq,
@@ -478,18 +487,21 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request Restore', new Date().toISOString(), error.message, { payload, docData });
             });
     },
     restoreAllMarkedRequests({ commit, state }, payload) {
         commit('setLoading', true);
 
         const { isSearching, user } = payload;
+        let docData = null;
 
         db.collection('question-requests').where('toDelete.status', '==', true)
             .where('toDelete.userEmail', '==', user.email).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     const data = doc.data();
+                    docData = data;
 
                     const request = {
                         iq: data.iq,
@@ -520,6 +532,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request Restore All', new Date().toISOString(), error.message, { payload, docData });
             });
     },
     changeDeleteStatusRequests({ commit }, payload) {
@@ -546,14 +559,18 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('exclusion', 'Solicitação', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request Confirm Delete', new Date().toISOString(), error.message, { payload });
             });
     },
     deleteRequests({ commit }) {
+        const data = [];
+
         db.collection("question-requests").where('toDelete.status', '==', false).get()
             .then(snapshot => {
                 const users = {}
                 snapshot.forEach(doc => {
                     doc.ref.delete();
+                    data.push(doc.data());
                     if(doc.data().image && doc.data().image.length > 0) {
                         const image = doc.data().image;
                         const childImage = image.split('?alt=media')[0].split('/o/')[1];
@@ -595,7 +612,8 @@ const actions = {
                     });
             })
             .catch(error => {
-                console.error("Error removing document: ", error);
+                console.error("Error removing request: ", error);
+                createErrorLog('Request DB Delete', new Date().toISOString(), error.message, { data });
             });
     },
     deleteQuestionRequest({ commit }, payload) {
@@ -658,6 +676,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('exclusion', 'Solicitação', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request Delete', new Date().toISOString(), error.message, { payload });
             });
     },
     deleteApprovedRequests({ commit }, payload) {
@@ -704,6 +723,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', 'Requests auto delete error - ' + error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Request Approved Delete', new Date().toISOString(), error.message, { payload });
             });
     },
     resetRequests({ commit }) {

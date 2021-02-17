@@ -1,4 +1,5 @@
 import { db, storage } from '../../main';
+import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     deletePaperId: null,
@@ -169,6 +170,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('connection', '', 'Image upload error - ' + error.message);
                         commit('setError', { message: errorModel });
+                        createErrorLog('Docs Image Upload', new Date().toISOString(), error.message, { payload, format });
                     });
             } catch{
                 reject();
@@ -223,6 +225,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('exclusion', 'Documento', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document Delete', new Date().toISOString(), error.message, { payload });
             });
     },
     loadPaperPage({ commit, state }, payload) {
@@ -264,6 +267,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Documentos', error.message);
                     commit('setError', { message: errorModel });
+                    createErrorLog('Document Page Load', new Date().toISOString(), error.message, { payload, data });
                 });
         } else {
             const pageContent = state.papers['p' + page];
@@ -321,6 +325,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Documentos', error.message);
                     commit('setError', { message: errorModel });
+                    createErrorLog('Document FOL Page Load', new Date().toISOString(), error.message, { payload, data });
                 });
         } else {
             const pageContent = state.papers['p' + page];
@@ -382,6 +387,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Documentos', 'Searching error - ' + error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document Searching', new Date().toISOString(), error.message, { payload, data });
             });
     },
     async paperExists(store, payload) {
@@ -395,6 +401,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('connection', '', error.message);
                         commit('setError', { message: errorModel });
+                        createErrorLog('Document Exist Test', new Date().toISOString(), error.message, { payload });
                     });
             } catch {
                 reject();
@@ -416,6 +423,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document Mark Check', new Date().toISOString(), error.message, { data });
             });
     },
     deleteMarkPaper({ commit }, payload) {
@@ -448,6 +456,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document Delete Mark', new Date().toISOString(), error.message, { payload });
             });
     },
     restoreMarkedPaper({ commit }, payload) {
@@ -483,6 +492,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document Restore', new Date().toISOString(), error.message, { payload });
             });
     },
     restoreAllMarkedPapers({ commit, state }, payload) {
@@ -530,6 +540,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document Restore All', new Date().toISOString(), error.message, { payload });
             });
     },
     changeDeleteStatusPapers({ commit }, payload) {
@@ -574,12 +585,13 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('exclusion', 'Documento', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document Confirm Delete', new Date().toISOString(), error.message, { payload });
             });
     },
     deletePapers({ commit }) {
+        const data = [];
         db.collection("papers").where('toDelete.status', '==', false).get()
             .then(snapshot => {
-                const data = [];
                 snapshot.forEach(doc => {
                     doc.ref.delete();
                     data.push(doc.data());
@@ -605,6 +617,7 @@ const actions = {
             })
             .catch(error => {
                 console.error("Error removing document: ", error);
+                createErrorLog('Document DB Delete', new Date().toISOString(), error.message, { data });
             });
     },
     createPaper({ commit }, payload) {
@@ -663,6 +676,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Document', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document DB Insert', new Date().toISOString(), error.message, { payload });
             });
     },
     updatePaper({ commit }, payload) {
@@ -672,6 +686,7 @@ const actions = {
             description: payload.paperDescription,
             id: payload.paperId
         }
+
         db.collection("papers").where('id', '==', paper.id).get()
             .then(snapshot => {
                 const doc = snapshot.docs[0];
@@ -704,6 +719,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Document', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Document DB Update', new Date().toISOString(), error.message, { payload });
             });
     },
     async getPaperNames({ commit }) {
@@ -733,7 +749,9 @@ const actions = {
                         resolve(doc.data());
                     })
                     .catch(error => {
-                        console.log(error);
+                        const errorModel = showErrorMessage('load', 'Documento', error.message);
+                        commit('setError', { message: errorModel });
+                        createErrorLog('Document ID Load', new Date().toISOString(), error.message, { data });
                     });
             } catch {
                 reject('getPaperById error')

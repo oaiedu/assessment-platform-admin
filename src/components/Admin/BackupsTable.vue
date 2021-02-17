@@ -179,7 +179,7 @@
                     {
                         text: 'ID',
                         value: 'id',
-                        align: 'center',
+                        align: 'left',
                         sortable: true
                     },
                     {
