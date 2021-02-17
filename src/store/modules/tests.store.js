@@ -1,7 +1,7 @@
 import uuid from 'uuid-random';
 
 import { db, storage } from '../../main';
-import { showErrorMessage } from '../../utils/errors';
+import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     loadedTests: [],
@@ -177,6 +177,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('load', 'Prova', 'Image loading error - ' + error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test Image Search', new Date().toISOString(), error.message, { payload });
             });
 
         return imageURL;
@@ -220,6 +221,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Provas', error.message);
                     commit('setError', { message: errorModel });
+                    createErrorLog('Test Page Load', new Date().toISOString(), error.message, { payload, data });
                 });
         } else {
             const pageContent = state.tests['p' + page];
@@ -277,6 +279,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Provas', error.message);
                     commit('setError', { message: errorModel });
+                    createErrorLog('Test FOL Page Load', new Date().toISOString(), error.message, { payload, data });
                 });
         } else {
             const pageContent = state.tests['p' + page];
@@ -297,7 +300,9 @@ const actions = {
                         else resolve(0);
                     })
                     .catch(error => {
-                        console.log(error);
+                        const errorModel = showErrorMessage('connection', '', error.message);
+                        commit('setError', { message: errorModel });
+                        createErrorLog('Test Exists Check', new Date().toISOString(), error.message, { payload });
                     });
             } catch {
                 reject();
@@ -354,6 +359,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Provas', 'Searching error - ' + error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test Search', new Date().toISOString(), error.message, { payload, data });
             });
     },
     loadTestQuestions({ commit }, payload) {
@@ -375,6 +381,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test Mark Check', new Date().toISOString(), error.message, { data });
             });
     },
     deleteMarkTest({ commit }, payload) {
@@ -407,17 +414,20 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test Delete Mark', new Date().toISOString(), error.message, { payload });
             });
     },
     restoreMarkedTest({ commit }, payload) {
         commit('setLoading', true);
 
         const { id, isSearching } = payload;
+        let docData = null;
 
         db.collection('tests').where('id', '==', id).get()
             .then(snapshot => {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
+                docData = data;
 
                 const test = {
                     id: data.id,
@@ -446,12 +456,14 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test Restore', new Date().toISOString(), error.message, { payload, docData });
             });
     },
     restoreAllMarkedTests({ commit, state }, payload) {
         commit('setLoading', true);
 
         const { all, isSearching, user } = payload;
+        let docData = null;
 
         const ref = db.collection('tests').where('toDelete.status', '==', true);
         let request = null;
@@ -466,6 +478,7 @@ const actions = {
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     const data = doc.data();
+                    docData = data;
 
                     const test = {
                         id: data.id,
@@ -497,6 +510,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test Restore All', new Date().toISOString(), error.message, { payload, docData });
             });
     },
     changeDeleteStatusTests({ commit }, payload) {
@@ -523,13 +537,17 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('exclusion', 'Provas', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test Confirm Delete', new Date().toISOString(), error.message, { payload });
             });
     },
     deleteTests({ commit }) {
+        const data = [];
+
         db.collection("tests").where('toDelete.status', '==', false).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.delete();
+                    data.push(doc.data());
                 });
 
                 db.collection('data-size').get()
@@ -545,7 +563,8 @@ const actions = {
                     });
             })
             .catch(error => {
-                console.error("Error removing document: ", error);
+                console.error("Error removing test: ", error);
+                createErrorLog('Test DB Delete', new Date().toISOString(), error.message, { data });
             });
     },
     createTest({ commit }, payload) {
@@ -588,6 +607,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Prova', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test DB Insert', new Date().toISOString(), error.message, { test });
             });
     },
     updateTest({ commit }, payload) {
@@ -604,6 +624,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Prova', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Test DB Update', new Date().toISOString(), error.message, { payload });
             });
     },
     async getSubjectIQS({ commit }, payload) {
@@ -619,6 +640,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('load', 'IQs' + error.message);
                         commit('setError', { message: errorModel });
+                        createErrorLog('Test Subject IQs', new Date().toISOString(), error.message, { payload });
                     });
             } catch {
                 reject('getSubjectIQS');

@@ -1,5 +1,5 @@
 import { db } from '../../main';
-import { showErrorMessage } from '../../utils/errors';
+import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     dataSize: null
@@ -44,6 +44,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Data Size', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Data Size Load', new Date().toISOString(), error.message, { data });
             });
     },
     resetDataSize({ commit }) {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { auth, db, storage } from '../../main';
-import { showErrorMessage } from '../../utils/errors';
+import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     user: null,
@@ -71,6 +71,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('connection', '', 'Avatar upload error - ' + error.message);
                         commit('setError', { message: errorModel });
+                        createErrorLog('Avatar Upload', new Date().toISOString(), error.message, { payload, format, subfolder });
                     });
             } catch {
                 reject();
@@ -133,6 +134,7 @@ const actions = {
                     .catch(error => {
                         commit('setLoading', false);
                         commit('setError', error);
+                        createErrorLog('Sign Up DB Insert', new Date().toISOString(), error.message, { payload, newUser, userInfo, url });
                     });
 
                 commit('setUser', newUser);
@@ -142,6 +144,8 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('default', '', 'Sign up error - ' + error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Sign Up', new Date().toISOString(), error.message, { payload });
+
             });
     },
     updateUser({ commit, state }, payload) {
@@ -169,6 +173,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('default', '', 'User update error - ' + error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('User DB Update', new Date().toISOString(), error.message, { payload });
             });
     },
     signUserIn({ commit, dispatch }, payload) {
@@ -200,21 +205,17 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('default', '', 'Login error - ' + error.message);
                     commit('setError', { message: errorModel });
+                    createErrorLog('Login', new Date().toISOString(), error.message, { payload });
                 }
             );
     },
     loadUserInfo({ commit }, payload) {
         commit('setLoading', true);
-        let user = {};
-        db.collection("users").get().then(snapshot => {
-            snapshot.forEach(doc => {
-                if(doc.id === payload) {
-                    user = doc.data();
-                }
+        db.collection("users").doc(payload).get()
+            .then(doc => {
+                commit('setUserInfo', { ...doc.data(), id: payload });
+                commit('setLoading', false);
             });
-            commit('setUserInfo', user);
-            commit('setLoading', false);
-        });
     },
     loadUserClaims({ commit }) {
         auth.currentUser && auth.currentUser.getIdTokenResult()
@@ -226,6 +227,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('load', 'User Claims', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('User Claims Load', new Date().toISOString(), error.message, { currentUser: auth.currentUser });
             });
     },
     loadUsers({ commit }) {
@@ -243,6 +245,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('load', 'Usuários', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('Users Load', new Date().toISOString(), error.message, { users });
             });
     },
     setUserRole({ commit }, payload) {
@@ -284,6 +287,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Cargo de Usuário', error.message);
                 commit('setError', { message: errorModel });
+                createErrorLog('User Role Update', new Date().toISOString(), error.message, { payload, url });
             });
     },
     logout({ commit }) {
