@@ -114,7 +114,7 @@
 
                 const a = document.createElement('a');
                 a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(template);
-                a.download = 'log_' + item.type.replace(' ', '_').toLowerCase()
+                a.download = 'log_' + item.type.replace(/\s/g, '_').toLowerCase()
                     + '_' + item.id + '_' + item.date + '.txt';
                 a.click();
                 a.remove();
