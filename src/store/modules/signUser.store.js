@@ -181,10 +181,6 @@ const actions = {
         commit('clearError');
         commit('clearSuccess');
 
-        dispatch('deleteQuestions');
-        dispatch('deleteRequests');
-        dispatch('deletePapers');
-        dispatch('deleteTests');
         dispatch('loadDataSize');
         dispatch('resetPapers');
         dispatch('resetQuestions');

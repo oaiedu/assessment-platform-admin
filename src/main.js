@@ -47,14 +47,14 @@ new Vue({
     created() {
         auth.onAuthStateChanged((user) => {
             if (user) {
-                this.$store.dispatch('autoSignIn', user );
+                this.$store.dispatch('autoSignIn', user);
+                this.$store.dispatch('deleteQuestions');
+                this.$store.dispatch('deleteRequests');
+                this.$store.dispatch('deletePapers');
+                this.$store.dispatch('deleteTests');
             }
         });
 
-        this.$store.dispatch('deleteQuestions');
-        this.$store.dispatch('deleteRequests');
-        this.$store.dispatch('deletePapers');
-        this.$store.dispatch('deleteTests');
         this.$store.dispatch('resetPapers');
         this.$store.dispatch('resetQuestions');
         this.$store.dispatch('resetRequests');
