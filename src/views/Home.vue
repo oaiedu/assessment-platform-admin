@@ -3,19 +3,19 @@
         <v-container v-if="user != null || user != undefined">
             <v-row justify="center">
                 <v-col sm=4>
-                    <profile />
+                    <Profile />
                 </v-col>
                 <v-col sm=8>
-                    <statistics-questions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
+                    <StatisticsQuestions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
                 </v-col>
             </v-row>
-            <fab :userClaims='userClaims' v-if='!userClaims["student"]' />
+            <Fab :userClaims='userClaims' v-if='!userClaims["student"]' />
         </v-container>
 
         <v-row justify="center" align="center" v-else>
             <img class="background-image"
-                src="https://firebasestorage.googleapis.com/v0/b/pwr-quiz-generator.appspot.com/o/home-background.jpg?alt=media&token=9f763b10-06ae-450e-90d1-96bbc7667376"
-                alt="Image" >
+                src="../assets/home-background.jpg"
+                alt="Background Image" >
             <div class="background-overlay"></div>
             <v-col class="sign-col" :cols="cardColums" >
                 <SignUser/>
@@ -28,7 +28,7 @@
     // @ is an alias to /src
     import Fab from '@/components/Fab.vue'
     import StatisticsQuestions from '@/components/Questions/StatisticsQuestions'
-    import profile from '@/components/User/DisplayProfile'
+    import Profile from '@/components/User/DisplayProfile'
     import SignUser from '@/components/User/SignUser'
 
     export default {
@@ -37,7 +37,7 @@
             Fab,
             StatisticsQuestions,
             SignUser,
-            profile
+            Profile
         },
         computed: {
             cardColums() {
