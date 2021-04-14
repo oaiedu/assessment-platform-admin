@@ -3,13 +3,10 @@
     <v-form ref="formRef">
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="close()" class="mr-2">
-          <v-icon>mdi-close</v-icon>
+          <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
         <h2>Criar nova prova</h2>
         <v-spacer></v-spacer>
-        <!-- <v-toolbar-items>
-          <v-btn dark text @click="onCreateTest()">Criar Teste</v-btn>
-        </v-toolbar-items> -->
       </v-toolbar>
 
       <v-tooltip left>
@@ -25,7 +22,7 @@
                 right
                 :loading="loading && testType === 'Aleatório'"
                 @click="onCreateTest()" >
-                <v-icon color="white">mdi-content-save</v-icon>
+                <v-icon color="white">{{ mdiContentSave }}</v-icon>
             </v-btn>
         </template>
         <h3>Salvar</h3>
@@ -197,7 +194,7 @@
                         filled
                         rounded
                         dense
-                        append-icon="mdi-magnify"
+                        :append-icon="mdiMagnify"
                         label="Procurar por IQ"
                         single-line
                         hide-details
@@ -231,22 +228,6 @@
                             </template>
                         </v-data-table>
                     </v-card>
-
-                    <!-- <v-card v-else>
-                        <v-data-table
-                        v-model="selectedQuestions"
-                        :headers="headers"
-                        :items="showedQuestions"
-                        :page.sync="page"
-                        :items-per-page="itemsPerPage"
-                        :loading='loading'
-                        show-select
-                        item-key="id"
-                        hide-default-footer
-                        class="elevation-1"
-                        @page-count="pageCount = $event"
-                        ></v-data-table>
-                    </v-card> -->
                 </v-container>
                 <div class="text-center pt-2">
                     <Paginator
@@ -287,6 +268,7 @@
 </template>
 
 <script>
+    import { mdiClose, mdiContentSave, mdiMagnify, mdiCloseBox, mdiMinusBox, mdiCheckboxBlankOutline } from '@mdi/js';
     import Paginator from '../Paginator';
     import Ripple from 'vuetify/lib/directives/ripple';
 
@@ -295,6 +277,9 @@
         components: { Paginator },
         data() {
             return {
+                mdiClose,
+                mdiContentSave,
+                mdiMagnify,
                 testType: "Selecionado",
                 randomizedPage: 1,
                 randomQuestionsNumber: 1,
@@ -386,9 +371,9 @@
                 return this.testSubjects.length > 0 && !this.selectedAllSubjects;
             },
             selectIcon () {
-                if (this.selectedAllSubjects) return 'mdi-close-box';
-                if (this.selectedSomeSubject) return 'mdi-minus-box';
-                return 'mdi-checkbox-blank-outline';
+                if (this.selectedAllSubjects) return mdiCloseBox;
+                if (this.selectedSomeSubject) return mdiMinusBox;
+                return mdiCheckboxBlankOutline;
             },
         },
         watch: {

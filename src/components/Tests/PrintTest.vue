@@ -19,7 +19,7 @@
 
       <div v-for="(paper) in papers" :key='paper.id' class="question-page">
           <v-row justify="start">
-            <viewer :value="paper.description" />
+            <vue-markdown :source="paper.description" />
           </v-row>
 
           <v-row justify="center">
@@ -49,7 +49,7 @@
                     class="buttonIsHidden"
                     @click="back()" >
                     <v-icon>
-                    mdi-arrow-left
+                    {{ mdiArrowLeft }}
                     </v-icon>
                 </v-btn>
             </template>
@@ -70,7 +70,7 @@
                     right
                     color="blue darken-1"
                     @click="toPrint()" >
-                    <v-icon>mdi-file-outline</v-icon>
+                    <v-icon>{{ mdiFileOutline }}</v-icon>
                 </v-btn>
             </template>
             <span>Gerar PDF</span>
@@ -91,7 +91,7 @@
                     style="margin-bottom: 80px;"
                     color="grey darken-1"
                     @click="printDialog = true" >
-                    <v-icon>mdi-file-document-edit-outline</v-icon>
+                    <v-icon>{{ mdiFileDocumentEditOutline }}</v-icon>
                 </v-btn>
             </template>
             <span>Editar Documentos</span>
@@ -149,8 +149,8 @@
 <script>
     import StatisticsQuestions from '@/components/Questions/StatisticsQuestions';
     import VueMarkdown from 'vue-markdown';
-    require('vue-markdown');
-    import { Viewer } from '@toast-ui/vue-editor';
+    import 'vue-markdown';
+    import { mdiArrowLeft, mdiFileOutline, mdiFileDocumentEditOutline } from '@mdi/js';
     import Definition from './Definition';
     import ListOfAnswers from './ListOfAnswers';
     import TestQuestions from './TestQuestions';
@@ -161,7 +161,6 @@
         components: {
             'vue-markdown': VueMarkdown,
             StatisticsQuestions,
-            'viewer': Viewer,
             Definition,
             TestQuestions,
             QuestionsList,
@@ -169,6 +168,9 @@
         },
         data() {
             return {
+                mdiArrowLeft,
+                mdiFileOutline,
+                mdiFileDocumentEditOutline,
                 checkFirtPage: false,
                 fab: false,
                 tabs: null,
@@ -239,6 +241,7 @@
             createdPapers() {
                 const result = [];
 
+                // eslint-disable-next-line vue/no-async-in-computed-properties
                 this.$store.dispatch('getPaperNames')
                     .then(papers => {
                         papers.forEach(p => {

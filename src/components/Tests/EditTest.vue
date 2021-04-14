@@ -3,13 +3,10 @@
     <v-form ref="formRef">
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="close()" class="mr-2">
-            <v-icon>mdi-close</v-icon>
+            <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
         <h2>Editar prova</h2>
         <v-spacer></v-spacer>
-        <!-- <v-toolbar-items>
-            <v-btn dark text @click="onEditTest()" height="100">Editar Teste</v-btn>
-        </v-toolbar-items> -->
       </v-toolbar>
 
       <v-tooltip left>
@@ -24,7 +21,7 @@
                 bottom
                 right
                 @click="onEditTest()" >
-                <v-icon color="white">mdi-content-save</v-icon>
+                <v-icon color="white">{{ mdiContentSave }}</v-icon>
             </v-btn>
         </template>
         <h3>Salvar</h3>
@@ -64,7 +61,7 @@
                             filled
                             rounded
                             dense
-                            append-icon="mdi-magnify"
+                            :append-icon="mdiMagnify"
                             label="Procurar por IQ"
                             single-line
                             hide-details
@@ -140,6 +137,7 @@
 </template>
 
 <script>
+import { mdiClose, mdiContentSave, mdiMagnify } from '@mdi/js';
 import Paginator from '../Paginator';
 import Ripple from 'vuetify/lib/directives/ripple';
 
@@ -150,6 +148,9 @@ export default {
   props: ["test"],
   data() {
     return {
+      mdiClose,
+      mdiContentSave,
+      mdiMagnify,
       randomQuestionsNumber: null,
       createErrorSnackBar: false,
       selectedQuestions: [],
@@ -214,6 +215,7 @@ export default {
     },
     name() {
       let aux = this.test.title;
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       this.testTitle = aux;
       return aux;
     },
