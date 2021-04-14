@@ -1,26 +1,15 @@
 import Vue from 'vue';
 import App from './App.vue';
-import * as firebase from 'firebase';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
+import 'firebase/storage';
 
 import router from './router';
 import store from './store';
 import vuetify from './plugins/vuetify';
 
-import AlertCmp from './components/Shared/Alert.vue';
-import Combined from './components/Shared/Combined';
-import NewQuestion from './components/Questions/NewQuestion';
-import EditQuestion from './components/Questions/EditQuestion';
-import Stepper from './components/Questions/Stepper';
-import PrintQuestion from './components/Questions/PrintQuestion';
-
 Vue.config.productionTip = false;
-
-Vue.component('app-alert', AlertCmp);
-Vue.component('Combined', Combined);
-Vue.component('NewQuestion', NewQuestion);
-Vue.component('EditQuestion', EditQuestion);
-Vue.component('Stepper', Stepper);
-Vue.component('Body', PrintQuestion);
 
 const firebaseConfig = {
     apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
