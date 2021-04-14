@@ -10,7 +10,7 @@
                     :ripple='false'
                     @click='toFirst()'
                     :disabled='page === 1' >
-                    <v-icon>mdi-chevron-double-left</v-icon>
+                    <v-icon>{{ mdiChevronDoubleLeft }}</v-icon>
                 </v-btn>
 
                 <v-btn
@@ -22,7 +22,7 @@
                     class='ml-3'
                     @click='onPrevious()'
                     :disabled='page === 1' >
-                    <v-icon>mdi-chevron-left</v-icon>
+                    <v-icon>{{ mdiChevronLeft }}</v-icon>
                 </v-btn>
 
                 <v-btn
@@ -45,7 +45,7 @@
                     class='ml-3'
                     @click='onNext()'
                     :disabled='page === length' >
-                    <v-icon>mdi-chevron-right</v-icon>
+                    <v-icon>{{ mdiChevronRight }}</v-icon>
                 </v-btn>
 
                 <v-btn
@@ -57,7 +57,7 @@
                     class='ml-3'
                     @click='toLast()'
                     :disabled='page === length' >
-                    <v-icon>mdi-chevron-double-right</v-icon>
+                    <v-icon>{{ mdiChevronDoubleRight }}</v-icon>
                 </v-btn>
             </v-row>
         </v-container>
@@ -65,12 +65,17 @@
 </template>
 
 <script>
+    import { mdiChevronDoubleRight, mdiChevronDoubleLeft, mdiChevronRight, mdiChevronLeft} from '@mdi/js';
+
     export default {
         name: 'Paginator',
         props: { page: Number, length: Number },
         data() {
             return {
-
+                mdiChevronLeft,
+                mdiChevronRight,
+                mdiChevronDoubleLeft,
+                mdiChevronDoubleRight
             }
         },
         methods: {
