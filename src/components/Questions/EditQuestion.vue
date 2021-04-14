@@ -1,17 +1,13 @@
 <template>
   <v-card>
-    <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
+    <link rel="preload" as="style" type="text/css" onload="this.rel = 'stylesheet'"
+        href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
     <v-toolbar dark color="primary">
       <v-btn icon dark @click="close()" class="mr-2">
-        <v-icon>mdi-close</v-icon>
+        <v-icon>{{ mdiClose }}</v-icon>
       </v-btn>
       <h2>Editar questão - {{ iq }}</h2>
       <v-spacer></v-spacer>
-      <!-- <v-toolbar-items>
-        <v-btn dark text @click="e1 = 2" v-if="e1 == 1">Continue</v-btn>
-        <v-btn dark text @click="e1 = 3" v-if="e1 == 2">Continue</v-btn>
-        <v-btn dark text @click="onEditQuestion()" v-if="e1 == 3">Editar Questão</v-btn>
-      </v-toolbar-items> -->
     </v-toolbar>
 
     <v-tooltip right v-if='e1 > 1'>
@@ -25,7 +21,7 @@
                 bottom
                 left
                 @click="e1 = e1 - 1" >
-                <v-icon color="blue darken-1">mdi-arrow-left</v-icon>
+                <v-icon color="blue darken-1">{{ mdiArrowLeft }}</v-icon>
             </v-btn>
         </template>
         <span>Voltar</span>
@@ -43,7 +39,7 @@
                 bottom
                 right
                 @click="e1 == 1 ? e1 = 2 : e1 = 3" >
-                <v-icon color="white">mdi-arrow-right</v-icon>
+                <v-icon color="white">{{ mdiArrowRight }}</v-icon>
             </v-btn>
         </template>
         <span>Continuar</span>
@@ -61,7 +57,7 @@
                 bottom
                 right
                 @click="onEditQuestion()" >
-                <v-icon color="white">mdi-content-save</v-icon>
+                <v-icon color="white">{{ mdiContentSave }}</v-icon>
             </v-btn>
         </template>
         <span>Salvar</span>
@@ -140,7 +136,7 @@
                   <v-stepper-content step="2">
                     <v-container>
                       <v-row>
-                        <editor v-model="editedQuestionDescription" />
+                        <VueSimplemde v-model="editedQuestionDescription"/>
                       </v-row>
 
                       <v-row>
@@ -194,11 +190,11 @@
                         <v-row v-for="(item, index) in editedAnswers" :key="index">
                           <v-col cols="12" md="1" sm="1" xs="1">
                             <v-radio-group v-model="radios">
-                              <v-radio :value="editedAnswers[index].ansId"></v-radio>
+                              <v-radio :value="item.ansId"></v-radio>
                             </v-radio-group>
                           </v-col>
                           <v-col>
-                            <v-text-field outlined v-model="editedAnswers[index].text"></v-text-field>
+                            <v-text-field outlined v-model="item.text"></v-text-field>
                           </v-col>
                         </v-row>
                       </v-main>
@@ -211,77 +207,15 @@
         </v-col>
 
         <v-col>
-          <v-card fill>
-            <v-card-title>Preview</v-card-title>
-            <v-card-text>
-              DISCIPLINA: {{editedSubject}}
-              <br />
-              CONHECIMENTO: {{editedKnowledge}} [{{editedKnowledgePWR}}/{{editedKnowledgeBWR}}]
-              <br />
-              IQ: {{ iq }}
-              <br />
-              <br />
-              <vue-markdown :source="editedQuestionDescription" />
-              <br />
-
-              <v-row
-                justify="center"
-                style="margin-top: 20px"
-                v-if="editedImages"
-              >
-                <img v-if="editedImages" style="max-height: 250px; max-width: 180px" :src="editedImages" alt='image' />
-              </v-row>
-
-              <div v-if="confirmTitle">
-                <v-row class='answer-block'>
-                  <v-col cols="1"></v-col>
-                  <v-col v-for="(item, index) in editedAnswers[0].text" :key="index">
-                    <vue-markdown :source="item.title" />
-                  </v-col>
-                </v-row>
-
-                <v-row class='answer-block'>
-                  <v-col cols="1">A -</v-col>
-                  <v-col v-for="(item, index) in editedAnswers[0].text" :key="index">
-                    <vue-markdown :source="item.answerDescription" />
-                  </v-col>
-                </v-row>
-                <br />
-
-                <v-row class='answer-block'>
-                  <v-col cols="1">B -</v-col>
-                  <v-col v-for="(item, index) in editedAnswers[1].text" :key="index">
-                    <vue-markdown :source="item.answerDescription" />
-                  </v-col>
-                </v-row>
-                <br />
-
-                <v-row class='answer-block'>
-                  <v-col cols="1">C -</v-col>
-                  <v-col v-for="(item, index) in editedAnswers[2].text" :key="index">
-                    <vue-markdown :source="item.answerDescription" />
-                  </v-col>
-                </v-row>
-                <br />
-
-                <v-row class='answer-block'>
-                  <v-col cols="1">D -</v-col>
-                  <v-col v-for="(item, index) in editedAnswers[3].text" :key="index">
-                    <vue-markdown :source="item.answerDescription" />
-                  </v-col>
-                </v-row>
-              </div>
-
-              <div v-else>
-                <v-row v-for="(item, index) in editedAnswers" :key="index" class='answer-block'>
-                  <v-col cols="1">{{ letters[index] }} -</v-col>
-                  <v-col>
-                    <vue-markdown :source="item.text" />
-                  </v-col>
-                </v-row>
-              </div>
-            </v-card-text>
-          </v-card>
+          <Preview
+            :iq='iq'
+            :subject='editedSubject'
+            :knowledge='editedKnowledge'
+            :knowledgePWR='editedKnowledgePWR'
+            :knowledgeBWR='editedKnowledgeBWR'
+            :questionDesc='editedQuestionDescription'
+            :answers='editedAnswers'
+            :image='imagePreview' />
         </v-col>
       </v-row>
     </v-container>
@@ -289,18 +223,24 @@
 </template>
 
 <script>
-import { Editor } from "@toast-ui/vue-editor";
-import VueMarkdown from "vue-markdown";
-require("vue-markdown");
+import 'simplemde/dist/simplemde.min.css';
+import VueSimplemde from 'vue-simplemde';
+import { mdiClose, mdiArrowLeft, mdiArrowRight, mdiContentSave } from '@mdi/js';
+import Preview from './Preview';
 
 export default {
   components: {
-    Editor,
-    "vue-markdown": VueMarkdown
+    VueSimplemde,
+    Preview
   },
   props: ['question', 'userClaims', 'userInfo', 'isSearching'],
   data() {
     return {
+      mdiClose,
+      mdiArrowLeft,
+      mdiArrowRight,
+      mdiContentSave,
+      imagePreview: '',
       letters: ["A", "B", "C", "D"],
       confirmTitle: false,
       editedQuestionDescription: null,
@@ -313,7 +253,12 @@ export default {
       chips: [],
       items: [],
       images: [],
-      editedAnswers: [],
+      editedAnswers: [
+        { text: "", ansId: "radio-1", value: false },
+        { text: "", ansId: "radio-2", value: false },
+        { text: "", ansId: "radio-3", value: false },
+        { text: "", ansId: "radio-4", value: false }
+      ],
       editedIq: null,
       editedSubject: null,
       editedKnowledge: null,
@@ -357,6 +302,7 @@ export default {
       );
     },
     iq() {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.editedIq = this.question.iq;
         return this.question.iq;
     }
@@ -400,6 +346,8 @@ export default {
       )
         this.editedImages = "";
       else this.editedImages = this.question.image;
+
+      this.imagePreview = this.editedImages || '';
 
       if (typeof this.question.answers[0].text == "string")
         this.number = 1;
@@ -562,6 +510,7 @@ export default {
       this.chips = [];
       this.items = [];
       this.images = [];
+      this.imagePreview = '';
       this.editedAnswers = [];
       this.editedIq = null;
       this.editedSubject = null;
@@ -579,7 +528,18 @@ export default {
             } else if (event[0].size > 2000000) {
                 this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
                 this.images = this.editedImages || [];
+            } else {
+                const file = event[0];
+                const reader = new FileReader();
+
+                reader.onload = readerEvent => {
+                    this.imagePreview = readerEvent.target.result;
+                }
+
+                reader.readAsDataURL(file);
             }
+        } else if (this.imagePreview && this.imagePreview !== '') {
+            this.imagePreview = this.editedImages || '';
         }
     },
     close() {
