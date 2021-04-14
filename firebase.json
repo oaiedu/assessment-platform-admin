@@ -11,6 +11,36 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "headers": [
+        {
+            "source" : "**/*.@(eot|otf|ttf|ttc|woff|woff2|font.css)",
+            "headers" : [ {
+                "key" : "Access-Control-Allow-Origin",
+                "value" : "*"
+            }, {
+                "key": "Cache-Control",
+                "value" : "max-age=30672000"
+            } ]
+        }, {
+            "source" : "**/*.@(js|css)",
+            "headers" : [ {
+              "key" : "Cache-Control",
+              "value" : "max-age=30672000"
+            } ]
+        }, {
+            "source" : "**/*.@(jpg|jpeg|gif|png)",
+            "headers" : [ {
+              "key" : "Cache-Control",
+              "value" : "max-age=30672000"
+            } ]
+        }, {
+            "source" : "404.html",
+            "headers" : [ {
+              "key" : "Cache-Control",
+              "value" : "max-age=300"
+            } ]
+        }
     ]
   },
   "firestore": {
