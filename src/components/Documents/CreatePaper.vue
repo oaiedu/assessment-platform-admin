@@ -3,14 +3,10 @@
     <v-form ref="formRef" @submit.prevent="onCreatePaper()">
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="close()" class="mr-2">
-          <v-icon>mdi-close</v-icon>
+          <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
         <h2>Criar novo documento</h2>
         <v-spacer></v-spacer>
-          <!-- <v-btn light type="submit">
-              <h3>Salvar</h3>
-              <v-icon color="blue darken-1" class="ml-2">mdi-text-box-check</v-icon>
-          </v-btn> -->
       </v-toolbar>
 
       <v-tooltip left>
@@ -25,7 +21,7 @@
                 bottom
                 right
                 type="submit" >
-                <v-icon color="white">mdi-content-save</v-icon>
+                <v-icon color="white">{{ mdiContentSave }}</v-icon>
             </v-btn>
         </template>
         <h3>Salvar</h3>
@@ -70,7 +66,7 @@
                     </v-row>
                     <v-row>
                       <v-col>
-                        <Combined @inputData="updateData"></Combined>
+                        <VueSimplemde v-model="paperDescription"/>
                       </v-col>
                     </v-row>
                   </v-container>
@@ -126,22 +122,26 @@
 
 <script>
     import uuid from 'uuid-random';
+    import 'simplemde/dist/simplemde.min.css';
+    import VueSimplemde from 'vue-simplemde';
+    import { mdiClose, mdiContentSave } from '@mdi/js';
     import Preview from './Preview';
 
     export default {
         name: 'CreatePaper',
-        components: { Preview },
-        data: () => ({
-            createErrorSnackBar: false,
-            paperDescription: null,
-            paperName: null,
-            images: [],
-            paperImage: ""
-        }),
+        components: { Preview, VueSimplemde },
+        data() {
+            return {
+                mdiClose,
+                mdiContentSave,
+                createErrorSnackBar: false,
+                paperDescription: null,
+                paperName: null,
+                images: [],
+                paperImage: ""
+            }
+        },
         methods: {
-            updateData(variable) {
-                this.paperDescription = variable;
-            },
             close() {
                 this.setInitialData();
                 this.$emit("closeDialogNew");
