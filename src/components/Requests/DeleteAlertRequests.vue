@@ -6,7 +6,7 @@
             prominent
             type='warning'
             color="red"
-            icon='mdi-alert' >
+            :icon='mdiAlert' >
             Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
         </v-alert>
 
@@ -16,7 +16,7 @@
             prominent
             type='warning'
             color="red"
-            icon='mdi-alert' >
+            :icon='mdiAlert' >
             {{ itemsText }}
             <br>
             {{ items }}
@@ -25,8 +25,15 @@
 </template>
 
 <script>
+    import { mdiAlert } from '@mdi/js';
+
     export default {
         name: 'DeleteAlertRequests',
-        props:['confirmCondition', 'itemsCondition', 'itemsText', 'items']
+        props:['confirmCondition', 'itemsCondition', 'itemsText', 'items'],
+        data() {
+            return {
+                mdiAlert
+            }
+        }
     }
 </script>
