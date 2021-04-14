@@ -32,7 +32,7 @@
                             v-on='on'
                             v-bind='attrs'
                             @click="downloadLog(item);" >
-                            mdi-download
+                            {{ mdiDownload }}
                         </v-icon>
                     </template>
                     <span>Download</span>
@@ -46,7 +46,7 @@
                             class="ml-3"
                             :disabled='item.user.email === userInfo.email'
                             @click="sendEmail(item.user.email)" >
-                            mdi-email
+                            {{ mdiEmail }}
                         </v-icon>
                     </template>
                     <span>Enviar e-mail</span>
@@ -57,10 +57,14 @@
 </template>
 
 <script>
+    import { mdiDownload, mdiEmail } from '@mdi/js';
+
     export default {
         name: 'LogsTable',
         data() {
             return {
+                mdiDownload,
+                mdiEmail,
                 headers: [
                     { text: "ID", align: "left",  value: "id", sortable: true },
                     { text: "Tipo", align: "center",  value: "type", sortable: true },
