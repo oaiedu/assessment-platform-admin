@@ -304,7 +304,7 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Test Exists Check', new Date().toISOString(), error.message, { payload });
                     });
-            } catch {
+            } catch(error) {
                 reject();
             }
         });
@@ -559,7 +559,7 @@ const actions = {
                         commit('addRemoveSize', { key: 'tests', data: size - snapshot.docs.length });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -596,11 +596,11 @@ const actions = {
                                 commit('addRemoveSize', { key: 'tests', data: size + 1 });
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -642,7 +642,7 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Test Subject IQs', new Date().toISOString(), error.message, { payload });
                     });
-            } catch {
+            } catch(error) {
                 reject('getSubjectIQS');
             }
         });

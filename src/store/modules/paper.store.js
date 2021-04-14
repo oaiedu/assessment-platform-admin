@@ -161,9 +161,7 @@ const actions = {
                 const format = `documents/document-$${paperId}.${type}`;
                 storageRef.child(format).put(file)
                     .then(snapshot => {
-                        console.log("Uploaded a file!: ", snapshot)
                         snapshot.ref.getDownloadURL().then(downloadURL => {
-                            console.log('File available at', downloadURL);
                             resolve(downloadURL.toString());
                         });
                     })
@@ -172,8 +170,8 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Docs Image Upload', new Date().toISOString(), error.message, { payload, format });
                     });
-            } catch{
-                reject();
+            } catch(error) {
+                reject('Paper Image Upload Error');
             }
         });
         return request;
@@ -203,11 +201,11 @@ const actions = {
                                     commit('addRemoveSize', { key: 'papers', data: size - 1 });
                                 })
                                 .catch(error => {
-                                    console.log(error);
+                                    console.error(error);
                                 });
                         })
                         .catch(error => {
-                            console.log(error);
+                            console.error(error);
                         });
                 });
             })
@@ -403,7 +401,7 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Document Exist Test', new Date().toISOString(), error.message, { payload });
                     });
-            } catch {
+            } catch(error) {
                 reject();
             }
         });
@@ -571,7 +569,7 @@ const actions = {
                         docNames.ref.update({ papers: newPapers });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
 
                 commit('updateCurrentPapersPage', { ...doc.data(), toDelete });
@@ -612,7 +610,7 @@ const actions = {
                         commit('addRemoveSize', { key: 'papers', data: size - snapshot.docs.length });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -652,11 +650,11 @@ const actions = {
                                 commit('setSuccess', 'Documento criado com sucesso!');
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .then(() => {
@@ -669,7 +667,7 @@ const actions = {
                         doc.ref.update({ papers: dPapers });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -707,7 +705,7 @@ const actions = {
                         docNames.ref.update({ papers: newPapers });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
 
                 commit('updatePaper', paper);
@@ -731,9 +729,9 @@ const actions = {
                         resolve(data.papers);
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
-            } catch {
+            } catch(error) {
                 reject('getPaperNames error');
             }
         });
@@ -753,7 +751,7 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Document ID Load', new Date().toISOString(), error.message, { data });
                     });
-            } catch {
+            } catch(error) {
                 reject('getPaperById error')
             }
         });

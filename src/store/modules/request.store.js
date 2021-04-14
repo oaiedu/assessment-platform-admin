@@ -201,11 +201,11 @@ const actions = {
                                 commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -604,11 +604,11 @@ const actions = {
                                 commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -661,15 +661,15 @@ const actions = {
                                         commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
                                     })
                                     .catch(error => {
-                                        console.log(error);
+                                        console.error(error);
                                     });
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -712,11 +712,11 @@ const actions = {
                                 commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {

@@ -34,7 +34,6 @@ const mutations = {
     },
     removeBackup(state, data) {
         const index = state.backups.indexOf(data);
-        console.log(index);
         if(index !== -1) {
             state.backups.splice(index, 1);
         }
@@ -76,8 +75,6 @@ const actions = {
                 bkp.size = res.data.size;
                 bkp.end = res.data.endDate;
                 bkp.cloudId = res.data.cloudId;
-
-                console.log('Backup realizado com sucesso!');
             }).catch(error => {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Backup', error.message);
@@ -126,7 +123,7 @@ const actions = {
                         commit('setLoading', false);
                         commit('setSuccess', 'Backup realizado com sucesso!');
                     })
-                    .catch(error => console.log(error));
+                    .catch(error => console.error(error));
             })
             .catch(error => {
                 commit('setLoading', false);
@@ -183,12 +180,12 @@ const actions = {
 
                 unzip(new Blob([Buffer.from(data)], { type: 'application/zip' }), (err, zipFile) => {
                     if(err) {
-                        console.log(err);
+                        console.error(err);
                     }
 
                     zipFile.readEntries((err, entries) => {
                         if(err) {
-                            console.log(err);
+                            console.error(err);
                         }
 
                         const zip = new AdmZip();
@@ -198,7 +195,7 @@ const actions = {
                         entries.forEach(entry => {
                             zipFile.readEntryData(entry, false, (err, readStream) => {
                                 if(err) {
-                                    console.log(err);
+                                    console.error(err);
                                 }
 
                                 readStream.on('data', async chunk => {
@@ -214,7 +211,7 @@ const actions = {
                                     zip.addFile('file' + ++counter + '.json', json);
                                 });
                                 readStream.on('error', error => {
-                                    console.log(error);
+                                    console.error(error);
                                 });
                                 readStream.on('end', () => {
                                     len++;
