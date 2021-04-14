@@ -1,13 +1,14 @@
 <template>
   <v-card max-width="250" class="mx-auto" @click="() => this.$router.push('/profile')">
+    <link rel="preload" as="image" :href="user.profileImages">
     <v-container>
       <v-row justify="center" class="ma-4">
         <v-avatar size="150">
           <img
-            src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-            v-if=" user.profileImages === '' || user.profileImages === null "
-          />
-          <img :src="user.profileImages" v-else />
+            class="display-profile-image"
+            rel='preload'
+            src="../../assets/no-profile-pic.jpg"
+            alt="Profile Image" />
         </v-avatar>
       </v-row>
 
@@ -32,6 +33,12 @@ export default {
             else if(role === 'appraiser') return 'Avaliador';
             else if(role === 'teacher') return 'Professor';
             else return 'Aluno';
+        }
+    },
+    mounted() {
+        if (this.user.profileImages && this.user.profileImages.length > 0) {
+            const image = document.getElementsByClassName('display-profile-image')[0];
+            image.src = this.user.profileImages;
         }
     }
 }

@@ -7,7 +7,7 @@
         filled
         rounded
         dense
-        append-icon="mdi-magnify"
+        :append-icon="mdiMagnify"
         :label="label"
         single-line
         hide-details >
@@ -15,11 +15,14 @@
 </template>
 
 <script>
+    import { mdiMagnify } from '@mdi/js';
+
     export default {
         name: 'SearchBox',
         props: { label: String },
         data() {
             return {
+                mdiMagnify,
                 search: ''
             }
         },

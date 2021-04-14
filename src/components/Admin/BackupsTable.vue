@@ -8,7 +8,7 @@
                 :loading='loading'
                 @click="backup()" >
                 Fazer Backup
-                <v-icon right dark>mdi-cloud-upload</v-icon>
+                <v-icon right dark>{{ mdiCloudUpload }}</v-icon>
             </v-btn>
         </v-row>
 
@@ -33,7 +33,7 @@
                             v-on='on'
                             v-bind='attrs'
                             @click="downloadBkp(item)" >
-                            mdi-download
+                            {{ mdiDownload }}
                         </v-icon>
                     </template>
                     <span>Download</span>
@@ -46,7 +46,7 @@
                             v-bind='attrs'
                             class="ml-1"
                             @click="deleteBackupSnackBar = true; deleteItem = item" >
-                            mdi-delete
+                            {{ mdiDelete }}
                         </v-icon>
                     </template>
                     <span>Excluir</span>
@@ -75,7 +75,7 @@
                             v-on='on'
                             v-bind='attrs'
                             @click="downloadBkp(item)" >
-                            mdi-download
+                            {{ mdiDownload }}
                         </v-icon>
                     </template>
                     <span>Download</span>
@@ -88,7 +88,7 @@
                             v-bind='attrs'
                             class="ml-1"
                             @click="deleteBackupSnackBar = true; deleteItem = item" >
-                            mdi-delete
+                            {{ mdiDelete }}
                         </v-icon>
                     </template>
                     <span>Excluir</span>
@@ -117,7 +117,7 @@
                             v-on='on'
                             v-bind='attrs'
                             @click="downloadBkp(item)" >
-                            mdi-download
+                            {{ mdiDownload }}
                         </v-icon>
                     </template>
                     <span>Download</span>
@@ -130,7 +130,7 @@
                             v-bind='attrs'
                             class="ml-1"
                             @click="deleteBackupSnackBar = true; deleteItem = item" >
-                            mdi-delete
+                            {{ mdiDelete }}
                         </v-icon>
                     </template>
                     <span>Excluir</span>
@@ -168,10 +168,15 @@
 </template>
 
 <script>
+    import { mdiDownload, mdiDelete, mdiCloudUpload } from '@mdi/js';
+
     export default {
         name: 'BackupsTable',
         data() {
             return {
+                mdiDownload,
+                mdiDelete,
+                mdiCloudUpload,
                 deleteBackupSnackBar: false,
                 deleteItem: null,
                 months: {},

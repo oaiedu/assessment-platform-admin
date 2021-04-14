@@ -24,7 +24,7 @@
                             v-bind='attrs'
                             :disabled='currentUser.email === item.email'
                             @click="editDialog = true; setEditItem(item);" >
-                            mdi-account-edit
+                            mdiAccountEdit
                         </v-icon>
                     </template>
                     <span>Editar função</span>
@@ -38,7 +38,7 @@
                             class="ml-3"
                             :disabled='currentUser.email === item.email'
                             @click="sendEmail(item.email)" >
-                            mdi-email
+                            mdiEmail
                         </v-icon>
                     </template>
                     <span>Enviar e-mail</span>
@@ -87,10 +87,14 @@
 </template>
 
 <script>
+    import { mdiAccountEdit, mdiEmail } from '@mdi/js';
+
     export default {
         name: 'UsersTable',
         data() {
             return {
+                mdiEmail,
+                mdiAccountEdit,
                 editItem: {
                     email: null,
                     role: null,

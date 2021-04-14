@@ -137,8 +137,10 @@ export default {
         user() {
             const user = this.$store.getters.userInfo;
 
+            // eslint-disable-next-line vue/no-side-effects-in-computed-properties
             if(user.name !== "") this.nickName = user.name;
 
+            // eslint-disable-next-line vue/no-side-effects-in-computed-properties
             if(user.profileImages !== "") this.imagesAsURL = user.profileImages;
 
             return user;

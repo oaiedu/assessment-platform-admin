@@ -10,19 +10,19 @@
                 background-color="white" >
                 <v-tab>
                     <v-icon left>
-                        mdi-database
+                        {{ mdiDatabase }}
                     </v-icon>
                     Backups
                 </v-tab>
                 <v-tab>
                     <v-icon left>
-                        mdi-account
+                        {{ mdiAccount }}
                     </v-icon>
                     Usuários
                 </v-tab>
                 <v-tab>
                     <v-icon left>
-                        mdi-file-document
+                        {{ mdiFileDocument }}
                     </v-icon>
                     Logs
                 </v-tab>
@@ -50,6 +50,7 @@
 </template>
 
 <script>
+    import { mdiFileDocument, mdiAccount, mdiDatabase } from '@mdi/js';
     import BackupsTable from './BackupsTable';
     import UsersTable from './UsersTable';
     import LogsTable from './LogsTable';
@@ -59,13 +60,27 @@
         components: { BackupsTable, UsersTable, LogsTable },
         data() {
             return {
-                tab: null
+                mdiDatabase,
+                mdiAccount,
+                mdiFileDocument,
+                tab: 0,
+                isUsersLoaded: false,
+                isLogsLoaded: false
+            }
+        },
+        watch: {
+            tab(number) {
+                if (number === 1 && !this.isUsersLoaded) {
+                    this.$store.dispatch('loadUsers');
+                    this.isUsersLoaded = true;
+                } else if (number === 2 && !this.isLogsLoaded) {
+                    this.$store.dispatch('loadLogs');
+                    this.isLogsLoaded = true;
+                }
             }
         },
         created() {
             this.$store.dispatch('loadBackups');
-            this.$store.dispatch('loadUsers');
-            this.$store.dispatch('loadLogs');
         }
     }
 </script>

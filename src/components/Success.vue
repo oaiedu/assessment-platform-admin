@@ -7,28 +7,20 @@
                 v-bind="attrs"
                 @click="snackbar = false"
                 dark >
-                mdi-close
+                {{ mdiClose }}
             </v-icon>
         </template>
     </v-snackbar>
-
-    <!-- <div style="position: absolute; left: 50%;" class="pt-4">
-        <v-alert
-            v-if="success"
-            style="position: relative; left: -50%;"
-            type="success"
-            @dismiss="onDismissed"
-            dismissible >
-            {{ success }}
-        </v-alert>
-    </div> -->
 </template>
 
 <script>
+    import { mdiClose } from '@mdi/js';
+
     export default {
         name: 'Success',
         data() {
             return {
+                mdiClose,
                 snackbar: false
             }
         },

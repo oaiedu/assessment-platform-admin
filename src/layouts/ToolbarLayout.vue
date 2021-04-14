@@ -49,7 +49,7 @@
         {{ item.title }}
       </v-btn>
       <v-btn v-if="userIsAuthenticated()" text @click="onLogout">
-        <v-icon left>mdi-logout-variant</v-icon> Sair
+        <v-icon left>{{ logoutIcon }}</v-icon> Sair
       </v-btn>
     </v-app-bar>
 
@@ -64,12 +64,26 @@
 <script>
     import Error from '../components/Error';
     import Success from '../components/Success';
+    import {
+        mdiLogoutVariant,
+        mdiHome,
+        mdiAccountCog,
+        mdiFileQuestionOutline,
+        mdiFileMultipleOutline,
+        mdiFileDocument,
+        mdiInbox,
+        mdiAccount
+    } from '@mdi/js';
 
     export default {
         props: { source: String },
-        components: { Error, Success },
+        components: {
+            Error,
+            Success
+        },
         data: () => ({
             drawer: null,
+            logoutIcon: mdiLogoutVariant
         }),
         computed: {
             currentUserClaims() {
@@ -87,43 +101,43 @@
                 if (this.userIsAuthenticated()) {
                     drawerItems = [
                         {
-                            icon: "mdi-home",
+                            icon: mdiHome,
                             title: "Página Inicial",
                             link: "/",
                             grantAccess: 'all'
                         },
                         {
-                            icon: 'mdi-account-cog',
+                            icon: mdiAccountCog,
                             title: 'Administração',
                             link: '/admin',
                             grantAccess: ['admin']
                         },
                         {
-                            icon: "mdi-file-question-outline",
+                            icon: mdiFileQuestionOutline,
                             title: "Gerenciar Questões",
                             link: "/questions",
                             grantAccess: ['admin', 'appraiser', 'teacher']
                         },
                         {
-                            icon: "mdi-file-multiple-outline",
+                            icon: mdiFileMultipleOutline,
                             title: "Gerenciar Provas",
                             link: "/tests",
                             grantAccess: ['admin', 'teacher', 'student']
                         },
                         {
-                            icon: "mdi-file-document",
+                            icon: mdiFileDocument,
                             title: "Gerenciar Documentos",
                             link: "/papers",
                             grantAccess: ['admin', 'teacher']
                         },
                         {
-                            icon: "mdi-inbox",
+                            icon: mdiInbox,
                             title: "Solicitações",
                             link: "/inbox",
                             grantAccess: ['admin', 'appraiser']
                         },
                         {
-                            icon: "mdi-account",
+                            icon: mdiAccount,
                             title: "Perfil",
                             link: "/profile",
                             grantAccess: 'all'

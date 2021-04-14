@@ -1,6 +1,6 @@
 <template>
     <div class="home">
-        <v-container v-if="user != null || user != undefined">
+        <v-container v-if="user">
             <v-row justify="center">
                 <v-col sm=4>
                     <Profile />
@@ -14,10 +14,12 @@
 
         <v-row justify="center" align="center" v-else>
             <img class="background-image"
+                width="2647"
+                height="1772"
                 src="../assets/home-background.jpg"
                 alt="Background Image" >
             <div class="background-overlay"></div>
-            <v-col class="sign-col" :cols="cardColums" >
+            <v-col class="sign-col" :cols="12" lg="4" md="5" sm="7" >
                 <SignUser/>
             </v-col>
         </v-row>
@@ -26,10 +28,10 @@
 
 <script>
     // @ is an alias to /src
-    import Fab from '@/components/Fab.vue'
-    import StatisticsQuestions from '@/components/Questions/StatisticsQuestions'
-    import Profile from '@/components/User/DisplayProfile'
-    import SignUser from '@/components/User/SignUser'
+    import Fab from '@/components/Fab.vue';
+    import StatisticsQuestions from '@/components/Questions/StatisticsQuestions';
+    import Profile from '@/components/User/DisplayProfile';
+    import SignUser from '@/components/User/SignUser';
 
     export default {
         name: 'home',
@@ -40,17 +42,6 @@
             Profile
         },
         computed: {
-            cardColums() {
-                const width = window.innerWidth;
-
-                if(width < 600) return 12;
-                else if(width < 800) return 10;
-                else if(width < 1000) return 8;
-                else if(width < 1200) return 6;
-                else if(width < 1300) return 5;
-                else if(width < 1400) return 4;
-                else return 3;
-            },
             user() {
                 return this.$store.getters.user;
             },
@@ -59,8 +50,8 @@
             },
             statistics() {
                 let statisticsObj = [];
-                const cat = this.$store.getters.getSubjects;
-                cat.forEach(element => {
+                const subjects = this.$store.getters.getSubjects;
+                subjects.forEach(element => {
                     const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubject(element);
                     statisticsObj.push({ name: element, questions: numberOfQuestions });
                 });
@@ -83,13 +74,13 @@
 
     .background-overlay {
         position: absolute;
-        height: calc(100vh - 48px);
+        height: calc(100vh - 36px);
         width: 100%;
         background-color: #0006;
     }
 
     .background-image {
-        height: calc(100vh - 48px);
+        height: calc(100vh - 36px);
         width: 100%;
         object-fit: cover;
     }

@@ -81,7 +81,7 @@
             right
             color="blue darken-1"
             @click.stop="dialogNewTest = true" >
-            <v-icon>mdi-plus</v-icon>
+            <v-icon>{{ mdiPlus }}</v-icon>
           </v-btn>
         </template>
         <span>Criar Prova</span>
@@ -112,6 +112,7 @@
 </template>
 
 <script>
+    import { mdiPlus } from '@mdi/js';
     import NewTest from './NewTestForm';
     import EditTest from './EditTest';
     import Paginator from '../Paginator';
@@ -125,6 +126,7 @@
         components: { NewTest, EditTest, Paginator, TestsTable, DeleteWarning, DeleteAlert, SearchBox },
         data() {
             return {
+                mdiPlus,
                 isSearching: false,
                 deleteConfirmed: false,
                 deleteTestSnackBar: false,

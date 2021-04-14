@@ -22,7 +22,7 @@
                                     v-on='on'
                                     v-bind='attrs'
                                     @click='onPdfClick(item)' >
-                                    mdi-pdf-box
+                                    {{ mdiPdfBox }}
                                 </v-icon>
                             </template>
                             <span>Visualizar PDF</span>
@@ -35,7 +35,7 @@
                                     v-bind='attrs'
                                     class="ml-2"
                                     @click="onEditClick(item)" >
-                                    mdi-pencil
+                                    {{ mdiPencil }}
                                 </v-icon>
                             </template>
                             <span>Editar</span>
@@ -48,7 +48,7 @@
                                     v-bind='attrs'
                                     class="ml-2"
                                     @click='onDeleteClick(item)' >
-                                    mdi-delete
+                                    {{ mdiDelete }}
                                 </v-icon>
                             </template>
                             <span>Excluir</span>
@@ -81,11 +81,16 @@
 </template>
 
 <script>
+    import { mdiPdfBox, mdiPencil, mdiDelete } from '@mdi/js';
+
     export default {
         name: 'PapersTable',
         props: ['items', 'itemsPerPage', 'page'],
         data() {
             return {
+                mdiPdfBox,
+                mdiPencil,
+                mdiDelete,
                 headers: [
                     { text: "Nome", align: "left",  value: "name", sortable: true },
                     { text: "Ações", align:"right", value: "actions", sortable: false }

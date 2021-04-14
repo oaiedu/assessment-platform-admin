@@ -12,7 +12,7 @@
                     bottom
                     left
                     @click="back()" >
-                    <v-icon>mdi-arrow-left</v-icon>
+                    <v-icon>{{ mdiArrowLeft }}</v-icon>
                 </v-btn>
             </template>
             <span>Voltar</span>
@@ -21,6 +21,7 @@
 </template>
 
 <script>
+    import { mdiArrowLeft } from '@mdi/js';
     import QuestionsList from '../../Tests/QuestionsList';
 
     export default {
@@ -46,6 +47,11 @@
                         iq: 'P0004'
                     }
                 ]
+            }
+        },
+        data() {
+            return {
+                mdiArrowLeft
             }
         },
         methods: {

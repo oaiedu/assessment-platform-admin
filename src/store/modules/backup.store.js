@@ -67,7 +67,8 @@ const actions = {
             size: '',
             start: '',
             end: '',
-            cloudId: ''
+            cloudId: '',
+            month: ''
         }
 
         await axios.get(url)
@@ -117,6 +118,7 @@ const actions = {
                 bkp.id = 'mb' + (bkpId >= 1000 ? bkpId : bkpId.toString().padStart(4, '0'));
                 bkp.start = formatDate(now);
                 bkp.end = formatDate(bkp.end);
+                bkp.month = bkp.start.substr(0, 3);
 
                 db.collection('backups').add(bkp)
                     .then(() => {
@@ -133,11 +135,21 @@ const actions = {
                 createErrorLog('Backup DB Insert', new Date().toISOString(), error.message, { payload, bkp });
             });
     },
-    loadBackups({ commit }) {
+    loadBackups({ commit, state }) {
         commit('setLoading', true);
 
         const data = [];
-        db.collection('backups').get()
+        const currentMonth = new Date().getMonth() + 1;
+        const lastMonth = currentMonth - 1 === 0 ? 12 : currentMonth - 1;
+        const twoMonthsAgo = currentMonth - 2 === 0 ? 12 : (currentMonth - 2 < 0 ? 11 : currentMonth - 2);
+
+        const months = [
+            state.months[currentMonth].substr(0, 3),
+            state.months[lastMonth].substr(0, 3),
+            state.months[twoMonthsAgo].substr(0, 3)
+        ];
+
+        db.collection('backups').where('month', 'in', months).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     data.push(doc.data());

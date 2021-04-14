@@ -3,11 +3,10 @@
     <v-form ref="formRef" @submit.prevent="onEditPaper()">
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="close()" class="mr-2">
-          <v-icon>mdi-close</v-icon>
+          <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
         <h2>Editar documento</h2>
         <v-spacer></v-spacer>
-          <!-- <v-btn dark text type="submit">Editar Documento</v-btn> -->
       </v-toolbar>
 
       <v-tooltip left>
@@ -22,7 +21,7 @@
                 bottom
                 right
                 type="submit" >
-                <v-icon color="white">mdi-content-save</v-icon>
+                <v-icon color="white">{{ mdiContentSave }}</v-icon>
             </v-btn>
         </template>
         <h3>Salvar</h3>
@@ -67,7 +66,7 @@
                     </v-row>
                     <v-row>
                       <v-col>
-                        <Combined :questionDescription="paperDescription" @inputData="updateData"></Combined>
+                        <VueSimplemde v-model="paperDescription"/>
                       </v-col>
                     </v-row>
                   </v-container>
@@ -125,22 +124,29 @@
 </template>
 
 <script>
-    import uuid from 'uuid-random';
+    import 'simplemde/dist/simplemde.min.css';
+    import VueSimplemde from 'vue-simplemde';
+    import { mdiClose, mdiContentSave } from '@mdi/js';
 
     export default {
         props: ["paper"],
-
-        data: () => ({
-            createErrorSnackBar: false,
-            paperDescription: "",
-            paperName: "",
-            images: [],
-            paperImage: ""
-        }),
+        components: { VueSimplemde },
+        data() {
+            return {
+                mdiClose,
+                mdiContentSave,
+                createErrorSnackBar: false,
+                paperDescription: "",
+                paperName: "",
+                images: [],
+                paperImage: ""
+            }
+        },
 
         computed: {
             name() {
                 const aux = this.paper.name;
+                // eslint-disable-next-line vue/no-side-effects-in-computed-properties
                 this.paperName = aux;
                 return aux;
             }
@@ -162,9 +168,6 @@
                     return true
                 else
                     return false
-            },
-            updateData(variable) {
-                this.paperDescription = variable;
             },
             close() {
                 this.setInitialData();

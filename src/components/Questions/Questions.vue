@@ -61,7 +61,7 @@
             color="blue darken-1"
             @click.stop="dialogNewQuestion = true"
           >
-            <v-icon>mdi-plus</v-icon>
+            <v-icon>{{ plusIcon }}</v-icon>
           </v-btn>
         </template>
         <span>Criar Questão</span>
@@ -151,12 +151,26 @@
     import DeleteWarning from '../Shared/DeleteWarning';
     import DeleteAlert from './DeleteAlertQuestions';
     import SearchBox from '../Shared/SearchBox';
+    import Stepper from './Stepper';
+    import EditQuestion from './EditQuestion';
+    import Body from './PrintQuestion';
+    import { mdiPlus } from '@mdi/js';
 
     export default {
         name: 'Questions',
-        components: { Paginator, QuestionsTable, DeleteWarning, DeleteAlert, SearchBox },
+        components: {
+            Paginator,
+            QuestionsTable,
+            DeleteWarning,
+            DeleteAlert,
+            SearchBox,
+            Stepper,
+            EditQuestion,
+            Body
+        },
         data() {
             return {
+                plusIcon: mdiPlus,
                 loadedPages: [1],
                 deleteSelect: "",
                 selectedEdit: {},

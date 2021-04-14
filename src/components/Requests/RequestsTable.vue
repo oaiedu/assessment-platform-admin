@@ -28,7 +28,7 @@
                                     v-on='on'
                                     v-bind='attrs'
                                     @click="onEmailClick(item)" >
-                                    mdi-email
+                                    {{ mdiEmail }}
                                 </v-icon>
                             </template>
                             <span>Enviar e-mail</span>
@@ -41,7 +41,7 @@
                                     v-bind='attrs'
                                     class="ml-3"
                                     @click="onPdfClick(item)" >
-                                    mdi-pdf-box
+                                    {{ mdiPdfBox }}
                                 </v-icon>
                             </template>
                             <span>Visualizar PDF</span>
@@ -55,7 +55,7 @@
                                     class="ml-3"
                                     :disabled='item.status === "Aprovado"'
                                     @click="onCheckClick(item)" >
-                                    mdi-check-bold
+                                    {{ mdiCheckBold }}
                                 </v-icon>
                             </template>
                             <span>Aprovar</span>
@@ -69,7 +69,7 @@
                                     class="ml-3"
                                     :disabled='item.status === "Aprovado"'
                                     @click="onEditClick(item)" >
-                                    mdi-pencil
+                                    {{ mdiPencil }}
                                 </v-icon>
                             </template>
                             <span>Editar</span>
@@ -85,7 +85,7 @@
                                     @click="userClaims['admin']
                                         ? onRejectClick(item)
                                         : onDeleteClick(item)" >
-                                    {{ userClaims['admin'] ? 'mdi-close' : 'mdi-delete' }}
+                                    {{ userClaims['admin'] ? mdiClose : mdiDelete }}
                                 </v-icon>
                             </template>
                             <span>{{ userClaims['admin'] ? 'Rejeitar' : 'Excluir' }}</span>
@@ -118,6 +118,8 @@
 </template>
 
 <script>
+    import { mdiClose, mdiDelete, mdiPencil, mdiCheckBold, mdiPdfBox, mdiEmail } from '@mdi/js';
+
     export default {
         name: 'RequestsTable',
         props: [
@@ -148,6 +150,16 @@
             },
             userClaims() {
                 return this.$store.getters.getUserClaims;
+            }
+        },
+        data() {
+            return {
+                mdiClose,
+                mdiDelete,
+                mdiPencil,
+                mdiCheckBold,
+                mdiPdfBox,
+                mdiEmail
             }
         },
         methods: {

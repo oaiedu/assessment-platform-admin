@@ -23,7 +23,7 @@
                                     v-on='on'
                                     v-bind='attrs'
                                     @click='onPdfClick(item)' >
-                                    mdi-pdf-box
+                                    {{ pdfIcon }}
                                 </v-icon>
                             </template>
                             <span>Visualizar PDF</span>
@@ -36,7 +36,7 @@
                                     v-bind='attrs'
                                     class="ml-2"
                                     @click="onEditClick(item)" >
-                                    mdi-pencil
+                                    {{ pencilIcon }}
                                 </v-icon>
                             </template>
                             <span>Editar</span>
@@ -49,7 +49,7 @@
                                     v-bind='attrs'
                                     class="ml-2"
                                     @click='onDeleteClick(item)' >
-                                    mdi-delete
+                                    {{ deleteIcon }}
                                 </v-icon>
                             </template>
                             <span>Excluir</span>
@@ -82,11 +82,16 @@
 </template>
 
 <script>
+    import { mdiPdfBox, mdiPencil, mdiDelete } from '@mdi/js';
+
     export default {
         name: 'QuestionsTable',
         props: ['items', 'itemsPerPage', 'page', 'isActionsAvailable'],
         data() {
             return {
+                pdfIcon: mdiPdfBox,
+                pencilIcon: mdiPencil,
+                deleteIcon: mdiDelete,
                 headers: [
                     { text: "IQ", align: "left", value: "iq" },
                     { text: "Conhecimento", value: "knowledge" },

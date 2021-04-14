@@ -16,19 +16,6 @@
 
             <Answers :answers='question.answers' />
 
-            <v-btn
-              class="buttonIsHidden"
-              fixed
-              dark
-              fab
-              bottom
-              right
-              color="blue darken-1"
-              @click="toPrint()"
-            >
-              <v-icon>mdi-file-outline</v-icon>
-            </v-btn>
-
             <v-tooltip left>
                 <template v-slot:activator='{ on, attrs }'>
                     <v-btn
@@ -42,7 +29,7 @@
                         right
                         color="blue darken-1"
                         @click="toPrint()" >
-                        <v-icon>mdi-file-outline</v-icon>
+                        <v-icon>{{ mdiFileOutline }}</v-icon>
                     </v-btn>
                 </template>
                 <span>Gerar PDF</span>
@@ -59,7 +46,7 @@
                         left
                         class="buttonIsHidden"
                         @click="back()" >
-                        <v-icon>mdi-arrow-left</v-icon>
+                        <v-icon>{{ mdiArrowLeft }}</v-icon>
                     </v-btn>
                 </template>
                 <span>Voltar</span>
@@ -72,6 +59,7 @@
 </template>
 
 <script>
+    import { mdiArrowLeft, mdiFileOutline } from '@mdi/js';
     import Answers from './Answers';
     import Definition from './Definition';
     import QuestionImage from './QuestionImage';
@@ -85,6 +73,8 @@
         },
         data() {
             return {
+                mdiArrowLeft,
+                mdiFileOutline,
                 letters: ["A", "B", "C", "D"]
             };
         },

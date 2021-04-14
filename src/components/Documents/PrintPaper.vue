@@ -2,7 +2,7 @@
   <v-container>
     <div class="question-page">
         <v-row justify="start">
-            <viewer :value="paper.description" />
+            <vue-markdown :source="paper.description" />
         </v-row>
 
         <v-row justify="center">
@@ -23,9 +23,7 @@
                 left
                 class="buttonIsHidden"
                 @click="back()" >
-                <v-icon>
-                mdi-arrow-left
-                </v-icon>
+                <v-icon>{{ mdiArrowLeft }}</v-icon>
             </v-btn>
         </template>
         <span>Voltar</span>
@@ -43,7 +41,7 @@
                 right
                 color="blue darken-1"
                 @click="print()" >
-                <v-icon>mdi-file-outline</v-icon>
+                <v-icon>{{ mdiFileOutline }}</v-icon>
             </v-btn>
         </template>
         <span>Gerar PDF</span>
@@ -52,13 +50,21 @@
 </template>
 
 <script>
-    import { Viewer } from '@toast-ui/vue-editor';
+    import VueMarkdown from "vue-markdown";
+    import "vue-markdown";
+    import { mdiArrowLeft, mdiFileOutline } from '@mdi/js';
 
     export default {
         name: "PrintPaper",
         props: ['paper'],
         components: {
-            'viewer': Viewer
+            VueMarkdown
+        },
+        data() {
+            return{
+                mdiArrowLeft,
+                mdiFileOutline
+            }
         },
         methods: {
             back() {

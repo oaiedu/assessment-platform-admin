@@ -20,7 +20,7 @@
                     prominent
                     type='warning'
                     color="red"
-                    icon='mdi-alert' >
+                    :icon='mdiAlert' >
                     Solicitações aprovadas serão excluídas automaticamente quando sair desta página!
                 </v-alert>
             </v-container>
@@ -131,6 +131,7 @@
 </template>
 
 <script>
+    import { mdiAlert } from '@mdi/js';
     import Body from '../Questions/PrintQuestion';
     import EditQuestion from '../Questions/EditQuestion';
     import RequestsTable from './RequestsTable';
@@ -151,6 +152,7 @@
         },
         data() {
             return {
+                mdiAlert,
                 deleteApproved: false,
                 page: 1,
                 pageCount: 15,
@@ -161,7 +163,6 @@
                 deleteConfirmed: false,
                 deleteRequestSnackBar: false,
                 isSearching: false,
-                page: 1,
                 searchPage: 1,
                 itemsPerPage: 8,
                 questionTests: [],
