@@ -15,7 +15,7 @@
 
 <script>
     import VueMarkdown from "vue-markdown";
-    require("vue-markdown");
+    import "vue-markdown";
 
     export default {
         name: 'Definition',
