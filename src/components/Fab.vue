@@ -17,8 +17,8 @@
               dark
               fab
             >
-              <v-icon v-if="fab">mdi-close</v-icon>
-              <v-icon v-else>mdi-plus</v-icon>
+              <v-icon v-if="fab">{{ closeIcon }}</v-icon>
+              <v-icon v-else>{{ plusIcon }}</v-icon>
             </v-btn>
           </template>
           <span v-if="fab">Fechar</span>
@@ -36,7 +36,7 @@
             @click="toQuestions"
             color="blue darken-1"
           >
-            <v-icon>mdi-file-question-outline</v-icon>
+            <v-icon>{{ fileQuestionIcon }}</v-icon>
           </v-btn>
         </template>
         <span>Criar nova questão</span>
@@ -52,7 +52,7 @@
             @click="toTests"
             color="blue darken-1"
           >
-            <v-icon>mdi-file-multiple-outline</v-icon>
+            <v-icon>{{ fileMultipleIcon }}</v-icon>
           </v-btn>
         </template>
         <span>Criar nova prova</span>
@@ -61,11 +61,17 @@
 </template>
 
 <script>
+    import { mdiPlus, mdiClose, mdiFileQuestionOutline, mdiFileMultipleOutline } from '@mdi/js';
+
     export default {
         props: ['userClaims'],
         data() {
             return {
-                fab: false
+                fab: false,
+                plusIcon: mdiPlus,
+                closeIcon: mdiClose,
+                fileQuestionIcon: mdiFileQuestionOutline,
+                fileMultipleIcon: mdiFileMultipleOutline
             }
         },
         methods: {
