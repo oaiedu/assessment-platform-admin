@@ -1,9 +1,10 @@
 <template>
   <v-card>
-    <link rel="stylesheet" href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
+    <link rel="preload" as="style" type="text/css" onload="this.rel = 'stylesheet'"
+        href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
     <v-toolbar dark color="primary">
       <v-btn icon dark @click="close()" class="mr-2">
-        <v-icon>mdi-close</v-icon>
+        <v-icon>{{ mdiClose }}</v-icon>
       </v-btn>
       <h2>Criar nova questão</h2>
       <v-spacer></v-spacer>
@@ -20,7 +21,7 @@
                 bottom
                 left
                 @click="e1 = e1 - 1" >
-                <v-icon color="blue darken-1">mdi-arrow-left</v-icon>
+                <v-icon color="blue darken-1">{{ mdiArrowLeft }}</v-icon>
             </v-btn>
         </template>
         <span>Voltar</span>
@@ -38,7 +39,7 @@
                 bottom
                 right
                 @click="e1 == 1 ? e1 = 2 : e1 = 3" >
-                <v-icon color="white">mdi-arrow-right</v-icon>
+                <v-icon color="white">{{ mdiArrowRight }}</v-icon>
             </v-btn>
         </template>
         <span>Continuar</span>
@@ -56,7 +57,7 @@
                 bottom
                 right
                 @click="onCreateQuestion()" >
-                <v-icon color="white">mdi-content-save</v-icon>
+                <v-icon color="white">{{ mdiContentSave }}</v-icon>
             </v-btn>
         </template>
         <span>Salvar</span>
@@ -150,7 +151,8 @@
                     <v-container>
                       <v-row justify="center">
                         <v-col cols="12">
-                          <editor v-model="questionDescription" />
+                          <VueSimplemde
+                            v-model="questionDescription" />
                         </v-col>
                       </v-row>
                       <v-row justify="center">
@@ -191,7 +193,7 @@
                             x-small
                             color="primary"
                           >
-                            <v-icon dark>mdi-plus</v-icon>
+                            <v-icon dark>{{ mdiPlus }}</v-icon>
                           </v-btn>
 
                           <v-btn
@@ -202,7 +204,7 @@
                             x-small
                             color="primary"
                           >
-                            <v-icon dark>mdi-minus</v-icon>
+                            <v-icon dark>{{ mdiMinus }}</v-icon>
                           </v-btn>
                         </v-container>
                       </v-row>
@@ -254,7 +256,8 @@
             :knowledgePWR='knowledgePWR'
             :knowledgeBWR='knowledgeBWR'
             :questionDesc='questionDescription'
-            :answers='answers' />
+            :answers='answers'
+            :image='imagePreview' />
         </v-col>
       </v-row>
 
@@ -287,17 +290,26 @@
 </template>
 
 <script>
-import { Editor } from "@toast-ui/vue-editor";
+import 'simplemde/dist/simplemde.min.css';
+import VueSimplemde from 'vue-simplemde';
+import { mdiClose, mdiPlus, mdiMinus, mdiArrowLeft, mdiArrowRight, mdiContentSave } from '@mdi/js';
 import Preview from './Preview';
 
 export default {
     components: {
-        Editor,
-        Preview
+        Preview,
+        VueSimplemde
     },
     props: ['questionRequest', 'page'],
     data() {
         return {
+            mdiClose,
+            mdiPlus,
+            mdiMinus,
+            mdiArrowLeft,
+            mdiArrowRight,
+            mdiContentSave,
+            imagePreview: '',
             images: [],
             imagesAsURL: "",
             imageSize: "1x",
@@ -545,7 +557,18 @@ export default {
                 } else if (event[0].size > 2000000) {
                     this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
                     this.images = [];
+                } else {
+                    const file = event[0];
+                    const reader = new FileReader();
+
+                    reader.onload = readerEvent => {
+                        this.imagePreview = readerEvent.target.result;
+                    }
+
+                    reader.readAsDataURL(file);
                 }
+            } else if (this.imagePreview && this.imagePreview !== '') {
+                this.imagePreview = '';
             }
         },
         close() {
