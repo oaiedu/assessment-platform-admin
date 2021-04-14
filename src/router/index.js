@@ -2,18 +2,14 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import SignUser from '@/components/User/SignUser.vue';
 import Profile from '@/components/User/Profile.vue';
-import NewQuestion from '@/components/Questions/NewQuestion.vue';
 import Questions from '@/components/Questions/Questions.vue';
-import EditQuestion from '@/components/Questions/EditQuestion.vue';
-import NewTestForm from '@/components/Tests/NewTestForm.vue';
 import Tests from '@/components/Tests/Tests.vue';
 import PrintTest from '@/components/Tests/PrintTest.vue';
-import PrintQuestion from '@/components/Questions/PrintQuestion.vue';
 import Papers from '@/components/Documents/Papers.vue';
 import Inbox from '@/components/Requests/Inbox.vue';
 import Home from '@/views/Home.vue';
-import AuthGuard from './auth-guard';
 import Management from '@/components/Admin/Management.vue';
+import AuthGuard from './auth-guard';
 
 Vue.use(VueRouter);
 
@@ -51,21 +47,9 @@ const routes = [
         beforeEnter: AuthGuard
     },
     {
-        path: '/newquestion',
-        component: NewQuestion,
-        name: 'newquestion',
-        beforeEnter: AuthGuard
-    },
-    {
         path: '/papers',
         component: Papers,
         name: 'papers',
-        beforeEnter: AuthGuard
-    },
-    {
-        path: '/editquestions/:id',
-        component: EditQuestion,
-        name: 'editquestions',
         beforeEnter: AuthGuard
     },
     {
@@ -78,18 +62,6 @@ const routes = [
         path: '/tests/:testId',
         component: PrintTest,
         name: 'testsById',
-        beforeEnter: AuthGuard
-    },
-    {
-        path: '/printquestion/:questionId',
-        component: PrintQuestion,
-        name: 'printquestion',
-        beforeEnter: AuthGuard
-    },
-    {
-        path: '/newtestform',
-        component: NewTestForm,
-        name: 'newtestform',
         beforeEnter: AuthGuard
     },
     {
