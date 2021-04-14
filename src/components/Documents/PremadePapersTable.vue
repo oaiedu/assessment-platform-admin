@@ -14,7 +14,7 @@
                         <v-icon
                             v-on="on"
                             @click="eyeClicked(item)" >
-                            mdi-eye
+                            {{ mdiEye }}
                         </v-icon>
                     </template>
                     <span>Visualizar</span>
@@ -25,10 +25,13 @@
 </template>
 
 <script>
+    import { mdiEye } from '@mdi/js';
+
     export default {
         name: 'PremadePapersTable',
         data() {
             return {
+                mdiEye,
                 headers: [
                     { text: "Nome", align: "left",  value: "name", sortable: true },
                     { text: "Ações", align:"right", value: "actions", sortable: false }

@@ -81,7 +81,7 @@
             right
             color="blue darken-1"
             @click.stop="dialogNewPaper = true" >
-            <v-icon>mdi-plus</v-icon>
+            <v-icon>{{ mdiPlus }}</v-icon>
           </v-btn>
         </template>
         <span>Criar Documento</span>
@@ -170,6 +170,7 @@
 </template>
 
 <script>
+    import { mdiPlus } from '@mdi/js';
     import NewPaper from './CreatePaper';
     import EditPaper from './EditPaper';
     import PapersTable from './PapersTable';
@@ -201,23 +202,26 @@
             DeleteWarning,
             PremadePapersTable
         },
-        data: () => ({
-            dialogPDF: false,
-            dialogIntro: false,
-            dialogQuestions: false,
-            dialogStatistics: false,
-            dialogAnswers: false,
-            dialogNewPaper: false,
-            dialogEditPaper: false,
-            selectedEdit: {},
-            page: 1,
-            searchPage: 1,
-            itemsPerPage: 10,
-            isSearching: false,
-            deleteConfirmed: false,
-            deletePaperSnackBar: false,
-            deleteSelect: ""
-        }),
+        data() {
+            return {
+                mdiPlus,
+                dialogPDF: false,
+                dialogIntro: false,
+                dialogQuestions: false,
+                dialogStatistics: false,
+                dialogAnswers: false,
+                dialogNewPaper: false,
+                dialogEditPaper: false,
+                selectedEdit: {},
+                page: 1,
+                searchPage: 1,
+                itemsPerPage: 10,
+                isSearching: false,
+                deleteConfirmed: false,
+                deletePaperSnackBar: false,
+                deleteSelect: ""
+            }
+        },
         computed: {
             loading () {
                 return this.$store.getters.loading;

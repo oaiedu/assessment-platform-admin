@@ -16,7 +16,7 @@
                     bottom
                     left
                     @click="back()" >
-                    <v-icon>mdi-arrow-left</v-icon>
+                    <v-icon>{{ mdiArrowLeft }}</v-icon>
                 </v-btn>
             </template>
             <span>Voltar</span>
@@ -25,6 +25,7 @@
 </template>
 
 <script>
+    import { mdiArrowLeft } from '@mdi/js';
     import Definition from '../../Tests/Definition';
 
     export default {
@@ -32,6 +33,7 @@
         components: { Definition },
         data() {
             return {
+                mdiArrowLeft,
                 title: 'Título',
                 creator: 'Criador',
                 editedDate: 'Usuário - 01/01/2021',
