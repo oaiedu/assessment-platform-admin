@@ -62,9 +62,7 @@ const actions = {
                 const format = `users/${subfolder}/${name}.${type}`;
                 storageRef.child(format).put(file)
                     .then(snapshot => {
-                        console.log("Uploaded a file!: ", snapshot)
                         snapshot.ref.getDownloadURL().then(function (downloadURL) {
-                            console.log('File available at', downloadURL);
                             resolve(downloadURL.toString())
                         });
                     })
@@ -73,7 +71,7 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Avatar Upload', new Date().toISOString(), error.message, { payload, format, subfolder });
                     });
-            } catch {
+            } catch(error) {
                 reject();
             }
         });
@@ -111,7 +109,7 @@ const actions = {
                     .then(async () => {
                         axios.get(url, { headers: { uid: newUser.id } })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
 
                         db.collection('data-size').get()
@@ -124,11 +122,11 @@ const actions = {
                                         commit('addRemoveSize', { key: 'users', data: size + 1 });
                                     })
                                     .catch(error => {
-                                        console.log(error);
+                                        console.error(error);
                                     });
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {

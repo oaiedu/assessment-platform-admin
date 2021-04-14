@@ -371,8 +371,6 @@ export default {
     },
     watch: {
         number(val, oldVal) {
-            console.log(oldVal);
-            console.log(this.answers);
             if (val > 1) {
                 this.answers.forEach(element => {
                     const aux = [];
@@ -384,7 +382,6 @@ export default {
                             ? element.text[i].title : '';
                         aux.push({ title: title || this.auxTitle[i] || "", answerDescription: text || "" });
                     }
-                    console.log(aux);
                     element.text = aux;
                 });
 
@@ -432,7 +429,6 @@ export default {
         onCreateQuestion() {
             this.$store.dispatch('questionExists', this.iq)
                 .then(exist => {
-                    console.log(exist);
                     if(exist) {
                         this.createErrorSnackBar = true;
                     } else {

@@ -316,9 +316,9 @@ const actions = {
                         resolve(tests);
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     })
-            } catch {
+            } catch(error) {
                 reject('Check Questions In Tests Error!');
             }
         });
@@ -375,7 +375,7 @@ const actions = {
                         document.ref.update({ questions });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
 
                 commit('setLoading', false);
@@ -428,7 +428,7 @@ const actions = {
                         document.ref.update({ questions });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
 
                 commit('setLoading', false);
@@ -491,7 +491,7 @@ const actions = {
                             doc.ref.update({ questions });
                         })
                         .catch(error => {
-                            console.log(error);
+                            console.error(error);
                         });
                 }
             })
@@ -578,11 +578,11 @@ const actions = {
                                 commit('addRemoveSize', { key: 'questions', data: questions });
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -601,9 +601,7 @@ const actions = {
 
                 storageRef.child(format).put(file)
                     .then(snapshot => {
-                        console.log("Uploaded a file!: ", snapshot)
                         snapshot.ref.getDownloadURL().then(downloadURL => {
-                            console.log('File available at', downloadURL);
                             resolve(downloadURL.toString());
                         });
                     })
@@ -612,7 +610,7 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Question Image Upload', new Date().toISOString(), error.message, { payload, format });
                     });
-            } catch {
+            } catch(error) {
                 reject();
             }
         });
@@ -669,11 +667,11 @@ const actions = {
                                     commit('addRemoveSize', { key: 'questions', data: questions });
                                 })
                                 .catch(error => {
-                                    console.log(error);
+                                    console.error(error);
                                 });
                         })
                         .catch(error => {
-                            console.log(error);
+                            console.error(error);
                         });
 
                     db.collection('question-subjects').where('name', '==', question.subject).get()
@@ -684,7 +682,7 @@ const actions = {
                             doc.ref.update({ questions });
                         })
                         .catch(error => {
-                            console.log(error);
+                            console.error(error);
                         });
 
                     db.collection('question-subjects').where('name', '==', oldSubject).get()
@@ -696,7 +694,7 @@ const actions = {
                             doc.ref.update({ questions });
                         })
                         .catch(error => {
-                            console.log(error);
+                            console.error(error);
                         });
                 }
 
@@ -746,7 +744,7 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Question Exist Test', new Date().toISOString(), error.message, { payload });
                     });
-            } catch {
+            } catch(error) {
                 reject();
             }
         });
@@ -786,11 +784,11 @@ const actions = {
                                 commit('addRemoveSize', { key: 'questions', data: questions });
                             })
                             .catch(error => {
-                                console.log(error);
+                                console.error(error);
                             });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
 
                 db.collection('question-subjects').where('name', '==', question.subject).get()
@@ -801,7 +799,7 @@ const actions = {
                         document.ref.update({ questions });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
             })
             .catch(error => {
@@ -824,7 +822,7 @@ const actions = {
                         commit('setError', { message: errorModel });
                         createErrorLog('Question IQ Load', new Date().toISOString(), error.message, { payload });
                     });
-            } catch {
+            } catch(error) {
                 reject();
             }
         });
