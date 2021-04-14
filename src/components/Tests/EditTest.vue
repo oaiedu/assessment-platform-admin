@@ -296,7 +296,6 @@ export default {
       this.search =  ""
     },
     randomSelection(i) {
-      console.log("i: ",i)
       this.selectedQuestions = []
 
       let conf = false
@@ -317,30 +316,15 @@ export default {
 
         this.selectedQuestions.push(aux);
       }
-
-      console.log("hey",this.selectedQuestions)
     },
     onEditTest() {
         if(this.$refs.formRef.validate()){
-
-        // if (this.randomQuestionsNumber == null && this.testType === "Aleatório") {
-        //   console.log("AAAAA: ",this.questions.length)
-        //   if (this.questions.length > 50) {
-        //     this.randomSelection(50)
-        //   }
-        //
-        //   else {
-        //     this.randomSelection(this.questions.length)
-        //   }
-        // }
 
         this.$store.dispatch('testExists', this.testTitle)
             .then(exist => {
                 if(exist > 1) {
                     this.createErrorSnackBar = true;
                 } else {
-                    console.log("selected: ", this.selectedQuestions)
-
                     this.selectedQuestions.forEach(element => {
                       this.testItems.push(element);
                     });
