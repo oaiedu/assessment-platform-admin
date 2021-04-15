@@ -7,7 +7,7 @@ const initialState = () => ({
     user: null,
     userInfo: null,
     userClaims: null,
-    users: null
+    users: []
 });
 
 const state = initialState();
@@ -142,7 +142,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('default', '', 'Sign up error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Sign Up', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Sign Up', new Date().toISOString(), error.message, { email: payload.email });
 
             });
     },
@@ -199,7 +199,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('default', '', 'Login error - ' + error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Login', new Date().toISOString(), error.message, { payload });
+                    createErrorLog('Login', new Date().toISOString(), error.message, { email: payload.email });
                 }
             );
     },
