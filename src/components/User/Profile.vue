@@ -8,7 +8,6 @@
         <v-col cols="12" sm="10" md="8" lg="6">
         <v-card ref="form">
             <v-card-text>
-            <p style="visibility: hidden; max-height: 1px">{{user}}</p>
             <div class="text-center">
                 <v-row>
                 <v-col>
@@ -23,57 +22,48 @@
                             />
                             <img :src="imagesAsURL" v-else />
                         </v-avatar>
+                        <v-container>
+                            <h4 class="text-center grey--text">{{ roleName }}</h4>
+                        </v-container>
                     </v-row>
-                    <v-container>
-                        <h4 class="text-center grey--text">{{ roleName }}</h4>
-                    </v-container>
                 </v-col>
                 </v-row>
             </div>
             </v-card-text>
 
             <v-card-text>
-            <v-text-field
-                ref="nickName"
-                v-model="nickName"
-                :rules="[() => !!nickName || 'Este campo é obrigatório!']"
-                label="Nome"
-                required
-            ></v-text-field>
-            <transition
-                name="fade"
-                mode="out-in"
-            >
-                <v-content v-if="showChangePassword === true">
-                <v-form @submit.prevent="onChangePassword">
-                    <v-text-field
-                    label="New Password"
-                    v-model="editedPassword"
-                    type="password"
-                    ></v-text-field>
-                    <v-text-field
-                    label="Confirm New Password"
-                    v-model="confirmNewPassword"
-                    type="password"
-                    :rules="[comparePassword]"
-                    ></v-text-field>
-                    <v-text-field
-                    label="Old Password"
-                    type="password"
-                    v-model="confirmOldPassword"
-                    ></v-text-field>
-                </v-form>
-                </v-content>
-            </transition>
-            <!-- <v-text-field
-                ref="name"
-                v-model="nickName"
-                :rules="[() => !!name || 'This field is required']"
-                :error-messages="errorMessages"
-                label="Nome completo"
-                placeholder="Fill with firebase"
-                required
-            ></v-text-field> -->
+                <v-text-field
+                    ref="nickName"
+                    v-model="nickName"
+                    :rules="[() => !!nickName || 'Este campo é obrigatório!']"
+                    label="Nome"
+                    required
+                ></v-text-field>
+                <transition
+                    name="fade"
+                    mode="out-in"
+                >
+                    <v-content v-if="showChangePassword">
+                    <v-form @submit.prevent="onChangePassword">
+                        <v-text-field
+                        label="Senha antiga"
+                        type="password"
+                        v-model="confirmOldPassword"
+                        ></v-text-field>
+                        <v-text-field
+                        label="Nova senha"
+                        v-model="editedPassword"
+                        type="password"
+                        ></v-text-field>
+                        <v-text-field
+                        label="Confirmar nova senha"
+                        v-model="confirmNewPassword"
+                        type="password"
+                        :rules="[comparePassword]"
+                        ></v-text-field>
+                    </v-form>
+                    </v-content>
+                </transition>
             </v-card-text>
 
             <v-row justify="center">
