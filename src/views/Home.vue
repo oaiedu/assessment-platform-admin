@@ -9,7 +9,7 @@
                     <StatisticsQuestions :statistics="statistics" :numberOfQuestions="numberOfQuestions"/>
                 </v-col>
             </v-row>
-            <Fab :userClaims='userClaims' v-if='!userClaims["student"]' />
+            <Fab :userClaims='userClaims' v-if='!userClaims || (userClaims && !userClaims["student"])' />
         </v-container>
 
         <v-row justify="center" align="center" v-else>

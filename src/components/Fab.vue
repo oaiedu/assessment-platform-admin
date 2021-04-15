@@ -26,7 +26,7 @@
         </v-tooltip>
       </template>
 
-      <v-tooltip left v-if='userClaims["appraiser"] || userClaims["admin"]'>
+      <v-tooltip left v-if='userClaims && (userClaims["appraiser"] || userClaims["admin"])'>
         <template v-slot:activator="{ on }">
           <v-btn
             fab
@@ -42,7 +42,7 @@
         <span>Criar nova questão</span>
       </v-tooltip>
 
-      <v-tooltip left v-if='userClaims["teacher"] || userClaims["admin"]'>
+      <v-tooltip left v-if='userClaims && (userClaims["teacher"] || userClaims["admin"])'>
         <template v-slot:activator="{ on }">
           <v-btn
             fab
