@@ -24,7 +24,7 @@
                             v-bind='attrs'
                             :disabled='currentUser.email === item.email'
                             @click="editDialog = true; setEditItem(item);" >
-                            mdiAccountEdit
+                            {{ mdiAccountEdit }}
                         </v-icon>
                     </template>
                     <span>Editar função</span>
@@ -38,7 +38,7 @@
                             class="ml-3"
                             :disabled='currentUser.email === item.email'
                             @click="sendEmail(item.email)" >
-                            mdiEmail
+                            {{ mdiEmail }}
                         </v-icon>
                     </template>
                     <span>Enviar e-mail</span>
@@ -192,7 +192,3 @@
         }
     }
 </script>
-
-<style>
-
-</style>
