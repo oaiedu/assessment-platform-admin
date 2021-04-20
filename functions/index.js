@@ -1,5 +1,5 @@
 exports.authentication = require('./authentication');
 exports.backup = require('./backup');
 exports.firestore = require('./firestore');
-exports.schedule = require('./schedule');
+exports.scheduled = require('./scheduled');
 exports.storage = require('./storage');
