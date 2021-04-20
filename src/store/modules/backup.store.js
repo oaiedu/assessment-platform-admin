@@ -33,10 +33,14 @@ const mutations = {
         state.backups.push(data);
     },
     removeBackup(state, data) {
-        const index = state.backups.indexOf(data);
+        const backups = state.backups;
+        const ids = state.backups.map((bkp) => bkp.id);
+        const index = ids.indexOf(data.id);
+
         if(index !== -1) {
-            state.backups.splice(index, 1);
+            backups.splice(index, 1);
         }
+        state.backups = backups;
     },
     RESETBackup(state) {
         const newState = initialState();
@@ -163,7 +167,9 @@ const actions = {
                 createErrorLog('Backups Load', new Date().toISOString(), error.message, { data });
             });
     },
-    downloadBackup(store, payload) {
+    downloadBackup({ commit }, payload) {
+        commit('setLoading', true);
+
         let url = ''
 
         if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
@@ -178,62 +184,24 @@ const actions = {
             .then(res => {
                 const data = res.data.backup;
 
-                unzip(new Blob([Buffer.from(data)], { type: 'application/zip' }), (err, zipFile) => {
-                    if(err) {
-                        console.error(err);
-                    }
+                if (data && res.data.error) {
+                    const error = res.data.error;
+                    const errorModel = showErrorMessage('connection', '', 'Download error - ' + error.message);
+                    commit('setError', { message: errorModel });
+                    createErrorLog('Backup Download', new Date().toISOString(), error.message, { payload, url });
+                } else {
+                    const url = 'data:application/zip;base64,' + data;
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${payload.id.toUpperCase()}-${payload.date.replace(/\s/g, '_')}.zip`;
+                    a.click();
+                    a.remove();
+                }
 
-                    zipFile.readEntries((err, entries) => {
-                        if(err) {
-                            console.error(err);
-                        }
-
-                        const zip = new AdmZip();
-
-                        let counter = 0;
-                        let len = 0;
-                        entries.forEach(entry => {
-                            zipFile.readEntryData(entry, false, (err, readStream) => {
-                                if(err) {
-                                    console.error(err);
-                                }
-
-                                readStream.on('data', async chunk => {
-                                    const chars = [];
-                                    const promises = chunk.map(dataIn => chars.push(dataIn));
-
-                                    await Promise.all(promises);
-
-                                    const fromCharCode = String.fromCharCode(...chars);
-
-                                    const json = JSON.stringify(fromCharCode);
-
-                                    zip.addFile('file' + ++counter + '.json', json);
-                                });
-                                readStream.on('error', error => {
-                                    console.error(error);
-                                });
-                                readStream.on('end', () => {
-                                    len++;
-                                    if(entries.length === len) {
-                                        const toBlob = zip.toBuffer();
-                                        const contentType = 'application/zip';
-                                        const blob = new Blob([toBlob], { type: contentType });
-
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = `${payload.id.toUpperCase()}-${payload.date}.zip`;
-                                        a.click();
-                                        a.remove();
-                                    }
-                                });
-                            });
-                        });
-                    });
-                });
+                commit('setLoading', false);
             })
             .catch(error => {
+                commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', 'Download error - ' + error.message);
                 commit('setError', { message: errorModel });
                 createErrorLog('Backup Download', new Date().toISOString(), error.message, { payload, url });
@@ -269,6 +237,7 @@ const actions = {
                             commit('setError', error);
                         });
                 } else {
+                    const error = res.data.error;
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('exclusion', 'Backup', error.message);
                     commit('setError', { message: errorModel });
