@@ -39,7 +39,7 @@ exports.downloadBackup = async (req, res) => {
                         fs.rmdirSync(folderPath, { recursive: true });
 
                         res.append('Access-Control-Allow-Origin', '*');
-                        res.send({ backup: data });
+                        res.send({ backup: data.toString('base64') });
                     }, 1000);
                 })
                 .on('error', err => {
@@ -121,7 +121,7 @@ exports.backupFirestoreAuth = async (req, res) => {
     const collections = [
         'edited questions',
         'papers',
-        'question requests',
+        'question-requests',
         'questions',
         'tests',
         'users'
@@ -209,8 +209,6 @@ exports.backupFirestoreAuth = async (req, res) => {
                 });
                 const json = JSON.stringify(dbData);
 
-                console.log(JSON.parse(json));
-
                 zip.addFile(`db-${collection}-${now}.json`, json);
                 size += encodeURI(json).split(/%..|./).length - 1;
 
@@ -244,7 +242,7 @@ exports.backupFirestoreAuth = async (req, res) => {
         }
     });
 
-    zip.extractAllTo('./extracted', true);
+    // zip.extractAllTo('./extracted', true);
 
     fs.rmSync('./' + zipFileName, { recursive: true });
 

@@ -32,6 +32,7 @@
                         <v-icon
                             v-on='on'
                             v-bind='attrs'
+                            :disabled="loading"
                             @click="downloadBkp(item)" >
                             {{ mdiDownload }}
                         </v-icon>
@@ -45,6 +46,7 @@
                             v-on='on'
                             v-bind='attrs'
                             class="ml-1"
+                            :disabled="loading"
                             @click="deleteBackupSnackBar = true; deleteItem = item" >
                             {{ mdiDelete }}
                         </v-icon>
@@ -271,6 +273,7 @@
             },
             deleteBkp(backup) {
                 this.$store.dispatch('deleteBackup', { id: backup.cloudId });
+                this.deleteBackupSnackBar = false;
             }
         },
         mounted() {

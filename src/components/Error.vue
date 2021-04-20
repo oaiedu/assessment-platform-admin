@@ -1,10 +1,8 @@
 <template>
-    <div style="position: absolute; left: 50%;" class="pt-4">
+    <div v-if="error" class="error-container pt-4">
         <v-alert
-            v-if="error"
-            style="position: relative; left: -50%;"
+            v-model="isErrorVisible"
             type="error"
-            @dismiss="onDismissed"
             dismissible >
             {{ error.message }}
         </v-alert>
@@ -14,15 +12,44 @@
 <script>
     export default {
         name: 'Error',
+        data() {
+            return {
+                isErrorVisible: false
+            }
+        },
         computed: {
-            error () {
+            error() {
                 return this.$store.getters.error
             },
         },
         methods: {
-            onDismissed () {
+            onDismissed() {
                 this.$store.dispatch('clearError');
+            }
+        },
+        watch: {
+            isErrorVisible(value) {
+                if(!value) {
+                    this.onDismissed();
+                }
+            },
+            error(value) {
+                if(value) {
+                    this.isErrorVisible = true;
+                }
             }
         }
     }
 </script>
+
+<style>
+    .error-container {
+        position: fixed;
+        left: 50%;
+        top: 5px;
+
+        z-index: 1000;
+
+        transform: translateX(-50%);
+    }
+</style>
