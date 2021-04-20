@@ -1,3 +1,0 @@
-exports.scheduleFunction = async context => {
-
-}
