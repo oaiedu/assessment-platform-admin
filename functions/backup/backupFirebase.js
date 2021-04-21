@@ -119,9 +119,14 @@ exports.backupFirestoreAuth = async (req, res) => {
     const zip = new AdmZip();
 
     const collections = [
+        'backups',
+        'data-size',
         'edited questions',
+        'logs',
+        'paper-names',
         'papers',
         'question-requests',
+        'question-subjects',
         'questions',
         'tests',
         'users'
