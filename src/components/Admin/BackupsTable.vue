@@ -265,8 +265,14 @@
                 return bkps;
             },
             backup() {
-                const now = new Date().toISOString();
-                this.$store.dispatch('backupFirebase', { now });
+                const now = new Date();
+                const date = now.toLocaleDateString();
+                const time = now.toLocaleTimeString();
+                const day = date.substr(0, 2);
+                const month = date.substr(3, 2);
+                const year = date.substr(6, 4);
+                const isoString = `${year}-${month}-${day}T${time}.000Z`;
+                this.$store.dispatch('backupFirebase', { now: isoString });
             },
             downloadBkp(backup) {
                 this.$store.dispatch('downloadBackup', { date: backup.start, cloudId: backup.cloudId, id: backup.id });
