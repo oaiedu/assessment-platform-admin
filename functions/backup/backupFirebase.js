@@ -251,8 +251,16 @@ exports.backupFirestoreAuth = async (req, res) => {
 
     fs.rmSync('./' + zipFileName, { recursive: true });
 
+    const endDate = new Date();
+    const date = endDate.toLocaleDateString();
+    const time = endDate.toLocaleTimeString();
+    const day = date.substr(0, 2);
+    const month = date.substr(3, 2);
+    const year = date.substr(6, 4);
+    const isoString = `${year}-${month}-${day}T${time}.000Z`;
+
     res.append('Access-Control-Allow-Origin', '*');
-    res.send({ endDate: new Date().toISOString(), size, cloudId: file.data.id });
+    res.send({ endDate: isoString, size, cloudId: file.data.id });
 }
 
 exports.backupFirebase = async (req, res) => {
