@@ -81,7 +81,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Backup', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Backup Url GET', new Date().toISOString(), error.message, { payload, bkp, url });
+                createErrorLog('Backup Url GET', now, error.message, { payload, bkp, url });
             });
 
         db.collection('backups').get()
@@ -131,7 +131,14 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Backup', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Backup DB Insert', new Date().toISOString(), error.message, { payload, bkp });
+
+                const logDate = new Date();
+                const year = logDate.getFullYear();
+                const month = (logDate.getMonth() + 1).toString().padStart(2, '0');
+                const day = (logDate.getDate()).toString().padStart(2, '0');
+                const time = logDate.toLocaleTimeString('pt-BR');
+                const miliseconds = logDate.getMilliseconds().toString().padStart(3, '0');
+                createErrorLog('Backup DB Insert', `${year}-${month}-${day}T${time}.${miliseconds}Z`, error.message, { payload, bkp });
             });
     },
     loadBackups({ commit, state }) {

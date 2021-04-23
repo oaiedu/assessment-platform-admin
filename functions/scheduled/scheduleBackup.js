@@ -19,8 +19,8 @@ const months = {
 
 exports.scheduledBackup = async context => {
     const now = new Date();
-    const date = now.toLocaleDateString();
-    const time = now.toLocaleTimeString();
+    const date = now.toLocaleDateString('pt-BR');
+    const time = now.toLocaleTimeString('pt-BR');
     const day = date.substr(0, 2);
     const month = date.substr(3, 2);
     const year = date.substr(6, 4);

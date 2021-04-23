@@ -252,8 +252,8 @@ exports.backupFirestoreAuth = async (req, res) => {
     fs.rmSync('./' + zipFileName, { recursive: true });
 
     const endDate = new Date();
-    const date = endDate.toLocaleDateString();
-    const time = endDate.toLocaleTimeString();
+    const date = endDate.toLocaleDateString('pt-BR');
+    const time = endDate.toLocaleTimeString('pt-BR');
     const day = date.substr(0, 2);
     const month = date.substr(3, 2);
     const year = date.substr(6, 4);
