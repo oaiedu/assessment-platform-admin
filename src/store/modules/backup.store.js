@@ -1,6 +1,7 @@
 const axios = require('axios');
 
 import { db } from '../../main';
+
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
@@ -81,7 +82,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Backup', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Backup Url GET', now, error.message, { payload, bkp, url });
+                createErrorLog('Backup Url GET', error.message, { payload, bkp, url });
             });
 
         db.collection('backups').get()
@@ -131,14 +132,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Backup', error.message);
                 commit('setError', { message: errorModel });
-
-                const logDate = new Date();
-                const year = logDate.getFullYear();
-                const month = (logDate.getMonth() + 1).toString().padStart(2, '0');
-                const day = (logDate.getDate()).toString().padStart(2, '0');
-                const time = logDate.toLocaleTimeString('pt-BR');
-                const miliseconds = logDate.getMilliseconds().toString().padStart(3, '0');
-                createErrorLog('Backup DB Insert', `${year}-${month}-${day}T${time}.${miliseconds}Z`, error.message, { payload, bkp });
+                createErrorLog('Backup DB Insert', error.message, { payload, bkp });
             });
     },
     loadBackups({ commit, state }) {
@@ -147,7 +141,7 @@ const actions = {
         const data = [];
         const currentMonth = new Date().getMonth() + 1;
         const lastMonth = currentMonth - 1 === 0 ? 12 : currentMonth - 1;
-        const twoMonthsAgo = currentMonth - 2 === 0 ? 12 : (currentMonth - 2 < 0 ? 11 : currentMonth - 2);
+        const twoMonthsAgo = currentMonth - 2 <= 0 ? currentMonth + 12 - 2 : currentMonth - 2;
 
         const months = [
             state.months[currentMonth].substr(0, 3),
@@ -169,7 +163,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Backup', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Backups Load', new Date().toISOString(), error.message, { data });
+                createErrorLog('Backups Load', error.message, { data });
             });
     },
     downloadBackup({ commit }, payload) {
@@ -193,7 +187,7 @@ const actions = {
                     const error = res.data.error;
                     const errorModel = showErrorMessage('connection', '', 'Download error - ' + error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Backup Download', new Date().toISOString(), error.message, { payload, url });
+                    createErrorLog('Backup Download', error.message, { payload, url });
                 } else {
                     const url = 'data:application/zip;base64,' + data;
                     const a = document.createElement('a');
@@ -209,7 +203,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', 'Download error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Backup Download', new Date().toISOString(), error.message, { payload, url });
+                createErrorLog('Backup Download', error.message, { payload, url });
             });
     },
     async deleteBackup({ commit }, payload) {
@@ -246,14 +240,14 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('exclusion', 'Backup', error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Backup Delete', new Date().toISOString(), error.message, { payload, deleted, url });
+                    createErrorLog('Backup Delete', error.message, { payload, deleted, url });
                 }
             })
             .catch(error => {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', 'Delete error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Backup Url Delete', new Date().toISOString(), error.message, { payload, url });
+                createErrorLog('Backup Url Delete', error.message, { payload, url });
             });
     },
     resetBackup({ commit }) {

@@ -168,7 +168,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('connection', '', 'Image upload error - ' + error.message);
                         commit('setError', { message: errorModel });
-                        createErrorLog('Docs Image Upload', new Date().toISOString(), error.message, { payload, format });
+                        createErrorLog('Docs Image Upload', error.message, { payload, format });
                     });
             } catch(error) {
                 reject('Paper Image Upload Error');
@@ -223,7 +223,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('exclusion', 'Documento', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document Delete', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Document Delete', error.message, { payload });
             });
     },
     loadPaperPage({ commit, state }, payload) {
@@ -265,7 +265,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Documentos', error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Document Page Load', new Date().toISOString(), error.message, { payload, data });
+                    createErrorLog('Document Page Load', error.message, { payload, data });
                 });
         } else {
             const pageContent = state.papers['p' + page];
@@ -323,7 +323,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Documentos', error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Document FOL Page Load', new Date().toISOString(), error.message, { payload, data });
+                    createErrorLog('Document FOL Page Load', error.message, { payload, data });
                 });
         } else {
             const pageContent = state.papers['p' + page];
@@ -385,7 +385,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Documentos', 'Searching error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document Searching', new Date().toISOString(), error.message, { payload, data });
+                createErrorLog('Document Searching', error.message, { payload, data });
             });
     },
     async paperExists(store, payload) {
@@ -399,7 +399,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('connection', '', error.message);
                         commit('setError', { message: errorModel });
-                        createErrorLog('Document Exist Test', new Date().toISOString(), error.message, { payload });
+                        createErrorLog('Document Exist Test', error.message, { payload });
                     });
             } catch(error) {
                 reject();
@@ -421,7 +421,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document Mark Check', new Date().toISOString(), error.message, { data });
+                createErrorLog('Document Mark Check', error.message, { data });
             });
     },
     deleteMarkPaper({ commit }, payload) {
@@ -454,7 +454,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document Delete Mark', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Document Delete Mark', error.message, { payload });
             });
     },
     restoreMarkedPaper({ commit }, payload) {
@@ -490,7 +490,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document Restore', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Document Restore', error.message, { payload });
             });
     },
     restoreAllMarkedPapers({ commit, state }, payload) {
@@ -538,7 +538,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document Restore All', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Document Restore All', error.message, { payload });
             });
     },
     changeDeleteStatusPapers({ commit }, payload) {
@@ -583,7 +583,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('exclusion', 'Documento', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document Confirm Delete', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Document Confirm Delete', error.message, { payload });
             });
     },
     deletePapers({ commit }) {
@@ -615,7 +615,7 @@ const actions = {
             })
             .catch(error => {
                 console.error("Error removing document: ", error);
-                createErrorLog('Document DB Delete', new Date().toISOString(), error.message, { data });
+                createErrorLog('Document DB Delete', error.message, { data });
             });
     },
     createPaper({ commit }, payload) {
@@ -674,7 +674,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Document', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document DB Insert', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Document DB Insert', error.message, { payload });
             });
     },
     updatePaper({ commit }, payload) {
@@ -717,7 +717,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Document', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Document DB Update', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Document DB Update', error.message, { payload });
             });
     },
     async getPaperNames({ commit }) {
@@ -749,7 +749,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('load', 'Documento', error.message);
                         commit('setError', { message: errorModel });
-                        createErrorLog('Document ID Load', new Date().toISOString(), error.message, { data });
+                        createErrorLog('Document ID Load', error.message, { data });
                     });
             } catch(error) {
                 reject('getPaperById error')

@@ -212,7 +212,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Solicitação', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request DB Insert', new Date().toISOString(), error.message, { payload, requestAmount });
+                createErrorLog('Request DB Insert', error.message, { payload, requestAmount });
             });
     },
     updateQuestionRequest({ commit }, payload) {
@@ -243,7 +243,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Solicitação', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request DB Update', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Request DB Update', error.message, { payload });
             });
     },
     loadRequestPage({ commit, state }, payload) {
@@ -290,7 +290,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Solicitações', error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Request Page Load', new Date().toISOString(), error.message, { payload, data });
+                    createErrorLog('Request Page Load', error.message, { payload, data });
                 });
         } else {
             const pageContent = state.request['p' + page];
@@ -350,7 +350,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Solicitações', error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Request FOL Page Load', new Date().toISOString(), error.message, { payload, data, requestAmount });
+                    createErrorLog('Request FOL Page Load', error.message, { payload, data, requestAmount });
                 });
         } else {
             const pageContent = state.requests['p' + page];
@@ -390,7 +390,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Solicitações', 'Searching error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request Searching', new Date().toISOString(), error.message, { payload, data });
+                createErrorLog('Request Searching', error.message, { payload, data });
             });
     },
     checkDeleteMarkRequests({ commit }) {
@@ -408,7 +408,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request Mark Check', new Date().toISOString(), error.message, { data });
+                createErrorLog('Request Mark Check', error.message, { data });
             });
     },
     deleteMarkRequest({ commit }, payload) {
@@ -441,7 +441,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request Delete Mark', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Request Delete Mark', error.message, { payload });
             });
     },
     restoreMarkedRequest({ commit }, payload) {
@@ -487,7 +487,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request Restore', new Date().toISOString(), error.message, { payload, docData });
+                createErrorLog('Request Restore', error.message, { payload, docData });
             });
     },
     restoreAllMarkedRequests({ commit, state }, payload) {
@@ -532,7 +532,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request Restore All', new Date().toISOString(), error.message, { payload, docData });
+                createErrorLog('Request Restore All', error.message, { payload, docData });
             });
     },
     changeDeleteStatusRequests({ commit }, payload) {
@@ -559,7 +559,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('exclusion', 'Solicitação', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request Confirm Delete', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Request Confirm Delete', error.message, { payload });
             });
     },
     deleteRequests({ commit }) {
@@ -613,7 +613,7 @@ const actions = {
             })
             .catch(error => {
                 console.error("Error removing request: ", error);
-                createErrorLog('Request DB Delete', new Date().toISOString(), error.message, { data });
+                createErrorLog('Request DB Delete', error.message, { data });
             });
     },
     deleteQuestionRequest({ commit }, payload) {
@@ -676,7 +676,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('exclusion', 'Solicitação', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request Delete', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Request Delete', error.message, { payload });
             });
     },
     deleteApprovedRequests({ commit }, payload) {
@@ -723,7 +723,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', 'Requests auto delete error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Request Approved Delete', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Request Approved Delete', error.message, { payload });
             });
     },
     resetRequests({ commit }) {

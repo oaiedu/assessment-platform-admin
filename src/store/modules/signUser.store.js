@@ -69,7 +69,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('connection', '', 'Avatar upload error - ' + error.message);
                         commit('setError', { message: errorModel });
-                        createErrorLog('Avatar Upload', new Date().toISOString(), error.message, { payload, format, subfolder });
+                        createErrorLog('Avatar Upload', error.message, { payload, format, subfolder });
                     });
             } catch(error) {
                 reject();
@@ -132,7 +132,7 @@ const actions = {
                     .catch(error => {
                         commit('setLoading', false);
                         commit('setError', error);
-                        createErrorLog('Sign Up DB Insert', new Date().toISOString(), error.message, { payload, newUser, userInfo, url });
+                        createErrorLog('Sign Up DB Insert', error.message, { payload, newUser, userInfo, url });
                     });
 
                 commit('setUser', newUser);
@@ -142,7 +142,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('default', '', 'Sign up error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Sign Up', new Date().toISOString(), error.message, { email: payload.email });
+                createErrorLog('Sign Up', error.message, { email: payload.email });
 
             });
     },
@@ -171,7 +171,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('default', '', 'User update error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('User DB Update', new Date().toISOString(), error.message, { payload });
+                createErrorLog('User DB Update', error.message, { payload });
             });
     },
     signUserIn({ commit, dispatch }, payload) {
@@ -199,7 +199,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('default', '', 'Login error - ' + error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Login', new Date().toISOString(), error.message, { email: payload.email });
+                    createErrorLog('Login', error.message, { email: payload.email });
                 }
             );
     },
@@ -221,7 +221,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('load', 'User Claims', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('User Claims Load', new Date().toISOString(), error.message, { currentUser: auth.currentUser });
+                createErrorLog('User Claims Load', error.message, { currentUser: auth.currentUser });
             });
     },
     loadUsers({ commit }) {
@@ -239,7 +239,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('load', 'Usuários', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Users Load', new Date().toISOString(), error.message, { users });
+                createErrorLog('Users Load', error.message, { users });
             });
     },
     setUserRole({ commit }, payload) {
@@ -281,7 +281,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Cargo de Usuário', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('User Role Update', new Date().toISOString(), error.message, { payload, url });
+                createErrorLog('User Role Update', error.message, { payload, url });
             });
     },
     logout({ commit }) {

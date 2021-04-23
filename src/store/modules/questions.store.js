@@ -208,7 +208,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Questões', error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Question Page Load', new Date().toISOString(), error.message, { payload, data });
+                    createErrorLog('Question Page Load', error.message, { payload, data });
                 });
         } else {
             const pageContent = state.questions['p' + page];
@@ -262,7 +262,7 @@ const actions = {
                     commit('setLoading', false);
                     const errorModel = showErrorMessage('load', 'Questões', error.message);
                     commit('setError', { message: errorModel });
-                    createErrorLog('Question FOL Page Load', new Date().toISOString(), error.message, { payload, data });
+                    createErrorLog('Question FOL Page Load', error.message, { payload, data });
                 });
         } else {
             const pageContent = state.questions['p' + page];
@@ -296,7 +296,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Questões', 'Searching error - ' + error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Question Searching', new Date().toISOString(), error.message, { payload, data });
+                createErrorLog('Question Searching', error.message, { payload, data });
             });
     },
     async checkQuestionInTests(store, payload) {
@@ -338,7 +338,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Question Mark Check', new Date().toISOString(), error.message, { data });
+                createErrorLog('Question Mark Check', error.message, { data });
             });
     },
     deleteMarkQuestion({ commit }, payload) {
@@ -384,7 +384,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Question Delete Mark', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Question Delete Mark', error.message, { payload });
             });
     },
     restoreMarkedQuestion({ commit }, payload) {
@@ -438,7 +438,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Question Restore', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Question Restore', error.message, { payload });
             });
     },
     restoreAllMarkedQuestions({ commit, state }, payload) {
@@ -500,7 +500,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('connection', '', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Question Restore All', new Date().toISOString(), error.message, { payload, questionData });
+                createErrorLog('Question Restore All', error.message, { payload, questionData });
             });
     },
     changeDeleteStatusQuestions({ commit }, payload) {
@@ -526,7 +526,7 @@ const actions = {
             .catch(error => {
                 const errorModel = showErrorMessage('exclusion', 'Questão', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Question Confirm Delete', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Question Confirm Delete', error.message, { payload });
             });
     },
     deleteQuestions({ commit }) {
@@ -587,7 +587,7 @@ const actions = {
             })
             .catch(error => {
                 console.error("Error removing question: ", error);
-                createErrorLog('Question DB Delete', new Date().toISOString(), error.message, { subjects });
+                createErrorLog('Question DB Delete', error.message, { subjects });
             });
     },
     async uploadImageQuestion({ commit }, payload) {
@@ -608,7 +608,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('connection', '', 'Image upload error - ' + error.message);
                         commit('setError', { message: errorModel });
-                        createErrorLog('Question Image Upload', new Date().toISOString(), error.message, { payload, format });
+                        createErrorLog('Question Image Upload', error.message, { payload, format });
                     });
             } catch(error) {
                 reject();
@@ -706,7 +706,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Questão', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Question DB Upload', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Question DB Upload', error.message, { payload });
             });
     },
     createdEditedQuestion({ commit }, payload) {
@@ -742,7 +742,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('connection', '', error.message);
                         commit('setError', { message: errorModel });
-                        createErrorLog('Question Exist Test', new Date().toISOString(), error.message, { payload });
+                        createErrorLog('Question Exist Test', error.message, { payload });
                     });
             } catch(error) {
                 reject();
@@ -806,7 +806,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('creation', 'Questão', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Question DB Insert', new Date().toISOString(), error.message, { payload });
+                createErrorLog('Question DB Insert', error.message, { payload });
             });
     },
     async getQuestionByIQ(store, payload) {
@@ -820,7 +820,7 @@ const actions = {
                     .catch(error => {
                         const errorModel = showErrorMessage('load', 'Questão', error.message);
                         commit('setError', { message: errorModel });
-                        createErrorLog('Question IQ Load', new Date().toISOString(), error.message, { payload });
+                        createErrorLog('Question IQ Load', error.message, { payload });
                     });
             } catch(error) {
                 reject();

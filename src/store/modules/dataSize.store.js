@@ -44,7 +44,7 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('load', 'Data Size', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('Data Size Load', new Date().toISOString(), error.message, { data });
+                createErrorLog('Data Size Load', error.message, { data });
             });
     },
     resetDataSize({ commit }) {
