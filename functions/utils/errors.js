@@ -2,7 +2,7 @@ const uuid = require('uuid-random');
 
 const { getNowISOString } = require('./date');
 
-export const createLog = async (type, message, payload) => {
+exports.createLog = async (type, message, payload) => {
     const log = {
         id: uuid(),
         type,

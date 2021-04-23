@@ -1,4 +1,4 @@
-export const getNowISOString = () => {
+exports.getNowISOString = () => {
     const now = new Date();
     const time = now.toLocaleTimeString('pt-BR');
     const day = now.getDate().toString().padStart(2, '0');
