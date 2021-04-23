@@ -3,7 +3,7 @@ const axios = require('axios');
 const { db } = require('../admin');
 
 const { getNowISOString } = require('../utils/date');
-const { createLog } = require('../utils/error');
+const { createLog } = require('../utils/errors');
 
 const months = {
     '1': 'Janeiro',
