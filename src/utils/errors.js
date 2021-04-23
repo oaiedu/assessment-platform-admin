@@ -1,6 +1,8 @@
 import uuid from 'uuid-random';
 import store from '../store';
 
+import { getNowISOString } from './date';
+
 const models = {
     load(category, message) {
         return 'Error ao carregar ' + category + ': ' + message;
@@ -36,13 +38,13 @@ export const showErrorMessage = (type, category, message) => {
     return models[type](category, message);
 }
 
-export const createErrorLog = (type, date, message, payload) => {
+export const createErrorLog = (type, message, payload) => {
     const id = uuid();
     const user = store.getters.userInfo;
     const log = {
         id,
         type,
-        date,
+        date: getNowISOString(),
         user: {
             id: user.id,
             name: user.name,
