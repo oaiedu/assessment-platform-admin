@@ -171,6 +171,7 @@
 
 <script>
     import { mdiDownload, mdiDelete, mdiCloudUpload } from '@mdi/js';
+    import { getNowISOString } from '../../utils/date';
 
     export default {
         name: 'BackupsTable',
@@ -230,7 +231,7 @@
                 return this.currentMonth - 1 === 0 ? 12 : this.currentMonth - 1;
             },
             twoMonthsAgo() {
-                return this.currentMonth - 2 === 0 ? 12 : (this.currentMonth - 2 < 0 ? 11 : this.currentMonth - 2);
+                return this.currentMonth - 2 <= 0 ? this.currentMonth + 12 - 2 : this.currentMonth - 2;
             },
             pastMonths() {
                 return [this.months[this.lastMonth], this.months[this.twoMonthsAgo]];
@@ -265,14 +266,8 @@
                 return bkps;
             },
             backup() {
-                const now = new Date();
-                const date = now.toLocaleDateString('pt-BR');
-                const time = now.toLocaleTimeString('pt-BR');
-                const day = date.substr(0, 2);
-                const month = date.substr(3, 2);
-                const year = date.substr(6, 4);
-                const isoString = `${year}-${month}-${day}T${time}.000Z`;
-                this.$store.dispatch('backupFirebase', { now: isoString });
+                const now = getNowISOString();
+                this.$store.dispatch('backupFirebase', { now });
             },
             downloadBkp(backup) {
                 this.$store.dispatch('downloadBackup', { date: backup.start, cloudId: backup.cloudId, id: backup.id });
@@ -287,7 +282,3 @@
         }
     }
 </script>
-
-<style>
-
-</style>
