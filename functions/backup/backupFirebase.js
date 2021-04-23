@@ -5,6 +5,7 @@ const { google } = require('googleapis');
 
 const { auth, db, storage } = require('../admin');
 const { serviceAccount } = require('../.env');
+const { getNowISOString } = require('../utils/date');
 
 exports.downloadBackup = async (req, res) => {
     const jwtClient = new google.auth.JWT(
@@ -251,16 +252,8 @@ exports.backupFirestoreAuth = async (req, res) => {
 
     fs.rmSync('./' + zipFileName, { recursive: true });
 
-    const endDate = new Date();
-    const date = endDate.toLocaleDateString('pt-BR');
-    const time = endDate.toLocaleTimeString('pt-BR');
-    const day = date.substr(0, 2);
-    const month = date.substr(3, 2);
-    const year = date.substr(6, 4);
-    const isoString = `${year}-${month}-${day}T${time}.000Z`;
-
     res.append('Access-Control-Allow-Origin', '*');
-    res.send({ endDate: isoString, size, cloudId: file.data.id });
+    res.send({ endDate: getNowISOString(), size, cloudId: file.data.id });
 }
 
 exports.backupFirebase = async (req, res) => {
