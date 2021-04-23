@@ -1,6 +1,4 @@
 const axios = require('axios');
-const unzip = require('unzip-js');
-const AdmZip = require('adm-zip');
 
 import { db } from '../../main';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
