@@ -1,5 +1,5 @@
 <template>
-    <div class="home">
+    <div class="home" :class="!user ? 'sign-home' : ''">
         <v-container v-if="user">
             <v-row justify="center">
                 <v-col sm=4>
@@ -12,17 +12,20 @@
             <Fab :userClaims='userClaims' v-if='!userClaims || (userClaims && !userClaims["student"])' />
         </v-container>
 
-        <v-row justify="center" align="center" v-else>
-            <img class="background-image"
-                width="2647"
-                height="1772"
-                src="../assets/home-background.jpg"
-                alt="Background Image" >
-            <div class="background-overlay"></div>
-            <v-col class="sign-col" :cols="12" lg="4" md="5" sm="7" >
-                <SignUser/>
-            </v-col>
-        </v-row>
+        <div v-else class="sign-container">
+            <div class="sign-info-container">
+                <img
+                    width="219"
+                    height="339"
+                    src="../assets/CINA.png"
+                    alt="CINA Image" >
+                <div class="sign-info">
+                    <h2>PWR Quiz Generator</h2>
+                    <h1>Centro Industrial Nuclear de Aramar</h1>
+                </div>
+            </div>
+            <SignUser/>
+        </div>
     </div>
 </template>
 
@@ -68,20 +71,97 @@
 </script>
 
 <style>
-    .sign-col {
-        position: absolute;
+    .sign-home {
+        height: 100vh;
+        width: 100vw;
+
+        background-color: #ededed;
     }
 
-    .background-overlay {
-        position: absolute;
-        height: calc(100vh - 36px);
-        width: 100%;
-        background-color: #0006;
+    .sign-info-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        flex: 1;
+        height: 100%;
+
+        margin: 0 20px;
     }
 
-    .background-image {
-        height: calc(100vh - 36px);
+    .sign-info-container img {
+        margin-right: 20px;
+    }
+
+    .sign-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .sign-info > h1 {
+        color: #333;
+    }
+
+    .sign-info > h2 {
+        font-weight: normal;
+        color: #2196f3;
+    }
+
+    .sign-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+
         width: 100%;
-        object-fit: cover;
+        height: 100%;
+    }
+
+    .sign-card {
+        width: 360px;
+        height: 92%;
+
+        margin-right: 30px;
+    }
+
+    @media(max-width: 1100px) {
+        .sign-info-container {
+            flex-direction: column;
+        }
+
+        .sign-info-container img {
+            margin: 0;
+        }
+
+        .sign-info {
+            flex-direction: column-reverse;
+            align-items: center;
+            text-align: center;
+        }
+    }
+
+    @media(max-width: 735px) {
+        .sign-info-container {
+            display: none;
+        }
+
+        .sign-container {
+            justify-content: center;
+        }
+
+        .sign-card {
+            margin-right: 0;
+        }
+    }
+
+    @media(max-width: 400px) {
+        .sign-card {
+            width: 100%;
+            height: 100%;
+
+            box-shadow: none;
+        }
     }
 </style>

@@ -1,10 +1,13 @@
 <template>
     <v-container fluid class="sign-card fill-height">
-        <v-row class="sign-title" justify="center" align="center">
+        <div class="sign-pwr">
+            <h2>PWR Quiz Generator</h2>
+        </div>
+        <div class="sign-title">
             <h2>{{ showSignIn ? 'Entrar' : 'Registrar' }}</h2>
-        </v-row>
-        <v-row class="sign-options fill-height" justify="center" align="center">
-            <v-col cols="11">
+        </div>
+        <v-row class="sign-options" justify="center" align="center" style="padding: 0; margin: 0;">
+            <v-col cols="10" style="padding: 0; margin: 0;">
                 <v-form @submit.prevent="onSignin" v-if="showSignIn">
                     <v-row justify="center">
                         <v-text-field
@@ -28,14 +31,14 @@
                             :rules="required" >
                         </v-text-field>
                     </v-row>
-                    <v-row style="margin-top: 10px" justify="end">
+                    <div class="confirm-button-container">
                         <v-btn color='blue' :dark='!loading' type="submit" :disabled="loading" :loading="loading">
                             Entrar
                             <span class="custom-loader">
                                 <v-icon light></v-icon>
                             </span>
                         </v-btn>
-                    </v-row>
+                    </div>
                 </v-form>
 
                 <v-form @submit.prevent="onSignup" v-else>
@@ -82,22 +85,23 @@
                             :rules="[...required, comparePassword]">
                         </v-text-field>
                     </v-row>
-                    <v-row style="margin-top: 10px" justify="end">
+                    <div class="confirm-button-container">
                         <v-btn color='blue' :dark='!loading' type="submit" :disabled="loading" :loading="loading">
                             Registrar
                             <span class="custom-loader">
                                 <v-icon light></v-icon>
                             </span>
                         </v-btn>
-                    </v-row>
+                    </div>
                 </v-form>
             </v-col>
         </v-row>
 
-        <v-row class="sign-footer" cols="12">
+        <div class="sign-footer">
             <v-row class="to-sign-in" v-if="showSignUp">
                 <span>Já possui uma conta?</span>
                 <v-btn
+                    style="padding: 0;"
                     text
                     color='blue'
                     @click="SignIn"
@@ -108,6 +112,7 @@
             <v-row class="to-sign-up" v-else>
                 <span>Não possui uma conta?</span>
                 <v-btn
+                    style="padding: 0;"
                     text
                     color='blue'
                     @click="SignUp"
@@ -115,7 +120,7 @@
                     <strong>Registrar-se</strong>
                 </v-btn>
             </v-row>
-        </v-row>
+        </div>
     </v-container>
 </template>
 
@@ -183,7 +188,7 @@
     .sign-card {
         position: relative;
 
-        min-height: 600px;
+        height: 100%;
         margin: 0;
 
         border-radius: 5px;
@@ -192,29 +197,101 @@
         box-shadow: 0px 4px 8px 0px #0005;
     }
 
+    .confirm-button-container {
+        position: absolute;
+        left: 50%;
+        bottom: 120px;
+
+        transform: translateX(-50%);
+    }
+
+    .sign-pwr {
+        display: none;
+
+        position: absolute;
+        left: 50%;
+        top: 100px;
+
+        width: 100%;
+
+        text-align: center;
+
+        transform: translateX(-50%);
+    }
+
+    .sign-pwr h2 {
+        color: #2196f3;
+        font-weight: normal;
+        font-size: 1.1rem;
+    }
+
     .sign-title {
+        position: absolute;
+        left: 50%;
+        top: 80px;
+
         color: #444;
+
+        transform: translateX(-50%);
     }
 
     .sign-options {
         width: 100%;
-        margin: 10px 0 10px 0;
-        padding: 20px;
     }
 
     .sign-footer {
-        bottom: 10px;
+        position: absolute;
+        left: 50%;
+        bottom: 50px;
+
+        width: 100%;
+
+        transform: translateX(-50%);
     }
 
-    .to-sign-in {
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-    }
-
+    .to-sign-in,
     .to-sign-up {
+        font-size: .9rem;
+
         text-align: center;
         justify-content: center;
         align-items: center;
+    }
+
+    .to-sign-in > span,
+    .to-sign-up > span {
+        margin-right: 10px;
+    }
+
+    .to-sign-in > .v-btn::before,
+    .to-sign-up > .v-btn::before {
+        background-color: transparent;
+    }
+
+    @media(max-width: 735px) {
+        .sign-pwr {
+            display: block;
+        }
+
+        .sign-title {
+            top: 60px;
+        }
+    }
+
+    @media(max-width: 330px) {
+        .to-sign-in,
+        .to-sign-up {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .to-sign-in > span,
+        .to-sign-up > span {
+            margin: 0;
+        }
+
+        .sign-footer {
+            bottom: 30px;
+        }
     }
 </style>
