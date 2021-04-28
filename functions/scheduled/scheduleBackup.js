@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const { db } = require('../admin');
+const { db, projectId } = require('../admin');
 
 const { getNowISOString } = require('../utils/date');
 const { createLog } = require('../utils/errors');
@@ -32,13 +32,7 @@ exports.scheduledBackup = async context => {
             });
     }
 
-    let url = '';
-
-    if (context && context.name && context.name.includes('stage-pwr-quiz-generator')) {
-        url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
-    } else {
-        url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=' + now.replace(/:/g, '-');
-    }
+    const url = `https://us-central1-${projectId}.cloudfunctions.net/backup-backupFirestoreAuth?now=${now.replace(/:/g, '-')}`
 
     const bkp = {
         id: '',
@@ -52,11 +46,11 @@ exports.scheduledBackup = async context => {
     await axios.get(url)
         .then(res => {
             bkp.size = res.data.size;
-            bkp.end = res.data.endDate;
+            bkp.end = getNowISOString();
             bkp.cloudId = res.data.cloudId;
         })
         .catch(error => {
-            createErrorLog('Automatic Backup', error.message, { url });
+            createErrorLog('Automatic Backup', error.message, { url, projectId });
         });
 
     db.collection('backups').get()
@@ -79,20 +73,9 @@ exports.scheduledBackup = async context => {
                 bkpId = lastBkpId + 1;
             } else bkpId = 1;
 
-            const formatDate = (date) => {
-                const month = new Date(date).getMonth() + 1;
-
-                const dateTime = new Date(date).toString();
-                const sub = dateTime.substr(7, 17);
-                const monthName = months[month].substr(0, 3);
-
-                return monthName + sub;
-            }
-
             bkp.id = 'ab' + (bkpId >= 1000 ? bkpId : bkpId.toString().padStart(4, '0'));
-            bkp.start = formatDate(now);
-            bkp.end = formatDate(bkp.end);
-            bkp.month = bkp.start.substr(0, 3);
+            bkp.start = now;
+            bkp.month = months[new Date(bkp.start).getMonth() + 1].substr(0, 3);
 
             db.collection('backups').add(bkp)
                 .catch(error => {

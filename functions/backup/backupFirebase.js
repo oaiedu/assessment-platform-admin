@@ -1,4 +1,7 @@
+const path = require('path');
+const os = require('os');
 const fs = require('fs');
+const { Readable } = require('stream');
 
 const AdmZip = require('adm-zip');
 const { google } = require('googleapis');
@@ -21,10 +24,7 @@ exports.downloadBackup = async (req, res) => {
 
     const fileId = req.query.id;
 
-    const folderPath = './temp';
-    const filePath = `${folderPath}/${fileId}.zip`;
-
-    fs.mkdirSync(folderPath);
+    const filePath = path.join(os.tmpdir(), `${fileId}.zip`);
 
     await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' })
         .then(async response => {
@@ -36,8 +36,6 @@ exports.downloadBackup = async (req, res) => {
                         zip.addLocalFile(filePath);
 
                         const data = zip.getEntries()[0].getData();
-
-                        fs.rmdirSync(folderPath, { recursive: true });
 
                         res.append('Access-Control-Allow-Origin', '*');
                         res.send({ backup: data.toString('base64') });
@@ -157,60 +155,29 @@ exports.backupFirestoreAuth = async (req, res) => {
                     const data = doc.data();
 
                     if(collection.includes('question')) {
-                        dbData[id] = {
-                            ...data,
-                            question: encodeURIComponent(data.question),
-                            subject: encodeURIComponent(data.subject),
-                            answers: data.answers.map(ans => {
-                                return {
-                                    ...ans,
-                                    text: encodeURIComponent(ans.text)
-                                }
-                            }),
-                        };
-                        if(collection === 'question requests') {
+                        if (collections !== 'question-subjects') {
                             dbData[id] = {
-                                ...dbData[id],
-                                user: {
-                                    ...user,
-                                    name: encodeURIComponent(data.user.name)
+                                ...data,
+                            };
+                            if(!data.IQ) {
+                                dbData[id] = {
+                                    ...dbData[id],
+                                    IQ: id
                                 }
                             }
-                        }
-                        if(!data.IQ) {
+                        } else {
                             dbData[id] = {
-                                ...dbData[id],
-                                IQ: id
+                                ...data
                             }
-                        }
-                    } else if(collection.includes('papers')) {
-                        dbData[id] = {
-                            image: data.image,
-                            description: encodeURIComponent(data.description),
-                            name: encodeURIComponent(data.name)
-                        };
-                    } else if(collection.includes('tests')) {
-                        dbData[id] = {
-                            ...data,
-                            created: encodeURIComponent(data.created),
-                            purpose: encodeURIComponent(data.purpose),
-                            title: encodeURIComponent(data.title),
-                            user: encodeURIComponent(data.user)
-                        }
-                    } else if(collection.includes('users')) {
-                        dbData[id] = {
-                            email: encodeURIComponent(data.email),
-                            name: encodeURIComponent(data.name),
-                            profileImages: data.profileImages
                         }
                     } else {
                         dbData[id] = data;
                     }
                 });
-                const json = JSON.stringify(dbData);
+                const json = encodeURI(JSON.stringify(dbData));
 
                 zip.addFile(`db-${collection}-${now}.json`, json);
-                size += encodeURI(json).split(/%..|./).length - 1;
+                size += json.split(/%..|./).length - 1;
 
                 return json;
             })
@@ -229,8 +196,6 @@ exports.backupFirestoreAuth = async (req, res) => {
     const zipFileName = `backup-${now}.zip`;
     const contentType = 'application/zip';
 
-    fs.writeFileSync('./' + zipFileName, zip.toBuffer());
-
     const file = await dv3.files.create({
         requestBody: {
             name: zipFileName,
@@ -238,13 +203,9 @@ exports.backupFirestoreAuth = async (req, res) => {
         },
         media: {
             mimeType: contentType,
-            body: fs.createReadStream('./' + zipFileName)
+            body: Readable.from(zip.toBuffer())
         }
     });
-
-    // zip.extractAllTo('./extracted', true);
-
-    fs.rmSync('./' + zipFileName, { recursive: true });
 
     res.append('Access-Control-Allow-Origin', '*');
     res.send({ endDate: getNowISOString(), size, cloudId: file.data.id });
