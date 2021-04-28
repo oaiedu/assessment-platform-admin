@@ -6,7 +6,7 @@ const getNowISOString = () => {
     const year = now.getFullYear();
     const miliseconds = now.getMilliseconds().toString().padStart(3, '0');
 
-    return `${year}-${month}-${day}T${time}.${miliseconds}`;
+    return `${year}-${month}-${day}T${time}.${miliseconds}Z`;
 }
 
 module.exports = {
