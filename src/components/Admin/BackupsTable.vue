@@ -54,6 +54,12 @@
                     <span>Excluir</span>
                 </v-tooltip>
             </template>
+            <template v-slot:[`item.start`]='{ item }'>
+                <span>{{ formatDate(item.start) }}</span>
+            </template>
+            <template v-slot:[`item.end`]='{ item }'>
+                <span>{{ formatDate(item.end) }}</span>
+            </template>
         </v-data-table>
 
         <v-data-table
@@ -96,6 +102,12 @@
                     <span>Excluir</span>
                 </v-tooltip>
             </template>
+            <template v-slot:[`item.start`]='{ item }'>
+                <span>{{ formatDate(item.start) }}</span>
+            </template>
+            <template v-slot:[`item.end`]='{ item }'>
+                <span>{{ formatDate(item.end) }}</span>
+            </template>
         </v-data-table>
 
         <v-data-table
@@ -137,6 +149,12 @@
                     </template>
                     <span>Excluir</span>
                 </v-tooltip>
+            </template>
+            <template v-slot:[`item.start`]='{ item }'>
+                <span>{{ formatDate(item.start) }}</span>
+            </template>
+            <template v-slot:[`item.end`]='{ item }'>
+                <span>{{ formatDate(item.end) }}</span>
             </template>
         </v-data-table>
 
@@ -182,7 +200,7 @@
                 mdiCloudUpload,
                 deleteBackupSnackBar: false,
                 deleteItem: null,
-                months: {},
+                months: null,
                 headers: [
                     {
                         text: 'ID',
@@ -238,14 +256,21 @@
             }
         },
         methods: {
+            formatDate(date) {
+                const month = new Date(date).getMonth() + 1;
+
+                const dateTime = new Date(date).toString();
+                const sub = dateTime.substr(7, 17);
+                const monthName = this.months[month].substr(0, 3);
+
+                return monthName + sub;
+            },
             getBackupsByMonth(month) {
                 const backups = this.backups;
                 const bkps = [];
-                const wanted = month;
 
                 backups.forEach(bkp => {
-                    const start = bkp.start;
-                    const bkpMon = start.substr(0, 3);
+                    const bkpMon = bkp.month;
                     const months = [];
 
                     for (const key in this.months) {
@@ -257,7 +282,7 @@
                     }
 
                     months.forEach(m => {
-                        if(m == wanted) {
+                        if(m == month) {
                             bkps.push(bkp);
                         }
                     });
@@ -277,7 +302,7 @@
                 this.deleteBackupSnackBar = false;
             }
         },
-        mounted() {
+        created() {
             this.months = this.$store.getters.getMonths;
         }
     }
