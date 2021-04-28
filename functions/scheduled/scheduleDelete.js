@@ -1,3 +1,5 @@
+const { google } = require('googleapis');
+
 const { db } = require('../admin');
 const { serviceAccount } = require('../.env');
 
@@ -31,7 +33,7 @@ exports.scheduledDelete = async () => {
 
     const backupsIds = [];
 
-    await db.collection('backups').orderBy('start').where('month', '<', belowDate).get()
+    await db.collection('backups').orderBy('start').where('start', '<', belowDate).get()
         .then(snapshot => {
             snapshot.forEach(doc => {
                 backupsIds.push(doc.data().cloudId);
