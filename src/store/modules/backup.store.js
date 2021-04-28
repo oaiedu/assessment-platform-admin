@@ -1,6 +1,7 @@
 const axios = require('axios');
 
 import { db } from '../../main';
+import { getNowISOString } from '../../utils/date';
 
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
@@ -76,7 +77,7 @@ const actions = {
         await axios.get(url)
             .then(res => {
                 bkp.size = res.data.size;
-                bkp.end = res.data.endDate;
+                bkp.end = getNowISOString();
                 bkp.cloudId = res.data.cloudId;
             }).catch(error => {
                 commit('setLoading', false);
@@ -105,20 +106,9 @@ const actions = {
                     bkpId = lastBkpId + 1;
                 } else bkpId = 1;
 
-                function formatDate(date) {
-                    const month = new Date(date).getMonth() + 1;
-
-                    const dateTime = new Date(date).toString();
-                    const sub = dateTime.substr(7, 17);
-                    const monthName = state.months[month].substr(0, 3);
-
-                    return monthName + sub;
-                }
-
                 bkp.id = 'mb' + (bkpId >= 1000 ? bkpId : bkpId.toString().padStart(4, '0'));
-                bkp.start = formatDate(now);
-                bkp.end = formatDate(bkp.end);
-                bkp.month = bkp.start.substr(0, 3);
+                bkp.start = now;
+                bkp.month = state.months[new Date(bkp.start).getMonth() + 1].substr(0, 3);
 
                 db.collection('backups').add(bkp)
                     .then(() => {
