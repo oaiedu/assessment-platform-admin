@@ -16,6 +16,10 @@
                     {{ item.type === 'selected' ? 'Selecionado' : 'Aleatório' }}
                 </template>
 
+                <template v-slot:[`item.user`]='{ item }'>
+                    {{ item.user.name || item.user.email }}
+                </template>
+
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-row justify="end" v-if='!item.toDelete'>
                         <v-tooltip top>
@@ -99,6 +103,7 @@
                     { text: "Nome", align: "start",  value: "title" },
                     { text: "Questões", align: "left",  value: "questions.length" },
                     { text: "Tipo", align: "left",  value: "type" },
+                    { text: "Usuário", align:"left", value: "user" },
                     { text: "Ações", align:"right", value: "actions", sortable: false }
                 ]
             }
