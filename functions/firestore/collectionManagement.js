@@ -27,6 +27,38 @@ exports.adjustImagesUrl = async (req, res) => {
     res.send('Adjusted images URL!');
 }
 
+exports.adjustUsersCreationDate = async (req, res) => {
+    await auth.listUsers()
+        .then(snapshot => {
+            snapshot.users.forEach(async user => {
+                const uid = user.uid;
+
+                const createdAt = user.metadata.creationTime;
+                const date = new Date(createdAt);
+
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const time = date.toLocaleTimeString('pt-BR');
+                const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+
+                const isoString = `${year}-${month}-${day}T${time}.${milliseconds}Z`;
+
+                await db.collection('users').doc(uid).update({ created: isoString, updated: isoString })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            });
+
+            return snapshot.users;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+
+    res.send('Adjusted users creation date!');
+}
+
 exports.adjustUsersIds = async (req, res) => {
     await auth.listUsers()
         .then(snapshot => {

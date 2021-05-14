@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const {
     adjustImagesUrl,
+    adjustUsersCreationDate,
     adjustUsersIds,
     auxQuestions,
     compareQuestions,
@@ -16,6 +17,7 @@ const { copyFirestore } = require('./dataCopy');
 module.exports = {
     adjustImagesUrl: functions.https.onRequest(adjustImagesUrl),
     adjustUsersIds: functions.https.onRequest(adjustUsersIds),
+    adjustUsersCreationDate: functions.https.onRequest(adjustUsersCreationDate),
     compareQuestions: functions.https.onRequest(compareQuestions),
     copyFirestore: functions.https.onRequest(copyFirestore),
     countData: functions.https.onRequest(countData),
