@@ -374,39 +374,27 @@ export default {
         const imageToUpload = { images: this.images[0], id: this.question.id };
         const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
 
+
         URL.then(result => {
           this.editedImages = result;
-          if (this.question.imageSize === undefined) {
-            var oldData = {
-              iq: this.question.iq,
-              subject: this.question.subject,
-              question: this.question.question,
-              knowledge: this.question.knowledge,
-              knowledgePWR: this.question.knowledgePWR,
-              knowledgeBWR: this.question.knowledgeBWR,
-              answers: this.question.answers,
-              image: this.question.image,
-              edited: this.question.edited,
-              imageSize: "1x"
-            };
-          }
-          else {
-            var oldData = {
-              iq: this.question.iq,
-              subject: this.question.subject,
-              question: this.question.question,
-              knowledge: this.question.knowledge,
-              knowledgePWR: this.question.knowledgePWR,
-              knowledgeBWR: this.question.knowledgeBWR,
-              answers: this.question.answers,
-              image: this.question.image,
-              edited: this.question.edited,
-              imageSize: this.question.imageSize,
-            };
-          }
+
+          const oldData = {
+            iq: this.question.iq,
+            created: this.question.created || null,
+            subject: this.question.subject,
+            question: this.question.question,
+            knowledge: this.question.knowledge,
+            knowledgePWR: this.question.knowledgePWR,
+            knowledgeBWR: this.question.knowledgeBWR,
+            answers: this.question.answers,
+            image: this.question.image,
+            edited: this.question.edited,
+            imageSize: this.question.imageSize || "1x",
+          };
 
           const questionData = {
             iq: this.editedIq,
+            created: this.question.created || null,
             subject: this.editedSubject,
             question: this.editedQuestionDescription,
             knowledge: this.editedKnowledge,
@@ -421,13 +409,10 @@ export default {
 
           if(this.userClaims['admin']) {
             const sendInfo = {
-                oldData: {},
-                questionData: {},
-                user: ""
+                oldData,
+                questionData,
+                user: this.$store.getters.user.id
             }
-            sendInfo.oldData = oldData;
-            sendInfo.questionData = questionData;
-            sendInfo.user = this.$store.getters.user.id;
 
             aux = this.$store.dispatch("editQuestion", sendInfo);
           } else {
@@ -446,8 +431,9 @@ export default {
           });
         });
       } else {
-        var oldData = {
+        const oldData = {
           iq: this.question.iq,
+          created: this.question.created || null,
           subject: this.question.subject,
           question: this.question.question,
           knowledge: this.question.knowledge,
@@ -461,6 +447,7 @@ export default {
 
         const  questionData = {
           iq: this.editedIq,
+          created: this.question.created || null,
           subject: this.editedSubject,
           question: this.editedQuestionDescription,
           knowledge: this.editedKnowledge,
@@ -491,7 +478,7 @@ export default {
                     email: this.userInfo.email
                 }
             }
-            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', question });
+            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', request: question });
           }
         aux.then(() => {
           this.close();

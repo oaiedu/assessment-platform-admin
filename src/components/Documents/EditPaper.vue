@@ -192,10 +192,11 @@
                             this.createErrorSnackBar = true;
                         } else {
                             const paperData = {
-                                paperName: this.paperName,
-                                paperDescription: this.paperDescription,
-                                paperImage: this.paperImage,
-                                paperId: this.paper.id
+                                name: this.paperName,
+                                description: this.paperDescription,
+                                image: this.paperImage,
+                                id: this.paper.id,
+                                created: this.paper.created
                             };
 
                             if ((this.images && this.images[0])) {
@@ -207,7 +208,7 @@
                                 }
                                 this.$store.dispatch("uploadImagePaper", imageToUpload)
                                     .then(result => {
-                                        paperData.paperImage = result;
+                                        paperData.image = result;
                                         this.$store.dispatch("updatePaper", paperData)
                                         .then(()=>{
                                             this.$emit("load");
