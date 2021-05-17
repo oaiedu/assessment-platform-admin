@@ -4,6 +4,7 @@ import { showErrorMessage } from '../../utils/errors';
 const initialState = () => ({
     loading: false,
     logs: [],
+    lastLog: null,
     error: null,
     success: null
 });
@@ -16,6 +17,9 @@ const mutations = {
     },
     setLogs(state, data) {
         state.logs = data;
+    },
+    setLastLog(state, data) {
+        state.lastLog = data;
     },
     addLog(state, data) {
         state.logs.push(data);
@@ -62,7 +66,23 @@ const actions = {
                 commit('setError', { message: errorModel });
             });
     },
-    createLog({ commit, state }, payload) {
+    loadLastLog({ commit }) {
+        commit('setLoading', true);
+
+        db.collection('logs').orderBy('date', 'desc').limit(1).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    commit('setLastLog', doc.data());
+                    commit('setLoading', false);
+                });
+            })
+            .catch(error => {
+                commit('setLoading', false);
+                const errorModel = showErrorMessage('load', 'Log', error.message);
+                commit('setError', { message: errorModel });
+            });
+    },
+    createLog({ commit }, payload) {
         commit('setLoading', true);
 
         db.collection('logs').add(payload.log)
@@ -96,6 +116,9 @@ const getters = {
     },
     logs(state) {
         return state.logs;
+    },
+    getLastLog(state) {
+        return state.lastLog;
     },
     error(state) {
         return state.error;
