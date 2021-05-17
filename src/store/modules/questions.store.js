@@ -1,4 +1,5 @@
 import { db, storage } from '../../main';
+import { getNowISOString } from '../../utils/date';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
@@ -514,12 +515,14 @@ const actions = {
                     status: false
                 }
 
-                if(doc) doc.ref.update({ ...doc.data(), toDelete: { status: false } });
+                if(doc) {
+                    doc.ref.update({ ...doc.data(), toDelete: { status: false } });
 
-                commit('updateCurrentQuestionsPage', { ...doc.data(), toDelete });
-                commit('updateQuestion', { ...doc.data(), toDelete });
-                commit('updateDeleteMarkQuestion', { ...doc.data(), toDelete });
-                if(isSearching) commit('updateFilteredQuestion', { ...doc.data(), toDelete });
+                    commit('updateCurrentQuestionsPage', { ...doc.data(), toDelete });
+                    commit('updateQuestion', { ...doc.data(), toDelete });
+                    commit('updateDeleteMarkQuestion', { ...doc.data(), toDelete });
+                    if(isSearching) commit('updateFilteredQuestion', { ...doc.data(), toDelete });
+                }
 
                 commit('setLoading', false);
             })
@@ -618,7 +621,7 @@ const actions = {
     editQuestion({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
-        const question = { ...payload.questionData }
+        const question = { ...payload.questionData, updated: getNowISOString() }
 
         const today = new Date();
         const edition = payload.oldData.edited;
@@ -749,10 +752,17 @@ const actions = {
             }
         });
     },
-    createQuestion({ commit, state }, payload) {
+    createQuestion({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
-        const question = { ...payload.question, edited: [] }
+        const createdDate = getNowISOString();
+
+        const question = {
+            created: createdDate,
+            updated: createdDate,
+            ...payload.question,
+            edited: []
+        }
 
         const questionAmount = this.getters.getDataSize.questions.general;
         const pageAmount = Math.ceil(questionAmount / 8);
@@ -782,6 +792,7 @@ const actions = {
                         document.ref.update({ questions })
                             .then(() => {
                                 commit('addRemoveSize', { key: 'questions', data: questions });
+                                dispatch('updateQuestionsByWeek');
                             })
                             .catch(error => {
                                 console.error(error);
