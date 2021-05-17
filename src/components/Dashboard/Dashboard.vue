@@ -1,0 +1,472 @@
+<template>
+    <div class="dashboard" :class="className">
+        <DisplayProfile v-if="windowWidth > 860" />
+        <DataAmount />
+        <LastData v-if="userClaims && userClaims['admin']" />
+        <LastDocs v-else-if="userClaims && userClaims['teacher']" :windowWidth="windowWidth" />
+        <LastRequests v-else-if="userClaims && userClaims['appraiser']" :windowWidth="windowWidth" />
+        <QuestionBySubject :windowWidth="windowWidth" />
+        <QuestionByWeek :windowWidth="windowWidth" />
+        <PendentRequests v-if="userClaims && !userClaims['student']" :windowWidth="windowWidth" />
+        <TestsTable :windowWidth="windowWidth" />
+    </div>
+</template>
+
+<script>
+    import DisplayProfile from './DisplayProfile';
+    import DataAmount from './DataAmount';
+    import LastData from './Admin/LastData';
+    import LastRequests from './Appraiser/LastRequests';
+    import LastDocs from './Teacher/LastDocs';
+    import QuestionBySubject from './QuestionBySubject';
+    import QuestionByWeek from './QuestionByWeek';
+    import PendentRequests from './PendentRequests';
+    import TestsTable from './TestsTable';
+
+    export default {
+        name: 'Dashboard',
+        components: {
+            DisplayProfile,
+            DataAmount,
+            LastData,
+            LastRequests,
+            LastDocs,
+            QuestionBySubject,
+            QuestionByWeek,
+            PendentRequests,
+            TestsTable
+        },
+        data() {
+            return {
+                windowWidth: window.innerWidth
+            }
+        },
+        computed: {
+            userClaims() {
+                return this.$store.getters.getUserClaims;
+            },
+            className() {
+                const claims = this.userClaims;
+
+                if (claims) {
+                    if (claims['admin']) {
+                        return 'admin';
+                    } else if (claims['appraiser']) {
+                        return 'appraiser';
+                    } else if (claims['teacher']) {
+                        return 'teacher';
+                    } else {
+                        return 'student';
+                    }
+                }
+
+                return '';
+            }
+        },
+        methods: {
+            onWindowResize() {
+                this.windowWidth = window.innerWidth;
+            }
+        },
+        mounted() {
+            window.addEventListener('resize', this.onWindowResize)
+        },
+        beforeDestroy() {
+            window.removeEventListener('resize', this.onWindowResize);
+        },
+    }
+</script>
+
+<style>
+    .dashboard {
+        display: grid;
+        grid-template-columns: 430px 430px 1fr;
+        grid-template-rows: 120px 250px 350px;
+        row-gap: 30px;
+        column-gap: 30px;
+
+        width: 100%;
+        min-height: calc(100vh - 48px);
+
+        padding: 30px;
+
+        background-color: #ededed;
+    }
+
+    .dashboard.admin {
+        grid-template-areas:
+            "user-info data-amount data-amount"
+            "last-data question-by-subject question-by-week"
+            "pendent-requests tests-table tests-table";
+    }
+
+    .dashboard.appraiser {
+        grid-template-areas:
+            "user-info data-amount data-amount"
+            "last-requests question-by-subject question-by-week"
+            "pendent-requests tests-table tests-table";
+    }
+
+    .dashboard.teacher {
+        grid-template-areas:
+            "user-info data-amount data-amount"
+            "last-docs question-by-subject question-by-week"
+            "pendent-requests tests-table tests-table";
+    }
+
+    .dashboard.student {
+        grid-template-areas:
+            "user-info data-amount data-amount"
+            "question-by-subject tests-table tests-table"
+            "question-by-week tests-table tests-table";
+    }
+
+    .dashboard .display-profile {
+        grid-area: user-info;
+    }
+
+    .dashboard .data-amount {
+        grid-area: data-amount;
+    }
+
+    .dashboard .last-data {
+        grid-area: last-data;
+    }
+
+    .dashboard .question-by-subject {
+        grid-area: question-by-subject;
+    }
+
+    .dashboard .question-by-week {
+        grid-area: question-by-week;
+    }
+
+    .dashboard .pendent-requests {
+        grid-area: pendent-requests;
+    }
+
+    .dashboard .tests-table {
+        grid-area: tests-table;
+    }
+
+    .dashboard .last-requests {
+        grid-area: last-requests;
+    }
+
+    .dashboard .last-docs {
+        grid-area: last-docs;
+    }
+
+    .dashboard .tests-table .v-data-table.dashboard-tests-table table {
+        height: 100%;
+    }
+
+    @media (max-width: 1300px) {
+        .dashboard {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 120px 250px 350px 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-areas:
+                "user-info data-amount"
+                "last-data question-by-subject"
+                "pendent-requests question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.appraiser {
+            grid-template-areas:
+                "user-info data-amount"
+                "last-requests question-by-subject"
+                "pendent-requests question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.teacher {
+            grid-template-areas:
+                "user-info data-amount"
+                "last-docs question-by-subject"
+                "pendent-requests question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.student {
+            grid-template-rows: 120px 250px 350px;
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject tests-table"
+                "question-by-week tests-table";
+        }
+    }
+
+    @media (max-width: 1000px) {
+        .dashboard {
+            grid-template-columns: 430px minmax(0, 1fr);
+            grid-template-rows: 120px 120px 250px auto 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-areas:
+                "user-info question-by-subject"
+                "data-amount question-by-subject"
+                "last-data question-by-week"
+                "pendent-requests pendent-requests"
+                "tests-table tests-table";
+        }
+
+        .dashboard.appraiser {
+            grid-template-areas:
+                "user-info question-by-subject"
+                "data-amount question-by-subject"
+                "last-requests question-by-week"
+                "pendent-requests pendent-requests"
+                "tests-table tests-table";
+        }
+
+        .dashboard.teacher {
+            grid-template-areas:
+                "user-info question-by-subject"
+                "data-amount question-by-subject"
+                "last-docs question-by-week"
+                "pendent-requests pendent-requests"
+                "tests-table tests-table";
+        }
+
+
+        .dashboard.student {
+            grid-template-rows: 120px 250px 350px;
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-week"
+                "tests-table tests-table";
+        }
+    }
+
+    @media (max-width: 960px) {
+        .dashboard {
+            grid-template-columns: 400px minmax(0, 1fr);
+            grid-template-rows: 120px 250px 300px 250px 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-subject"
+                "last-data pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.appraiser {
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-subject"
+                "last-requests pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.teacher {
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-subject"
+                "last-docs pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.student {
+            grid-template-rows: 120px 250px 250px 350px;
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-subject"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+    }
+
+    @media (max-width: 900px) {
+        .dashboard {
+            grid-template-columns: 400px minmax(0, 1fr);
+            grid-template-rows: 120px 250px auto auto 250px 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-subject"
+                "last-data last-data"
+                "pendent-requests pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.appraiser {
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-subject"
+                "last-requests last-requests"
+                "pendent-requests pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.teacher {
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-subject"
+                "last-docs last-docs"
+                "pendent-requests pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.student {
+            grid-template-rows: 120px 250px 250px 350px;
+            grid-template-areas:
+                "user-info data-amount"
+                "question-by-subject question-by-subject"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+    }
+
+    @media (max-width: 860px) {
+        .dashboard {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: 120px 250px auto auto 250px 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-areas:
+                "data-amount"
+                "question-by-subject"
+                "last-data"
+                "pendent-requests"
+                "question-by-week"
+                "tests-table";
+        }
+
+        .dashboard.appraiser {
+            grid-template-areas:
+                "data-amount"
+                "question-by-subject"
+                "last-requests"
+                "pendent-requests"
+                "question-by-week"
+                "tests-table";
+        }
+
+        .dashboard.teacher {
+            grid-template-areas:
+                "data-amount"
+                "question-by-subject"
+                "last-docs"
+                "pendent-requests"
+                "question-by-week"
+                "tests-table";
+        }
+
+        .dashboard.student {
+            grid-template-rows: 120px 250px 250px 350px;
+            grid-template-areas:
+                "data-amount data-amount"
+                "question-by-subject question-by-subject"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+    }
+
+    @media (max-width: 760px) {
+        .dashboard {
+            grid-template-columns: minmax(276.5px, 1fr) minmax(0, 1fr);
+            grid-template-rows: 120px 250px 300px 250px 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-areas:
+                "data-amount data-amount"
+                "question-by-subject question-by-subject"
+                "last-data pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.appraiser {
+            grid-template-areas:
+                "data-amount data-amount"
+                "question-by-subject question-by-subject"
+                "last-requests pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+
+        .dashboard.teacher {
+            grid-template-areas:
+                "data-amount data-amount"
+                "question-by-subject question-by-subject"
+                "last-docs pendent-requests"
+                "question-by-week question-by-week"
+                "tests-table tests-table";
+        }
+    }
+
+    @media (max-width: 660px) {
+        .dashboard {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: 120px 250px 250px auto 250px 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-areas:
+                "data-amount"
+                "question-by-subject"
+                "last-data"
+                "pendent-requests"
+                "question-by-week"
+                "tests-table";
+        }
+
+        .dashboard.appraiser {
+            grid-template-areas:
+                "data-amount"
+                "question-by-subject"
+                "last-requests"
+                "pendent-requests"
+                "question-by-week"
+                "tests-table";
+        }
+
+        .dashboard.teacher {
+            grid-template-areas:
+                "data-amount"
+                "question-by-subject"
+                "last-docs"
+                "pendent-requests"
+                "question-by-week"
+                "tests-table";
+        }
+    }
+
+    @media (max-width: 500px) {
+        .dashboard {
+            padding: 20px 10px;
+            row-gap: 20px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .dashboard {
+            grid-template-rows: 200px 400px 250px auto 250px 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-rows: 200px 400px 250px auto 250px 350px;
+        }
+
+        .dashboard.student {
+            grid-template-rows: 200px 250px 250px 350px;
+        }
+    }
+</style>
