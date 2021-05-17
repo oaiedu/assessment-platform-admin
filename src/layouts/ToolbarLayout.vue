@@ -1,25 +1,18 @@
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" absolute temporary>
-        <v-main v-if="authUser !== null">
+        <v-main v-if="user" class="pt-0">
             <v-list>
                 <v-list-item class="px-2">
-                    <v-list-item>
-                        <v-row justify="center">
-                            <v-avatar size="150">
+                            <v-avatar size="50">
                                 <img class="display-profile-image"
                                     rel='preload'
                                     src="../assets/no-profile-pic.jpg"
                                     alt="Profile Image" />
                             </v-avatar>
-                        </v-row>
-                    </v-list-item>
-                </v-list-item>
-
-                <v-list-item v-if="user">
-                    <v-list-item-content>
-                        <v-list-item-title class="title">{{user.name}}</v-list-item-title>
-                        <v-list-item-subtitle>{{user.email}}</v-list-item-subtitle>
+                    <v-list-item-content class="pl-4">
+                            <v-list-item-title style="font-weight: 500;">{{user.name}}</v-list-item-title>
+                            <v-list-item-subtitle>{{roleName}}</v-list-item-subtitle>
                     </v-list-item-content>
                 </v-list-item>
             </v-list>
@@ -39,7 +32,7 @@
             </v-list>
         </v-main>
     </v-navigation-drawer>
-    <v-app-bar app v-if="authUser" color="blue darken-1" dark dense absolute>
+    <v-app-bar app v-if="user" color="blue darken-1" dark dense absolute>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>PWR Quiz Generator</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -169,6 +162,13 @@
                 }
 
                 return menuItems;
+            },
+            roleName() {
+                const role = this.user.role;
+                if(role === 'admin') return 'Administrador';
+                else if(role === 'appraiser') return 'Avaliador';
+                else if(role === 'teacher') return 'Professor';
+                else return 'Aluno';
             }
         },
         methods: {
@@ -178,16 +178,16 @@
                     this.$store.getters.user !== undefined
                 );
             },
-            onLogout() {
-                this.$store.dispatch("logout");
-                if(window.location.pathname !== '/') {
-                    this.$router.push('/');
+            async onLogout() {
+                await this.$store.dispatch("logout");
+                if(window.location.pathname !== '/auth') {
+                    this.$router.push('/auth');
                 }
             },
             setImage() {
                 if (this.authUser && this.user && this.user.profileImages && this.user.profileImages.length > 0) {
-                    const image = document.getElementsByClassName('display-profile-image')[0];
-                    image.src = this.user.profileImages;
+                    const image = document.getElementsByClassName('display-profile-image');
+                    if (image && image[0]) image[0].src = this.user.profileImages;
                 }
             }
         },
