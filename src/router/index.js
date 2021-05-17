@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import SignUser from '@/components/User/SignUser.vue';
+import Auth from '@/views/Auth.vue';
 import Profile from '@/components/User/Profile.vue';
 import Questions from '@/components/Questions/Questions.vue';
 import Tests from '@/components/Tests/Tests.vue';
@@ -18,6 +18,7 @@ const routes = [
         path:'/',
         component:Home,
         name:'home',
+        beforeEnter: AuthGuard
     },
     {
         path: '/admin',
@@ -29,16 +30,12 @@ const routes = [
         path:'/inbox',
         component: Inbox,
         name:'inbox',
+        beforeEnter: AuthGuard
     },
     {
-        path: '/signup',
-        component: SignUser,
-        name: 'signup'
-    },
-    {
-        path: '/signin',
-        component: SignUser,
-        name: 'signin'
+        path: '/auth',
+        component: Auth,
+        name: 'auth'
     },
     {
         path: '/profile',
