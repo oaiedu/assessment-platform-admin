@@ -1,4 +1,5 @@
 import { db, storage } from '../../main';
+import { getNowISOString } from '../../utils/date';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
@@ -7,7 +8,8 @@ const initialState = () => ({
     filteredPapers: [],
     currentPapersPage: [],
     lastPaperDocument: null,
-    deleteMarkPapers: []
+    deleteMarkPapers: [],
+    lastPapers: []
 });
 
 const state = initialState();
@@ -21,6 +23,9 @@ const mutations = {
     },
     setFilteredPapers(state, data) {
         state.filteredPapers = data;
+    },
+    setLastPapers(state, data) {
+        state.lastPapers = data;
     },
     resetFilteredPapers(state) {
         state.filteredPapers = [];
@@ -619,11 +624,17 @@ const actions = {
             });
     },
     createPaper({ commit }, payload) {
+        commit('setLoading', true);
+
+        const createdDate = getNowISOString();
+
         const paper = {
             id: payload.paperId,
             name: payload.paperName,
             image: payload.paperImage,
-            description: payload.paperDescription
+            description: payload.paperDescription,
+            created: createdDate,
+            updated: createdDate
         }
 
         const paperAmount = this.getters.getDataSize.papers;
@@ -679,10 +690,8 @@ const actions = {
     },
     updatePaper({ commit }, payload) {
         const paper = {
-            name: payload.paperName,
-            image: payload.paperImage,
-            description: payload.paperDescription,
-            id: payload.paperId
+            ...payload,
+            updated: getNowISOString()
         }
 
         db.collection("papers").where('id', '==', paper.id).get()
@@ -756,6 +765,28 @@ const actions = {
             }
         });
     },
+    loadLastPapers({ commit }) {
+        commit('setLoading', true);
+
+        const data = [];
+
+        db.collection('papers').orderBy('updated', 'desc').limit(6).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
+            })
+            .then(() => {
+                commit('setLastPapers', data);
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                commit('setLoading', false);
+                const errorModel = showErrorMessage('load', 'Documentos', error.message);
+                commit('setError', { message: errorModel });
+                createErrorLog('Last Documents Loading', error.message, { data });
+            })
+    },
     resetPapers({ commit }) {
         commit('RESETPapers');
     }
@@ -776,6 +807,9 @@ const getters = {
     },
     getFilteredPapers(state) {
         return state.filteredPapers;
+    },
+    getLastPapers(state) {
+        return state.lastPapers;
     }
 }
 
