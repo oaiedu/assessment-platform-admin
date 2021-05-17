@@ -20,7 +20,8 @@ const initialState = () => ({
         '11': 'Novembro',
         '12': 'Dezembro'
     },
-    backups: []
+    backups: [],
+    lastBackup: null
 });
 
 const state = initialState();
@@ -41,6 +42,9 @@ const mutations = {
             backups.splice(index, 1);
         }
         state.backups = backups;
+    },
+    setLastBackup(state, data) {
+        state.lastBackup = data;
     },
     RESETBackup(state) {
         const newState = initialState();
@@ -240,6 +244,23 @@ const actions = {
                 createErrorLog('Backup Url Delete', error.message, { payload, url });
             });
     },
+    loadLastBackup({ commit }) {
+        commit('setLoading', true);
+
+        db.collection('backups').orderBy('start', 'desc').limit(1).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    commit('setLastBackup', doc.data());
+                    commit('setLoading', false);
+                });
+            })
+            .catch(error => {
+                commit('setLoading', false);
+                const errorModel = showErrorMessage('load', 'Backup', error.message);
+                commit('setError', { message: errorModel });
+                createErrorLog('Last Backup Loading', error.message, null);
+            });
+    },
     resetBackup({ commit }) {
         commit('RESETBackup');
     }
@@ -251,6 +272,9 @@ const getters = {
     },
     getBackups(state) {
         return state.backups;
+    },
+    getLastBackup(state) {
+        return state.lastBackup;
     }
 }
 
