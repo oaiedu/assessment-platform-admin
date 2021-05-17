@@ -151,7 +151,6 @@ export default {
       mdiClose,
       mdiContentSave,
       mdiMagnify,
-      randomQuestionsNumber: null,
       createErrorSnackBar: false,
       selectedQuestions: [],
       testItems: [],
@@ -225,13 +224,12 @@ export default {
     pageAmount() {
         const questionAmount = this.$store.getters.getDataSize.questions.general;
         return Math.ceil(questionAmount / this.itemsPerPage);
+    },
+    userInfo() {
+        return this.$store.getters.userInfo;
     }
   },
   watch: {
-    randomQuestionsNumber(val) {
-      if ( val <= this.questions.length)
-        this.randomSelection(val)
-    },
     testTitle(val) {
       this.update();
     },
@@ -287,7 +285,6 @@ export default {
     },
     setInitialData () {
       this.testType =  "Selecionado",
-      this.randomQuestionsNumber =  null,
       this.selectedQuestions =  [],
       this.testItems =  [],
       this.testName =  "",
@@ -295,30 +292,8 @@ export default {
       this.showedQuestions =  [],
       this.search =  ""
     },
-    randomSelection(i) {
-      this.selectedQuestions = []
-
-      let conf = false
-      let randomizer = 0
-      let aux = ""
-      let j = 0
-
-      for ( j = 0 ; j < i ; j++ ) {
-        do{
-          conf = false
-          randomizer = Math.floor(Math.random() * this.questions.length)
-          aux = this.questions[randomizer]
-          this.selectedQuestions.forEach(element => {
-            if ( element === aux )
-              conf = true
-          })
-        } while ( conf == true );
-
-        this.selectedQuestions.push(aux);
-      }
-    },
     onEditTest() {
-        if(this.$refs.formRef.validate()){
+        if(this.$refs.formRef.validate()) {
 
         this.$store.dispatch('testExists', this.testTitle)
             .then(exist => {
@@ -326,24 +301,24 @@ export default {
                     this.createErrorSnackBar = true;
                 } else {
                     this.selectedQuestions.forEach(element => {
-                      this.testItems.push(element);
+                        this.testItems.push(element);
                     });
 
-                    const now = new Date();
-                    const editedDate = now.toLocaleString().split('/');
-
                     const testData = {
-                      title: this.testTitle,
-                      questions: this.testItems,
-                      type: this.testType,
-                      user: this.test.user,
-                      created: this.test.created,
-                      edited: `${this.$store.getters.userInfo.name}` + ' - ' + `${editedDate[1]}/${editedDate[0].padStart(2, '0')}/${editedDate[2].split(',')[0]}`,
-                      purpose: this.purpose,
-                      id: this.test.id
+                        title: this.testTitle,
+                        questions: this.testItems,
+                        type: this.testType,
+                        user: this.test.user,
+                        created: this.test.created,
+                        editedBy: {
+                            name: this.userInfo.name,
+                            email: this.userInfo.email
+                        },
+                        purpose: this.purpose,
+                        id: this.test.id
                     }
 
-                    this.close()
+                    this.close();
                     this.$store.dispatch("updateTest", testData);
                 }
             });
@@ -356,9 +331,9 @@ export default {
         if(this.selectedQuestions.length != this.questions.length - this.disabledCount) {
             this.selectedQuestions = [];
             props.items.forEach(item => {
-            if(!item.toDelete) {
-                this.selectedQuestions.push(item);
-            }
+                if(!item.toDelete) {
+                    this.selectedQuestions.push(item);
+                }
             });
         } else this.selectedQuestions = [];
     }
