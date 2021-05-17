@@ -1,13 +1,15 @@
 import axios from 'axios';
 
 import { auth, db, storage } from '../../main';
+import { getNowISOString } from '../../utils/date';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
     user: null,
     userInfo: null,
     userClaims: null,
-    users: []
+    users: [],
+    lastUser: null
 });
 
 const state = initialState();
@@ -25,6 +27,9 @@ const mutations = {
     setUsers(state, data) {
         state.users = data;
     },
+    setLastUser(state, data) {
+        state.lastUser = data;
+    },
     setUserRole(state, data) {
         const { email, role } = data;
         const users = [];
@@ -33,7 +38,8 @@ const mutations = {
             if(user.email === email) {
                 users.push({
                     ...user,
-                    role
+                    role,
+                    updated
                 });
             } else {
                 users.push(user);
@@ -86,13 +92,16 @@ const actions = {
                 const newUser = {
                     id: user.user.uid
                 }
+
+                const createdAt = getNowISOString();
+
                 const userInfo = {
                     name: payload.name,
                     profileImages: '',
                     email: payload.email,
-                    role: {
-                        student: true
-                    }
+                    role: 'student',
+                    created: createdAt,
+                    updated: createdAt
                 }
 
                 let url = '';
@@ -151,18 +160,18 @@ const actions = {
 
         const userInfo = {
             name: payload.name,
-            profileImages: payload.profileImages
+            profileImages: payload.profileImages,
+            updated: getNowISOString()
         }
         db.collection("users").doc(state.user.id).update({
-                name: userInfo.name,
-                profileImages: userInfo.profileImages
+                ...userInfo
             })
             .then(() => {
                 commit('setUserInfo', {
-                    name: userInfo.name,
-                    profileImages: userInfo.profileImages,
+                    ...userInfo,
                     email: state.userInfo.email,
-                    role: state.userInfo.role
+                    role: state.userInfo.role,
+                    created: state.userInfo.created
                 });
                 commit('setLoading', false);
                 commit('setSuccess', `'${userInfo.name || userInfo.email}' editado(a) com sucesso!`);
@@ -242,6 +251,23 @@ const actions = {
                 createErrorLog('Users Load', error.message, { users });
             });
     },
+    loadLastUser({ commit }) {
+        commit('setLoading', true);
+
+        db.collection('users').orderBy('created', 'desc').limit(1).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    commit('setLastUser', doc.data());
+                    commit('setLoading', false);
+                });
+            })
+            .catch(error => {
+                commit('setLoading', false);
+                const errorModel = showErrorMessage('load', 'Usuário', error.message);
+                commit('setError', { message: errorModel });
+                createErrorLog('Last User Loading', error.message, { users });
+            });
+    },
     setUserRole({ commit }, payload) {
         commit('setLoading', true);
 
@@ -260,10 +286,11 @@ const actions = {
         db.collection('users').where('email', '==', email).get()
             .then(snapshot => {
                 const doc = snapshot.docs[0];
+                const updated = getNowISOString();
 
-                doc.ref.update({ role });
+                doc.ref.update({ role, updated });
 
-                commit('setUserRole', payload);
+                commit('setUserRole', { payload, updated });
                 commit('setLoading', false);
                 commit('setSuccess', `'${doc.data().name || email}' editado(a) com sucesso!`);
 
@@ -281,12 +308,14 @@ const actions = {
                 commit('setLoading', false);
                 const errorModel = showErrorMessage('edition', 'Cargo de Usuário', error.message);
                 commit('setError', { message: errorModel });
-                createErrorLog('User Role Update', error.message, { payload, url });
+                createErrorLog('User Role Update', error.message, { payload, url, updated });
             });
     },
     logout({ commit }) {
         auth.signOut();
         commit('setUser', null);
+        commit('setUserInfo', null);
+        commit('setUserClaims', null);
     },
     autoSignIn({ commit, dispatch }, payload) {
         dispatch('loadUserInfo', payload.uid);
@@ -313,6 +342,9 @@ const getters = {
     },
     getUserClaims(state) {
         return state.userClaims;
+    },
+    getLastUser(state) {
+        return state.lastUser;
     }
 }
 
