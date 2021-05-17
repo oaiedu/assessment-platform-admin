@@ -1,6 +1,7 @@
 import uuid from 'uuid-random';
 
 import { db, storage } from '../../main';
+import { getNowISOString } from '../../utils/date';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
 const initialState = () => ({
@@ -10,7 +11,8 @@ const initialState = () => ({
     currentTestsPage: [],
     lastTestDocument: null,
     testQuestions: [],
-    deleteMarkTests: []
+    deleteMarkTests: [],
+    lastTests: []
 });
 
 const state = initialState();
@@ -24,6 +26,9 @@ const mutations = {
     },
     setFilteredTests(state, data) {
         state.filteredTests = data;
+    },
+    setLastTests(state, data) {
+        state.lastTests = data;
     },
     resetFilteredTests(state) {
         state.filteredTests = [];
@@ -570,7 +575,14 @@ const actions = {
     createTest({ commit }, payload) {
         commit('setLoading', true);
 
-        const test = { ...payload, id: uuid() }
+        const createdDate = getNowISOString();
+
+        const test = {
+            id: uuid(),
+            ...payload,
+            created: createdDate,
+            updated: createdDate
+        }
 
         const testAmount = this.getters.getDataSize.tests;
         const pageAmount = Math.ceil(testAmount / 8);
@@ -611,7 +623,7 @@ const actions = {
             });
     },
     updateTest({ commit }, payload) {
-        const test = { ...payload }
+        const test = { ...payload, updated: getNowISOString() }
         db.collection("tests").where('id', '==', test.id).get()
             .then(snapshot => {
                 snapshot.docs[0].ref.update(test);
@@ -647,6 +659,30 @@ const actions = {
             }
         });
     },
+    loadLastTests({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { limit } = payload;
+
+        const data = [];
+
+        db.collection('tests').orderBy('updated', 'desc').limit(limit || 5).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
+            })
+            .then(() => {
+                commit('setLastTests', data);
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                commit('setLoading', false);
+                const errorModel = showErrorMessage('load', 'Provas' + error.message);
+                commit('setError', { message: errorModel });
+                createErrorLog('Last Tests Loading', error.message, { payload });
+            });
+    },
     resetTests({ commit }) {
         commit('RESETTests');
     }
@@ -658,6 +694,9 @@ const getters = {
     },
     getTests(state) {
         return state.tests;
+    },
+    getLastTests(state) {
+        return state.lastTests;
     },
     getDeleteMarkTests(state) {
         return state.deleteMarkTests;

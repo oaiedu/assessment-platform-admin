@@ -1,0 +1,310 @@
+<template>
+    <v-card width="100%" height="100%" class="question-by-subject">
+        <div class="question-by-subject-container">
+            <h2 class="chart-title">Questões por matéria</h2>
+            <div class="subject-list">
+                <span
+                    v-for="(item, index) in sortedChartData"
+                    :key="index"
+                    class="subject-item">
+                    <div class="list-circle-dot" :style="{ backgroundColor: colorPaleteList[colorPalete][colorPaleteList[colorPalete].length - index - 1] }"></div>
+                    <span class="subject-name">{{ item.name }}</span>
+                    <span class="item-percentage"> - {{ (item.value * 100 / numberOfQuestions).toFixed(0) }}%</span>
+                </span>
+            </div>
+            <v-chart v-if="questionsBySubject" class="chart" :option="option" autoresize />
+        </div>
+    </v-card>
+</template>
+
+<script>
+    import { use } from "echarts/core";
+    import { PieChart } from 'echarts/charts';
+    import { CanvasRenderer } from 'echarts/renderers';
+    import {
+        TooltipComponent
+    } from 'echarts/components';
+    import VChart, { THEME_KEY } from 'vue-echarts';
+
+    use([
+        PieChart,
+        TooltipComponent,
+        CanvasRenderer,
+    ]);
+
+    export default {
+        name: 'QuestionBySubject',
+        components: {
+            VChart
+        },
+        provide: {
+            [THEME_KEY]: 'light'
+        },
+        props: {
+            windowWidth: Number
+        },
+        data() {
+            return {
+                colorPalete: 0,
+                colorPaleteList: [
+                    ['#023E8A', '#0077B6', '#0096C7', '#00B4D8', '#48CAE4'],
+                    ['#480CA8', '#560BAD', '#7209B7', '#B5179E', '#F72585'],
+                    ['#34A0A4', '#52B69A', '#76C893', '#99D98C', '#B5E48C'],
+                    ['#DC2F02', '#E85D04', '#F48C06', '#FAA307', '#FFBA08'],
+                    ['#7400B8', '#6930C3', '#5E60CE', '#5390D9', '#4EA8DE'],
+                    ['#240046', '#3C096C', '#5A189A', '#7B2CBF', '#9D4EDD'],
+                    ['#FF0A54', '#FF477E', '#FF5C8A', '#FF7096', '#FF85A1'],
+                    ['#602437', '#8A2846', '#B9375E', '#E05780', '#FF7AA2'],
+                    ['#006400', '#007200', '#008000', '#38B000', '#70E000']
+                ]
+            }
+        },
+        computed: {
+            sortedChartData() {
+                return [...this.chartData].sort((a, b) => (a.value - b.value) * -1);
+            },
+            option() {
+                return {
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    series: [
+                        {
+                            ...this.chartResponsiveness,
+                            name: '',
+                            type: 'pie',
+                            data: this.chartData,
+                            roseType: 'radius',
+                            itemStyle: {
+                                shadowBlur: 20,
+                                shadowColor: 'rgba(0, 0, 0, 0.2)'
+                            },
+                            color: this.colorPaleteList[this.colorPalete],
+                            animationType: 'scale',
+                            animationEasing: 'elasticOut',
+                            animationDelay: (idx) => {
+                                return Math.random() * 200;
+                            }
+                        }
+                    ]
+                }
+            },
+            chartResponsiveness() {
+                const setResponsiveness = (
+                    radius = '70%',
+                    center = ['80%', '60%'],
+                    label = { show: true, color: '#333a' },
+                    labelLine = { show: true, smooth: 0.2, lineStyle: { opacity: 0.3 } }
+                ) => {
+                    return { radius, center, label, labelLine };
+                }
+
+                let responsiveness = setResponsiveness(
+                    '70%',
+                    ['80%', '60%'],
+                    { show: false },
+                    { show: false }
+                );
+
+                if (this.windowWidth <= 1000) {
+                    responsiveness = setResponsiveness('70%', ['50%', '50%']);
+                }
+
+                if (this.windowWidth <= 960) {
+                    responsiveness = setResponsiveness('70%', ['65%', '50%']);
+                }
+
+                if (this.windowWidth <= 900) {
+                    responsiveness = setResponsiveness('70%', ['60%', '50%']);
+                }
+
+                if (this.windowWidth <= 800) {
+                    responsiveness = setResponsiveness('70%', ['65%', '50%']);
+                }
+
+                if (this.windowWidth <= 700) {
+                    responsiveness = setResponsiveness(
+                        '80%',
+                        ['75%', '50%'],
+                        { show: false },
+                        { show: false }
+                    );
+                }
+
+                if (this.windowWidth <= 600) {
+                    responsiveness = setResponsiveness(
+                        '70%',
+                        ['80%', '60%'],
+                        { show: false },
+                        { show: false }
+                    );
+                }
+
+
+                if (this.windowWidth <= 460) {
+                    responsiveness = setResponsiveness('70%', ['50%', '60%']);
+                }
+
+                if (this.windowWidth <= 400) {
+                    responsiveness = setResponsiveness(
+                        '80%',
+                        ['50%', '50%'],
+                        { show: false },
+                        { show: false }
+                    );
+                }
+
+                return responsiveness;
+            },
+            chartData() {
+                const data = [];
+
+                data.push(...this.questionsBySubject.slice(0, 4));
+
+                const others = this.questionsBySubject.slice(5)
+                    .map((subject) => subject.value)
+                    .reduce((a, b) => a + b, 0);
+
+                data.push({ name: 'Outros', value: others });
+
+                data.sort((a, b) => (a.value - b.value));
+
+                return data;
+            },
+            questionsBySubject() {
+                const statistics = [];
+                const subjects = this.$store.getters.getSubjects;
+                subjects.forEach(element => {
+                    const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubject(element);
+                    statistics.push({ name: element, value: numberOfQuestions });
+                });
+                return statistics.sort((a, b) => (a.value - b.value) * -1);
+            },
+            numberOfQuestions() {
+                return this.$store.getters.getDataSize.questions.general;
+            }
+        },
+        created() {
+            this.colorPalete = Math.floor(Math.random() * this.colorPaleteList.length);
+        }
+    }
+</script>
+
+<style scoped>
+    .question-by-subject-container {
+        position: relative;
+
+        height: 100%;
+        width: 100%;
+
+        padding: 20px;
+    }
+
+    .chart-title {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+
+        z-index: 5;
+
+        color: #555;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    .chart {
+        height: 200px;
+        width: 100%;
+    }
+
+    .subject-list {
+        display: flex;
+        flex-direction: column;
+
+        position: absolute;
+        top: 30%;
+        left: 35px;
+    }
+
+    .subject-item {
+        position: relative;
+
+        color: #555;
+        font-size: 0.85rem;
+        font-weight: 400;
+        line-height: 1.6rem;
+    }
+
+    .list-circle-dot {
+        position: absolute;
+        left: -15px;
+        top: 50%;
+
+        height: 7px;
+        width: 7px;
+
+        border-radius: 10px;
+
+        transform: translateY(-50%);
+    }
+
+    .item-percentage {
+        display: none;
+    }
+
+    @media (max-width: 1000px) {
+        .chart-title {
+            position: static;
+            margin-bottom: 10px;
+        }
+
+        .subject-list {
+            display: none;
+        }
+    }
+
+    @media (max-width: 960px) {
+        .chart-title {
+            position: absolute;
+            margin-bottom: 0;
+        }
+
+        .chart {
+            height: 210px;
+        }
+
+        .subject-list {
+            display: flex;
+        }
+
+        .item-percentage {
+            display: inline;
+        }
+    }
+
+    @media (max-width: 550px) {
+        .item-percentage {
+            display: none;
+        }
+    }
+
+    @media (max-width: 460px) {
+        .subject-list {
+            display: none;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .chart-title {
+            position: static;
+            margin-bottom: 10px;
+        }
+
+        .subject-list {
+            display: flex;
+            position: static;
+
+            margin-left: 16px;
+        }
+    }
+</style>

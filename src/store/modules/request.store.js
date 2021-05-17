@@ -1,5 +1,6 @@
 import { db, storage } from '../../main';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
+import { getNowISOString } from '../../utils/date';
 
 const initialState = () => ({
     questionRequests: [],
@@ -7,7 +8,10 @@ const initialState = () => ({
     filteredRequests: [],
     currentRequestsPage: [],
     lastRequestDocument: null,
-    deleteMarkQuestions: []
+    deleteMarkQuestions: [],
+    lastPendentRequests: [],
+    currentUserRequests: [],
+    otherUserRequests: []
 });
 
 const state = initialState();
@@ -30,6 +34,15 @@ const mutations = {
     },
     setCurrentRequestsPage(state, data) {
         state.currentRequestsPage = data;
+    },
+    setLastPendentRequests(state, data) {
+        state.lastPendentRequests = data;
+    },
+    setCurrentUserRequests(state, data) {
+        state.currentUserRequests = data;
+    },
+    setOtherUserRequests(state, data) {
+        state.otherUserRequests = data;
     },
     addDeleteMarkRequest(state, data) {
         state.deleteMarkRequests.push(data);
@@ -89,16 +102,17 @@ const mutations = {
         }
     },
     updateRequest(state, data) {
-        const requests = state.requests;
+        const requests = {...state.requests};
         for(let key in requests) {
             if(requests[key]) {
                 requests[key].forEach((item, index) => {
                     if(item.iq === data.iq) {
-                        state.requests[key][index] = { ...data, user: item.user };
+                        requests[key][index] = { ...data, user: item.user };
                     }
                 });
             }
         }
+        state.requests = requests;
     },
     updateFilteredRequest(state, data) {
         const requests = [...state.filteredRequests];
@@ -116,7 +130,7 @@ const mutations = {
                 requests[index] = data;
             }
         });
-        state.currentRequestsPage = requests;
+        state.currentRequestsPage = [...requests];
     },
     removeRequest(state, data) {
         const requests = state.requests;
@@ -153,8 +167,12 @@ const actions = {
     createQuestionRequest({ commit }, payload) {
         commit('setLoading', true);
 
+        const createdDate = getNowISOString();
+
         const request = {
             iq: payload.iq,
+            created: createdDate,
+            updated: createdDate,
             user: {
                 name: payload.name,
                 email: payload.email
@@ -219,21 +237,23 @@ const actions = {
         commit('setLoading', true);
         const { mode, request } = payload;
 
+        const toUpdate = { ...request, status: payload.status, updated: getNowISOString() };
+
         db.collection('question-requests').where('iq', '==', request.iq).get()
             .then(snapshot => {
                 if(mode === 'sttUpdate') {
-                    snapshot.docs[0].ref.update({ status: payload.status })
+                    snapshot.docs[0].ref.update({ status: payload.status, updated: getNowISOString() })
                         .then(() => {
                             request.status = payload.status;
-                            commit('updateRequest', request);
-                            commit('updateCurrentRequestsPage', request);
+                            commit('updateRequest', toUpdate);
+                            commit('updateCurrentRequestsPage', toUpdate);
                             commit('setLoading', false);
                         });
                 } else {
-                    snapshot.docs[0].ref.update(request)
+                    snapshot.docs[0].ref.update(toUpdate)
                         .then(() => {
-                            commit('updateRequest', request);
-                            commit('updateCurrentRequestsPage', request);
+                            commit('updateRequest', toUpdate);
+                            commit('updateCurrentRequestsPage', toUpdate);
                             commit('setLoading', false);
                             commit('setSuccess', 'Solicitação editada com sucesso!');
                         });
@@ -319,7 +339,7 @@ const actions = {
             if(claims['admin']) {
                 ref = db.collection('question-requests').orderBy('iq');
             } else {
-                ref = db.collection('question-requests').where('user.email', '==', userInfo.email);
+                ref = db.collection('question-requests').orderBy('iq').where('user.email', '==', userInfo.email);
             }
 
             if(mode === 'first') {
@@ -458,6 +478,8 @@ const actions = {
 
                 const request = {
                     iq: data.iq,
+                    created: data.created,
+                    updated: data.updated,
                     subject: data.subject,
                     question: data.question,
                     knowledge: data.knowledge,
@@ -505,6 +527,8 @@ const actions = {
 
                     const request = {
                         iq: data.iq,
+                        created: data.created,
+                        updated: data.updated,
                         subject: data.subject,
                         question: data.question,
                         knowledge: data.knowledge,
@@ -726,6 +750,70 @@ const actions = {
                 createErrorLog('Request Approved Delete', error.message, { payload });
             });
     },
+    loadLastPendentRequests({ commit }, payload) {
+        commit('setLoading', true);
+
+        const data = [];
+
+        db.collection('question-requests')
+            .orderBy('updated', 'desc')
+            .where('status', '==', 'Pendente')
+            .limit(payload ? payload.limit : 5)
+            .get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
+            })
+            .then(() => {
+                commit('setLastPendentRequests', data);
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                commit('setLoading', false);
+                const errorModel = showErrorMessage('load', 'Solicitações Pendentes', error.message);
+                commit('setError', { message: errorModel });
+                createErrorLog('Pendent Requests Loading', error.message, { payload });
+            });
+    },
+    loadUserRequests({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { email, mode, limit } = payload;
+
+        const data = [];
+
+        const reference = db.collection('question-requests');
+
+        let request = null;
+
+        if (mode === 'other') {
+            request = reference.orderBy('user.email').orderBy('updated', 'desc').where('user.email', '!=', email);
+        } else {
+            request = reference.orderBy('updated', 'desc').where('user.email', '==', email);
+        }
+
+        request.limit(limit || 5).get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    data.push(doc.data());
+                });
+            })
+            .then(() => {
+                if (mode === 'other') {
+                    commit('setOtherUserRequests', data);
+                } else {
+                    commit('setCurrentUserRequests', data);
+                }
+                commit('setLoading', false);
+            })
+            .catch(error => {
+                commit('setLoading', false);
+                const errorModel = showErrorMessage('load', mode === 'other' ? 'Solicitações Pendentes' : 'Solicitações do Usuário', error.message);
+                commit('setError', { message: errorModel });
+                createErrorLog('Pendent User Requests Load', error.message, { payload });
+            });
+    },
     resetRequests({ commit }) {
         commit('RESETRequests');
     }
@@ -746,6 +834,15 @@ const getters = {
     },
     getFilteredRequests(state) {
         return state.filteredRequests;
+    },
+    getLastPendentRequests(state) {
+        return state.lastPendentRequests;
+    },
+    getCurrentUserRequests(state) {
+        return state.currentUserRequests;
+    },
+    getOtherUserRequests(state) {
+        return state.otherUserRequests;
     }
 }
 

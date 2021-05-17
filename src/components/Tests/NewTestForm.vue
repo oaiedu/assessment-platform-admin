@@ -542,13 +542,6 @@
                                     this.testItems.push(element);
                                 });
 
-                                const now = new Date();
-                                const createdHour = parseInt(now.toLocaleTimeString().split(':')[0]);
-                                const isAfterNoon = now.toLocaleString().split(':')[2].includes('PM');
-                                const createdDate = now.toISOString().split('T')[0] + 'T'
-                                    + (isAfterNoon ? (createdHour + 12) : (createdHour < 10 ? '0' + createdHour : createdHour))
-                                    + now.toISOString().split('T')[1].slice(2);
-
                                 const testData = {
                                     title: this.testName,
                                     questions: this.testItems,
@@ -557,8 +550,7 @@
                                         name: this.$store.getters.userInfo.name,
                                         email: this.$store.getters.userInfo.email
                                     },
-                                    created: createdDate,
-                                    edited: "",
+                                    editedBy: null,
                                     purpose: this.purpose
                                 }
 

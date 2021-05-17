@@ -294,8 +294,8 @@
                                 })
                         } else {
                             this.$store.dispatch('createQuestion', { question: toCreate, isRequest: true })
-                                .then(() => {
-                                    this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
+                                .then(async () => {
+                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
                                     this.$store.commit('setSuccess', 'Solicitação aprovada com sucesso!');
                                 });
                         }
@@ -315,8 +315,8 @@
                         this.questionTests = result;
                         if(result.length === 0) {
                             this.$store.dispatch('changeDeleteStatusQuestions', { iq: request.iq, isSearching: false })
-                                .then(() => {
-                                    this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', request });
+                                .then(async () => {
+                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', request });
                                     this.$store.commit('setSuccess', 'Solicitação rejeitada com sucesso!');
                                 });
                         } else {

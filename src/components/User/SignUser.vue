@@ -104,7 +104,7 @@
                     style="padding: 0;"
                     text
                     color='blue'
-                    @click="SignIn"
+                    @click="signIn"
                     :ripple="false" >
                     <strong>Entrar</strong>
                 </v-btn>
@@ -115,7 +115,7 @@
                     style="padding: 0;"
                     text
                     color='blue'
-                    @click="SignUp"
+                    @click="signUp"
                     :ripple="false" >
                     <strong>Registrar-se</strong>
                 </v-btn>
@@ -141,9 +141,6 @@
             comparePassword() {
                 return this.password === this.confirmPassword || 'As senhas não correspondem!';
             },
-            user () {
-                return this.$store.getters.user;
-            },
             error () {
                 return this.$store.getters.error;
             },
@@ -152,12 +149,12 @@
             }
         },
         methods: {
-            SignUp() {
+            signUp() {
                 this.password = '';
                 this.showSignUp = true;
                 this.showSignIn = false;
             },
-            SignIn() {
+            signIn() {
                 this.password = '';
                 this.confirmPassword = '';
                 this.showSignUp = false;
@@ -165,15 +162,9 @@
             },
             onSignin () {
                 this.$store.dispatch('signUserIn', {email: this.email, password: this.password});
-                if(window.location.pathname !== '/') {
-                    this.$router.push('/');
-                }
             },
             onSignup() {
                 this.$store.dispatch('signUserUp', {name: this.name, email: this.email, password: this.password});
-                if(window.location.pathname !== '/') {
-                    this.$router.push('/');
-                }
             },
             back() {
                 this.$store.commit("clearError")

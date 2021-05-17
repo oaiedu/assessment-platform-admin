@@ -180,7 +180,7 @@
                 printDialog: false,
                 testPurpose: "",
                 testCreator: "",
-                testEditedDate: "",
+                testEditedData: "",
                 testQuestions: null,
                 testTitle: "",
                 confirmTitle: false,
@@ -289,7 +289,15 @@
             } else {
                 this.testTitle = test.title.toUpperCase();
                 this.testPurpose = test.purpose;
-                this.testEditedDate = test.edited;
+
+                const updated = test.updated;
+                const updatedDate = updated.split('T')[0];
+                const updatedTime = updated.split('T')[1].split('.')[0];
+                const day = updatedDate.substr(8, 2);
+                const month = updatedDate.substr(5, 2);
+                const year = updatedDate.substr(0, 4);
+
+                this.testEditedDate = `${test.editedBy.name} - ${day}/${month}/${year} ${updatedTime}`;
                 this.testCreator = test.user.name;
 
                 this.$store.dispatch('loadTestQuestions', test);
