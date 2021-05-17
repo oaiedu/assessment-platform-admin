@@ -48,6 +48,13 @@
     <v-main>
       <Error />
       <Success />
+      <v-dialog
+        v-if="user && !user.name"
+        v-model="userNameModal"
+        persistent
+        width="500">
+        <UserNameModal @continueClick="updateUserName($event)" />
+      </v-dialog>
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -56,6 +63,7 @@
 <script>
     import Error from '../components/Error';
     import Success from '../components/Success';
+    import UserNameModal from '../components/User/UserNameModal';
     import {
         mdiLogoutVariant,
         mdiHome,
@@ -71,11 +79,13 @@
         props: { source: String },
         components: {
             Error,
-            Success
+            Success,
+            UserNameModal
         },
         data: () => ({
             drawer: null,
-            logoutIcon: mdiLogoutVariant
+            logoutIcon: mdiLogoutVariant,
+            userNameModal: true
         }),
         computed: {
             currentUserClaims() {
@@ -189,6 +199,9 @@
                     const image = document.getElementsByClassName('display-profile-image');
                     if (image && image[0]) image[0].src = this.user.profileImages;
                 }
+            },
+            updateUserName(name) {
+                this.$store.dispatch('updateUser', { name, profileImages: this.user.profileImages });
             }
         },
         watch: {
