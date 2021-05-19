@@ -1,44 +1,50 @@
 <template>
     <v-card width="100%" height="100%" class="last-data">
         <div class="last-data-container">
-            <div class="last-backup" v-if="lastBackup">
-                <div class="icon-container">
-                    <v-icon size="26" color="#219653">{{ mdiCloud }}</v-icon>
+            <h1 class="last-data-title">Últimos registros</h1>
+            <div class="last-data-sub-container">
+                <div class="last-backup">
+                    <div class="icon-container">
+                        <v-icon size="26" color="#219653">{{ mdiCloud }}</v-icon>
+                    </div>
+                    <div class="data-info">
+                        <span class="info-title">Backup</span>
+                        <span class="backup-id" v-if="lastBackup">
+                            {{ lastBackup.id }}
+                            <span class="creation-date">{{ formatDate(lastBackup.start) }}</span>
+                        </span>
+                        <span class="backup-id" v-else>Ainda não há backups</span>
+                    </div>
+                    <div class="creation-date" v-if="lastBackup">{{ formatDate(lastBackup.start) }}</div>
                 </div>
-                <div class="data-info">
-                    <span class="info-title">Último Backup</span>
-                    <span class="backup-id">
-                        {{ lastBackup.id }}
-                        <span class="creation-date">{{ formatDate(lastBackup.start) }}</span>
-                    </span>
+                <div class="last-error-log">
+                    <div class="icon-container">
+                        <v-icon size="26" color="#FF2233">{{ mdiFileAlertOutline }}</v-icon>
+                    </div>
+                    <div class="data-info">
+                        <span class="info-title">Registro de Erro</span>
+                        <span class="log-type" v-if="lastLog">
+                            {{ lastLog.type }}
+                            <span class="creation-date">{{ formatDate(lastLog.date) }}</span>
+                        </span>
+                        <span class="log-type" v-else>Ainda não há erros</span>
+                    </div>
+                    <div class="creation-date" v-if="lastLog">{{ formatDate(lastLog.date) }}</div>
                 </div>
-                <div class="creation-date">{{ formatDate(lastBackup.start) }}</div>
-            </div>
-            <div class="last-error-log" v-if="lastLog">
-                <div class="icon-container">
-                    <v-icon size="26" color="#FF2233">{{ mdiFileAlertOutline }}</v-icon>
+                <div class="last-user" v-if="lastUser">
+                    <div class="icon-container">
+                        <v-icon size="30" color="#2F80ED">{{ mdiAccount }}</v-icon>
+                    </div>
+                    <div class="data-info">
+                        <span class="info-title">Usuário Criado</span>
+                        <span class="user-name" v-if="lastUser">
+                            {{ lastUser.name }}
+                            <span class="creation-date">{{ formatDate(lastUser.created) }}</span>
+                        </span>
+                        <span class="user-name" v-else>Nenhum usuário registrado</span>
+                    </div>
+                    <div class="creation-date" v-if="lastUser">{{ formatDate(lastUser.created) }}</div>
                 </div>
-                <div class="data-info">
-                    <span class="info-title">Último Registro de Erro</span>
-                    <span class="log-type">
-                        {{ lastLog.type }}
-                        <span class="creation-date">{{ formatDate(lastLog.date) }}</span>
-                    </span>
-                </div>
-                <div class="creation-date">{{ formatDate(lastLog.date) }}</div>
-            </div>
-            <div class="last-user" v-if="lastUser">
-                <div class="icon-container">
-                    <v-icon size="30" color="#2F80ED">{{ mdiAccount }}</v-icon>
-                </div>
-                <div class="data-info">
-                    <span class="info-title">Último Usuário Criado</span>
-                    <span class="user-name">
-                        {{ lastUser.name }}
-                        <span class="creation-date">{{ formatDate(lastUser.created) }}</span>
-                    </span>
-                </div>
-                <div class="creation-date">{{ formatDate(lastUser.created) }}</div>
             </div>
         </div>
     </v-card>
@@ -109,12 +115,26 @@
     .last-data-container {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
 
         width: 100%;
         height: 100%;
 
         padding: 20px;
+    }
+
+    .last-data-sub-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+    }
+
+    .last-data-title {
+        color: #555;
+        font-size: 1.2rem;
+        font-weight: 500;
+
+        margin-bottom: 10px;
     }
 
     .icon-container {
@@ -123,6 +143,7 @@
         align-items: center;
 
         height: 50px;
+        min-width: 50px;
         width: 50px;
 
         margin-right: 10px;
@@ -155,12 +176,17 @@
         flex-direction: column;
         justify-content: center;
         flex-grow: 1;
+        width: 50%;
     }
 
     .backup-id,
     .log-type,
     .user-name {
         font-size: 0.95rem;
+
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
     .data-info .creation-date {
@@ -182,6 +208,10 @@
     .info-title {
         color: #555;
         font-weight: 500;
+
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
     .creation-date {
@@ -197,23 +227,45 @@
         .data-info .creation-date {
             display: block;
         }
+
+        .last-backup,
+        .last-error-log,
+        .last-user {
+            width: 100%;
+        }
     }
 
     @media(max-width: 900px) {
-        .last-data-container {
+        .last-data-sub-container {
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
         }
+
+        .last-backup,
+        .last-error-log,
+        .last-user {
+            width: 32%;
+        }
+
+        .last-backup {
+            width: 28%;
+        }
     }
 
     @media(max-width: 760px) {
-        .last-data-container {
+        .last-data-sub-container {
             flex-direction: column;
             align-items: flex-start;
             justify-content: space-between;
             gap: 10px;
+        }
+
+        .last-backup,
+        .last-error-log,
+        .last-user {
+            width: 100%;
         }
     }
 
@@ -228,12 +280,6 @@
 
         .data-info .creation-date {
             display: none;
-        }
-
-        .last-backup,
-        .last-error-log,
-        .last-user {
-            width: 100%;
         }
     }
 
