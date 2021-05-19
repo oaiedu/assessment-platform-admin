@@ -2,8 +2,15 @@
     <v-card width="100%" height="100%" class="last-docs">
         <div class="last-docs-container">
             <h2 class="card-title">Documentos recentes</h2>
+            <span
+                class="see-all"
+                v-if="documents && documents.length >= 6"
+                @click="pushUrl()"
+            >
+                Ver todas
+            </span>
             <div v-if="documents && documents.length > 0" class="documents" :style="getFlexStyle">
-                <div v-for="item in documents" :key="item.id" class="document-row">
+                <div v-for="item in documents" :key="item.id" class="document-row" @click="pushUrl(item.id)">
                     <div class="name">{{ item.name }}</div>
                     <div class="date">{{ formatDate(item.updated) }}</div>
                 </div>
@@ -56,6 +63,13 @@
                 } else {
                     return `${this.months[parseInt(month)].substr(0, 3)} ${day} ${year}`;
                 }
+            },
+            pushUrl(id) {
+                if (id) {
+                    this.$router.push('/papers?id=' + id);
+                } else {
+                    this.$router.push('/papers');
+                }
             }
         },
         mounted() {
@@ -99,6 +113,23 @@
         margin-bottom: 10px;
     }
 
+    .see-all {
+        position: absolute;
+        left: 220px;
+        top: 25px;
+
+        color: #555;
+        font-size: 0.8rem;
+
+        cursor: pointer;
+
+        transition: all 0.2s;
+    }
+
+    .see-all:hover {
+        color: #2196F3;
+    }
+
     .documents {
         display: flex;
         flex-direction: column;
@@ -114,6 +145,8 @@
         gap: 10px;
 
         width: 100%;
+
+        cursor: pointer;
     }
 
     .document-row .name {
@@ -153,6 +186,12 @@
 
         .last-docs-container {
             padding-bottom: 20px;
+        }
+    }
+
+    @media (max-width: 320px) {
+        .see-all {
+            display: none;
         }
     }
 </style>
