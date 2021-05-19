@@ -2,6 +2,13 @@
     <v-card width="100%" height="100%" class="pendent-requests">
         <div class="pendent-requests-container">
             <h2 class="card-title">{{ cardTitle }}</h2>
+            <span
+                class="see-all"
+                v-if="userClaims['admin'] && requests && requests.length >= limit"
+                @click="pushUrl"
+            >
+                Ver todas
+            </span>
             <div v-if="requests && requests.length > 0" class="requests" :style="getFlexStyle">
                 <div v-for="item in requests" :key="item.iq" class="request-row">
                     <div class="iq-container">{{ item.iq }}</div>
@@ -26,6 +33,10 @@
             windowWidth: Number
         },
         computed: {
+            limit() {
+                return this.windowWidth > 1000 || this.windowWidth <= 660 ? 5
+                    : this.windowWidth > 960 || (this.windowWidth <= 900 && this.windowWidth > 760) ? 6 : 4;
+            },
             requests() {
                 return this.userClaims['appraiser'] ? this.$store.getters.getOtherUserRequests : this.$store.getters.getLastPendentRequests;
             },
@@ -54,13 +65,16 @@
                 }
             }
         },
+        methods: {
+            pushUrl() {
+                this.$router.push('/inbox');
+            }
+        },
         created() {
-            const limit = this.windowWidth > 1000 ? 5
-                : this.windowWidth > 960 || this.windowWidth <= 900 ? 6 : 4;
             if (this.userClaims['appraiser']) {
-                this.$store.dispatch('loadUserRequests', { email: this.userInfo.email, mode: 'other', limit });
+                this.$store.dispatch('loadUserRequests', { email: this.userInfo.email, mode: 'other', limit: this.limit });
             } else {
-                this.$store.dispatch('loadLastPendentRequests', { limit });
+                this.$store.dispatch('loadLastPendentRequests', { limit: this.limit });
             }
         }
     }
@@ -93,6 +107,23 @@
         font-weight: 500;
 
         margin-bottom: 20px;
+    }
+
+    .see-all {
+        position: absolute;
+        left: 230px;
+        top: 25px;
+
+        color: #555;
+        font-size: 0.8rem;
+
+        cursor: pointer;
+
+        transition: all 0.2s;
+    }
+
+    .see-all:hover {
+        color: #2196F3;
     }
 
     .requests {
@@ -208,6 +239,12 @@
     @media (max-width: 660px) {
         .request-knowledge {
             display: block;
+        }
+    }
+
+    @media (max-width: 330px) {
+        .see-all {
+            display: none;
         }
     }
 </style>

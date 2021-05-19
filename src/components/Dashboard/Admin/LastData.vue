@@ -3,45 +3,54 @@
         <div class="last-data-container">
             <h1 class="last-data-title">Últimos registros</h1>
             <div class="last-data-sub-container">
-                <div class="last-backup">
+                <div
+                    class="last-backup info-row"
+                    :class="lastBackup ? 'clickable' : ''"
+                    @click="lastBackup && pushUrl('backups')">
                     <div class="icon-container">
                         <v-icon size="26" color="#219653">{{ mdiCloud }}</v-icon>
                     </div>
                     <div class="data-info">
                         <span class="info-title">Backup</span>
-                        <span class="backup-id" v-if="lastBackup">
+                        <span class="backup-id info-id" v-if="lastBackup">
                             {{ lastBackup.id }}
                             <span class="creation-date">{{ formatDate(lastBackup.start) }}</span>
                         </span>
-                        <span class="backup-id" v-else>Ainda não há backups</span>
+                        <span class="backup-id info-id" v-else>Ainda não há backups</span>
                     </div>
                     <div class="creation-date" v-if="lastBackup">{{ formatDate(lastBackup.start) }}</div>
                 </div>
-                <div class="last-error-log">
+                <div
+                    class="last-error-log info-row"
+                    :class="lastLog ? 'clickable' : ''"
+                    @click="lastLog && pushUrl('logs')">
                     <div class="icon-container">
                         <v-icon size="26" color="#FF2233">{{ mdiFileAlertOutline }}</v-icon>
                     </div>
                     <div class="data-info">
                         <span class="info-title">Registro de Erro</span>
-                        <span class="log-type" v-if="lastLog">
+                        <span class="log-type info-id" v-if="lastLog">
                             {{ lastLog.type }}
                             <span class="creation-date">{{ formatDate(lastLog.date) }}</span>
                         </span>
-                        <span class="log-type" v-else>Ainda não há erros</span>
+                        <span class="log-type info-id" v-else>Ainda não há erros</span>
                     </div>
                     <div class="creation-date" v-if="lastLog">{{ formatDate(lastLog.date) }}</div>
                 </div>
-                <div class="last-user" v-if="lastUser">
+                <div
+                    class="last-user info-row"
+                    :class="lastUser ? 'clickable' : ''"
+                    @click="lastUser && pushUrl('users')">
                     <div class="icon-container">
                         <v-icon size="30" color="#2F80ED">{{ mdiAccount }}</v-icon>
                     </div>
                     <div class="data-info">
                         <span class="info-title">Usuário Criado</span>
-                        <span class="user-name" v-if="lastUser">
+                        <span class="user-name info-id" v-if="lastUser">
                             {{ lastUser.name }}
                             <span class="creation-date">{{ formatDate(lastUser.created) }}</span>
                         </span>
-                        <span class="user-name" v-else>Nenhum usuário registrado</span>
+                        <span class="user-name info-id" v-else>Nenhum usuário registrado</span>
                     </div>
                     <div class="creation-date" v-if="lastUser">{{ formatDate(lastUser.created) }}</div>
                 </div>
@@ -99,6 +108,9 @@
                 } else {
                     return `${this.months[parseInt(month)].substr(0, 3)} ${day} ${year}`;
                 }
+            },
+            pushUrl(param) {
+                this.$router.push('/admin?tab=' + param);
             }
         },
         mounted() {
@@ -151,12 +163,22 @@
         border-radius: 5px;
     }
 
-    .last-backup,
-    .last-error-log,
-    .last-user {
+    .info-row {
         display: flex;
         flex-direction: row;
         align-items: center;
+    }
+
+    .info-row.clickable {
+        cursor: pointer;
+        border-radius: 5px;
+
+        transition: all 0.3s;
+    }
+
+    .info-row.clickable:hover {
+        background-color: #d4d4d433;
+        transform: translateY(-2px);
     }
 
     .last-backup .icon-container {
@@ -179,9 +201,7 @@
         width: 50%;
     }
 
-    .backup-id,
-    .log-type,
-    .user-name {
+    .info-id {
         font-size: 0.95rem;
 
         text-overflow: ellipsis;
@@ -228,9 +248,7 @@
             display: block;
         }
 
-        .last-backup,
-        .last-error-log,
-        .last-user {
+        .info-row {
             width: 100%;
         }
     }
@@ -243,9 +261,7 @@
             gap: 10px;
         }
 
-        .last-backup,
-        .last-error-log,
-        .last-user {
+        .info-row {
             width: 32%;
         }
 
@@ -262,9 +278,7 @@
             gap: 10px;
         }
 
-        .last-backup,
-        .last-error-log,
-        .last-user {
+        .info-row {
             width: 100%;
         }
     }
@@ -298,9 +312,7 @@
             font-size: 0.9rem;
         }
 
-        .backup-id,
-        .log-type,
-        .user-name {
+        .info-id {
             font-size: 0.85rem;
         }
 

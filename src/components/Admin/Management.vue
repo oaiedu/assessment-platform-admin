@@ -63,14 +63,18 @@
                 mdiDatabase,
                 mdiAccount,
                 mdiFileDocument,
-                tab: 0,
+                tab: null,
+                isBackupsLoaded: false,
                 isUsersLoaded: false,
                 isLogsLoaded: false
             }
         },
         watch: {
             tab(number) {
-                if (number === 1 && !this.isUsersLoaded) {
+                if (number === 0 && !this.isBackupsLoaded) {
+                    this.$store.dispatch('loadBackups');
+                    this.isBackupsLoaded = true;
+                } else if (number === 1 && !this.isUsersLoaded) {
                     this.$store.dispatch('loadUsers');
                     this.isUsersLoaded = true;
                 } else if (number === 2 && !this.isLogsLoaded) {
@@ -80,11 +84,18 @@
             }
         },
         created() {
-            this.$store.dispatch('loadBackups');
+            const queryTab = this.$route.query.tab;
+            if (queryTab) {
+                if (queryTab === 'backups') {
+                    this.tab = 0;
+                } else if (queryTab === 'users') {
+                    this.tab = 1;
+                } else {
+                    this.tab = 2;
+                }
+            } else {
+                this.tab = 0;
+            }
         }
     }
 </script>
-
-<style>
-
-</style>
