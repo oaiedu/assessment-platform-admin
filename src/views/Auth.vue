@@ -141,7 +141,7 @@
         }
     }
 
-    @media(max-width: 400px) {
+    @media(max-width: 430px) {
         .sign-card {
             width: 100%;
             height: 100%;
