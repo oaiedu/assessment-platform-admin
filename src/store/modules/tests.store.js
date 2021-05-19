@@ -545,7 +545,7 @@ const actions = {
                 createErrorLog('Test Confirm Delete', error.message, { payload });
             });
     },
-    deleteTests({ commit }) {
+    deleteTests({ commit, dispatch }) {
         const data = [];
 
         db.collection("tests").where('toDelete.status', '==', false).get()
@@ -567,12 +567,15 @@ const actions = {
                         console.error(error);
                     });
             })
+            .then(() => {
+                if (data.length > 0) dispatch('removeTestsByWeek', { tests: data });
+            })
             .catch(error => {
                 console.error("Error removing test: ", error);
                 createErrorLog('Test DB Delete', error.message, { data });
             });
     },
-    createTest({ commit }, payload) {
+    createTest({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const createdDate = getNowISOString();
@@ -606,6 +609,7 @@ const actions = {
                         document.ref.update({ tests: size + 1 })
                             .then(() => {
                                 commit('addRemoveSize', { key: 'tests', data: size + 1 });
+                                dispatch('addTestsByWeek');
                             })
                             .catch(error => {
                                 console.error(error);
@@ -678,7 +682,7 @@ const actions = {
             })
             .catch(error => {
                 commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Provas' + error.message);
+                const errorModel = showErrorMessage('load', 'Provas', error.message);
                 commit('setError', { message: errorModel });
                 createErrorLog('Last Tests Loading', error.message, { payload });
             });
@@ -723,9 +727,15 @@ const getters = {
     },
     findTestById: state => id => {
         let test = null;
-        for(let key in state.tests) {
-            test = state.tests[key].find(t => t.id == id);
+
+        test = state.lastTests.find(t => t.id == id);
+
+        if (!test) {
+            for(let key in state.tests) {
+                test = state.tests[key].find(t => t.id == id);
+            }
         }
+
         return test;
     }
 }
