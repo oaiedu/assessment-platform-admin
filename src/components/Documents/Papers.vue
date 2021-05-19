@@ -344,6 +344,17 @@
             this.deleteConfirmed = false;
             this.$store.dispatch('checkDeleteMarkPapers');
             this.$store.dispatch("loadFOLPaperPage", { page: 1, itemsPerPage: this.itemsPerPage, mode: 'first' });
+
+            const id = this.$route.query.id;
+            if (id) {
+                const paper = this.$store.getters.findPaperById(id);
+                if (paper) {
+                    this.dialogPDF = true;
+                    this.selectedEdit = paper;
+                } else {
+                    this.$router.push('/papers');
+                }
+            }
         },
         beforeDestroy() {
             this.search = '';
