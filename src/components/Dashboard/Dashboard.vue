@@ -6,7 +6,7 @@
         <LastDocs v-else-if="userClaims && userClaims['teacher']" :windowWidth="windowWidth" />
         <LastRequests v-else-if="userClaims && userClaims['appraiser']" :windowWidth="windowWidth" />
         <QuestionBySubject :windowWidth="windowWidth" />
-        <QuestionByWeek :windowWidth="windowWidth" />
+        <TestsByWeek :windowWidth="windowWidth" />
         <PendentRequests v-if="userClaims && !userClaims['student']" :windowWidth="windowWidth" />
         <TestsTable :windowWidth="windowWidth" />
     </div>
@@ -19,7 +19,7 @@
     import LastRequests from './Appraiser/LastRequests';
     import LastDocs from './Teacher/LastDocs';
     import QuestionBySubject from './QuestionBySubject';
-    import QuestionByWeek from './QuestionByWeek';
+    import TestsByWeek from './TestsByWeek';
     import PendentRequests from './PendentRequests';
     import TestsTable from './TestsTable';
 
@@ -32,7 +32,7 @@
             LastRequests,
             LastDocs,
             QuestionBySubject,
-            QuestionByWeek,
+            TestsByWeek,
             PendentRequests,
             TestsTable
         },
@@ -46,21 +46,7 @@
                 return this.$store.getters.getUserClaims;
             },
             className() {
-                const claims = this.userClaims;
-
-                if (claims) {
-                    if (claims['admin']) {
-                        return 'admin';
-                    } else if (claims['appraiser']) {
-                        return 'appraiser';
-                    } else if (claims['teacher']) {
-                        return 'teacher';
-                    } else {
-                        return 'student';
-                    }
-                }
-
-                return '';
+                return this.userClaims ? Object.entries(this.userClaims).filter(role => role[1])[0][0] : '';
             }
         },
         methods: {
@@ -96,21 +82,21 @@
     .dashboard.admin {
         grid-template-areas:
             "user-info data-amount data-amount"
-            "last-data question-by-subject question-by-week"
+            "last-data question-by-subject tests-by-week"
             "pendent-requests tests-table tests-table";
     }
 
     .dashboard.appraiser {
         grid-template-areas:
             "user-info data-amount data-amount"
-            "last-requests question-by-subject question-by-week"
+            "last-requests question-by-subject tests-by-week"
             "pendent-requests tests-table tests-table";
     }
 
     .dashboard.teacher {
         grid-template-areas:
             "user-info data-amount data-amount"
-            "last-docs question-by-subject question-by-week"
+            "last-docs question-by-subject tests-by-week"
             "pendent-requests tests-table tests-table";
     }
 
@@ -118,7 +104,7 @@
         grid-template-areas:
             "user-info data-amount data-amount"
             "question-by-subject tests-table tests-table"
-            "question-by-week tests-table tests-table";
+            "tests-by-week tests-table tests-table";
     }
 
     .dashboard .display-profile {
@@ -137,8 +123,8 @@
         grid-area: question-by-subject;
     }
 
-    .dashboard .question-by-week {
-        grid-area: question-by-week;
+    .dashboard .tests-by-week {
+        grid-area: tests-by-week;
     }
 
     .dashboard .pendent-requests {
@@ -171,7 +157,7 @@
             grid-template-areas:
                 "user-info data-amount"
                 "last-data question-by-subject"
-                "pendent-requests question-by-week"
+                "pendent-requests tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -179,7 +165,7 @@
             grid-template-areas:
                 "user-info data-amount"
                 "last-requests question-by-subject"
-                "pendent-requests question-by-week"
+                "pendent-requests tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -187,7 +173,7 @@
             grid-template-areas:
                 "user-info data-amount"
                 "last-docs question-by-subject"
-                "pendent-requests question-by-week"
+                "pendent-requests tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -196,7 +182,7 @@
             grid-template-areas:
                 "user-info data-amount"
                 "question-by-subject tests-table"
-                "question-by-week tests-table";
+                "tests-by-week tests-table";
         }
     }
 
@@ -210,7 +196,7 @@
             grid-template-areas:
                 "user-info question-by-subject"
                 "data-amount question-by-subject"
-                "last-data question-by-week"
+                "last-data tests-by-week"
                 "pendent-requests pendent-requests"
                 "tests-table tests-table";
         }
@@ -219,7 +205,7 @@
             grid-template-areas:
                 "user-info question-by-subject"
                 "data-amount question-by-subject"
-                "last-requests question-by-week"
+                "last-requests tests-by-week"
                 "pendent-requests pendent-requests"
                 "tests-table tests-table";
         }
@@ -228,7 +214,7 @@
             grid-template-areas:
                 "user-info question-by-subject"
                 "data-amount question-by-subject"
-                "last-docs question-by-week"
+                "last-docs tests-by-week"
                 "pendent-requests pendent-requests"
                 "tests-table tests-table";
         }
@@ -238,7 +224,7 @@
             grid-template-rows: 120px 250px 350px;
             grid-template-areas:
                 "user-info data-amount"
-                "question-by-subject question-by-week"
+                "question-by-subject tests-by-week"
                 "tests-table tests-table";
         }
     }
@@ -254,7 +240,7 @@
                 "user-info data-amount"
                 "question-by-subject question-by-subject"
                 "last-data pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -263,7 +249,7 @@
                 "user-info data-amount"
                 "question-by-subject question-by-subject"
                 "last-requests pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -272,7 +258,7 @@
                 "user-info data-amount"
                 "question-by-subject question-by-subject"
                 "last-docs pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -281,7 +267,7 @@
             grid-template-areas:
                 "user-info data-amount"
                 "question-by-subject question-by-subject"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
     }
@@ -298,7 +284,7 @@
                 "question-by-subject question-by-subject"
                 "last-data last-data"
                 "pendent-requests pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -308,7 +294,7 @@
                 "question-by-subject question-by-subject"
                 "last-requests last-requests"
                 "pendent-requests pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -318,7 +304,7 @@
                 "question-by-subject question-by-subject"
                 "last-docs last-docs"
                 "pendent-requests pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -327,7 +313,7 @@
             grid-template-areas:
                 "user-info data-amount"
                 "question-by-subject question-by-subject"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
     }
@@ -344,7 +330,7 @@
                 "question-by-subject"
                 "last-data"
                 "pendent-requests"
-                "question-by-week"
+                "tests-by-week"
                 "tests-table";
         }
 
@@ -354,7 +340,7 @@
                 "question-by-subject"
                 "last-requests"
                 "pendent-requests"
-                "question-by-week"
+                "tests-by-week"
                 "tests-table";
         }
 
@@ -364,7 +350,7 @@
                 "question-by-subject"
                 "last-docs"
                 "pendent-requests"
-                "question-by-week"
+                "tests-by-week"
                 "tests-table";
         }
 
@@ -373,7 +359,7 @@
             grid-template-areas:
                 "data-amount data-amount"
                 "question-by-subject question-by-subject"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
     }
@@ -389,7 +375,7 @@
                 "data-amount data-amount"
                 "question-by-subject question-by-subject"
                 "last-data pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -398,7 +384,7 @@
                 "data-amount data-amount"
                 "question-by-subject question-by-subject"
                 "last-requests pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
 
@@ -407,7 +393,7 @@
                 "data-amount data-amount"
                 "question-by-subject question-by-subject"
                 "last-docs pendent-requests"
-                "question-by-week question-by-week"
+                "tests-by-week tests-by-week"
                 "tests-table tests-table";
         }
     }
@@ -424,7 +410,7 @@
                 "question-by-subject"
                 "last-data"
                 "pendent-requests"
-                "question-by-week"
+                "tests-by-week"
                 "tests-table";
         }
 
@@ -434,7 +420,7 @@
                 "question-by-subject"
                 "last-requests"
                 "pendent-requests"
-                "question-by-week"
+                "tests-by-week"
                 "tests-table";
         }
 
@@ -444,7 +430,7 @@
                 "question-by-subject"
                 "last-docs"
                 "pendent-requests"
-                "question-by-week"
+                "tests-by-week"
                 "tests-table";
         }
     }
@@ -458,11 +444,7 @@
 
     @media (max-width: 400px) {
         .dashboard {
-            grid-template-rows: 200px 400px 250px auto 250px 350px;
-        }
-
-        .dashboard.admin {
-            grid-template-rows: 200px 400px 250px auto 250px 350px;
+            grid-template-rows: 200px 400px 300px auto 250px 350px;
         }
 
         .dashboard.student {

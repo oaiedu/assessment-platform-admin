@@ -48,10 +48,10 @@ const actions = {
                 createErrorLog('Data Size Load', error.message, { data });
             });
     },
-    updateQuestionsByWeek({ commit, state }) {
+    addTestsByWeek({ commit, state }) {
         const thisWeek = getWeekInterval(new Date())[0];
 
-        let data = {...state.dataSize.questionsByWeek};
+        let data = {...state.dataSize.testsByWeek};
 
         const lastWeeks = Object.keys(data);
 
@@ -78,17 +78,55 @@ const actions = {
             data = { ...newData, [thisWeek]: 1 };
         }
 
-        console.log(data);
+        db.collection('data-size').get()
+            .then(snapshot => {
+                const doc = snapshot.docs[0];
+                if (doc) {
+                    doc.ref.update({ testsByWeek: data });
+                }
+            })
+            .then(() => {
+                commit('addRemoveSize', { key: 'testsByWeek', data });
+            })
+            .catch(error => {
+                const errorModel = showErrorMessage('edition', 'Data Size', error.message);
+                commit('setError', { message: errorModel });
+                createErrorLog('Data Size Update', error.message, { data });
+            });
+    },
+    async removeTestsByWeek({ commit, state }, payload) {
+        const { tests } = payload;
+
+        let data = {...state.dataSize.testsByWeek};
+
+        const lastWeeks = Object.keys(data);
+
+        const promises = tests.map(test => {
+            const date = test.created;
+            const year = date.substr(0, 4);
+            const month = date.substr(5, 2);
+            const day = date.substr(8, 2);
+
+            const removeWeek = getWeekInterval(new Date(`${year}/${month}/${day}`))[[0]];
+
+            if (lastWeeks.includes(removeWeek)) {
+                data[removeWeek] -= data[removeWeek] - 1 < 0 ? 0 : 1;
+            }
+
+            return removeWeek;
+        });
+
+        await Promise.all(promises);
 
         db.collection('data-size').get()
             .then(snapshot => {
                 const doc = snapshot.docs[0];
                 if (doc) {
-                    doc.ref.update({ questionsByWeek: data });
+                    doc.ref.update({ testsByWeek: data });
                 }
             })
             .then(() => {
-                commit('addRemoveSize', { key: 'questionsByWeek', data });
+                commit('addRemoveSize', { key: 'testsByWeek', data });
             })
             .catch(error => {
                 const errorModel = showErrorMessage('edition', 'Data Size', error.message);
@@ -108,12 +146,12 @@ const getters = {
     getNumberOfQuestionBySubject: state => subjectName => {
         return state.dataSize.questions.subject[subjectName];
     },
-    getQuestionsByWeek(state) {
-        return Object.fromEntries(Object.entries(state.dataSize.questionsByWeek).sort((a, b) => a[0] < b[0] ? -1 : 1));
+    getTestsByWeek(state) {
+        return Object.fromEntries(Object.entries(state.dataSize.testsByWeek).sort((a, b) => a[0] < b[0] ? -1 : 1));
     },
-    getQuestionsByWeekInterval(state) {
+    getTestsByWeekInterval(state) {
         const intervals = [];
-        Object.entries(state.dataSize.questionsByWeek).sort((a, b) => a[0] < b[0] ? -1 : 1).forEach(week => {
+        Object.entries(state.dataSize.testsByWeek).sort((a, b) => a[0] < b[0] ? -1 : 1).forEach(week => {
             const interval = getWeekInterval(new Date(`${week[0].substr(5, 2)}/${week[0].substr(8, 2)}/${week[0].substr(0, 4)}`));
             intervals.push(`${interval[0].substr(8, 2)}/${interval[0].substr(5, 2)} - ${interval[1].substr(8, 2)}/${interval[1].substr(5, 2)}`);
         });

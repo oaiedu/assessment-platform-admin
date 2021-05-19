@@ -752,7 +752,7 @@ const actions = {
             }
         });
     },
-    createQuestion({ commit, dispatch }, payload) {
+    createQuestion({ commit }, payload) {
         commit('setLoading', true);
 
         const createdDate = getNowISOString();
@@ -792,7 +792,6 @@ const actions = {
                         document.ref.update({ questions })
                             .then(() => {
                                 commit('addRemoveSize', { key: 'questions', data: questions });
-                                dispatch('updateQuestionsByWeek');
                             })
                             .catch(error => {
                                 console.error(error);

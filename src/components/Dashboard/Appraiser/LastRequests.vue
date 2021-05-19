@@ -1,20 +1,23 @@
 <template>
     <v-card width="100%" height="100%" class="last-requests">
-        <div v-if="requests && requests.length > 0" class="last-requests-container" :style="getFlexStyle">
-            <div v-for="item in requests" :key="item.iq" class="request-row">
-                <div class="details-container">
-                    <div class="iq">{{ item.iq }}</div>
-                    <div class="subject">{{ item.subject }}</div>
-                </div>
-                <div class="status"
-                    :style="{ color: getColor(item.status), backgroundColor: getColor(item.status) + '33' }"
-                >
-                    {{ item.status }}
+        <div class="last-requests-container">
+            <h1 class="last-requests-title">Suas solicitações</h1>
+            <div v-if="requests && requests.length > 0" class="last-requests-sub-container" :style="getFlexStyle">
+                <div v-for="item in requests" :key="item.iq" class="request-row">
+                    <div class="details-container">
+                        <div class="iq">{{ item.iq }}</div>
+                        <div class="subject">{{ item.subject }}</div>
+                    </div>
+                    <div class="status"
+                        :style="{ color: getColor(item.status), backgroundColor: getColor(item.status) + '33' }"
+                    >
+                        {{ item.status }}
+                    </div>
                 </div>
             </div>
-        </div>
-        <div v-else class="no-content">
-            Não há solicitações no momento
+            <div v-else class="no-content">
+                Não há solicitações no momento
+            </div>
         </div>
     </v-card>
 </template>
@@ -66,12 +69,20 @@
         display: flex;
         flex-direction: column;
 
-        position: relative;
-
         width: 100%;
         height: 100%;
 
         padding: 20px;
+    }
+
+    .last-requests-sub-container {
+        display: flex;
+        flex-direction: column;
+
+        position: relative;
+
+        flex-grow: 1;
+        width: 100%;
     }
 
     .no-content {
@@ -80,6 +91,14 @@
 
         color: #999;
         font-size: 1.2rem;
+    }
+
+    .last-requests-title {
+        color: #555;
+        font-size: 1.2rem;
+        font-weight: 500;
+
+        margin-bottom: 5px;
     }
 
     .request-row {
@@ -126,7 +145,7 @@
     }
 
     @media (min-width: 761px) and (max-width: 900px) {
-        .last-requests-container {
+        .last-requests-sub-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;

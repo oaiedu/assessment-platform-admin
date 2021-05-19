@@ -1,28 +1,28 @@
 <template>
-    <v-card width="100%" height="100%" class="question-by-week">
-        <div class="question-by-week-container" v-if="questionsByWeek && questionsByWeekInterval">
-            <h2 class="chart-title">Questões por semana</h2>
-            <span class="number-of-questions">
+    <v-card width="100%" height="100%" class="tests-by-week">
+        <div class="tests-by-week-container" v-if="testsByWeek && testsByWeekInterval">
+            <h2 class="chart-title">Provas por semana</h2>
+            <span class="number-of-tests">
                 Total:
                 <span
                     :style="{ color: colorPaleteList[colorPalete] }"
                     class="amount">
-                    {{ Object.values(questionsByWeek).reduce((a, b) => a + b, 0) }}
+                    {{ Object.values(testsByWeek).reduce((a, b) => a + b, 0) }}
                 </span>
             </span>
             <div class="details-container">
                 <span
-                    v-for="(item, index) in Object.entries(questionsByWeek)"
+                    v-for="(item, index) in Object.entries(testsByWeek)"
                     :key="index"
                     class="week-details" >
                     <span class="week-interval"> {{ getItemWeekInterval(item) }} </span>
                     <span class="week">Semana {{ index + 1 }}:</span>
                     <span class="week-amount"
-                        :class="item[1] === higherQuestionsAmount ? 'highlight' : ''"
-                        :style="{ color: item[1] === higherQuestionsAmount ? colorPaleteList[colorPalete] : '#222' }" >
+                        :class="item[1] === higherTestsAmount ? 'highlight' : ''"
+                        :style="{ color: item[1] === higherTestsAmount ? colorPaleteList[colorPalete] : '#222' }" >
                         {{ item[1] }}
                         <v-icon
-                            v-if="item[1] === higherQuestionsAmount"
+                            v-if="item[1] === higherTestsAmount"
                             size="18"
                             class="highlight-icon"
                             :color="colorPaleteList[colorPalete]" >{{ mdiStarCircle }}</v-icon>
@@ -57,7 +57,7 @@
     ]);
 
     export default {
-        name: 'QuestionByWeek',
+        name: 'TestsByWeek',
         components: {
             VChart
         },
@@ -81,14 +81,14 @@
             }
         },
         computed: {
-            questionsByWeek() {
-                return this.$store.getters.getQuestionsByWeek;
+            testsByWeek() {
+                return this.$store.getters.getTestsByWeek;
             },
-            questionsByWeekInterval() {
-                return this.$store.getters.getQuestionsByWeekInterval;
+            testsByWeekInterval() {
+                return this.$store.getters.getTestsByWeekInterval;
             },
-            higherQuestionsAmount() {
-                return Math.max(...Object.values(this.questionsByWeek));
+            higherTestsAmount() {
+                return Math.max(...Object.values(this.testsByWeek));
             },
             option() {
                 return {
@@ -100,14 +100,14 @@
                     xAxis: {
                         show: false,
                         type: 'category',
-                        data: this.questionsByWeekInterval
+                        data: this.testsByWeekInterval
                     },
                     yAxis: {
                         show: false,
                         type: 'value'
                     },
                     series: [{
-                        data: Object.values(this.questionsByWeek),
+                        data: Object.values(this.testsByWeek),
                         type: 'line',
                         smooth: true,
                         markLine: {
@@ -178,7 +178,7 @@
             getItemWeekInterval(item) {
                 if (item) {
                     const weekStart = `${item[0].substr(8, 2)}/${item[0].substr(5, 2)}`;
-                    const match = this.questionsByWeekInterval.find(q => q.includes(weekStart));
+                    const match = this.testsByWeekInterval.find(q => q.includes(weekStart));
                     return match || '';
                 }
 
@@ -192,7 +192,7 @@
 </script>
 
 <style scoped>
-    .question-by-week-container {
+    .tests-by-week-container {
         position: relative;
 
         height: 100%;
@@ -223,7 +223,7 @@
         width: 100%;
     }
 
-    .number-of-questions {
+    .number-of-tests {
         position: absolute;
         top: 56px;
         left: 20px;
@@ -231,7 +231,7 @@
         color: #999;
     }
 
-    .number-of-questions .amount {
+    .number-of-tests .amount {
         font-weight: 500;
     }
 

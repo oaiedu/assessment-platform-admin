@@ -8,17 +8,26 @@
             no-data-text='Não há provas a serem mostradas'
             loading-text="Carregando provas..."
             hide-default-footer
-            style="height: 100% !important;"
-            height="100%" >
+            style="height: calc(100% - 48px) !important;"
+            height="100%"
+            :item-class="itemRowStyle"
+            @click:row="onRowClick"
+        >
+            <template v-slot:top>
+                <v-toolbar dense flat color="white">
+                    <h1 class="table-title">Provas recentes</h1>
+                </v-toolbar>
+                <div class="title-divider" />
+            </template>
             <template v-slot:[`item.type`]='{ item }'>
                 <div class="type-container">
-                    <div class="icon-container" :style="{ backgroundColor: item.type === 'random' ? '#2196F344' : '#6755FA44' }">
+                    <div class="icon-container" :style="{ backgroundColor: getItemIconColor(item) + '44' }">
                         <v-icon v-if="item.type === 'selected'"
                             size="20"
-                            color="#6755FA">{{ mdiCheckboxMultipleMarked }}</v-icon>
+                            :color="getItemIconColor(item)">{{ mdiCheckboxMultipleMarked }}</v-icon>
                         <v-icon v-else
                             size="20"
-                            color="#2196F3">{{ mdiShuffleVariant }}</v-icon>
+                            :color="getItemIconColor(item)">{{ mdiShuffleVariant }}</v-icon>
                     </div>
                     <span class="type-text">
                         {{ item.type === 'selected' ? 'Selecionado' : 'Aleatório' }}
@@ -65,9 +74,29 @@
             },
             userClaims() {
                 return this.$store.getters.getUserClaims;
+            },
+            className() {
+                return this.userClaims ? Object.entries(this.userClaims).filter(role => role[1])[0][0] : '';
             }
         },
         methods: {
+            getItemIconColor(item) {
+                if (item.toDelete) {
+                    if (item.toDelete.status) {
+                        return '#ff0000';
+                    } else {
+                        return '#c4c4c4';
+                    }
+                }
+                return item.type === 'random' ? '#2196F3' : '#6755FA';
+            },
+            itemRowStyle(item) {
+                return item.toDelete
+                    ? (item.toDelete.status
+                        ? 'item-to-delete'
+                        : 'item-deleted')
+                    : 'item-active ' + this.className;
+            },
             formatDate(date) {
                 const year = date.substr(0, 4);
                 const month = date.substr(5, 2);
@@ -86,6 +115,11 @@
                     return `Ontem às ${testTime}`
                 } else {
                     return `${this.months[parseInt(month)].substr(0, 3)} ${day} ${year}`;
+                }
+            },
+            onRowClick(item) {
+                if (this.userClaims['admin'] || this.userClaims['teacher']) {
+                    this.$router.push('/tests/' + item.id);
                 }
             }
         },
@@ -114,6 +148,19 @@
         animation: animate-icon 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
+    .table-title {
+        color: #555;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    .title-divider {
+        height: 1px;
+        width: 100%;
+
+        background-color: #6755FA44;
+    }
+
     .type-container {
         display: flex;
         flex-direction: row;
@@ -127,5 +174,22 @@
         to {
             transform: scale(1);
         }
+    }
+</style>
+
+<style>
+    .dashboard-tests-table .item-to-delete {
+        color: #f00;
+        background-color: white !important;
+    }
+
+    .dashboard-tests-table .item-deleted {
+        color: #c4c4c4;
+        background-color: white !important;
+    }
+
+    .dashboard-tests-table .item-active.admin,
+    .dashboard-tests-table .item-active.teacher {
+        cursor: pointer !important;
     }
 </style>
