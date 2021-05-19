@@ -810,6 +810,19 @@ const getters = {
     },
     getLastPapers(state) {
         return state.lastPapers;
+    },
+    findPaperById: state => id => {
+        let paper = null;
+
+        paper = state.lastPapers.find(t => t.id == id);
+
+        if (!paper) {
+            for(let key in state.papers) {
+                paper = state.papers[key].find(t => t.id == id);
+            }
+        }
+
+        return paper;
     }
 }
 
