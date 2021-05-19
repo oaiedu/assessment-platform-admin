@@ -2,6 +2,13 @@
     <v-card width="100%" height="100%" class="last-requests">
         <div class="last-requests-container">
             <h1 class="last-requests-title">Suas solicitações</h1>
+            <span
+                class="see-all"
+                v-if="requests && requests.length >= 4"
+                @click="pushUrl"
+            >
+                Ver todas
+            </span>
             <div v-if="requests && requests.length > 0" class="last-requests-sub-container" :style="getFlexStyle">
                 <div v-for="item in requests" :key="item.iq" class="request-row">
                     <div class="details-container">
@@ -54,6 +61,9 @@
                 } else {
                     return '#ff2233';
                 }
+            },
+            pushUrl() {
+                this.$router.push('/inbox');
             }
         },
         mounted() {
@@ -91,6 +101,23 @@
 
         color: #999;
         font-size: 1.2rem;
+    }
+
+    .see-all {
+        position: absolute;
+        left: 180px;
+        top: 25px;
+
+        color: #555;
+        font-size: 0.8rem;
+
+        cursor: pointer;
+
+        transition: all 0.2s;
+    }
+
+    .see-all:hover {
+        color: #2196F3;
     }
 
     .last-requests-title {
@@ -155,6 +182,12 @@
         .request-row {
             flex-direction: row-reverse;
             gap: 20px;
+        }
+    }
+
+    @media (max-width: 280px) {
+        .see-all {
+            display: none;
         }
     }
 </style>
