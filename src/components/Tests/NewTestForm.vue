@@ -546,17 +546,14 @@
                                     title: this.testName,
                                     questions: this.testItems,
                                     type: this.testType,
-                                    user: {
-                                        name: this.$store.getters.userInfo.name,
-                                        email: this.$store.getters.userInfo.email
-                                    },
+                                    userId: this.$store.getters.user.id,
                                     editedBy: null,
                                     purpose: this.purpose
                                 }
 
                                 this.$store.commit('setLoading', false);
                                 this.close();
-                                this.$store.dispatch("createTest", testData);
+                                this.$store.dispatch("createTest", { testData, userInfo: this.$store.getters.userInfo });
                                 this.$store.dispatch("loadedTests");
                             }
                         });

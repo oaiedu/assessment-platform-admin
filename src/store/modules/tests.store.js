@@ -187,7 +187,7 @@ const actions = {
 
         return imageURL;
     },
-    loadTestPage({ commit, state }, payload) {
+    loadTestPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, type } = payload;
@@ -208,13 +208,19 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(snapshot => {
-                    first = snapshot.docs[0].data().id;
-                    last = snapshot.docs[snapshot.docs.length - 1].data().id;
+            request.then(async snapshot => {
+                    if(snapshot.docs.length > 0) {
+                        first = snapshot.docs[0].data().id;
+                        last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
-                    });
+                        const promises = snapshot.docs.map(async doc => {
+                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            data.push({ ...doc.data(), user: userData });
+                            return userData;
+                        });
+
+                        await Promise.all(promises);
+                    }
                 })
                 .then(() => {
                     commit('setCurrentTestsPage', data);
@@ -238,7 +244,7 @@ const actions = {
             commit('setLoading', false);
         }
     },
-    loadFOLTestPage({ commit, state }, payload) {
+    loadFOLTestPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, mode } = payload;
@@ -262,14 +268,18 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(snapshot => {
+            request.then(async snapshot => {
                     if(snapshot.docs.length > 0) {
                         first = snapshot.docs[0].data().id;
                         last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
-                        snapshot.forEach(doc => {
-                            data.push(doc.data());
+                        const promises = snapshot.docs.map(async doc => {
+                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            data.push({ ...doc.data(), user: userData });
+                            return userData;
                         });
+
+                        await Promise.all(promises);
                     }
                 })
                 .then(() => {
@@ -314,7 +324,7 @@ const actions = {
             }
         });
     },
-    searchTests({ commit }, payload) {
+    searchTests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const data = [];
@@ -356,6 +366,15 @@ const actions = {
                         });
                     });
             })
+            .then(async () => {
+                const promises = data.map(async (doc, index) => {
+                    const userData = await dispatch('getUserById', { id: doc.userId });
+                    data[index] = { ...doc, user: userData };
+                    return userData;
+                });
+
+                await Promise.all(promises);
+            })
             .then(() => {
                 commit('setFilteredTests', data);
                 commit('setLoading', false);
@@ -371,14 +390,18 @@ const actions = {
         const data = [...payload.questions];
         commit('setTestQuestions', data);
     },
-    checkDeleteMarkTests({ commit }) {
+    checkDeleteMarkTests({ commit, dispatch }) {
         const data = [];
 
         db.collection('tests').where('toDelete.status', '==', true).get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    data.push(doc.data());
+            .then(async snapshot => {
+                const promises = snapshot.docs.map(async doc => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data.push({ ...doc.data(), user: userData });
+                    return userData;
                 });
+
+                await Promise.all(promises);
             })
             .then(() => {
                 commit('setDeleteMarkTests', data);
@@ -389,13 +412,13 @@ const actions = {
                 createErrorLog('Test Mark Check', error.message, { data });
             });
     },
-    deleteMarkTest({ commit }, payload) {
+    deleteMarkTest({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { id, isSearching, userEmail } = payload;
 
         db.collection('tests').where('id', '==', id).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
 
                 const toDelete = {
@@ -405,14 +428,16 @@ const actions = {
 
                 doc.ref.update({ toDelete });
 
-                commit('setDeleteMarkTest', { id, toDelete });
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+
+                commit('setDeleteMarkTest', { id, toDelete, user });
 
                 if(isSearching) {
-                    commit('setDeleteMarkFilteredTest', { id, toDelete });
+                    commit('setDeleteMarkFilteredTest', { id, toDelete, user });
                 }
 
-                commit('updateCurrentTestsPage', { ...doc.data(), toDelete });
-                commit('addDeleteMarkTest', { ...doc.data(), toDelete });
+                commit('updateCurrentTestsPage', { ...doc.data(), toDelete, user });
+                commit('addDeleteMarkTest', { ...doc.data(), toDelete, user });
                 commit('setLoading', false);
             })
             .catch(error => {
@@ -429,7 +454,7 @@ const actions = {
         let docData = null;
 
         db.collection('tests').where('id', '==', id).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
                 docData = data;
@@ -439,13 +464,17 @@ const actions = {
                     title: data.title,
                     questions: data.questions,
                     type: data.type,
-                    user: data.user,
+                    userId: data.userId,
                     created: data.created,
-                    edited: data.edited,
+                    editedBy: data.editedBy,
                     purpose: data.purpose
                 }
 
                 doc.ref.set(test);
+
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+                test['user'] = user;
+
                 commit('updateTest', test);
 
                 if(isSearching) {
@@ -464,7 +493,7 @@ const actions = {
                 createErrorLog('Test Restore', error.message, { payload, docData });
             });
     },
-    restoreAllMarkedTests({ commit, state }, payload) {
+    restoreAllMarkedTests({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { all, isSearching, user } = payload;
@@ -481,7 +510,7 @@ const actions = {
 
         request.get()
             .then(snapshot => {
-                snapshot.forEach(doc => {
+                snapshot.forEach(async doc => {
                     const data = doc.data();
                     docData = data;
 
@@ -490,13 +519,18 @@ const actions = {
                         title: data.title,
                         questions: data.questions,
                         type: data.type,
-                        user: data.user,
+                        userId: data.userId,
                         created: data.created,
-                        edited: data.edited,
+                        editedId: data.editedId,
                         purpose: data.purpose
                     }
 
                     doc.ref.set(test);
+
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+
+                    test['user'] = userData;
+
                     if(all) {
                         const falseMarkedTests = state.deleteMarkTests.filter(t => !t.toDelete.status);
                         commit('setDeleteMarkTests', falseMarkedTests);
@@ -518,12 +552,12 @@ const actions = {
                 createErrorLog('Test Restore All', error.message, { payload, docData });
             });
     },
-    changeDeleteStatusTests({ commit }, payload) {
+    changeDeleteStatusTests({ commit, dispatch }, payload) {
         commit('setLoading', true);
         const { id, isSearching } = payload;
 
         db.collection('tests').where('id', '==', id).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const toDelete = {
                     status: false
@@ -531,10 +565,12 @@ const actions = {
 
                 doc.ref.update({ ...doc.data(), toDelete: { status: false } });
 
-                commit('updateCurrentTestsPage', { ...doc.data(), toDelete });
-                commit('updateTest', { ...doc.data(), toDelete });
-                commit('updateDeleteMarkTest', { ...doc.data(), toDelete });
-                if(isSearching) commit('updateFilteredTest', { ...doc.data(), toDelete });
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+
+                commit('updateCurrentTestsPage', { ...doc.data(), toDelete, user });
+                commit('updateTest', { ...doc.data(), toDelete, user });
+                commit('updateDeleteMarkTest', { ...doc.data(), toDelete, user });
+                if(isSearching) commit('updateFilteredTest', { ...doc.data(), toDelete, user });
 
                 commit('setLoading', false);
                 commit('setSuccess', 'Provas excluídas com sucesso!');
@@ -579,10 +615,11 @@ const actions = {
         commit('setLoading', true);
 
         const createdDate = getNowISOString();
+        const { testData, userInfo } = payload;
 
         const test = {
             id: uuid(),
-            ...payload,
+            ...testData,
             created: createdDate,
             updated: createdDate
         }
@@ -596,7 +633,7 @@ const actions = {
                 commit('setLoading', false);
                 commit('createTest', {
                     page: (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount),
-                    data: test,
+                    data: { ...test, user: {...userInfo} },
                     amount: testAmount
                 });
                 commit('setSuccess', 'Prova criada com sucesso!');
@@ -626,11 +663,15 @@ const actions = {
                 createErrorLog('Test DB Insert', error.message, { test });
             });
     },
-    updateTest({ commit }, payload) {
+    updateTest({ commit, dispatch }, payload) {
         const test = { ...payload, updated: getNowISOString() }
         db.collection("tests").where('id', '==', test.id).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 snapshot.docs[0].ref.update(test);
+
+                const user = await dispatch('getUserById', { id: snapshot.docs[0].userId });
+                test['user'] = user;
+
                 commit('updateTest', test);
                 commit('updateCurrentTestsPage', test);
                 commit('setLoading', false);
@@ -663,7 +704,7 @@ const actions = {
             }
         });
     },
-    loadLastTests({ commit }, payload) {
+    loadLastTests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { limit } = payload;
@@ -671,10 +712,14 @@ const actions = {
         const data = [];
 
         db.collection('tests').orderBy('updated', 'desc').limit(limit || 5).get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    data.push(doc.data());
+            .then(async snapshot => {
+                const promises = snapshot.docs.map(async doc => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data.push({ ...doc.data(), user: userData });
+                    return userData;
                 });
+
+                await Promise.all(promises);
             })
             .then(() => {
                 commit('setLastTests', data);

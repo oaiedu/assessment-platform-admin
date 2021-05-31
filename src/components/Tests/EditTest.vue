@@ -225,8 +225,8 @@ export default {
         const questionAmount = this.$store.getters.getDataSize.questions.general;
         return Math.ceil(questionAmount / this.itemsPerPage);
     },
-    userInfo() {
-        return this.$store.getters.userInfo;
+    user() {
+        return this.$store.getters.user;
     }
   },
   watch: {
@@ -308,12 +308,9 @@ export default {
                         title: this.testTitle,
                         questions: this.testItems,
                         type: this.testType,
-                        user: this.test.user,
+                        userId: this.test.userId,
                         created: this.test.created,
-                        editedBy: {
-                            name: this.userInfo.name,
-                            email: this.userInfo.email
-                        },
+                        editedBy: this.user.id,
                         purpose: this.purpose,
                         id: this.test.id
                     }
