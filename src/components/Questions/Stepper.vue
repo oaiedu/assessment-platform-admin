@@ -456,10 +456,12 @@ export default {
                                     aux = this.$store.dispatch("createQuestion", questionData);
                                 } else {
                                     aux = this.$store.dispatch('createQuestionRequest', {
-                                        ...questionData,
-                                        name: this.userInfo.name,
-                                        email: this.userInfo.email,
-                                        status: 'Pendente'
+                                        request: {
+                                            ...questionData,
+                                            userId: this.userInfo.id,
+                                            status: 'Pendente'
+                                        },
+                                        user: this.userInfo
                                     });
                                 }
 
@@ -487,10 +489,12 @@ export default {
                                     aux = this.$store.dispatch("createQuestion", { question: questionData, page: this.page });
                             } else {
                                 aux = this.$store.dispatch('createQuestionRequest', {
-                                    ...questionData,
-                                    name: this.userInfo.name,
-                                    email: this.userInfo.email,
-                                    status: 'Pendente'
+                                    request: {
+                                        ...questionData,
+                                        userId: this.userInfo.id,
+                                        status: 'Pendente'
+                                    },
+                                    user: this.userInfo
                                 });
                             }
 
