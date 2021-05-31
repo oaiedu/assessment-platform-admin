@@ -149,6 +149,9 @@
                 // eslint-disable-next-line vue/no-side-effects-in-computed-properties
                 this.paperName = aux;
                 return aux;
+            },
+            userInfo() {
+                return this.$store.getters.userInfo;
             }
         },
 
@@ -160,14 +163,11 @@
 
         methods: {
             update() {
-                this.paperDescription = this.paper.description
-                this.paperImage = this.paper.image
+                this.paperDescription = this.paper.description;
+                this.paperImage = this.paper.image;
             },
             hasImage() {
-                if( paperImage !== '' && typeof paperImage !== 'undefined')
-                    return true
-                else
-                    return false
+                return !!this.paperImage;
             },
             close() {
                 this.setInitialData();
@@ -196,7 +196,9 @@
                                 description: this.paperDescription,
                                 image: this.paperImage,
                                 id: this.paper.id,
-                                created: this.paper.created
+                                created: this.paper.created,
+                                editedBy: this.userInfo.id,
+                                userId: this.paper.userId
                             };
 
                             if ((this.images && this.images[0])) {

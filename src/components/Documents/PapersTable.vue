@@ -93,6 +93,7 @@
                 mdiDelete,
                 headers: [
                     { text: "Nome", align: "left",  value: "name", sortable: true },
+                    { text: "Usuário", align: "left",  value: "user.name", sortable: true },
                     { text: "Ações", align:"right", value: "actions", sortable: false }
                 ],
             }
