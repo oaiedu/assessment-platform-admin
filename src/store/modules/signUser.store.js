@@ -141,11 +141,12 @@ const actions = {
                     .catch(error => {
                         commit('setLoading', false);
                         commit('setError', error);
-                        createErrorLog('Sign Up DB Insert', error.message, { payload, newUser, userInfo, url });
+                        createErrorLog('Sign Up DB Insert', error.message,
+                            { payload, newUser, userInfo: { ...userInfo, id: newUser.id }, url });
                     });
 
                 commit('setUser', newUser);
-                commit('setUserInfo', userInfo);
+                commit('setUserInfo', { ...userInfo, id: newUser.id });
             })
             .catch(error => {
                 commit('setLoading', false);
@@ -169,6 +170,7 @@ const actions = {
             .then(() => {
                 commit('setUserInfo', {
                     ...userInfo,
+                    id: state.userInfo.id,
                     email: state.userInfo.email,
                     role: state.userInfo.role,
                     created: state.userInfo.created
@@ -239,7 +241,7 @@ const actions = {
         db.collection('users').get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
-                    users.push(doc.data());
+                    users.push({ ...doc.data(), id: doc.id });
                 });
             })
             .then(() => {
@@ -257,7 +259,7 @@ const actions = {
         db.collection('users').orderBy('created', 'desc').limit(1).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
-                    commit('setLastUser', doc.data());
+                    commit('setLastUser', { ...doc.data(), id: doc.id });
                     commit('setLoading', false);
                 });
             })
@@ -267,6 +269,26 @@ const actions = {
                 commit('setError', { message: errorModel });
                 createErrorLog('Last User Loading', error.message, { users });
             });
+    },
+    async getUserById({ commit }, payload) {
+        commit('setLoading', true);
+
+        const { id } = payload;
+
+        return new Promise((resolve, reject) => {
+            try {
+                db.collection('users').doc(id).get()
+                    .then(doc => {
+                        resolve({ ...doc.data(), id });
+                        commit('setLoading', false);
+                    });
+            } catch (error) {
+                commit('setLoading', false);
+                const errorModel = showErrorMessage('load', 'Usuário', error.message);
+                commit('setError', { message: errorModel });
+                createErrorLog('User By Id Loading', error.message, { payload });
+            }
+        });
     },
     setUserRole({ commit }, payload) {
         commit('setLoading', true);
