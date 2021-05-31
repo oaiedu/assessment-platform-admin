@@ -299,7 +299,11 @@
                     const month = updatedDate.substr(5, 2);
                     const year = updatedDate.substr(0, 4);
 
-                    this.testEditedData = `${test.editedBy.name} - ${day}/${month}/${year} ${updatedTime}`;
+                    this.$store.dispatch('getUserById', { id: test.editedBy })
+                        .then(data => {
+                            this.testEditedData = `${data.name} - ${day}/${month}/${year} ${updatedTime}`;
+                        });
+
                 }
 
                 this.testCreator = test.user.name;

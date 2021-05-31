@@ -469,17 +469,14 @@ export default {
             }
 
             aux = this.$store.dispatch("editQuestion", sendInfo);
-          } else {
+        } else {
             const question = {
                 ...questionData,
                 status: 'Pendente',
-                user: {
-                    name: this.userInfo.name,
-                    email: this.userInfo.email
-                }
+                userId: this.userInfo.id
             }
-            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', request: question });
-          }
+            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', request: question, user: this.userInfo });
+        }
         aux.then(() => {
           this.close();
         });

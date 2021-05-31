@@ -141,6 +141,11 @@
                 paperImage: ""
             }
         },
+        computed: {
+            userInfo() {
+                return this.$store.getters.userInfo;
+            }
+        },
         methods: {
             close() {
                 this.setInitialData();
@@ -165,10 +170,12 @@
                         } else {
                             const id = uuid();
                             const paperData = {
-                                paperName: this.paperName,
-                                paperDescription: this.paperDescription,
-                                paperImage: this.paperImage,
-                                paperId: id
+                                name: this.paperName,
+                                description: this.paperDescription,
+                                image: this.paperImage,
+                                id,
+                                editedBy: null,
+                                userId: this.userInfo.id
                             };
 
                             if(this.images && this.images[0]) {
@@ -176,14 +183,14 @@
                                 this.$store.dispatch("uploadImagePaper", imageToUpload)
                                     .then(result => {
                                         paperData.paperImage = result;
-                                        this.$store.dispatch("createPaper", paperData)
+                                        this.$store.dispatch("createPaper", { paperData, userInfo: this.userInfo })
                                             .then(() => {
                                                 this.$emit("load");
                                                 this.close();
                                         });
                                     });
                             } else {
-                                this.$store.dispatch("createPaper", paperData)
+                                this.$store.dispatch("createPaper", { paperData, userInfo: this.userInfo })
                                     .then(() => {
                                         this.$emit("load");
                                         this.close();

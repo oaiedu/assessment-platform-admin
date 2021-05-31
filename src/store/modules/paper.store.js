@@ -231,7 +231,7 @@ const actions = {
                 createErrorLog('Document Delete', error.message, { payload });
             });
     },
-    loadPaperPage({ commit, state }, payload) {
+    loadPaperPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, type } = payload;
@@ -252,13 +252,17 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(snapshot => {
+            request.then(async snapshot => {
                     first = snapshot.docs[0].data().id;
                     last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
+                    const promises = snapshot.docs.map(async doc => {
+                        const userData = await dispatch('getUserById', { id: doc.data().userId });
+                        data.push({ ...doc.data(), user: userData });
+                        return userData;
                     });
+
+                    await Promise.all(promises);
                 })
                 .then(() => {
                     commit('setCurrentPapersPage', data);
@@ -282,7 +286,7 @@ const actions = {
             commit('setLoading', false);
         }
     },
-    loadFOLPaperPage({ commit, state }, payload) {
+    loadFOLPaperPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, mode } = payload;
@@ -306,14 +310,18 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(snapshot => {
+            request.then(async snapshot => {
                     if(snapshot.docs.length > 0) {
                         first = snapshot.docs[0].data().id;
                         last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
-                        snapshot.forEach(doc => {
-                            data.push(doc.data());
+                        const promises = snapshot.docs.map(async doc => {
+                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            data.push({ ...doc.data(), user: userData });
+                            return userData;
                         });
+
+                        await Promise.all(promises);
                     }
                 })
                 .then(() => {
@@ -340,7 +348,7 @@ const actions = {
             commit('setLoading', false);
         }
     },
-    searchPapers({ commit }, payload) {
+    searchPapers({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const data = [];
@@ -382,6 +390,15 @@ const actions = {
                         });
                     });
             })
+            .then(async () => {
+                const promises = snapshot.docs.map(async (doc, index) => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data[index] = { ...doc.data(), user: userData };
+                    return userData;
+                });
+
+                await Promise.all(promises);
+            })
             .then(() => {
                 commit('setFilteredPapers', data);
                 commit('setLoading', false);
@@ -411,14 +428,18 @@ const actions = {
             }
         });
     },
-    checkDeleteMarkPapers({ commit }) {
+    checkDeleteMarkPapers({ commit, dispatch }) {
         const data = [];
 
         db.collection('papers').where('toDelete.status', '==', true).get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    data.push(doc.data());
+            .then(async snapshot => {
+                const promises = snapshot.docs.map(async doc => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data.push({ ...doc.data(), user: userData });
+                    return userData;
                 });
+
+                await Promise.all(promises);
             })
             .then(() => {
                 commit('setDeleteMarkPapers', data);
@@ -429,13 +450,13 @@ const actions = {
                 createErrorLog('Document Mark Check', error.message, { data });
             });
     },
-    deleteMarkPaper({ commit }, payload) {
+    deleteMarkPaper({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { id, isSearching, userEmail } = payload;
 
         db.collection('papers').where('id', '==', id).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
 
                 const toDelete = {
@@ -445,14 +466,16 @@ const actions = {
 
                 doc.ref.update({ toDelete });
 
-                commit('setDeleteMarkPaper', { id, toDelete });
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+
+                commit('setDeleteMarkPaper', { id, toDelete, user });
 
                 if(isSearching) {
-                    commit('setDeleteMarkFilteredPaper', { id, toDelete });
+                    commit('setDeleteMarkFilteredPaper', { id, toDelete, user });
                 }
 
-                commit('updateCurrentPapersPage', { ...doc.data(), toDelete });
-                commit('addDeleteMarkPaper', { ...doc.data(), toDelete });
+                commit('updateCurrentPapersPage', { ...doc.data(), toDelete, user });
+                commit('addDeleteMarkPaper', { ...doc.data(), toDelete, user });
                 commit('setLoading', false);
             })
             .catch(error => {
@@ -462,13 +485,13 @@ const actions = {
                 createErrorLog('Document Delete Mark', error.message, { payload });
             });
     },
-    restoreMarkedPaper({ commit }, payload) {
+    restoreMarkedPaper({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { id, isSearching } = payload;
 
         db.collection('papers').where('id', '==', id).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
 
@@ -480,6 +503,10 @@ const actions = {
                 }
 
                 doc.ref.set(paper);
+
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+                paper['user'] = user;
+
                 commit('updatePaper', paper);
 
                 if(isSearching) {
@@ -498,7 +525,7 @@ const actions = {
                 createErrorLog('Document Restore', error.message, { payload });
             });
     },
-    restoreAllMarkedPapers({ commit, state }, payload) {
+    restoreAllMarkedPapers({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { all, isSearching, user } = payload;
@@ -514,7 +541,7 @@ const actions = {
 
         request.get()
             .then(snapshot => {
-                snapshot.forEach(doc => {
+                snapshot.forEach(async doc => {
                     const data = doc.data();
 
                     const paper = {
@@ -525,6 +552,10 @@ const actions = {
                     }
 
                     doc.ref.set(paper);
+
+                    const user = await dispatch('getUserById', { id: doc.data().userId });
+                    paper['user'] = user;
+
                     if(all) {
                         const falseMarkedPapers = state.deleteMarkPapers.filter(t => !t.toDelete.status);
                         commit('setDeleteMarkPapers', falseMarkedPapers);
@@ -546,12 +577,12 @@ const actions = {
                 createErrorLog('Document Restore All', error.message, { payload });
             });
     },
-    changeDeleteStatusPapers({ commit }, payload) {
+    changeDeleteStatusPapers({ commit, dispatch }, payload) {
         commit('setLoading', true);
         const { id, isSearching } = payload;
 
         db.collection('papers').where('id', '==', id).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const toDelete = {
                     status: false
@@ -577,10 +608,12 @@ const actions = {
                         console.error(error);
                     });
 
-                commit('updateCurrentPapersPage', { ...doc.data(), toDelete });
-                commit('updatePaper', { ...doc.data(), toDelete });
-                commit('updateDeleteMarkPaper', { ...doc.data(), toDelete });
-                if(isSearching) commit('updateFilteredPaper', { ...doc.data(), toDelete });
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+
+                commit('updateCurrentPapersPage', { ...doc.data(), toDelete, user });
+                commit('updatePaper', { ...doc.data(), toDelete, user });
+                commit('updateDeleteMarkPaper', { ...doc.data(), toDelete, user });
+                if(isSearching) commit('updateFilteredPaper', { ...doc.data(), toDelete, user });
 
                 commit('setLoading', false);
                 commit('setSuccess', 'Documento excluído com sucesso!');
@@ -591,7 +624,7 @@ const actions = {
                 createErrorLog('Document Confirm Delete', error.message, { payload });
             });
     },
-    deletePapers({ commit }) {
+    deletePapers({ commit, dispatch }) {
         const data = [];
         db.collection("papers").where('toDelete.status', '==', false).get()
             .then(snapshot => {
@@ -628,11 +661,10 @@ const actions = {
 
         const createdDate = getNowISOString();
 
+        const { paperData, userInfo } = payload;
+
         const paper = {
-            id: payload.paperId,
-            name: payload.paperName,
-            image: payload.paperImage,
-            description: payload.paperDescription,
+            ...paperData,
             created: createdDate,
             updated: createdDate
         }
@@ -642,10 +674,10 @@ const actions = {
         const amount = paperAmount % 10;
 
         db.collection("papers").add(paper)
-            .then(() => {
+            .then(async () => {
                 commit('createPaper', {
-                    page: (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount),
-                    data: paper,
+                    page: (amount === 0 ? pageAmount + 1 : pageAmount),
+                    data: { ...paper, user: { ...userInfo } },
                     amount: paperAmount
                 });
                 commit('setLoading', false);
@@ -688,14 +720,14 @@ const actions = {
                 createErrorLog('Document DB Insert', error.message, { payload });
             });
     },
-    updatePaper({ commit }, payload) {
+    updatePaper({ commit, dispatch }, payload) {
         const paper = {
             ...payload,
             updated: getNowISOString()
         }
 
         db.collection("papers").where('id', '==', paper.id).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 doc.ref.update(paper);
 
@@ -716,6 +748,9 @@ const actions = {
                     .catch(error => {
                         console.error(error);
                     });
+
+                const user = await dispatch('getUserById', { id: snapshot.docs[0].userId });
+                paper['user'] = user;
 
                 commit('updatePaper', paper);
                 commit('updateCurrentPapersPage', paper);
@@ -745,15 +780,20 @@ const actions = {
             }
         });
     },
-    async getPaperById({ commit }, payload) {
+    async getPaperById({ commit, dispatch }, payload) {
         const id = payload;
 
         return new Promise((resolve, reject) => {
             try {
                 db.collection('papers').where('id', '==', id).get()
-                    .then(snapshot => {
+                    .then(async snapshot => {
                         const doc = snapshot.docs[0];
-                        resolve(doc.data());
+                        const paper = doc.data();
+
+                        const user = await dispatch('getUserById', { id: snapshot.docs[0].userId });
+                        paper['user'] = user;
+
+                        resolve(paper);
                     })
                     .catch(error => {
                         const errorModel = showErrorMessage('load', 'Documento', error.message);
@@ -765,16 +805,20 @@ const actions = {
             }
         });
     },
-    loadLastPapers({ commit }) {
+    loadLastPapers({ commit, dispatch }) {
         commit('setLoading', true);
 
         const data = [];
 
         db.collection('papers').orderBy('updated', 'desc').limit(6).get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    data.push(doc.data());
+            .then(async snapshot => {
+                const promises = snapshot.docs.map(async doc => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data.push({ ...doc.data(), user: userData });
+                    return userData;
                 });
+
+                await Promise.all(promises);
             })
             .then(() => {
                 commit('setLastPapers', data);

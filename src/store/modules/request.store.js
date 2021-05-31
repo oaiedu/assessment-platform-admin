@@ -170,22 +170,9 @@ const actions = {
         const createdDate = getNowISOString();
 
         const request = {
-            iq: payload.iq,
+            ...payload.request,
             created: createdDate,
             updated: createdDate,
-            user: {
-                name: payload.name,
-                email: payload.email
-            },
-            status: payload.status,
-            question: payload.question,
-            subject: payload.subject,
-            knowledge: payload.knowledge,
-            knowledgePWR: payload.knowledgePWR,     // RELEVANCIA_OR
-            knowledgeBWR: payload.knowledgeBWR,     // RELEVANCIA_OSR
-            answers: payload.answers,
-            image: payload.image,
-            imageSize: payload.imageSize,
             edited: []
         }
 
@@ -195,7 +182,7 @@ const actions = {
 
         db.collection('question-requests').add(request)
             .then(() => {
-                commit('addRequest', { page: (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: request });
+                commit('addRequest', { page: (amount === 0 ? pageAmount + 1 : pageAmount), data: { ...request, user: payload.user } });
                 commit('setLoading', false);
                 commit('setSuccess', 'Solicitação criada com sucesso!');
 
@@ -203,14 +190,14 @@ const actions = {
                     .then(snap => {
                         const document = snap.docs[0];
                         const general = document.data()['question-requests'].general;
-                        const email = request.user.email;
-                        const subSize = document.data()['question-requests'].users[email];
+                        const userId = request.id;
+                        const subSize = document.data()['question-requests'].users[userId];
 
                         const questionRequests = {
                             general: general + 1,
                             users: {
                                 ...document.data()['question-requests'].users,
-                                [email]: subSize + 1
+                                [userId]: subSize + 1
                             }
                         }
 
@@ -235,7 +222,7 @@ const actions = {
     },
     updateQuestionRequest({ commit }, payload) {
         commit('setLoading', true);
-        const { mode, request } = payload;
+        const { mode, request, user } = payload;
 
         const toUpdate = { ...request, status: payload.status, updated: getNowISOString() };
 
@@ -245,15 +232,15 @@ const actions = {
                     snapshot.docs[0].ref.update({ status: payload.status, updated: getNowISOString() })
                         .then(() => {
                             request.status = payload.status;
-                            commit('updateRequest', toUpdate);
-                            commit('updateCurrentRequestsPage', toUpdate);
+                            commit('updateRequest', { ...toUpdate, user});
+                            commit('updateCurrentRequestsPage', { ...toUpdate, user});
                             commit('setLoading', false);
                         });
                 } else {
                     snapshot.docs[0].ref.update(toUpdate)
                         .then(() => {
-                            commit('updateRequest', toUpdate);
-                            commit('updateCurrentRequestsPage', toUpdate);
+                            commit('updateRequest', { ...toUpdate, user });
+                            commit('updateCurrentRequestsPage', { ...toUpdate, user });
                             commit('setLoading', false);
                             commit('setSuccess', 'Solicitação editada com sucesso!');
                         });
@@ -266,7 +253,7 @@ const actions = {
                 createErrorLog('Request DB Update', error.message, { payload });
             });
     },
-    loadRequestPage({ commit, state }, payload) {
+    loadRequestPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { claims, page, itemsPerPage, type, userInfo } = payload;
@@ -280,7 +267,7 @@ const actions = {
             if(claims['admin']) {
                 ref = db.collection('question-requests').orderBy('iq');
             } else {
-                ref = db.collection('question-requests').orderBy('iq').where('user.email', '==', userInfo.email);
+                ref = db.collection('question-requests').orderBy('iq').where('userId', '==', userInfo.id);
             }
 
             if(type === 'next') {
@@ -292,13 +279,19 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(snapshot => {
-                    first = snapshot.docs[0].data().iq;
-                    last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+            request.then(async snapshot => {
+                    if (snapshot.docs.length > 0) {
+                        first = snapshot.docs[0].data().iq;
+                        last = snapshot.docs[snapshot.docs.length - 1].data().iq;
 
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
-                    });
+                        const promises = snapshot.docs.map(async doc => {
+                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            data.push({ ...doc.data(), user: userData });
+                            return userData;
+                        });
+
+                        await Promise.all(promises);
+                    }
                 })
                 .then(() => {
                     commit('setCurrentRequestsPage', data);
@@ -322,14 +315,14 @@ const actions = {
             commit('setLoading', false);
         }
     },
-    loadFOLRequestPage({ commit, state }, payload) {
+    loadFOLRequestPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { claims, page, itemsPerPage, mode, userInfo } = payload;
         const data = [];
         const pages = Object.keys(state.requests);
 
-        const requestAmount = this.getters.getDataSize['question-requests'].users[payload.email];
+        const requestAmount = this.getters.getDataSize['question-requests'].users[userInfo.id];
         const amount = requestAmount % 8;
 
         if(!pages.includes('p' + page)) {
@@ -339,7 +332,7 @@ const actions = {
             if(claims['admin']) {
                 ref = db.collection('question-requests').orderBy('iq');
             } else {
-                ref = db.collection('question-requests').orderBy('iq').where('user.email', '==', userInfo.email);
+                ref = db.collection('question-requests').orderBy('iq').where('userId', '==', userInfo.id);
             }
 
             if(mode === 'first') {
@@ -351,14 +344,18 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(snapshot => {
+            request.then(async snapshot => {
                 if(snapshot.docs.length > 0) {
                         first = snapshot.docs.length > 0 ? snapshot.docs[0].data().iq : '';
                         last = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1].data().iq : '';
 
-                        snapshot.forEach(doc => {
-                            data.push(doc.data());
+                        const promises = snapshot.docs.map(async doc => {
+                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            data.push({ ...doc.data(), user: userData });
+                            return userData;
                         });
+
+                        await Promise.all(promises);
 
                         commit('setCurrentRequestsPage', data);
                         commit('setRequestPage', { page: 'p' + page, data });
@@ -382,7 +379,7 @@ const actions = {
             commit('setLoading', false);
         }
     },
-    searchRequests({ commit }, payload) {
+    searchRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { claims, key, userInfo } = payload;
@@ -393,14 +390,18 @@ const actions = {
             .where('iq', '<=', key.toUpperCase() + '~');
 
         if(!claims['admin']) {
-            req = req.where('user.email', '==', userInfo.email);
+            req = req.where('userId', '==', userInfo.id);
         }
 
         req.get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    data.push(doc.data());
+            .then(async snapshot => {
+                const promises = snapshot.docs.map(async doc => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data.push({ ...doc.data(), user: userData });
+                    return userData;
                 });
+
+                await Promise.all(promises);
             })
             .then(() => {
                 commit('setFilteredRequests', data);
@@ -413,14 +414,18 @@ const actions = {
                 createErrorLog('Request Searching', error.message, { payload, data });
             });
     },
-    checkDeleteMarkRequests({ commit }) {
+    checkDeleteMarkRequests({ commit, dispatch }) {
         const data = [];
 
         db.collection('question-requests').where('toDelete.status', '==', true).get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    data.push(doc.data());
+            .then(async snapshot => {
+                const promises = snapshot.docs.map(async doc => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data.push({ ...doc.data(), user: userData });
+                    return userData;
                 });
+
+                await Promise.all(promises);
             })
             .then(() => {
                 commit('setDeleteMarkRequests', data);
@@ -431,30 +436,32 @@ const actions = {
                 createErrorLog('Request Mark Check', error.message, { data });
             });
     },
-    deleteMarkRequest({ commit }, payload) {
+    deleteMarkRequest({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
-        const { iq, isSearching, userEmail } = payload;
+        const { iq, isSearching, userId } = payload;
 
         db.collection('question-requests').where('iq', '==', iq).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
 
                 const toDelete = {
                     status: true,
-                    userEmail
+                    userId
                 }
 
                 doc.ref.update({ toDelete });
 
-                commit('setDeleteMarkRequest', { iq, toDelete });
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+
+                commit('setDeleteMarkRequest', { iq, toDelete, user });
 
                 if(isSearching) {
-                    commit('setDeleteMarkFilteredRequest', { iq, toDelete });
+                    commit('setDeleteMarkFilteredRequest', { iq, toDelete, user });
                 }
 
-                commit('updateCurrentRequestsPage', { ...doc.data(), toDelete });
-                commit('addDeleteMarkRequest', { ...doc.data(), toDelete });
+                commit('updateCurrentRequestsPage', { ...doc.data(), toDelete, user });
+                commit('addDeleteMarkRequest', { ...doc.data(), toDelete, user });
                 commit('setLoading', false);
             })
             .catch(error => {
@@ -464,44 +471,45 @@ const actions = {
                 createErrorLog('Request Delete Mark', error.message, { payload });
             });
     },
-    restoreMarkedRequest({ commit }, payload) {
+    restoreMarkedRequest({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { iq, isSearching } = payload;
         let docData = null;
 
         db.collection('question-requests').where('iq', '==', iq).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
                 docData = data;
 
                 const request = {
-                    iq: data.iq,
                     created: data.created,
-                    updated: data.updated,
-                    subject: data.subject,
-                    question: data.question,
-                    knowledge: data.knowledge,
-                    knowledgePWR: data.knowledgePWR,
-                    knowledgeBWR: data.knowledgeBWR,
-                    answers: data.answers,
                     image: data.image,
                     imageSize: data.imageSize,
-                    edited: data.edited || [],
+                    iq: data.iq,
+                    knowledge: data.knowledge,
+                    knowledgeBWR: data.knowledgeBWR,
+                    knowledgePWR: data.knowledgePWR,
+                    question: data.question,
                     status: data.status,
-                    user: data.user
+                    subject: data.subject,
+                    updated: data.updated,
+                    userId: data.userId,
+                    edited: data.edited || []
                 };
 
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+
                 doc.ref.set(request);
-                commit('updateRequest', request);
+                commit('updateRequest', { ...request, user });
 
                 if(isSearching) {
-                    commit('updateFilteredRequest', request);
+                    commit('updateFilteredRequest', { ...request, user });
                 }
 
                 commit('removeDeleteMarkRequest', iq);
-                commit('updateCurrentRequestsPage', request);
+                commit('updateCurrentRequestsPage', { ...request, user });
                 commit('setLoading', false);
                 commit('setSuccess', 'Solicitação restaurada com sucesso!');
             })
@@ -519,35 +527,34 @@ const actions = {
         let docData = null;
 
         db.collection('question-requests').where('toDelete.status', '==', true)
-            .where('toDelete.userEmail', '==', user.email).get()
+            .where('toDelete.userId', '==', user.id).get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     docData = data;
 
                     const request = {
-                        iq: data.iq,
                         created: data.created,
-                        updated: data.updated,
-                        subject: data.subject,
-                        question: data.question,
-                        knowledge: data.knowledge,
-                        knowledgePWR: data.knowledgePWR,
-                        knowledgeBWR: data.knowledgeBWR,
-                        answers: data.answers,
                         image: data.image,
                         imageSize: data.imageSize,
-                        edited: data.edited || [],
+                        iq: data.iq,
+                        knowledge: data.knowledge,
+                        knowledgeBWR: data.knowledgeBWR,
+                        knowledgePWR: data.knowledgePWR,
+                        question: data.question,
                         status: data.status,
-                        user: data.user
+                        subject: data.subject,
+                        updated: data.updated,
+                        userId: data.userId,
+                        edited: data.edited || []
                     };
 
                     doc.ref.set(request);
                     const falseMarkedRequests = state.deleteMarkRequests.filter(q => !q.toDelete.status);
                     commit('setDeleteMarkRequests', falseMarkedRequests);
-                    commit('updateRequest', request);
-                    commit('updateCurrentRequestsPage', request);
-                    if(isSearching) commit('updateFilteredRequest', request);
+                    commit('updateRequest', { ...request, user });
+                    commit('updateCurrentRequestsPage', { ...request, user });
+                    if(isSearching) commit('updateFilteredRequest', { ...request, user });
                     commit('setSuccess', 'Solicitações restauradas com sucesso!');
                 });
             })
@@ -559,12 +566,12 @@ const actions = {
                 createErrorLog('Request Restore All', error.message, { payload, docData });
             });
     },
-    changeDeleteStatusRequests({ commit }, payload) {
+    changeDeleteStatusRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
         const { iq, isSearching } = payload;
 
         db.collection('question-requests').where('iq', '==', iq).get()
-            .then(snapshot => {
+            .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const toDelete = {
                     status: false
@@ -572,10 +579,12 @@ const actions = {
 
                 doc.ref.update({ ...doc.data(), toDelete: { status: false } });
 
-                commit('updateCurrentRequestsPage', { ...doc.data(), toDelete });
-                commit('updateRequest', { ...doc.data(), toDelete });
-                commit('updateDeleteMarkRequest', { ...doc.data(), toDelete });
-                if(isSearching) commit('updateFilteredRequest', { ...doc.data(), toDelete });
+                const user = await dispatch('getUserById', { id: doc.data().userId });
+
+                commit('updateCurrentRequestsPage', { ...doc.data(), toDelete, user });
+                commit('updateRequest', { ...doc.data(), toDelete, user });
+                commit('updateDeleteMarkRequest', { ...doc.data(), toDelete, user });
+                if(isSearching) commit('updateFilteredRequest', { ...doc.data(), toDelete, user });
 
                 commit('setLoading', false);
                 commit('setSuccess', 'Solicitação excluída com sucesso!');
@@ -601,10 +610,10 @@ const actions = {
                         const child = decodeURIComponent(childImage);
                         storage.ref().child(child).delete();
                     }
-                    if(users[doc.data().user.email]) {
-                        users[doc.data().user.email] += 1;
+                    if(users[doc.data().userId]) {
+                        users[doc.data().userId] += 1;
                     } else {
-                        users[doc.data().user.email] = 1;
+                        users[doc.data().userId] = 1;
                     }
                 });
                 db.collection('data-size').get()
@@ -669,14 +678,14 @@ const actions = {
                             .then(snap => {
                                 const document = snap.docs[0];
                                 const general = document.data()['question-requests'].general;
-                                const email = request.user.email;
-                                const subSize = document.data()['question-requests'].users[email];
+                                const userId = request.userId;
+                                const subSize = document.data()['question-requests'].users[userId];
 
                                 const questionRequests = {
                                     general: general - 1,
                                     users: {
                                         ...document.data()['question-requests'].users,
-                                        [email]: subSize - 1
+                                        [userId]: subSize - 1
                                     }
                                 }
 
@@ -707,7 +716,7 @@ const actions = {
         const { userInfo } = payload;
 
         db.collection('question-requests')
-            .where('user.email', '==', userInfo.email)
+            .where('userId', '==', userInfo.id)
             .where('status', '==', 'Aprovado')
             .get()
             .then(snapshot => {
@@ -720,14 +729,14 @@ const actions = {
                     .then(snap => {
                         const document = snap.docs[0];
                         const general = document.data()['question-requests'].general;
-                        const email = userInfo.email;
-                        const subSize = document.data()['question-requests'].users[email];
+                        const userId = userInfo.id;
+                        const subSize = document.data()['question-requests'].users[userId];
 
                         const questionRequests = {
                             general: general - 1,
                             users: {
                                 ...document.data()['question-requests'].users,
-                                [email]: subSize - 1
+                                [userId]: subSize - 1
                             }
                         }
 
@@ -750,7 +759,7 @@ const actions = {
                 createErrorLog('Request Approved Delete', error.message, { payload });
             });
     },
-    loadLastPendentRequests({ commit }, payload) {
+    loadLastPendentRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const data = [];
@@ -760,10 +769,14 @@ const actions = {
             .where('status', '==', 'Pendente')
             .limit(payload ? payload.limit : 5)
             .get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    data.push(doc.data());
+            .then(async snapshot => {
+                const promises = snapshot.docs.map(async doc => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data.push({ ...doc.data(), user: userData });
+                    return userData;
                 });
+
+                await Promise.all(promises);
             })
             .then(() => {
                 commit('setLastPendentRequests', data);
@@ -776,10 +789,10 @@ const actions = {
                 createErrorLog('Pendent Requests Loading', error.message, { payload });
             });
     },
-    loadUserRequests({ commit }, payload) {
+    loadUserRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
-        const { email, mode, limit } = payload;
+        const { userId, mode, limit } = payload;
 
         const data = [];
 
@@ -788,16 +801,20 @@ const actions = {
         let request = null;
 
         if (mode === 'other') {
-            request = reference.orderBy('user.email').orderBy('updated', 'desc').where('user.email', '!=', email);
+            request = reference.orderBy('userId').orderBy('updated', 'desc').where('userId', '!=', userId);
         } else {
-            request = reference.orderBy('updated', 'desc').where('user.email', '==', email);
+            request = reference.orderBy('updated', 'desc').where('userId', '==', userId);
         }
 
         request.limit(limit || 5).get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    data.push(doc.data());
+            .then(async snapshot => {
+                const promises = snapshot.docs.map(async doc => {
+                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    data.push({ ...doc.data(), user: userData });
+                    return userData;
                 });
+
+                await Promise.all(promises);
             })
             .then(() => {
                 if (mode === 'other') {

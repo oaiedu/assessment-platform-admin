@@ -37,10 +37,10 @@
                 return this.$store.getters.getCurrentUserRequests;
             },
             getFlexStyle() {
-                if (this.requests.length === 2) {
-                    return { justifyContent: 'flex-start', gap: '18px' };
+                if (this.requests.length <= 3) {
+                    return { justifyContent: 'flex-start', gap: '10px' };
                 } else if (this.requests.length === 3) {
-                    return { justifyContent: 'space-between', padding: '30px 20px' };
+                    return { justifyContent: 'space-between' };
                 } else {
                     return { justifyContent: 'space-between' };
                 }
@@ -68,7 +68,7 @@
         },
         mounted() {
             if (this.userClaims['appraiser']) {
-                this.$store.dispatch('loadUserRequests', { email: this.userInfo.email, mode: 'current', limit: 4 });
+                this.$store.dispatch('loadUserRequests', { userId: this.userInfo.id, mode: 'current', limit: 4 });
             }
         }
     }

@@ -72,7 +72,7 @@
         },
         created() {
             if (this.userClaims['appraiser']) {
-                this.$store.dispatch('loadUserRequests', { email: this.userInfo.email, mode: 'other', limit: this.limit });
+                this.$store.dispatch('loadUserRequests', { userId: this.userInfo.id, mode: 'other', limit: this.limit });
             } else {
                 this.$store.dispatch('loadLastPendentRequests', { limit: this.limit });
             }

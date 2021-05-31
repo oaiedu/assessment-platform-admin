@@ -26,7 +26,7 @@
             </v-container>
 
             <v-container v-if='(hasDeleteMarkRequests && userClaims["appraiser"] && (markedRequestsByUser ||
-                                deleteMarkRequests.filter(r => r.toDelete.userEmail === userInfo.email)))'>
+                                deleteMarkRequests.filter(r => r.toDelete.userId === userInfo.id)))'>
                 <DeleteAlert
                     :confirmCondition='deleteConfirmed'
                     :itemsCondition='hasTrueMarkStatus && markedRequestsByUser'
@@ -198,7 +198,7 @@
             },
             markedRequestsByUser() {
                 if(this.hasDeleteMarkRequests) {
-                    const requests = this.deleteMarkRequests.filter(r => r.toDelete.userEmail === this.userInfo.email);
+                    const requests = this.deleteMarkRequests.filter(r => r.toDelete.userId === this.userInfo.id);
 
                     const iqs = requests.filter(r => r.toDelete && r.toDelete.status);
 
@@ -260,13 +260,13 @@
                 this.$store.dispatch('deleteMarkRequest', {
                     iq: request.iq,
                     isSearching: this.isSearching,
-                    userEmail: this.userInfo.email
+                    userId: this.userInfo.id
                 });
             },
             deleteRequests() {
                 const requests = this.deleteMarkRequests;
                 requests.forEach(request => {
-                    if(request.toDelete.status && request.toDelete.userEmail === this.userInfo.email) {
+                    if(request.toDelete.status && request.toDelete.userId === this.userInfo.id) {
                         this.$store.dispatch("changeDeleteStatusRequests", { iq: request.iq, isSearching: this.isSearching });
                     }
                 });
@@ -395,7 +395,9 @@
             this.$store.dispatch('loadFOLRequestPage', {
                     claims: this.userClaims,
                     userInfo: this.userInfo,
-                    page: 1, itemsPerPage: this.itemsPerPage, mode: 'first'
+                    page: 1,
+                    itemsPerPage: this.itemsPerPage,
+                    mode: 'first'
                 })
                 .then(() => {
                     if(this.userClaims['appraiser'] && this.hasApprovedRequests) {
