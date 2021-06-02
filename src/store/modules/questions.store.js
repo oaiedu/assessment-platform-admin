@@ -1,9 +1,93 @@
+import { Store } from 'vuex';
+
 import { db, storage } from '../../main';
 import { getNowISOString } from '../../utils/date';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
+/**
+ * @typedef {import('./tests.store.js').Test} Test
+ */
+
+/**
+ * @typedef {"Teoria do Reator"
+ *  |"Termodinâmica"
+ *  |"Instrumentação e Controle"
+ *  |"Válvulas e Bombas"
+ *  |"Eletricidade"
+ *  |"Mecânica dos Fluidos"
+ *  |"Tratamento Qúimico Refrigerante"
+ *  |"Análise Integrada"
+ *  |"Instrumentação Nuclear"
+ *  |"Física Nuclear"
+ *  |"Transferência de Calor"
+ *  |"Materiais"} Subject
+ */
+
+/**
+ * @typedef {Object} DeleteStatus
+ * @property {boolean} toDelete.status - If true, the question can be restored. If false, it will be deleted.
+ * @property {string|undefined} toDelete.userEmail - The user that marked the question to be deleted.
+ */
+
+/**
+ * @typedef {Object} AnswerText
+ * @property {string} title - The text column title.
+ * @property {string} answerDescription - The text column answer description.
+ */
+
+/**
+ * @typedef {Object} Answer
+ * @property {"radio-1"|"radio-2"|"radio-3"|"radio-4"} ansId - The answer id.
+ * @property {AnswerText[]|string} text - The answer description.
+ * @property {boolean} value - Whether the answer is correct or not.
+ */
+
+/**
+ * @typedef {Object} QuestionCreation
+ * @property {string} iq - The question IQ.
+ * @property {Subject} subject - The question subject.
+ * @property {string} question - The question description.
+ * @property {string} knowledge - The question knowledge.
+ * @property {string} knowledgeBWR - The question knowledge (BWR).
+ * @property {string} knowledgePWR - The question knowledge (PWR).
+ * @property {string} image - The question image url.
+ * @property {string} imageSize - The size of the image.
+ * @property {Answer[]} answers - The question answers.
+ */
+
+/**
+ * @typedef {Object} Question
+ * @property {string} iq - The question IQ.
+ * @property {Subject} subject - The question subject.
+ * @property {string} question - The question description.
+ * @property {string} knowledge - The question knowledge.
+ * @property {string} knowledgeBWR - The question knowledge (BWR).
+ * @property {string} knowledgePWR - The question knowledge (PWR).
+ * @property {string} image - The question image url.
+ * @property {string} imageSize - The size of the image.
+ * @property {string|undefined} created - The question creation date.
+ * @property {string|undefined} updated - The question edition date.
+ * @property {Answer[]} answers - The question answers.
+ * @property {Array} edited - The question edition history.
+ * @property {DeleteStatus|undefined} toDelete - The question deletion status.
+ */
+
+/**
+ * @typedef {Object} QuestionsState
+ * @property {Object.<string, Question[]>} questions - The pages with it's questions list.
+ * @property {Question[]} filteredQuestions - An array of questions filtered by IQ.
+ * @property {Question[]} currentQuestionsPage - An array of questions of the current page.
+ * @property {Subject[]} subjects - An array of subjects.
+ * @property {[string, string]|null} lastQuestionDocument - An array with the first and last question IQ from the last request.
+ * @property {Question[]} deleteMarkQuestions - An array of questions that were marked to be deleted.
+ */
+
+/**
+ * Gets the initial questions state.
+ *
+ * @returns {QuestionsState} The initial questions state.
+ */
 const initialState = () => ({
-    deleteQuestionId: null,
     questions: {},
     filteredQuestions: [],
     currentQuestionsPage: [],
@@ -21,7 +105,6 @@ const initialState = () => ({
         "Transferência de Calor",
         "Materiais"
     ],
-    subjectsAmount: null,
     lastQuestionDocument: null,
     deleteMarkQuestions: []
 });
@@ -29,24 +112,57 @@ const initialState = () => ({
 const state = initialState();
 
 const mutations = {
-    setQuestions(state, data) {
-        state.questions = data;
-    },
+    /**
+     * Sets a page of questions according to the given data.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Object} data - The data containing the page number and it's data.
+     * @param {string} data.page - The page number.
+     * @param {Question[]} data.data - An array of questions.
+     */
     setQuestionPage(state, data) {
         state.questions[data.page] = data.data;
     },
+    /**
+     * Sets the filtered questions.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question[]} data - An array of filtered questions.
+     */
     setFilteredQuestions(state, data) {
         state.filteredQuestions = data;
     },
+    /**
+     * Cleans the filtered questions array.
+     *
+     * @param {QuestionsState} state - The questions state.
+     */
     resetFilteredQuestions(state) {
         state.filteredQuestions = [];
     },
+    /**
+     * Cleans the current questions page array.
+     *
+     * @param {QuestionsState} state - The questions state.
+     */
     resetCurrentQuestionsPage(state) {
         state.currentQuestionsPage = [];
     },
+    /**
+     * Adds a question to the array of questions marked to be deleted.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question} data - The question to be added.
+     */
     addDeleteMarkQuestion(state, data) {
         state.deleteMarkQuestions.push(data);
     },
+    /**
+     * Updates a question that's in the array of questions marked to be deleted.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question} data - The question to be updated.
+     */
     updateDeleteMarkQuestion(state, data) {
         const questions = [...state.deleteMarkQuestions];
         questions.forEach((item, index) => {
@@ -56,6 +172,12 @@ const mutations = {
         });
         state.deleteMarkQuestions = questions;
     },
+    /**
+     * Removes a question from the array of questions marked to be deleted.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question} data - The IQ of the question to be removed.
+     */
     removeDeleteMarkQuestion(state, data) {
         const questions = [...state.deleteMarkQuestions];
         questions.forEach((item, index) => {
@@ -64,9 +186,23 @@ const mutations = {
             }
         })
     },
+    /**
+     * Sets the array of questions marked to be deleted.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question[]} data - An array of questions marked to be deleted.
+     */
     setDeleteMarkQuestions(state, data) {
         state.deleteMarkQuestions = data;
     },
+    /**
+     * Sets a question as marked to be deleted.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Object} data - The data containing the question IQ and the deletion status.
+     * @param {string} data.iq - The question IQ.
+     * @param {DeleteStatus} data.toDelete - The question deletion status.
+     */
     setDeleteMarkQuestion(state, data) {
         const questions = state.questions;
         for(let key in questions) {
@@ -79,6 +215,14 @@ const mutations = {
             }
         }
     },
+    /**
+     * Sets a question as marked to be deleted into the filtered questions array.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Object} data - The data containing the question IQ and the deletion status.
+     * @param {string} data.iq - The question IQ.
+     * @param {DeleteStatus} data.toDelete - The question deletion status.
+     */
     setDeleteMarkFilteredQuestion(state, data) {
         const questions = [...state.filteredQuestions];
         questions.forEach((item, index) => {
@@ -88,26 +232,43 @@ const mutations = {
         });
         state.filteredQuestions = questions;
     },
-    setDeletedQuestion(state, data) {
-        state.deleteQuestionId = data;
-    },
-    addCurrentQuestion(state, data) {
-        const questions = [...state.currentQuestionsPage];
-        questions.push(data);
-        state.currentQuestionsPage = questions;
-    },
+    /**
+     * Sets the current questions page array.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question[]} data - An array of questions.
+     */
     setCurrentQuestionsPage(state, data) {
         state.currentQuestionsPage = data;
     },
+    /**
+     * Creates a question into the questions object, according to the given data.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Object} data - The data containing the question data and the page number.
+     * @param {number} data.page - The page number.
+     * @param {number} data.amount - The total amount of questions.
+     * @param {Question} data.data - The question to be created.
+     */
     createQuestion(state, data) {
         const page = data.page;
         const questions = state.questions['p' + page] || [];
         const oneBefore = state.questions['p' + (page - 1)] || [];
-        if(questions.length > 0 || oneBefore.length === 8) {
+        const amount = data.amount;
+        if(questions.length > 0 || oneBefore.length === 8 || amount === 0) {
             questions.push(data.data);
             state.questions['p' + page] = [...questions];
+            if(amount === 0) {
+                state.currentQuestionsPage.push(data.data);
+            }
         }
     },
+    /**
+     * Updates a question into the question object, according to the question's IQ.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question} data - The question to be updated.
+     */
     updateQuestion(state, data) {
         const questions = state.questions;
         for(let key in questions) {
@@ -120,6 +281,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Updates a question that's in the filtered questions array, according to the question's IQ.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question} data - The question to be updated.
+     */
     updateFilteredQuestion(state, data) {
         const questions = [...state.filteredQuestions];
         questions.forEach((item, index) => {
@@ -129,6 +296,12 @@ const mutations = {
         });
         state.filteredQuestions = questions;
     },
+    /**
+     * Updates a question that's in the current questions page array, according to the question's IQ.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {Question} data - The question to be updated.
+     */
     updateCurrentQuestionsPage(state, data) {
         const questions = [...state.currentQuestionsPage];
         questions.forEach((item, index) => {
@@ -138,6 +311,12 @@ const mutations = {
         });
         state.currentQuestionsPage = questions;
     },
+    /**
+     * Deletes a question from the question object, according to the given data.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {string} data - The IQ of the question to be deleted.
+     */
     deleteQuestion(state, data) {
         const questions = state.questions;
         for(let key in questions) {
@@ -150,6 +329,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Deletes a question from the filtered questions array, according to the given data.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {string} data - The IQ of the question to be deleted.
+     */
     deleteFilteredQuestion(state, data) {
         const questions = [...state.filteredQuestions];
         questions.forEach((item, index) => {
@@ -158,9 +343,20 @@ const mutations = {
             }
         });
     },
+    /**
+     * Sets the last question request IQs.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {[string, string]} data An array of strings containing the first and last question IQs from the last request.
+     */
     setLastQuestionDocument(state, data) {
         state.lastQuestionDocument = data;
     },
+    /**
+     * Resets the questions state to it's initial state.
+     *
+     * @param {QuestionsState} state - The questions state.
+     */
     RESETQuestions(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
@@ -170,7 +366,16 @@ const mutations = {
 }
 
 const actions = {
-    loadQuestionPage({ commit, state }, payload) {
+    /**
+     * Loads a page of questions according to the payload data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.page - The page number.
+     * @param {number} payload.itemsPerPage - The amount of items per page.
+     * @param {"next"|"previous"} payload.type - The request type.
+     */
+    loadQuestionPage({ commit }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, type } = payload;
@@ -221,6 +426,15 @@ const actions = {
             commit('setLoading', false);
         }
     },
+    /**
+     * Loads the first or last page according to the payload data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.page - The page number.
+     * @param {number} payload.itemsPerPage - The amount of items per page.
+     * @param {"first"|"last"} payload.mode - The request mode.
+     */
     loadFOLQuestionPage({ commit, state }, payload) {
         commit('setLoading', true);
 
@@ -275,6 +489,12 @@ const actions = {
             commit('setLoading', false);
         }
     },
+    /**
+     * Searches for questions based on their IQ.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The string to be searched.
+     */
     searchQuestions({ commit }, payload) {
         commit('setLoading', true);
 
@@ -300,6 +520,14 @@ const actions = {
                 createErrorLog('Question Searching', error.message, { payload, data });
             });
     },
+    /**
+     * Gets all tests that includes a question based on it's IQ.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.iq - The question IQ.
+     * @returns {Promise<Test[]>} An array of tests.
+     */
     async checkQuestionInTests(store, payload) {
         const { iq } = payload;
 
@@ -324,6 +552,11 @@ const actions = {
             }
         });
     },
+    /**
+     * Loads all questions that are marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     */
     checkDeleteMarkQuestions({ commit }) {
         const data = [];
 
@@ -342,6 +575,15 @@ const actions = {
                 createErrorLog('Question Mark Check', error.message, { data });
             });
     },
+    /**
+     * Marks a question to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.iq - The question IQ.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered questions or not.
+     * @param {string} payload.userEmail - The current user e-mail.
+     */
     deleteMarkQuestion({ commit }, payload) {
         commit('setLoading', true);
 
@@ -388,6 +630,15 @@ const actions = {
                 createErrorLog('Question Delete Mark', error.message, { payload });
             });
     },
+    /**
+     * Restores a question from being marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.iq - The question IQ.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered questions or not.
+     * @param {boolean} payload.isRequest - Whether the question is a request or not.
+     */
     restoreMarkedQuestion({ commit }, payload) {
         commit('setLoading', true);
 
@@ -398,8 +649,13 @@ const actions = {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
 
+                /**
+                 * @type {Question}
+                 */
                 const question = {
                     iq: data.iq,
+                    created: data.created,
+                    updated: data.updated,
                     subject: data.subject,
                     question: data.question,
                     knowledge: data.knowledge,
@@ -442,6 +698,13 @@ const actions = {
                 createErrorLog('Question Restore', error.message, { payload });
             });
     },
+    /**
+     * Restores all questions that are marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered questions or not.
+     */
     restoreAllMarkedQuestions({ commit, state }, payload) {
         commit('setLoading', true);
 
@@ -453,8 +716,13 @@ const actions = {
                 snapshot.forEach(doc => {
                     const data = doc.data();
 
+                    /**
+                     * @type {Question}
+                     */
                     const question = {
                         iq: data.iq,
+                        created: data.created,
+                        updated: data.updated,
                         subject: data.subject,
                         question: data.question,
                         knowledge: data.knowledge,
@@ -504,6 +772,14 @@ const actions = {
                 createErrorLog('Question Restore All', error.message, { payload, questionData });
             });
     },
+    /**
+     * Changes a question's delete status to false (confirmed deletion).
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.iq - The question IQ.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered questions or not.
+     */
     changeDeleteStatusQuestions({ commit }, payload) {
         commit('setLoading', true);
         const { iq, isSearching } = payload;
@@ -516,7 +792,7 @@ const actions = {
                 }
 
                 if(doc) {
-                    doc.ref.update({ ...doc.data(), toDelete: { status: false } });
+                    doc.ref.update({ ...doc.data(), toDelete });
 
                     commit('updateCurrentQuestionsPage', { ...doc.data(), toDelete });
                     commit('updateQuestion', { ...doc.data(), toDelete });
@@ -532,7 +808,15 @@ const actions = {
                 createErrorLog('Question Confirm Delete', error.message, { payload });
             });
     },
+    /**
+     * Deletes all questions that are marked to be deleted (toDelete.status = false).
+     *
+     * @param {Store} store - The vuex store.
+     */
     deleteQuestions({ commit }) {
+        /**
+         * @type {Object.<string, number>}
+         */
         const subjects = {
             "Teoria do Reator": 0,
             "Termodinâmica": 0,
@@ -593,6 +877,15 @@ const actions = {
                 createErrorLog('Question DB Delete', error.message, { subjects });
             });
     },
+    /**
+     * Uploads a question image.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {File} payload.image - The image to be uploaded.
+     * @param {string} payload.iq - The question IQ.
+     * @returns {Promise<string>} The image url.
+     */
     async uploadImageQuestion({ commit }, payload) {
         return new Promise((resolve,reject) => {
             try {
@@ -618,6 +911,16 @@ const actions = {
             }
         });
     },
+    /**
+     * Updates a question based on it's IQ.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {Question} payload.questionData - The question to be updated.
+     * @param {Question} payload.oldData - The question to be kept in the history.
+     * @param {string} payload.user - The current user id.
+     * @param {isSearching} payload.isSearching - Whether the application is using the filtered questions or not.
+     */
     editQuestion({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -712,6 +1015,12 @@ const actions = {
                 createErrorLog('Question DB Upload', error.message, { payload });
             });
     },
+    /**
+     * Creates a question with the non updated data version.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Question} payload - The question to be kept.
+     */
     createdEditedQuestion({ commit }, payload) {
         commit('setLoading', true);
 
@@ -728,6 +1037,13 @@ const actions = {
                 console.error("Error writing document: ", error);
             });
     },
+    /**
+     * Checks if a question with the given IQ exists.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The question IQ.
+     * @returns {Promise<boolean>} Whether the question exists or not.
+     */
     async questionExists(store, payload) {
         return new Promise((resolve, reject) => {
             try {
@@ -752,6 +1068,14 @@ const actions = {
             }
         });
     },
+    /**
+     * Creates a new question.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {QuestionCreation} payload.question - The question to be created.
+     * @param {boolean} payload.isRequest - Whether the question is a request or not.
+     */
     createQuestion({ commit }, payload) {
         commit('setLoading', true);
 
@@ -771,7 +1095,11 @@ const actions = {
         db.collection("questions").add(question)
             .then(() => {
                 commit('setLoading', false);
-                commit('createQuestion', { page: (amount === 8 || amount === 0 ? pageAmount + 1 : pageAmount), data: question });
+                commit('createQuestion', {
+                    page: (amount === 0 ? pageAmount + 1 : pageAmount),
+                    data: question,
+                    amount: questionAmount
+                });
                 if(!payload.isRequest) commit('setSuccess', 'Questão criada com sucesso!');
 
                 db.collection('data-size').get()
@@ -819,6 +1147,12 @@ const actions = {
                 createErrorLog('Question DB Insert', error.message, { payload });
             });
     },
+    /**
+     * Gets a question by it's IQ.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The question IQ.
+     */
     async getQuestionByIQ(store, payload) {
         return new Promise((resolve, reject) => {
             try {
@@ -837,40 +1171,91 @@ const actions = {
             }
         });
     },
+    /**
+     * Resets the questions state to it's initial state.
+     *
+     * @param {Store} store - The vuex store.
+     */
     resetQuestions({ commit }) {
         commit('RESETQuestions');
     }
 }
 
 const getters = {
+    /**
+     * Gets all the subjects.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @returns {Subject[]} An array of subjects.
+     */
     getSubjects(state) {
         return state.subjects;
     },
+    /**
+     * Gets an object with all loaded pages and it's questions.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @returns {Object.<string, Question[]>} The questions pages object.
+     */
     getQuestions(state) {
         return state.questions;
     },
+    /**
+     * Gets an array of questions that were marked to be deleted.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @returns {Question[]} An array of questions.
+     */
     getDeleteMarkQuestions(state) {
         return state.deleteMarkQuestions;
     },
-    getQuestionsByPage: state => page => {
-        return state.questions['p' + page];
+    /**
+     * Gets an array of questions of the given page.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {number} page - The page number.
+     * @returns {(page: number) => Question[]} An array of questions.
+     */
+    getQuestionsByPage(state) {
+        return page => state.questions['p' + page];
     },
+    /**
+     * Gets an array of the current page questions.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @returns {Question[]} An array of questions.
+     */
     getCurrentQuestionsPage(state) {
         return state.currentQuestionsPage;
     },
+    /**
+     * Gets an array of filtered questions.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @returns {Question[]} An array of questions.
+     */
     getFilteredQuestions(state) {
         return state.filteredQuestions;
     },
-    getAnswersById: state => iq => {
-        let aux = [];
+    /**
+     * Gets an array of answers based on the question's IQ.
+     *
+     * @param {QuestionsState} state - The questions state.
+     * @param {string} iq - The question IQ.
+     * @returns {(iq: string) => Answer[]} An array of answers.
+     */
+    getAnswersById(state) {
+        return iq => {
+            const aux = [];
 
-        for(let key in state.questions) {
-            if(state.questions[key].iq === iq) {
-                aux = state.questions[key];
+            for(let key in state.questions) {
+                if(state.questions[key].iq === iq) {
+                    aux = state.questions[key];
+                }
             }
-        }
 
-        return { ...aux.answers }
+            return { ...aux.answers }
+        }
     }
 }
 

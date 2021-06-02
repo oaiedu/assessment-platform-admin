@@ -1,10 +1,33 @@
-const axios = require('axios');
+import { Store } from 'vuex';
+import axios from 'axios';
 
 import { db } from '../../main';
 import { getNowISOString } from '../../utils/date';
 
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
+/**
+ * @typedef {Object} Backup
+ * @property {string} id - The backup id.
+ * @property {string} cloudId - The backup cloud id (google drive cloud service).
+ * @property {string} size - The backup size.
+ * @property {string} month - The month that the backup was created.
+ * @property {string} start - The iso string of when the backup started.
+ * @property {string} end - The iso string of when the backup ended.
+ */
+
+/**
+ * @typedef {Object} BackupState
+ * @property {Object.<string, string>} months - The months object, from 1 to 12.
+ * @property {Backup[]} backups - An array of backups.
+ * @property {Backup|null} lastBackup - The last backup made.
+ */
+
+/**
+ * Gets the initial state for backup store.
+ *
+ * @returns {BackupState} The initial backup state object.
+ */
 const initialState = () => ({
     months: {
         '1': 'Janeiro',
@@ -27,25 +50,54 @@ const initialState = () => ({
 const state = initialState();
 
 const mutations = {
+    /**
+     * Sets to the state a new array of backups.
+     *
+     * @param {BackupState} state - The backup state.
+     * @param {Backup[]} data - An array of backups.
+     */
     setBackups(state, data) {
         state.backups = data;
     },
+    /**
+     * Pushes a new backup to backups list.
+     *
+     * @param {BackupState} state - The backup state.
+     * @param {Backup} data
+     */
     newBackup(state, data) {
         state.backups.push(data);
     },
+    /**
+     * Remove a backup from backups list.
+     *
+     * @param {BackupState} state - The backup state.
+     * @param {Backup} data - The backup to remove.
+     */
     removeBackup(state, data) {
-        const backups = state.backups;
+        const backups = [...state.backups];
         const ids = state.backups.map((bkp) => bkp.id);
         const index = ids.indexOf(data.id);
 
         if(index !== -1) {
             backups.splice(index, 1);
         }
-        state.backups = backups;
+        state.backups = [...backups];
     },
+    /**
+     * Sets the last backup with the given data.
+     *
+     * @param {BackupState} state - The backup state.
+     * @param {Backup} data - The backup to be setted.
+     */
     setLastBackup(state, data) {
         state.lastBackup = data;
     },
+    /**
+     * Resets the backup state to it's initial state.
+     *
+     * @param {BackupState} state - The backup state.
+     */
     RESETBackup(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
@@ -55,10 +107,17 @@ const mutations = {
 }
 
 const actions = {
-    async backupFirebase({ commit, state }, payload) {
+    /**
+     * Backups all Firebase data and sends it to the google drive cloud service.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.now - The iso string of when the backups started.
+     */
+    async backupFirebase({ commit }, payload) {
         commit('setLoading', true);
-        const now = payload.now;
 
+        const { now } = payload;
         let url = '';
 
         if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
@@ -129,7 +188,12 @@ const actions = {
                 createErrorLog('Backup DB Insert', error.message, { payload, bkp });
             });
     },
-    loadBackups({ commit, state }) {
+    /**
+     * Loads all the backups from the last 3 months.
+     *
+     * @param {Store} store - The vuex store.
+     */
+    loadBackups({ commit }) {
         commit('setLoading', true);
 
         const data = [];
@@ -160,6 +224,15 @@ const actions = {
                 createErrorLog('Backups Load', error.message, { data });
             });
     },
+    /**
+     * Downloads a backup according to it's cloudId.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The backup id.
+     * @param {string} payload.cloudId - The backup cloud id.
+     * @param {string} payload.date - The backup start date.
+     */
     downloadBackup({ commit }, payload) {
         commit('setLoading', true);
 
@@ -200,6 +273,12 @@ const actions = {
                 createErrorLog('Backup Download', error.message, { payload, url });
             });
     },
+    /**
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The backup cloud id.
+     */
     async deleteBackup({ commit }, payload) {
         commit('setLoading', true);
 
@@ -244,6 +323,11 @@ const actions = {
                 createErrorLog('Backup Url Delete', error.message, { payload, url });
             });
     },
+    /**
+     * Loads the most recent backup.
+     *
+     * @param {Store} store - The vuex store.
+     */
     loadLastBackup({ commit }) {
         commit('setLoading', true);
 
@@ -261,18 +345,41 @@ const actions = {
                 createErrorLog('Last Backup Loading', error.message, null);
             });
     },
+    /**
+     * Resets the backup state to it's initial state.
+     *
+     * @param {Store} store - The vuex store.
+     */
     resetBackup({ commit }) {
         commit('RESETBackup');
     }
 }
 
 const getters = {
+    /**
+     * Gets the months object from the backup state.
+     *
+     * @param {BackupState} state - The backup state.
+     * @returns {Object.<string, string>} The months object, from 1 to 12.
+     */
     getMonths(state) {
         return state.months;
     },
+    /**
+     * Gets all the backups from the backup state.
+     *
+     * @param {BackupState} state - The backup state.
+     * @returns {Backup[]} An array of backups.
+     */
     getBackups(state) {
         return state.backups;
     },
+    /**
+     * Gets the most recent backup from the backup state.
+     *
+     * @param {BackupState} state - The backup state.
+     * @returns {Backup} The most recent backup.
+     */
     getLastBackup(state) {
         return state.lastBackup;
     }

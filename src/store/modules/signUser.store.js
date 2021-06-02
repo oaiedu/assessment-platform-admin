@@ -1,9 +1,39 @@
+import { Store } from 'vuex';
 import axios from 'axios';
 
 import { auth, db, storage } from '../../main';
 import { getNowISOString } from '../../utils/date';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
+/**
+ * @typedef {Object} UserInfo
+ * @property {string} id - The user id.
+ * @property {string} name - The user name.
+ * @property {string} email - The user e-mail.
+ * @property {string} role - The user role.
+ * @property {string} profileImages - The user profile image.
+ * @property {string} created - The iso string of the user creation date.
+ * @property {string} updated - The iso string of the user last edition date.
+ */
+
+/**
+ * @typedef {{admin: boolean, appraiser: boolean, student: boolean, teacher: boolean}} UserClaims
+ */
+
+/**
+ * @typedef {Object} SignUserState
+ * @property {{id: string}|null} user - The current user uid.
+ * @property {UserInfo} userInfo - The current user info.
+ * @property {UserClaims} userClaims - The current user claims.
+ * @property {UserInfo[]} users - An array of users.
+ * @property {UserInfo} lastUser - The most recent registered user.
+ */
+
+/**
+ * Gets the initial state for sign user store.
+ *
+ * @returns {SignUserState} The initial sign user state object.
+ */
 const initialState = () => ({
     user: null,
     userInfo: null,
@@ -15,21 +45,59 @@ const initialState = () => ({
 const state = initialState();
 
 const mutations = {
+    /**
+     * Sets the current user uid into the state.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @param {string} data - The user uid.
+     */
     setUser(state, data) {
         state.user = data;
     },
+    /**
+     * Sets the current user info into the state.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @param {UserInfo} data - The user info.
+     */
     setUserInfo(state, data) {
         state.userInfo = data;
     },
+    /**
+     * Sets the current user claims into the state.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @param {UserClaims} data - The user claims.
+     */
     setUserClaims(state, data) {
         state.userClaims = data;
     },
+    /**
+     * Sets an array of users into the state.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @param {UserInfo[]} data - The array of users.
+     */
     setUsers(state, data) {
         state.users = data;
     },
+    /**
+     * Sets the most recent registered user into the state.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @param {UserInfo} data - The most recent user info.
+     */
     setLastUser(state, data) {
         state.lastUser = data;
     },
+    /**
+     * Sets to a user a new role according to it's e-mail.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @param {Object} data - The data containing the user e-mail and new role.
+     * @param {string} data.email - The user e-mail.
+     * @param {string} data.role - The user new role.
+     */
     setUserRole(state, data) {
         const { email, role } = data;
         const users = [];
@@ -48,6 +116,11 @@ const mutations = {
 
         state.users = [...users];
     },
+    /**
+     * Resets the sign user state to it's initial state.
+     *
+     * @param {SignUserState} state - The sign user state.
+     */
     RESETUsers(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
@@ -57,6 +130,14 @@ const mutations = {
 }
 
 const actions = {
+    /**
+     * Uploads a new avatar image to the current user.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {File} payload.images - The image to be uploaded.
+     * @returns {string} The image url.
+     */
     uploadAvatar({ commit }, payload) {
         const request = new Promise((resolve, reject) => {
             try {
@@ -83,12 +164,23 @@ const actions = {
         });
         return request;
     },
+    /**
+     * Creates a new user account in Firebase Authentication.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.name - The new user name.
+     * @param {string} payload.email - The new user email.
+     * @param {string} payload.password - The new user password.
+     */
     signUserUp({ commit }, payload) {
         commit('setLoading', true);
         commit('clearError');
+
         auth.createUserWithEmailAndPassword(payload.email, payload.password)
             .then(user => {
                 commit('setLoading', false);
+
                 const newUser = {
                     id: user.user.uid
                 }
@@ -156,7 +248,15 @@ const actions = {
 
             });
     },
-    updateUser({ commit, state }, payload) {
+    /**
+     * Updates an user name and avatar image.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.name - The user new name.
+     * @param {string} payload.profileImages - The user new avatar image.
+     */
+    updateUser({ commit }, payload) {
         commit('setLoading', true);
 
         const userInfo = {
@@ -164,6 +264,7 @@ const actions = {
             profileImages: payload.profileImages,
             updated: getNowISOString()
         }
+
         db.collection("users").doc(state.user.id).update({
                 ...userInfo
             })
@@ -185,6 +286,14 @@ const actions = {
                 createErrorLog('User DB Update', error.message, { payload });
             });
     },
+    /**
+     * Sign in the user using it's e-mail and password.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.email - The user e-mail.
+     * @param {string} payload.password - The user password.
+     */
     signUserIn({ commit, dispatch }, payload) {
         commit('setLoading', true);
         commit('clearError');
@@ -199,11 +308,8 @@ const actions = {
         auth.signInWithEmailAndPassword(payload.email, payload.password)
             .then(user => {
                     commit('setLoading', false);
-                    const newUser = {
-                        id: user.user.uid
-                    }
-                    commit('setUser', newUser);
-                    dispatch('loadUserInfo', newUser.id);
+                    commit('setUser', { id: user.user.uid });
+                    dispatch('loadUserInfo', { id: user.user.uid });
                 }
             )
             .catch(error => {
@@ -214,14 +320,27 @@ const actions = {
                 }
             );
     },
+    /**
+     * Loads the current user info base on it's uid.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The user uid.
+     */
     loadUserInfo({ commit }, payload) {
         commit('setLoading', true);
-        db.collection("users").doc(payload).get()
+
+        db.collection("users").doc(payload.id).get()
             .then(doc => {
-                commit('setUserInfo', { ...doc.data(), id: payload });
+                commit('setUserInfo', { ...doc.data(), id: payload.id });
                 commit('setLoading', false);
             });
     },
+    /**
+     * Loads the current user claims.
+     *
+     * @param {Store} store - The vuex store.
+     */
     loadUserClaims({ commit }) {
         auth.currentUser && auth.currentUser.getIdTokenResult()
             .then(idTokenResult => {
@@ -235,6 +354,11 @@ const actions = {
                 createErrorLog('User Claims Load', error.message, { currentUser: auth.currentUser });
             });
     },
+    /**
+     * Loads all the application users.
+     *
+     * @param {Store} store - The vuex store.
+     */
     loadUsers({ commit }) {
         const users = [];
 
@@ -253,6 +377,11 @@ const actions = {
                 createErrorLog('Users Load', error.message, { users });
             });
     },
+    /**
+     * Loads the most recent registered user.
+     *
+     * @param {Store} store - The vuex store.
+     */
     loadLastUser({ commit }) {
         commit('setLoading', true);
 
@@ -270,6 +399,14 @@ const actions = {
                 createErrorLog('Last User Loading', error.message, { users });
             });
     },
+    /**
+     * Gets an user by it's uid.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The user uid.
+     * @returns {Promise<UserInfo>} An user.
+     */
     async getUserById({ commit }, payload) {
         commit('setLoading', true);
 
@@ -290,6 +427,14 @@ const actions = {
             }
         });
     },
+    /**
+     * Sets to an user a new role.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.email - The user e-email.
+     * @param {string} payload.role - The user new role.
+     */
     setUserRole({ commit }, payload) {
         commit('setLoading', true);
 
@@ -333,38 +478,82 @@ const actions = {
                 createErrorLog('User Role Update', error.message, { payload, url, updated });
             });
     },
+    /**
+     * Logs out the current user.
+     *
+     * @param {Store} store - The vuex store.
+     */
     logout({ commit }) {
         auth.signOut();
         commit('setUser', null);
         commit('setUserInfo', null);
         commit('setUserClaims', null);
     },
+    /**
+     * Auto sign in an user if it's id is already into the browser local storage.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.uid - The user uid.
+     */
     autoSignIn({ commit, dispatch }, payload) {
-        dispatch('loadUserInfo', payload.uid);
+        dispatch('loadUserInfo', { id: payload.uid });
         dispatch('loadUserClaims');
         commit('setUser', { id: payload.uid });
     },
-    user(state) {
-        return state.user;
-    },
+    /**
+     * Resets the sign user state to it's initial state.
+     *
+     * @param {Store} store - The vuex store.
+     */
     resetUsers({ commit }) {
         commit('RESETUsers');
     }
 }
 
 const getters = {
+    /**
+     * Gets the current user uid.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @returns {{id: string}|null} The current user uid.
+     */
     user(state) {
         return state.user;
     },
+    /**
+     * Gets the current user info.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @returns {UserInfo} The current user info.
+     */
     userInfo(state) {
         return state.userInfo;
     },
+    /**
+     * Gets an array of all application users.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @returns {UserInfo[]} An array of users.
+     */
     users(state) {
         return state.users;
     },
+    /**
+     * Gets the current user claims.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @returns {UserClaims} The current user claims.
+     */
     getUserClaims(state) {
         return state.userClaims;
     },
+    /**
+     * Gets the most recent registered user info.
+     *
+     * @param {SignUserState} state - The sign user state.
+     * @returns {UserInfo} The last registered user info.
+     */
     getLastUser(state) {
         return state.lastUser;
     }

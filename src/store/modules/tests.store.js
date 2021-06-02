@@ -1,11 +1,61 @@
+import { Store } from 'vuex';
 import uuid from 'uuid-random';
 
-import { db, storage } from '../../main';
+import { db } from '../../main';
 import { getNowISOString } from '../../utils/date';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
+/**
+ * @typedef {import('./questions.store.js').Question} Question
+ */
+
+/**
+ * @typedef {Object} DeleteStatus
+ * @property {boolean} toDelete.status - If true, the question can be restored. If false, it will be deleted.
+ * @property {string|undefined} toDelete.userEmail - The user that marked the question to be deleted.
+ */
+
+/**
+ * @typedef {Object} TestCreation
+ * @property {string} userId - The user that created the test.
+ * @property {string|null} editedBy - The last user that edited the test.
+ * @property {string} title - The test title.
+ * @property {string} purpose - The test purpose.
+ * @property {"selected"|"random"} type - The test type.
+ * @property {Question[]} questions - The test questions.
+ */
+
+/**
+ * @typedef {Object} Test
+ * @property {string} id - The test id.
+ * @property {string} created - The test creation date.
+ * @property {string} updated - The test edition date.
+ * @property {string} userId - The user that created the test.
+ * @property {string|null} editedBy - The last user that edited the test.
+ * @property {string} title - The test title.
+ * @property {string} purpose - The test purpose.
+ * @property {"selected"|"random"} type - The test type.
+ * @property {Question[]} questions - The test questions.
+ * @property {DeleteStatus|undefined} toDelete - The test deletion status.
+ */
+
+/**
+ * @typedef {Object} TestsState
+ * @property {Object.<string, Test[]>} tests - The pages with it's tests list.
+ * @property {Test[]} filteredTests - An array of tests filtered by id.
+ * @property {Test[]} currentTestsPage - An array of tests of the current page.
+ * @property {[string, string]|null} lastTestDocument - An array with the first and last test id from the last request.
+ * @property {Question[]} testQuestions - An array of questions from a specific test.
+ * @property {Test[]} deleteMarkTests - An array of tests that were marked to be deleted.
+ * @property {Test[]} lastTests - An array of the most recent tests.
+ */
+
+/**
+ * Gets the initial state of tests state.
+ *
+ * @returns {TestsState} The initial state of tests state.
+ */
 const initialState = () => ({
-    loadedTests: [],
     tests: {},
     filteredTests: [],
     currentTestsPage: [],
@@ -18,30 +68,75 @@ const initialState = () => ({
 const state = initialState();
 
 const mutations = {
-    setLoadedTests(state, payload) {
-        state.loadedTests = payload
-    },
+    /**
+     * Sets a page of tests according to the given data.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Object} data - The data containing the page number and it's data.
+     * @param {string} data.page - The page number.
+     * @param {Test[]} data.data - An array of tests.
+     */
     setTestPage(state, data) {
         state.tests[data.page] = data.data;
     },
+    /**
+     * Sets the filtered tests.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test[]} data - An array of filtered tests.
+     */
     setFilteredTests(state, data) {
         state.filteredTests = data;
     },
+    /**
+     * Sets the most recent tests.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test[]} data - An array of tests.
+     */
     setLastTests(state, data) {
         state.lastTests = data;
     },
+    /**
+     * Cleans the filtered tests array.
+     *
+     * @param {TestsState} state - The tests state.
+     */
     resetFilteredTests(state) {
         state.filteredTests = [];
     },
+    /**
+     * Cleans the current tests page array.
+     *
+     * @param {TestsState} state - The tests state.
+     */
     resetCurrentTestsPage(state) {
         state.currentTestsPage = [];
     },
+    /**
+     * Sets the current tests page array.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test[]} data - An array of tests.
+     */
     setCurrentTestsPage(state, data) {
         state.currentTestsPage = data;
     },
+    /**
+     * Adds a test to the array of tests marked to be deleted.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test} data - The test to be added.
+     */
     addDeleteMarkTest(state, data) {
         state.deleteMarkTests.push(data);
     },
+    /**
+     * Updates a test that's in the array of tests marked to be deleted.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test} data - The test to be updated.
+     */
     updateDeleteMarkTest(state, data) {
         const tests = [...state.deleteMarkTests];
         tests.forEach((item, index) => {
@@ -51,6 +146,12 @@ const mutations = {
         });
         state.deleteMarkTests = tests;
     },
+    /**
+     * Removes a test from the array of tests marked to be deleted.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test} data - The id of the test to be removed.
+     */
     removeDeleteMarkTest(state, data) {
         const tests = [...state.deleteMarkTests];
         tests.forEach((item, index) => {
@@ -59,9 +160,23 @@ const mutations = {
             }
         })
     },
+    /**
+     * Sets the array of tests marked to be deleted.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test[]} data - An array of tests marked to be deleted.
+     */
     setDeleteMarkTests(state, data) {
         state.deleteMarkTests = data;
     },
+    /**
+     * Sets a test as marked to be deleted.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Object} data - The data containing the test id and the deletion status.
+     * @param {string} data.id - The test id.
+     * @param {DeleteStatus} data.toDelete - The test deletion status.
+     */
     setDeleteMarkTest(state, data) {
         const tests = state.tests;
         for(let key in tests) {
@@ -74,6 +189,14 @@ const mutations = {
             }
         }
     },
+    /**
+     * Sets a test as marked to be deleted into the filtered tests array.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Object} data - The data containing the test id and the deletion status.
+     * @param {string} data.id - The test id.
+     * @param {DeleteStatus} data.toDelete - The test deletion status.
+     */
     setDeleteMarkFilteredTest(state, data) {
         const tests = [...state.filteredTests];
         tests.forEach((item, index) => {
@@ -83,9 +206,24 @@ const mutations = {
         });
         state.filteredTests = tests;
     },
+    /**
+     * Sets the test questions.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Question[]} data - An array of questions.
+     */
     setTestQuestions(state, data) {
         state.testQuestions = data;
     },
+    /**
+     * Creates a test into the tests object, according to the given data.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Object} data - The data containing the test data and the page number.
+     * @param {number} data.page - The page number.
+     * @param {number} data.amount - The total amount of tests.
+     * @param {Test} data.data - The test to be created.
+     */
     createTest(state, data) {
         const page = data.page;
         const tests = state.tests['p' + page] || [];
@@ -99,6 +237,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Updates a test into the test object, according to the test's id.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {test} data - The test to be updated.
+     */
     updateTest(state, data) {
         const tests = state.tests;
         for(let key in tests) {
@@ -111,6 +255,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Updates a test that's in the filtered tests array, according to the test's id.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test} data - The test to be updated.
+     */
     updateFilteredTest(state, data) {
         const tests = [...state.filteredTests];
         tests.forEach((item, index) => {
@@ -120,6 +270,12 @@ const mutations = {
         });
         state.filteredTests = tests;
     },
+    /**
+     * Updates a test that's in the current tests page array, according to the test's id.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {Test} data - The test to be updated.
+     */
     updateCurrentTestsPage(state, data) {
         const tests = [...state.currentTestsPage];
         tests.forEach((item, index) => {
@@ -129,6 +285,12 @@ const mutations = {
         });
         state.currentTestsPage = tests;
     },
+    /**
+     * Deletes a test from the test object, according to the given data.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {string} data - The id of the test to be deleted.
+     */
     deleteTest(state, data) {
         const tests = state.tests;
         for(let key in tests) {
@@ -141,6 +303,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Deletes a test from the filtered tests array, according to the given data.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {string} data - The IQ of the test to be deleted.
+     */
     deleteFilteredTest(state, data) {
         const tests = state.filteredTests;
         tests.forEach((item, index) => {
@@ -149,9 +317,20 @@ const mutations = {
             }
         });
     },
+    /**
+     * Sets the last test request IQs.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {[string, string]} data An array of strings containing the first and last test ids from the last request.
+     */
     setLastTestDocument(state, data) {
         state.lastTestDocument = data;
     },
+    /**
+     * Resets the tests state to it's initial state.
+     *
+     * @param {TestsState} state - The tests state.
+     */
     RESETTests(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
@@ -161,32 +340,15 @@ const mutations = {
 }
 
 const actions = {
-    loadedTests({ commit }) {
-        commit('setLoading', true);
-        let tests = []
-        db.collection("tests").get().then(querySnapshot => {
-            querySnapshot.forEach(doc => {
-                tests.push(doc.data());
-            });
-            commit('setLoadedTests', tests);
-            commit('setLoading', false);
-        })
-    },
-    findImageTests({ commit }, payload) {
-        const pathReference = storage.refFromURL(`gs://pwr-quiz-generator.appspot.com/${payload}`);
-
-        const imageURL = pathReference.getDownloadURL()
-            .then(url => {
-                return url;
-            })
-            .catch(error => {
-                const errorModel = showErrorMessage('load', 'Prova', 'Image loading error - ' + error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test Image Search', error.message, { payload });
-            });
-
-        return imageURL;
-    },
+    /**
+     * Loads a page of tests according to the payload data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.page - The page number.
+     * @param {number} payload.itemsPerPage - The amount of items per page.
+     * @param {"next"|"previous"} payload.type - The request type.
+     */
     loadTestPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
@@ -244,6 +406,15 @@ const actions = {
             commit('setLoading', false);
         }
     },
+    /**
+     * Loads the first or last page according to the payload data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.page - The page number.
+     * @param {number} payload.itemsPerPage - The amount of items per page.
+     * @param {"first"|"last"} payload.mode - The request mode.
+     */
     loadFOLTestPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
@@ -306,6 +477,13 @@ const actions = {
             commit('setLoading', false);
         }
     },
+    /**
+     * Checks if a test with the given title exists.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The test title.
+     * @returns {Promise<number>} The number of tests that match the given title.
+     */
     async testExists(store, payload) {
         return new Promise((resolve, reject) => {
             try {
@@ -324,6 +502,12 @@ const actions = {
             }
         });
     },
+    /**
+     * Searches for tests based on their title.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The string to be searched.
+     */
     searchTests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -386,10 +570,20 @@ const actions = {
                 createErrorLog('Test Search', error.message, { payload, data });
             });
     },
+    /**
+     * Loads the questions from a given test.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Test} payload - The test payload.
+     */
     loadTestQuestions({ commit }, payload) {
-        const data = [...payload.questions];
-        commit('setTestQuestions', data);
+        commit('setTestQuestions', [...payload.questions]);
     },
+    /**
+     * Loads all tests that are marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     */
     checkDeleteMarkTests({ commit, dispatch }) {
         const data = [];
 
@@ -412,6 +606,15 @@ const actions = {
                 createErrorLog('Test Mark Check', error.message, { data });
             });
     },
+    /**
+     * Marks a test to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The test id.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
+     * @param {string} payload.userEmail - The current user e-mail.
+     */
     deleteMarkTest({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -430,10 +633,10 @@ const actions = {
 
                 const user = await dispatch('getUserById', { id: doc.data().userId });
 
-                commit('setDeleteMarkTest', { id, toDelete, user });
+                commit('setDeleteMarkTest', { id, toDelete });
 
                 if(isSearching) {
-                    commit('setDeleteMarkFilteredTest', { id, toDelete, user });
+                    commit('setDeleteMarkFilteredTest', { id, toDelete });
                 }
 
                 commit('updateCurrentTestsPage', { ...doc.data(), toDelete, user });
@@ -447,6 +650,14 @@ const actions = {
                 createErrorLog('Test Delete Mark', error.message, { payload });
             });
     },
+    /**
+     * Restores a test from being marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The test id.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
+     */
     restoreMarkedTest({ commit }, payload) {
         commit('setLoading', true);
 
@@ -459,6 +670,9 @@ const actions = {
                 const data = doc.data();
                 docData = data;
 
+                /**
+                 * @type {Test}
+                 */
                 const test = {
                     id: data.id,
                     title: data.title,
@@ -472,7 +686,7 @@ const actions = {
 
                 doc.ref.set(test);
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch('getUserById', { id: test.userId });
                 test['user'] = user;
 
                 commit('updateTest', test);
@@ -493,7 +707,16 @@ const actions = {
                 createErrorLog('Test Restore', error.message, { payload, docData });
             });
     },
-    restoreAllMarkedTests({ commit, dispatch, state }, payload) {
+    /**
+     * Restores all tests that are marked to be deleted from the database or the current user, depending on the given data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {boolean} payload.all - Whether will restore all database tests or only from the current user.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
+     * @param {import('./signUser.store.js').UserInfo} payload.user - The current user info.
+     */
+    restoreAllMarkedTests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { all, isSearching, user } = payload;
@@ -514,6 +737,9 @@ const actions = {
                     const data = doc.data();
                     docData = data;
 
+                    /**
+                     * @type {Test}
+                     */
                     const test = {
                         id: data.id,
                         title: data.title,
@@ -527,8 +753,7 @@ const actions = {
 
                     doc.ref.set(test);
 
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
-
+                    const userData = await dispatch('getUserById', { id: test.userId });
                     test['user'] = userData;
 
                     if(all) {
@@ -552,6 +777,14 @@ const actions = {
                 createErrorLog('Test Restore All', error.message, { payload, docData });
             });
     },
+    /**
+     * Changes a test's delete status to false (confirmed deletion).
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The test id.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
+     */
     changeDeleteStatusTests({ commit, dispatch }, payload) {
         commit('setLoading', true);
         const { id, isSearching } = payload;
@@ -581,6 +814,11 @@ const actions = {
                 createErrorLog('Test Confirm Delete', error.message, { payload });
             });
     },
+    /**
+     * Deletes all tests that are marked to be deleted (toDelete.status = false).
+     *
+     * @param {Store} store - The vuex store.
+     */
     deleteTests({ commit, dispatch }) {
         const data = [];
 
@@ -611,6 +849,14 @@ const actions = {
                 createErrorLog('Test DB Delete', error.message, { data });
             });
     },
+    /**
+     * Creates a new test.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {TestCreation} payload.testData - The test to be created.
+     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     */
     createTest({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -632,7 +878,7 @@ const actions = {
             .then(() => {
                 commit('setLoading', false);
                 commit('createTest', {
-                    page: (amount === 10 || amount === 0 ? pageAmount + 1 : pageAmount),
+                    page: (amount === 0 ? pageAmount + 1 : pageAmount),
                     data: { ...test, user: {...userInfo} },
                     amount: testAmount
                 });
@@ -663,6 +909,12 @@ const actions = {
                 createErrorLog('Test DB Insert', error.message, { test });
             });
     },
+    /**
+     * Updates a test based on it's id.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Test} payload - The test to be updated.
+     */
     updateTest({ commit, dispatch }, payload) {
         const test = { ...payload, updated: getNowISOString() }
         db.collection("tests").where('id', '==', test.id).get()
@@ -684,6 +936,13 @@ const actions = {
                 createErrorLog('Test DB Update', error.message, { payload });
             });
     },
+    /**
+     * Gets all the questions IQs from a subject.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The subject name.
+     * @returns {Promise<string[]>} An array of IQs.
+     */
     async getSubjectIQS({ commit }, payload) {
         const subject = payload;
 
@@ -704,6 +963,11 @@ const actions = {
             }
         });
     },
+    /**
+     * Loads the most recent tests.
+     *
+     * @param {Store} store - The vuex store.
+     */
     loadLastTests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -732,56 +996,121 @@ const actions = {
                 createErrorLog('Last Tests Loading', error.message, { payload });
             });
     },
+    /**
+     * Resets the tests state to it's initial state.
+     *
+     * @param {Store} store - The vuex store.
+     */
     resetTests({ commit }) {
         commit('RESETTests');
     }
 }
 
 const getters = {
-    loadedTests(state) {
-        return state.loadedTests;
-    },
+    /**
+     * Gets an object with all loaded pages and it's tests.
+     *
+     * @param {TestsState} state - The tests state.
+     * @returns {Object.<string, Test[]>} The tests pages object.
+     */
     getTests(state) {
         return state.tests;
     },
+    /**
+     * Gets the most recent tests.
+     *
+     * @param {TestsState} state - The tests state.
+     * @returns {Test[]} An array of tests.
+     */
     getLastTests(state) {
-        return state.lastTests;
+        return [...state.lastTests].sort((t1, t2) => t1.updated > t2.updated ? -1 : 1);
     },
+    /**
+     * Gets an array of tests that are marked to be deleted.
+     *
+     * @param {TestsState} state - The tests state.
+     * @returns {Test[]} An array of tests that are marked to be deleted.
+     */
     getDeleteMarkTests(state) {
         return state.deleteMarkTests;
     },
+    /**
+     * Gets an array of tests of the given page.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {number} page - The page number.
+     * @returns {Test[]} An array of tests.
+     */
     getTestsByPage: state => page => {
         return state.tests['p' + page];
     },
+    /**
+     * Gets an array of the current page tests.
+     *
+     * @param {TestsState} state - The tests state.
+     * @returns {Test[]} An array of tests.
+     */
     getCurrentTestsPage(state) {
         return state.currentTestsPage;
     },
+    /**
+     * Gets an array of filtered tests.
+     *
+     * @param {TestsState} state - The tests state.
+     * @returns {Test[]} An array of tests.
+     */
     getFilteredTests(state) {
         return state.filteredTests;
     },
+    /**
+     * Gets an array of questions from a specific test.
+     *
+     * @param {TestsState} state - The tests state.
+     * @returns {Question[]} An array of questions.
+     */
     getTestQuestions(state) {
         return state.testQuestions;
     },
-    getNumberOfQuestionBySubjectOnTest: state => (subject, questions) => {
-        let counter = 0;
-        questions.forEach(element => {
-            if (element.subject === subject)
-                counter++;
-        })
-        return counter;
-    },
-    findTestById: state => id => {
-        let test = null;
+    /**
+     * Gets the number of questions of the given subject.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {string} subject - The subject name.
+     * @param {Question[]} questions - An array of questions.
+     * @returns {(subject: string, questions: Question[]) => number} The number of questions of the subject.
+     */
+    getNumberOfQuestionBySubjectOnTest(state) {
 
-        test = state.lastTests.find(t => t.id == id);
-
-        if (!test) {
-            for(let key in state.tests) {
-                test = state.tests[key].find(t => t.id == id);
-            }
+        return (subject, questions) => {
+            let counter = 0;
+            questions.forEach(question => {
+                if (question.subject === subject)
+                    counter++;
+            })
+            return counter;
         }
+    },
+    /**
+     * Gets a test from the test state based on it's id.
+     *
+     * @param {TestsState} state - The tests state.
+     * @param {string} id - The test id.
+     * @returns {(id: string) => Test|null} The test or null if not found.
+     */
+    findTestById(state) {
+        return id => {
+            let test = null;
 
-        return test;
+            test = state.lastTests.find(t => t.id == id);
+
+            if (!test) {
+                for(let key in state.tests) {
+                    test = state.tests[key].find(t => t.id == id);
+                }
+            }
+
+            return test;
+        }
     }
 }
 

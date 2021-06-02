@@ -1,9 +1,68 @@
+import { Store } from 'vuex';
+
 import { db, storage } from '../../main';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 import { getNowISOString } from '../../utils/date';
 
+/**
+ * @typedef {import('./questions.store.js').DeleteStatus} DeleteStatus
+ * @typedef {import('./questions.store.js').Answer} Answer
+ * @typedef {import('./questions.store.js').Subject} Subject
+ * @typedef {"Rejeitado"|"Pendente"|"Aprovado"} RequestStatus
+ */
+
+/**
+ * @typedef {Object} RequestCreation
+ * @property {string} iq - The request IQ.
+ * @property {string} userId - The user that created the request.
+ * @property {Subject} subject - The request subject.
+ * @property {string} question - The request description.
+ * @property {string} knowledge - The request knowledge.
+ * @property {string} knowledgeBWR - The request knowledge (BWR).
+ * @property {string} knowledgePWR - The request knowledge (PWR).
+ * @property {string} image - The request image url.
+ * @property {string} imageSize - The size of the image.
+ * @property {Answer[]} answers - The request answers.
+ * @property {RequestStatus} status - The request status.
+ */
+
+/**
+ * @typedef {Object} Request
+ * @property {string} iq - The request IQ.
+ * @property {string} userId - The user that created the request.
+ * @property {Subject} subject - The request subject.
+ * @property {string} question - The request description.
+ * @property {string} knowledge - The request knowledge.
+ * @property {string} knowledgeBWR - The request knowledge (BWR).
+ * @property {string} knowledgePWR - The request knowledge (PWR).
+ * @property {string} image - The request image url.
+ * @property {string} imageSize - The size of the image.
+ * @property {string|undefined} created - The request creation date.
+ * @property {string|undefined} updated - The request edition date.
+ * @property {Answer[]} answers - The request answers.
+ * @property {RequestStatus} status - The request status.
+ * @property {Array} edited - The request edition history.
+ * @property {DeleteStatus|undefined} toDelete - The request deletion status.
+ */
+
+/**
+ * @typedef {Object} RequestState
+ * @property {Object.<string, Request[]} requests - The pages with it's requests list.
+ * @property {Request[]} filteredRequests - An array of requests filtered by IQ.
+ * @property {Request[]} currentRequestsPage - An array of requests of the current page.
+ * @property {[string, string]|null} lastRequestDocument - An array with the first and last test IQ from the last request.
+ * @property {Request[]} deleteMarkRequests - An array of requests that were marked to be deleted.
+ * @property {Request[]} lastPendentTests - An array of the most recent pending tests.
+ * @property {Request[]} currentUserRequests - An array of the current user last pending requests.
+ * @property {Request[]} otherUserRequests - An array of other users last pending requests.
+ */
+
+/**
+ * Gets the initial state of the request state.
+ *
+ * @returns {RequestState} The initial state of the request state.
+ */
 const initialState = () => ({
-    questionRequests: [],
     requests: {},
     filteredRequests: [],
     currentRequestsPage: [],
@@ -17,36 +76,93 @@ const initialState = () => ({
 const state = initialState();
 
 const mutations = {
-    setRequests(state, data) {
-        state.requests = data;
-    },
+    /**
+     * Sets a page of requests according to the given data.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Object} data - The data containing the page number and it's data.
+     * @param {string} data.page - The page number.
+     * @param {Request[]} data.data - An array of requests.
+     */
     setRequestPage(state, data) {
         state.requests[data.page] = data.data;
     },
+    /**
+     * Sets the filtered requests.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request[]} data - An array of filtered requests.
+     */
     setFilteredRequests(state, data) {
         state.filteredRequests = data;
     },
+    /**
+     * Cleans the filtered requests array.
+     *
+     * @param {RequestState} state - The request state.
+     */
     resetFilteredRequests(state) {
         state.filteredRequests = [];
     },
+    /**
+     * Cleans the current requests page array.
+     *
+     * @param {RequestState} state - The request state.
+     */
     resetCurrentRequestsPage(state) {
         state.currentRequestsPage = [];
     },
+    /**
+     * Sets the current requests page array.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request[]} data - An array of requests.
+     */
     setCurrentRequestsPage(state, data) {
         state.currentRequestsPage = data;
     },
+    /**
+     * Sets the most recent pending requests.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request[]} data - An array of requests.
+     */
     setLastPendentRequests(state, data) {
         state.lastPendentRequests = data;
     },
+    /**
+     * Sets the most recent pending requests from the current user.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request[]} data - An array of requests.
+     */
     setCurrentUserRequests(state, data) {
         state.currentUserRequests = data;
     },
+    /**
+     * Sets the most recent pending requests from other users.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request[]} data - An array of requests.
+     */
     setOtherUserRequests(state, data) {
         state.otherUserRequests = data;
     },
+    /**
+     * Adds a request to the array of requests marked to be deleted.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request} data - The request to be added.
+     */
     addDeleteMarkRequest(state, data) {
         state.deleteMarkRequests.push(data);
     },
+    /**
+     * Updates a request that's into the array of requests marked to be deleted.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request} data - The request to be updated.
+     */
     updateDeleteMarkRequest(state, data) {
         const requests = [...state.deleteMarkRequests];
         requests.forEach((item, index) => {
@@ -56,6 +172,12 @@ const mutations = {
         });
         state.deleteMarkRequests = requests;
     },
+    /**
+     * Removes a request from the array of requests marked to be deleted.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {string} data - The IQ of the request to be removed.
+     */
     removeDeleteMarkRequest(state, data) {
         const requests = [...state.deleteMarkRequests];
         requests.forEach((item, index) => {
@@ -64,9 +186,23 @@ const mutations = {
             }
         })
     },
+    /**
+     * Sets the array of requests marked to be deleted.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request[]} data - An array of requests.
+     */
     setDeleteMarkRequests(state, data) {
         state.deleteMarkRequests = data;
     },
+    /**
+     * Sets a request as marked to be deleted.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Object} data - The data containing the request IQ and it's deletion status.
+     * @param {string} data.iq - The request IQ.
+     * @param {DeleteStatus} data.toDelete - The request deletion status.
+     */
     setDeleteMarkRequest(state, data) {
         const requests = state.requests;
         for(let key in requests) {
@@ -79,6 +215,14 @@ const mutations = {
             }
         }
     },
+    /**
+     * Sets a filtered request as marked to be deleted.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Object} data - The data containing the request IQ and it's deletion status.
+     * @param {string} data.iq - The request IQ.
+     * @param {DeleteStatus} data.toDelete - The request deletion status.
+     */
     setDeleteMarkFilteredRequest(state, data) {
         const requests = [...state.filteredRequests];
         requests.forEach((item, index) => {
@@ -88,6 +232,15 @@ const mutations = {
         });
         state.filteredRequests = requests;
     },
+    /**
+     * Adds a request into the requests object, according to the given data.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Object} data - The data containing the page number, requests amount and the data to be added.
+     * @param {number} data.page - The page number.
+     * @param {number} data.amount - The total amount of requests.
+     * @param {Request} data.data - The request to be added.
+     */
     addRequest(state, data) {
         const page = data.page;
         const requests = state.requests['p' + page] || [];
@@ -101,6 +254,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Updates a request.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request} data - The request to be updated.
+     */
     updateRequest(state, data) {
         const requests = {...state.requests};
         for(let key in requests) {
@@ -114,6 +273,12 @@ const mutations = {
         }
         state.requests = requests;
     },
+    /**
+     * Updates a request that's in the filtered requests array.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request} data - The request to be updated.
+     */
     updateFilteredRequest(state, data) {
         const requests = [...state.filteredRequests];
         requests.forEach((item, index) => {
@@ -123,6 +288,12 @@ const mutations = {
         });
         state.filteredRequests = requests;
     },
+    /**
+     * Updates a request that's in the current requests page array.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {Request} data - The request to be updated.
+     */
     updateCurrentRequestsPage(state, data) {
         const requests = [...state.currentRequestsPage];
         requests.forEach((item, index) => {
@@ -132,6 +303,12 @@ const mutations = {
         });
         state.currentRequestsPage = [...requests];
     },
+    /**
+     * Removes a request from the requests object.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {string} data - The IQ of the request to be removed.
+     */
     removeRequest(state, data) {
         const requests = state.requests;
         for(let key in requests) {
@@ -144,6 +321,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Removes a request from the filtered requests array.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {string} data The IQ of the request to be removed.
+     */
     removeFilteredRequest(state, data) {
         const request = state.filteredRequests;
         request.forEach((item, index) => {
@@ -152,9 +335,20 @@ const mutations = {
             }
         });
     },
+    /**
+     * Sets the last requests request ids.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {[string, string]} data An array of strings containing the first and last IQs from the last request.
+     */
     setLastRequestDocument(state, data) {
         state.lastRequestDocument = data;
     },
+    /**
+     * Resets the request state to it's initial state.
+     *
+     * @param {RequestState} state - The request state.
+     */
     RESETRequests(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
@@ -164,6 +358,15 @@ const mutations = {
 }
 
 const actions = {
+    /**
+     * Creates a new request.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {RequestCreation} payload.request - The request to be created.
+     * @param {string} payload.email - The current user e-mail.
+     * @param {import('./signUser.store.js').UserInfo} payload.user - The current user info.
+     */
     createQuestionRequest({ commit }, payload) {
         commit('setLoading', true);
 
@@ -220,6 +423,16 @@ const actions = {
                 createErrorLog('Request DB Insert', error.message, { payload, requestAmount });
             });
     },
+    /**
+     * Updates a request based on it's IQ.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {Request} payload.request - The request to be updated.
+     * @param {RequestStatus} payload.status - The request new status.
+     * @param {"reqUpdate"|"sttUpdate"} payload.mode - If reqUpdate, update all the request data. Otherwise, update only it's status.
+     * @param {import('./signUser.store.js').UserInfo} payload.user - The request to be updated.
+     */
     updateQuestionRequest({ commit }, payload) {
         commit('setLoading', true);
         const { mode, request, user } = payload;
@@ -253,7 +466,18 @@ const actions = {
                 createErrorLog('Request DB Update', error.message, { payload });
             });
     },
-    loadRequestPage({ commit, dispatch, state }, payload) {
+    /**
+     * Loads a page of requests according to the payload data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.page - The page number.
+     * @param {number} payload.itemsPerPage - The amount of items per page.
+     * @param {"next"|"previous"} payload.type - The data request type.
+     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./signUser.store.js').UserClaims} payload.claims - The current user claims.
+     */
+    loadRequestPage({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { claims, page, itemsPerPage, type, userInfo } = payload;
@@ -315,7 +539,18 @@ const actions = {
             commit('setLoading', false);
         }
     },
-    loadFOLRequestPage({ commit, dispatch, state }, payload) {
+    /**
+     * Loads the first or last page according to the payload data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.page - The page number.
+     * @param {number} payload.itemsPerPage - The amount of items per page.
+     * @param {"first"|"last"} payload.mode - The data request mode.
+     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./signUser.store.js').UserClaims} payload.claims - The current user claims.
+     */
+    loadFOLRequestPage({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { claims, page, itemsPerPage, mode, userInfo } = payload;
@@ -379,6 +614,15 @@ const actions = {
             commit('setLoading', false);
         }
     },
+    /**
+     * Searches for requests based on their IQ.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.key - The string to be searched.
+     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./signUser.store.js').UserClaims} payload.claims - The current user claims.
+     */
     searchRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -414,6 +658,11 @@ const actions = {
                 createErrorLog('Request Searching', error.message, { payload, data });
             });
     },
+    /**
+     * Loads all requests that are marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     */
     checkDeleteMarkRequests({ commit, dispatch }) {
         const data = [];
 
@@ -436,6 +685,15 @@ const actions = {
                 createErrorLog('Request Mark Check', error.message, { data });
             });
     },
+    /**
+     * Marks a request to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.iq - The request IQ.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
+     * @param {string} payload.userId - The current user id.
+     */
     deleteMarkRequest({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -471,6 +729,14 @@ const actions = {
                 createErrorLog('Request Delete Mark', error.message, { payload });
             });
     },
+    /**
+     * Restores a request from being marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.iq - The request IQ.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
+     */
     restoreMarkedRequest({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -520,6 +786,14 @@ const actions = {
                 createErrorLog('Request Restore', error.message, { payload, docData });
             });
     },
+    /**
+     * Restores all requests that are marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
+     * @param {import('./signUser.store.js').UserInfo} payload.user - The current user info.
+     */
     restoreAllMarkedRequests({ commit, state }, payload) {
         commit('setLoading', true);
 
@@ -566,6 +840,14 @@ const actions = {
                 createErrorLog('Request Restore All', error.message, { payload, docData });
             });
     },
+    /**
+     * Changes a request's delete status to false (confirmed deletion).
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.iq - The request IQ.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
+     */
     changeDeleteStatusRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
         const { iq, isSearching } = payload;
@@ -595,6 +877,11 @@ const actions = {
                 createErrorLog('Request Confirm Delete', error.message, { payload });
             });
     },
+    /**
+     * Deletes all requests that are marked to be deleted (toDelete.status = false).
+     *
+     * @param {Store} store - The vuex store.
+     */
     deleteRequests({ commit }) {
         const data = [];
 
@@ -649,69 +936,13 @@ const actions = {
                 createErrorLog('Request DB Delete', error.message, { data });
             });
     },
-    deleteQuestionRequest({ commit }, payload) {
-        commit('setLoading', true);
-
-        const { request, isSearching } = payload;
-
-        db.collection('question-requests').where('iq', '==', request.iq).get()
-            .then(snapshot => {
-                const doc = snapshot.docs[0];
-                doc.ref.delete()
-                    .then(() => {
-                        commit('removeRequest', request.iq);
-
-                        if(isSearching) {
-                            commit('removeFilteredRequest', request.iq);
-                        }
-
-                        commit('setLoading', false);
-                        commit('setSuccess', 'Solicitação excluída com sucesso!');
-                        if(doc.data().image && doc.data().image.length > 0) {
-                            const image = doc.data().image;
-                            const childImage = image.split('?alt=media')[0].split('/o/')[1];
-                            const child = decodeURIComponent(childImage);
-                            storage.ref().child(child).delete();
-                        }
-
-                        db.collection('data-size').get()
-                            .then(snap => {
-                                const document = snap.docs[0];
-                                const general = document.data()['question-requests'].general;
-                                const userId = request.userId;
-                                const subSize = document.data()['question-requests'].users[userId];
-
-                                const questionRequests = {
-                                    general: general - 1,
-                                    users: {
-                                        ...document.data()['question-requests'].users,
-                                        [userId]: subSize - 1
-                                    }
-                                }
-
-                                document.ref.update({ ['question-requests']: questionRequests })
-                                    .then(() => {
-                                        commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
-                                    })
-                                    .catch(error => {
-                                        console.error(error);
-                                    });
-                            })
-                            .catch(error => {
-                                console.error(error);
-                            });
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
-            })
-            .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('exclusion', 'Solicitação', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request Delete', error.message, { payload });
-            });
-    },
+    /**
+     * Deletes all approved request from a user.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     */
     deleteApprovedRequests({ commit }, payload) {
         const { userInfo } = payload;
 
@@ -759,6 +990,13 @@ const actions = {
                 createErrorLog('Request Approved Delete', error.message, { payload });
             });
     },
+    /**
+     * Loads the most recent pending requests.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.limit - The limit of requests on the response.
+     */
     loadLastPendentRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -789,6 +1027,15 @@ const actions = {
                 createErrorLog('Pendent Requests Loading', error.message, { payload });
             });
     },
+    /**
+     * Loads the most recent pending requests.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.limit - The limit of requests on the response.
+     * @param {string} payload.userId - The current user id.
+     * @param {"current"|"other"} payload.mode - The data request mode.
+     */
     loadUserRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -831,33 +1078,78 @@ const actions = {
                 createErrorLog('Pendent User Requests Load', error.message, { payload });
             });
     },
+    /**
+     * Resets the request state to it's initial state.
+     *
+     * @param {Store} store - The vuex store.
+     */
     resetRequests({ commit }) {
         commit('RESETRequests');
     }
 }
 
 const getters = {
-    getRequests(state) {
-        return state.questionRequests;
-    },
+    /**
+     * Gets an array of requests that were marked to be deleted.
+     *
+     * @param {RequestState} state - The requests state.
+     * @returns {Request[]} An array of requests.
+     */
     getDeleteMarkRequests(state) {
         return state.deleteMarkRequests;
     },
-    getRequestsByPage: state => page => {
-        return state.requests['p' + page];
+    /**
+     * Gets an array of requests of the given page.
+     *
+     * @param {RequestState} state - The request state.
+     * @param {number} page - The page number.
+     * @returns {(page: number) => Request[]} An array of requests.
+     */
+    getRequestsByPage(state) {
+        return page => state.requests['p' + page];
     },
+    /**
+     * Gets an array of the current page requests.
+     *
+     * @param {RequestState} state - The request state.
+     * @returns {Request[]} An array of requests.
+     */
     getCurrentRequestsPage(state) {
         return state.currentRequestsPage;
     },
+    /**
+     * Gets an array of the filtered requests.
+     *
+     * @param {RequestState} state - The request state.
+     * @returns {Request[]} An array of requests.
+     */
     getFilteredRequests(state) {
         return state.filteredRequests;
     },
+    /**
+     * Gets the most recent pending requests.
+     *
+     * @param {RequestState} state - The request state.
+     * @returns {Request[]} An array of requests.
+     */
     getLastPendentRequests(state) {
         return state.lastPendentRequests;
     },
+    /**
+     * Gets the most recent pending requests from the current user.
+     *
+     * @param {RequestState} state - The request state.
+     * @returns {Request[]} An array of requests.
+     */
     getCurrentUserRequests(state) {
         return state.currentUserRequests;
     },
+    /**
+     * Gets the most recent pending requests from other users.
+     *
+     * @param {RequestState} state - The request state.
+     * @returns {Request[]} An array of requests.
+     */
     getOtherUserRequests(state) {
         return state.otherUserRequests;
     }

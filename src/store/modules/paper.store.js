@@ -1,9 +1,54 @@
+import { Store } from 'vuex';
+
 import { db, storage } from '../../main';
 import { getNowISOString } from '../../utils/date';
 import { createErrorLog, showErrorMessage } from '../../utils/errors';
 
+/**
+ * @typedef {Object} DeleteStatus
+ * @property {boolean} toDelete.status - If true, the paper can be restored. If false, it will be deleted.
+ * @property {string|undefined} toDelete.userEmail - The user that marked the paper to be deleted.
+ */
+
+/**
+ * @typedef {Object} PaperCreation
+ * @property {string} id - The paper id.
+ * @property {string} name - The paper name.
+ * @property {string} description - The paper description.
+ * @property {string} image - The paper image.
+ * @property {string} userId - The user that created the paper.
+ * @property {null} editedBy - The last user that edited the paper.
+ */
+
+/**
+ * @typedef {Object} Paper
+ * @property {string} id - The paper id.
+ * @property {string} name - The paper name.
+ * @property {string} description - The paper description.
+ * @property {string} image - The paper image.
+ * @property {string} userId - The user that created the paper.
+ * @property {string|null} editedBy - The last user that edited the paper.
+ * @property {string} created - The paper creation date.
+ * @property {string} updated - The paper edition date.
+ * @property {DeleteStatus|undefined} toDelete - The paper deletion status.
+ */
+
+/**
+ * @typedef {Object} PaperState
+ * @property {Object.<string, Paper[]>} papers - The pages with it's paper list.
+ * @property {Paper[]} filteredPapers - An array of papers filtered by name.
+ * @property {Paper[]} currentPapersPage - A papers array of the current page.
+ * @property {[string, string]|null} lastPaperDocument - An array with the first and last paper id from the last request.
+ * @property {Paper[]} deleteMarkPapers - An array of papers that were marked to be deleted.
+ * @property {Paper[]} lastPapers - An array of the most recent papers.
+ */
+
+/**
+ * Gets the initial paper state.
+ *
+ * @returns {PaperState} - The initial state of paper store.
+ */
 const initialState = () => ({
-    deletePaperId: null,
     papers: {},
     filteredPapers: [],
     currentPapersPage: [],
@@ -15,30 +60,75 @@ const initialState = () => ({
 const state = initialState();
 
 const mutations = {
-    setLoadedPapers(state, data) {
-        state.loadedPapers = data;
-    },
+    /**
+     * Sets a page of papers according to the given data.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Object} data - The data containing the page number and it's data.
+     * @param {string} data.page - The page number.
+     * @param {Paper[]} data.data - An array of papers.
+     */
     setPaperPage(state, data) {
         state.papers[data.page] = data.data;
     },
+    /**
+     * Sets the filtered papers.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper[]} data - An array of filtered papers.
+     */
     setFilteredPapers(state, data) {
         state.filteredPapers = data;
     },
+    /**
+     * Sets the most recent papers.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper[]} data - An array of papers.
+     */
     setLastPapers(state, data) {
         state.lastPapers = data;
     },
+    /**
+     * Cleans the filtered papers array.
+     *
+     * @param {PaperState} state - The paper state.
+     */
     resetFilteredPapers(state) {
         state.filteredPapers = [];
     },
+    /**
+     * Cleans the current papers page array.
+     *
+     * @param {PaperState} state - The paper state.
+     */
     resetCurrentPapersPage(state) {
         state.currentPapersPage = [];
     },
+    /**
+     * Sets the current papers page.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper[]} data - An array of papers.
+     */
     setCurrentPapersPage(state, data) {
         state.currentPapersPage = data;
     },
+    /**
+     * Adds a paper to the array of papers marked to be deleted.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper} data - The paper to be added.
+     */
     addDeleteMarkPaper(state, data) {
         state.deleteMarkPapers.push(data);
     },
+    /**
+     * Updates a paper that's into the array of papers marked to be deleted.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper} data - The paper to be updated.
+     */
     updateDeleteMarkPaper(state, data) {
         const papers = [...state.deleteMarkPapers];
         papers.forEach((item, index) => {
@@ -48,6 +138,12 @@ const mutations = {
         });
         state.deleteMarkPapers = papers;
     },
+    /**
+     * Removes a paper from the array of papers marked to be deleted.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {string} data - The id of the paper to be removed.
+     */
     removeDeleteMarkPaper(state, data) {
         const papers = [...state.deleteMarkPapers];
         papers.forEach((item, index) => {
@@ -56,9 +152,23 @@ const mutations = {
             }
         })
     },
+    /**
+     * Sets the array of papers marked to be deleted.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper[]} data - An array of papers.
+     */
     setDeleteMarkPapers(state, data) {
         state.deleteMarkPapers = data;
     },
+    /**
+     * Sets a paper as marked to be deleted.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Object} data - The data containing the paper id and it's deletion status.
+     * @param {string} data.id - The paper id.
+     * @param {DeleteStatus} data.toDelete - The paper deletion status.
+     */
     setDeleteMarkPaper(state, data) {
         const papers = state.papers;
         for(let key in papers) {
@@ -71,6 +181,14 @@ const mutations = {
             }
         }
     },
+    /**
+     * Sets a filtered paper as marked to be deleted.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Object} data - The data containing the paper id and it's deletion status.
+     * @param {string} data.id - The paper id.
+     * @param {DeleteStatus} data.toDelete - The paper deletion status.
+     */
     setDeleteMarkFilteredPaper(state, data) {
         const papers = [...state.filteredPapers];
         papers.forEach((item, index) => {
@@ -80,6 +198,15 @@ const mutations = {
         });
         state.filteredPapers = papers;
     },
+    /**
+     * Creates a paper into the papers object, according to the given data.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Object} data - The data containing the page number, papers amount and the data to be added.
+     * @param {number} data.page - The page number.
+     * @param {number} data.amount - The total amount of papers.
+     * @param {Paper} data.data - The paper to be added.
+     */
     createPaper(state, data) {
         const page = data.page;
         const papers = state.papers['p' + page] || [];
@@ -93,6 +220,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Updates a paper.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper} data - The paper to be updated.
+     */
     updatePaper(state, data) {
         const papers = {...state.papers};
         for(let key in papers) {
@@ -106,6 +239,12 @@ const mutations = {
         }
         state.papers = papers;
     },
+    /**
+     * Updates a paper that's in the filtered papers array.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper} data - The paper to be updated.
+     */
     updateFilteredPaper(state, data) {
         const papers = [...state.filteredPapers];
         papers.forEach((item, index) => {
@@ -115,6 +254,12 @@ const mutations = {
         });
         state.filteredPapers = papers;
     },
+    /**
+     * Updates a paper that's in the current page array.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {Paper} data - The paper to be updated.
+     */
     updateCurrentPapersPage(state, data) {
         const papers = [...state.currentPapersPage];
         papers.forEach((item, index) => {
@@ -124,6 +269,12 @@ const mutations = {
         });
         state.currentPapersPage = papers;
     },
+    /**
+     * Removes a paper from the papers object.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {string} data - The id of the paper to be removed.
+     */
     removePaper(state, data) {
         const papers = state.papers;
         for(let key in papers) {
@@ -136,6 +287,12 @@ const mutations = {
             }
         }
     },
+    /**
+     * Removes a paper from the filtered papers array.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {string} data The id of the paper to be removed.
+     */
     removeFilteredPaper(state, data) {
         const papers = state.filteredPapers;
         papers.forEach((item, index) => {
@@ -144,9 +301,20 @@ const mutations = {
             }
         });
     },
+    /**
+     * Sets the last papers request ids.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {[string, string]} data An array of strings containing the first and last ids from the last request.
+     */
     setLastPaperDocument(state, data) {
         state.lastPaperDocument = data;
     },
+    /**
+     * Resets the paper state to it's initial state.
+     *
+     * @param {PaperState} state - The paper state.
+     */
     RESETPapers(state) {
         const newState = initialState();
         Object.keys(newState).forEach(key => {
@@ -156,6 +324,15 @@ const mutations = {
 }
 
 const actions = {
+    /**
+     * Uploads a paper image.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {File} payload.images - The image to be uploaded.
+     * @param {string} payload.id - The paper id.
+     * @returns {string} The image url.
+     */
     uploadImagePaper({ commit }, payload) {
         const request = new Promise((resolve,reject) => {
             try {
@@ -181,57 +358,16 @@ const actions = {
         });
         return request;
     },
-    deletePaper({ commit }, payload) {
-        commit('setLoading', true);
-        const { id, isSearching } = payload;
-
-        db.collection("papers").where('id', '==', id).get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    doc.ref.delete();
-                    if(doc.data().image && doc.data().image.length > 0) {
-                        const image = doc.data().image;
-                        const childImage = image.split('?alt=media')[0].split('/o/')[1];
-                        const child = decodeURIComponent(childImage);
-                        storage.ref().child(child).delete();
-                    }
-
-                    db.collection('data-size').get()
-                        .then(snap => {
-                            const document = snap.docs[0];
-                            const size = document.data().papers;
-
-                            document.ref.update({ papers: size - 1 })
-                                .then(() => {
-                                    commit('addRemoveSize', { key: 'papers', data: size - 1 });
-                                })
-                                .catch(error => {
-                                    console.error(error);
-                                });
-                        })
-                        .catch(error => {
-                            console.error(error);
-                        });
-                });
-            })
-            .then(() => {
-                commit('removePaper', id);
-
-                if(isSearching) {
-                    commit('removeFilteredPaper', id);
-                }
-
-                commit('setLoading', false);
-                commit('setSuccess', 'Documento excluído com sucesso!');
-            })
-            .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('exclusion', 'Documento', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document Delete', error.message, { payload });
-            });
-    },
-    loadPaperPage({ commit, dispatch, state }, payload) {
+    /**
+     * Loads a page of papers according to the payload data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.page - The page number.
+     * @param {number} payload.itemsPerPage - The amount of items per page.
+     * @param {"next"|"previous"} payload.type - The request type.
+     */
+    loadPaperPage({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, type } = payload;
@@ -286,7 +422,16 @@ const actions = {
             commit('setLoading', false);
         }
     },
-    loadFOLPaperPage({ commit, dispatch, state }, payload) {
+    /**
+     * Loads the first or last page according to the payload data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {number} payload.page - The page number.
+     * @param {number} payload.itemsPerPage - The amount of items per page.
+     * @param {"first"|"last"} payload.mode - The request mode.
+     */
+    loadFOLPaperPage({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, mode } = payload;
@@ -348,6 +493,12 @@ const actions = {
             commit('setLoading', false);
         }
     },
+    /**
+     * Searches for papers based on their name.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The string to be searched.
+     */
     searchPapers({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -410,6 +561,13 @@ const actions = {
                 createErrorLog('Document Searching', error.message, { payload, data });
             });
     },
+    /**
+     * Checks if a paper with the given name exists.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The paper name.
+     * @returns {Promise<{id: string|null, exist: boolean}>} An object containing the paper id and whether it exists or not.
+     */
     async paperExists(store, payload) {
         return new Promise((resolve, reject) => {
             try {
@@ -428,6 +586,11 @@ const actions = {
             }
         });
     },
+    /**
+     * Loads all papers that are marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     */
     checkDeleteMarkPapers({ commit, dispatch }) {
         const data = [];
 
@@ -450,6 +613,15 @@ const actions = {
                 createErrorLog('Document Mark Check', error.message, { data });
             });
     },
+    /**
+     * Marks a paper to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The paper id.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered papers or not.
+     * @param {string} payload.userEmail - The current user e-mail.
+     */
     deleteMarkPaper({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -468,10 +640,10 @@ const actions = {
 
                 const user = await dispatch('getUserById', { id: doc.data().userId });
 
-                commit('setDeleteMarkPaper', { id, toDelete, user });
+                commit('setDeleteMarkPaper', { id, toDelete });
 
                 if(isSearching) {
-                    commit('setDeleteMarkFilteredPaper', { id, toDelete, user });
+                    commit('setDeleteMarkFilteredPaper', { id, toDelete });
                 }
 
                 commit('updateCurrentPapersPage', { ...doc.data(), toDelete, user });
@@ -485,6 +657,14 @@ const actions = {
                 createErrorLog('Document Delete Mark', error.message, { payload });
             });
     },
+    /**
+     * Restores a paper from being marked to be deleted.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The paper id.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered papers or not.
+     */
     restoreMarkedPaper({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
@@ -495,16 +675,23 @@ const actions = {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
 
+                /**
+                 * @type {Paper}
+                 */
                 const paper = {
                     id: data.id,
                     image: data.image,
                     description: data.description,
-                    name: data.name
+                    name: data.name,
+                    created: data.created,
+                    updated: data.updated,
+                    editedBy: data.editedBy,
+                    userId: data.userId
                 }
 
                 doc.ref.set(paper);
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch('getUserById', { id: paper.userId });
                 paper['user'] = user;
 
                 commit('updatePaper', paper);
@@ -525,7 +712,16 @@ const actions = {
                 createErrorLog('Document Restore', error.message, { payload });
             });
     },
-    restoreAllMarkedPapers({ commit, dispatch, state }, payload) {
+    /**
+     * Restores all papers that are marked to be deleted from the database or the current user, depending on the given data.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {boolean} payload.all - Whether will restore all database papers or only from the current user.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered papers or not.
+     * @param {import('./signUser.store.js').UserInfo} payload.user - The current user info.
+     */
+    restoreAllMarkedPapers({ commit, dispatch }, payload) {
         commit('setLoading', true);
 
         const { all, isSearching, user } = payload;
@@ -544,16 +740,23 @@ const actions = {
                 snapshot.forEach(async doc => {
                     const data = doc.data();
 
+                    /**
+                     * @type {Paper}
+                     */
                     const paper = {
                         id: data.id,
                         image: data.image,
                         description: data.description,
-                        name: data.name
+                        name: data.name,
+                        created: data.created,
+                        updated: data.updated,
+                        editedBy: data.editedBy,
+                        userId: data.userId
                     }
 
                     doc.ref.set(paper);
 
-                    const user = await dispatch('getUserById', { id: doc.data().userId });
+                    const user = await dispatch('getUserById', { id: paper.userId });
                     paper['user'] = user;
 
                     if(all) {
@@ -577,6 +780,14 @@ const actions = {
                 createErrorLog('Document Restore All', error.message, { payload });
             });
     },
+    /**
+     * Changes a paper's delete status to false (confirmed deletion).
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.id - The paper id.
+     * @param {boolean} payload.isSearching - Whether the application is using filtered papers or not.
+     */
     changeDeleteStatusPapers({ commit, dispatch }, payload) {
         commit('setLoading', true);
         const { id, isSearching } = payload;
@@ -624,7 +835,12 @@ const actions = {
                 createErrorLog('Document Confirm Delete', error.message, { payload });
             });
     },
-    deletePapers({ commit, dispatch }) {
+    /**
+     * Deletes all papers that are marked to be deleted (toDelete.status = false).
+     *
+     * @param {Store} store - The vuex store.
+     */
+    deletePapers({ commit }) {
         const data = [];
         db.collection("papers").where('toDelete.status', '==', false).get()
             .then(snapshot => {
@@ -656,6 +872,14 @@ const actions = {
                 createErrorLog('Document DB Delete', error.message, { data });
             });
     },
+    /**
+     * Creates a new paper.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {PaperCreation} payload.paperData - The paper to be created.
+     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     */
     createPaper({ commit }, payload) {
         commit('setLoading', true);
 
@@ -720,6 +944,12 @@ const actions = {
                 createErrorLog('Document DB Insert', error.message, { payload });
             });
     },
+    /**
+     * Updates a paper based on it's id.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Paper} payload - The paper to be updated.
+     */
     updatePaper({ commit, dispatch }, payload) {
         const paper = {
             ...payload,
@@ -749,7 +979,7 @@ const actions = {
                         console.error(error);
                     });
 
-                const user = await dispatch('getUserById', { id: snapshot.docs[0].userId });
+                const user = await dispatch('getUserById', { id: doc.data().userId });
                 paper['user'] = user;
 
                 commit('updatePaper', paper);
@@ -764,7 +994,12 @@ const actions = {
                 createErrorLog('Document DB Update', error.message, { payload });
             });
     },
-    async getPaperNames({ commit }) {
+    /**
+     * Gets all paper names.
+     *
+     * @param {Store} store - The vuex store.
+     */
+    async getPaperNames(store) {
         return new Promise((resolve, reject) => {
             try {
                 db.collection('paper-names').get()
@@ -780,6 +1015,12 @@ const actions = {
             }
         });
     },
+    /**
+     * Gets a paper by it's id.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {string} payload - The paper id.
+     */
     async getPaperById({ commit, dispatch }, payload) {
         const id = payload;
 
@@ -788,9 +1029,13 @@ const actions = {
                 db.collection('papers').where('id', '==', id).get()
                     .then(async snapshot => {
                         const doc = snapshot.docs[0];
+
+                        /**
+                         * @type {Paper}
+                         */
                         const paper = doc.data();
 
-                        const user = await dispatch('getUserById', { id: snapshot.docs[0].userId });
+                        const user = await dispatch('getUserById', { id: paper.userId });
                         paper['user'] = user;
 
                         resolve(paper);
@@ -805,6 +1050,11 @@ const actions = {
             }
         });
     },
+    /**
+     * Loads the most recent papers.
+     *
+     * @param {Store} store - The vuex store.
+     */
     loadLastPapers({ commit, dispatch }) {
         commit('setLoading', true);
 
@@ -831,42 +1081,93 @@ const actions = {
                 createErrorLog('Last Documents Loading', error.message, { data });
             })
     },
+    /**
+     * Resets the paper state to it's initial state.
+     *
+     * @param {Store} store - The vuex store.
+     */
     resetPapers({ commit }) {
         commit('RESETPapers');
     }
 }
 
 const getters = {
+    /**
+     * Gets an object with all loaded pages and it's papers.
+     *
+     * @param {PaperState} state - The paper state.
+     * @returns {Object.<string, Paper[]>} The papers pages object.
+     */
     getPapers(state) {
         return state.papers;
     },
+    /**
+     * Gets an array of papers that are marked to be deleted.
+     *
+     * @param {PaperState} state - The paper state.
+     * @returns {Paper[]} An array of papers that are marked to be deleted.
+     */
     getDeleteMarkPapers(state) {
         return state.deleteMarkPapers;
     },
-    getPapersByPage: state => page => {
-        return state.papers['p' + page];
+    /**
+     * Gets an array of papers of the given page.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {number} page - The page number.
+     * @returns {(page: number) => Paper[]} An array of papers.
+     */
+    getPapersByPage(state) {
+        return page => state.papers['p' + page];
     },
+    /**
+     * Gets an array of the current page papers.
+     *
+     * @param {PaperState} state - The paper state.
+     * @returns {Paper[]} An array of papers.
+     */
     getCurrentPapersPage(state) {
         return state.currentPapersPage;
     },
+    /**
+     * Gets an array of filtered papers.
+     *
+     * @param {PaperState} state - The paper state.
+     * @returns {Paper[]} An array of papers.
+     */
     getFilteredPapers(state) {
         return state.filteredPapers;
     },
+    /**
+     * Gets the most recent papers.
+     *
+     * @param {PaperState} state - The paper state.
+     * @returns {Paper[]} An array of papers.
+     */
     getLastPapers(state) {
         return state.lastPapers;
     },
-    findPaperById: state => id => {
-        let paper = null;
+    /**
+     * Gets a paper from the paper state based on it's id.
+     *
+     * @param {PaperState} state - The paper state.
+     * @param {string} id - The paper id.
+     * @returns {(id: string) => Paper|null} The paper or null if not found.
+     */
+    findPaperById(state) {
+        return id => {
+            let paper = null;
 
-        paper = state.lastPapers.find(t => t.id == id);
+            paper = state.lastPapers.find(t => t.id == id);
 
-        if (!paper) {
-            for(let key in state.papers) {
-                paper = state.papers[key].find(t => t.id == id);
+            if (!paper) {
+                for(let key in state.papers) {
+                    paper = state.papers[key].find(t => t.id == id);
+                }
             }
-        }
 
-        return paper;
+            return paper;
+        }
     }
 }
 
