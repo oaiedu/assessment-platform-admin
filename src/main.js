@@ -44,6 +44,7 @@ new Vue({
             }
         });
 
+        this.$store.dispatch('resetLayout');
         this.$store.dispatch('resetPapers');
         this.$store.dispatch('resetQuestions');
         this.$store.dispatch('resetRequests');
