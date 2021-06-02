@@ -552,9 +552,8 @@
                                 }
 
                                 this.$store.commit('setLoading', false);
-                                this.close();
                                 this.$store.dispatch("createTest", { testData, userInfo: this.$store.getters.userInfo });
-                                this.$store.dispatch("loadedTests");
+                                this.close();
                             }
                         });
                 }
