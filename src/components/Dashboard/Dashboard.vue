@@ -66,7 +66,7 @@
 <style>
     .dashboard {
         display: grid;
-        grid-template-columns: 430px 430px 1fr;
+        grid-template-columns: 500px 460px 1fr;
         grid-template-rows: 120px 250px 350px;
         row-gap: 30px;
         column-gap: 30px;
@@ -145,6 +145,41 @@
 
     .dashboard .tests-table .v-data-table.dashboard-tests-table table {
         height: 100%;
+    }
+
+    @media (max-width: 1400px) {
+        .dashboard {
+            grid-template-columns: 430px 430px 1fr;
+            grid-template-rows: 120px 250px 350px;
+        }
+
+        .dashboard.admin {
+            grid-template-areas:
+                "user-info data-amount data-amount"
+                "last-data question-by-subject tests-by-week"
+                "pendent-requests tests-table tests-table";
+        }
+
+        .dashboard.appraiser {
+            grid-template-areas:
+                "user-info data-amount data-amount"
+                "last-requests question-by-subject tests-by-week"
+                "pendent-requests tests-table tests-table";
+        }
+
+        .dashboard.teacher {
+            grid-template-areas:
+                "user-info data-amount data-amount"
+                "last-docs question-by-subject tests-by-week"
+                "pendent-requests tests-table tests-table";
+        }
+
+        .dashboard.student {
+            grid-template-areas:
+                "user-info data-amount data-amount"
+                "question-by-subject tests-table tests-table"
+                "tests-by-week tests-table tests-table";
+        }
     }
 
     @media (max-width: 1300px) {

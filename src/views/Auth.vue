@@ -106,9 +106,18 @@
 
     .sign-card {
         width: 360px;
-        height: 92%;
+        height: 86%;
 
         margin-right: 30px;
+    }
+
+    @media (max-height: 800px) {
+        .sign-card {
+            width: 360px;
+            height: 92%;
+
+            margin-right: 30px;
+        }
     }
 
     @media(max-width: 1100px) {
