@@ -147,8 +147,8 @@
                     grid: {
                         top: 84,
                         bottom: 7,
-                        left: -35,
-                        right: -35
+                        left: -30,
+                        right: -30
                     }
                 }
 
