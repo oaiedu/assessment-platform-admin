@@ -21,7 +21,7 @@ import { createErrorLog, showErrorMessage } from '../../utils/errors';
  */
 
 /**
- * @typedef {Object} SignUserState
+ * @typedef {Object} UserState
  * @property {{id: string}|null} user - The current user uid.
  * @property {UserInfo} userInfo - The current user info.
  * @property {UserClaims} userClaims - The current user claims.
@@ -32,7 +32,7 @@ import { createErrorLog, showErrorMessage } from '../../utils/errors';
 /**
  * Gets the initial state for sign user store.
  *
- * @returns {SignUserState} The initial sign user state object.
+ * @returns {UserState} The initial user state object.
  */
 const initialState = () => ({
     user: null,
@@ -48,7 +48,7 @@ const mutations = {
     /**
      * Sets the current user uid into the state.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @param {string} data - The user uid.
      */
     setUser(state, data) {
@@ -57,7 +57,7 @@ const mutations = {
     /**
      * Sets the current user info into the state.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @param {UserInfo} data - The user info.
      */
     setUserInfo(state, data) {
@@ -66,7 +66,7 @@ const mutations = {
     /**
      * Sets the current user claims into the state.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @param {UserClaims} data - The user claims.
      */
     setUserClaims(state, data) {
@@ -75,7 +75,7 @@ const mutations = {
     /**
      * Sets an array of users into the state.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @param {UserInfo[]} data - The array of users.
      */
     setUsers(state, data) {
@@ -84,7 +84,7 @@ const mutations = {
     /**
      * Sets the most recent registered user into the state.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @param {UserInfo} data - The most recent user info.
      */
     setLastUser(state, data) {
@@ -93,7 +93,7 @@ const mutations = {
     /**
      * Sets to a user a new role according to it's e-mail.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @param {Object} data - The data containing the user e-mail and new role.
      * @param {string} data.email - The user e-mail.
      * @param {string} data.role - The user new role.
@@ -117,9 +117,9 @@ const mutations = {
         state.users = [...users];
     },
     /**
-     * Resets the sign user state to it's initial state.
+     * Resets the user state to it's initial state.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      */
     RESETUsers(state) {
         const newState = initialState();
@@ -173,7 +173,7 @@ const actions = {
      * @param {string} payload.email - The new user email.
      * @param {string} payload.password - The new user password.
      */
-    signUserUp({ commit }, payload) {
+    signUserUp({ commit, dispatch }, payload) {
         commit('setLoading', true);
         commit('clearError');
 
@@ -237,8 +237,9 @@ const actions = {
                             { payload, newUser, userInfo: { ...userInfo, id: newUser.id }, url });
                     });
 
-                commit('setUser', newUser);
+                dispatch('loadUserClaims', true);
                 commit('setUserInfo', { ...userInfo, id: newUser.id });
+                commit('setUser', newUser);
             })
             .catch(error => {
                 commit('setLoading', false);
@@ -340,12 +341,17 @@ const actions = {
      * Loads the current user claims.
      *
      * @param {Store} store - The vuex store.
+     * @param {boolean} payload - Whether is to apply the default role or not.
      */
-    loadUserClaims({ commit }) {
+    loadUserClaims({ commit }, payload) {
         auth.currentUser && auth.currentUser.getIdTokenResult()
             .then(idTokenResult => {
                 if(idTokenResult.claims) {
-                    commit('setUserClaims', idTokenResult.claims);
+                    if (payload) {
+                        commit('setUserClaims', { ...idTokenResult.claims, admin: false, appraiser: false, teacher: false, student: true });
+                    } else {
+                        commit('setUserClaims', idTokenResult.claims);
+                    }
                 }
             })
             .catch(error => {
@@ -502,7 +508,26 @@ const actions = {
         commit('setUser', { id: payload.uid });
     },
     /**
-     * Resets the sign user state to it's initial state.
+     * Resets the user password according to it's e-mail.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string} payload.email - The user e-mail.
+     */
+    resetPassword({ commit }, payload) {
+        const { email } = payload;
+
+        auth.sendPasswordResetEmail(email).then(() => {
+            commit('setSuccess', `E-mail enviado para ${email}`);
+        }).catch(error => {
+            commit('setLoading', false);
+            const errorModel = showErrorMessage('admin', '', 'Não foi possível enviar o e-mail para redefinir a senha.');
+            commit('setError', { message: errorModel });
+            createErrorLog('User Password Reset', error.message, { payload });
+        });
+    },
+    /**
+     * Resets the user state to it's initial state.
      *
      * @param {Store} store - The vuex store.
      */
@@ -515,7 +540,7 @@ const getters = {
     /**
      * Gets the current user uid.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @returns {{id: string}|null} The current user uid.
      */
     user(state) {
@@ -524,7 +549,7 @@ const getters = {
     /**
      * Gets the current user info.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @returns {UserInfo} The current user info.
      */
     userInfo(state) {
@@ -533,7 +558,7 @@ const getters = {
     /**
      * Gets an array of all application users.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @returns {UserInfo[]} An array of users.
      */
     users(state) {
@@ -542,7 +567,7 @@ const getters = {
     /**
      * Gets the current user claims.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @returns {UserClaims} The current user claims.
      */
     getUserClaims(state) {
@@ -551,7 +576,7 @@ const getters = {
     /**
      * Gets the most recent registered user info.
      *
-     * @param {SignUserState} state - The sign user state.
+     * @param {UserState} state - The user state.
      * @returns {UserInfo} The last registered user info.
      */
     getLastUser(state) {
