@@ -31,6 +31,9 @@
                             :rules="required" >
                         </v-text-field>
                     </v-row>
+                    <v-row justify="center">
+                        <v-btn text color="blue" @click="forgotPassword()">Esqueceu a senha?</v-btn>
+                    </v-row>
                     <div class="confirm-button-container">
                         <v-btn color='blue' :dark='!loading' type="submit" :disabled="loading" :loading="loading">
                             Entrar
@@ -170,6 +173,9 @@
                 this.$store.commit("clearError")
                 this.showSignIn = true;
                 this.showSignUp = false;
+            },
+            forgotPassword() {
+                this.$emit('forgotPassword');
             }
         }
     }
