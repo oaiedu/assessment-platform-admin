@@ -45,8 +45,11 @@
             userClaims() {
                 return this.$store.getters.getUserClaims;
             },
+            userInfo() {
+                return this.$store.getters.userInfo;
+            },
             className() {
-                return this.userClaims ? Object.entries(this.userClaims).filter(role => role[1])[0][0] : '';
+                return this.userInfo.role;
             }
         },
         methods: {
@@ -55,7 +58,7 @@
             }
         },
         mounted() {
-            window.addEventListener('resize', this.onWindowResize)
+            window.addEventListener('resize', this.onWindowResize);
         },
         beforeDestroy() {
             window.removeEventListener('resize', this.onWindowResize);
@@ -68,6 +71,10 @@
         display: grid;
         grid-template-columns: 500px 460px 1fr;
         grid-template-rows: 120px 250px 350px;
+        grid-template-areas:
+            "user-info data-amount data-amount"
+            "question-by-subject tests-table tests-table"
+            "tests-by-week tests-table tests-table";
         row-gap: 30px;
         column-gap: 30px;
 
