@@ -12,18 +12,72 @@
                     <h1>Centro Industrial Nuclear de Aramar</h1>
                 </div>
             </div>
-            <SignUser/>
+            <SignUser @forgotPassword="isResetUserPwdModalVisible = true"/>
         </div>
+        <v-dialog
+            persistent
+            v-model="isResetUserPwdModalVisible"
+            width="500px"
+            max-width="100%"
+        >
+            <v-card>
+                <v-card-title>Esqueceu a senha?</v-card-title>
+                <v-card-subtitle>Insira seu e-mail no campo abaixo.</v-card-subtitle>
+                <v-card-text>
+                    <v-row justify="center" class="px-3">
+                        <v-text-field
+                            :append-icon="mdiEmail"
+                            name="email-resetpwd"
+                            label="E-mail"
+                            id="email-resetpwd"
+                            v-model="email"
+                            type="email"
+                            :rules='required'
+                            required>
+                        </v-text-field>
+                    </v-row>
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn
+                        text
+                        color="grey darken-1"
+                        @click="isResetUserPwdModalVisible = false; email = '';"
+                    >
+                        Cancelar
+                    </v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        text
+                        color="blue"
+                        :disabled="!email"
+                        @click="forgotPassword()"
+                    >
+                        Confirmar
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
 <script>
+    import { mdiEmail } from '@mdi/js';
     import SignUser from '../components/User/SignUser';
 
     export default {
         name: 'AuthPage',
         components: {
             SignUser
+        },
+        data() {
+            return {
+                mdiEmail,
+                isResetUserPwdModalVisible: false,
+                email: '',
+                required: [
+                    value => (value && value.length > 0) || 'O e-mail é obrigatório!'
+                ]
+            }
         },
         computed: {
             statistics() {
@@ -40,11 +94,21 @@
             },
             user() {
                 return this.$store.getters.userInfo;
+            },
+            userInfo() {
+                return this.$store.getters.userInfo;
+            }
+        },
+        methods: {
+            forgotPassword() {
+                this.isResetUserPwdModalVisible = false;
+                this.$store.dispatch('resetPassword', { email: this.email });
+                this.email = '';
             }
         },
         watch: {
-            user() {
-                if (this.user) this.$router.push('/');
+            userInfo() {
+                if (this.userInfo) this.$router.push('/');
             }
         },
         mounted() {
