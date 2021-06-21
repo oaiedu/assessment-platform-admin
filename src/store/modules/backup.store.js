@@ -114,7 +114,7 @@ const actions = {
      * @param {Object} payload - The action payload.
      * @param {string} payload.now - The iso string of when the backups started.
      */
-    async backupFirebase({ commit }, payload) {
+    async backupFirebase({ commit, state }, payload) {
         commit('setLoading', true);
 
         const { now } = payload;
@@ -193,7 +193,7 @@ const actions = {
      *
      * @param {Store} store - The vuex store.
      */
-    loadBackups({ commit }) {
+    loadBackups({ commit, state }) {
         commit('setLoading', true);
 
         const data = [];

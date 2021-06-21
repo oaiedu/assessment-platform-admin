@@ -375,7 +375,7 @@ const actions = {
      * @param {number} payload.itemsPerPage - The amount of items per page.
      * @param {"next"|"previous"} payload.type - The request type.
      */
-    loadQuestionPage({ commit }, payload) {
+    loadQuestionPage({ commit, state }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, type } = payload;

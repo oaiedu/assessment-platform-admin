@@ -256,7 +256,7 @@ const actions = {
      * @param {string} payload.name - The user new name.
      * @param {string} payload.profileImages - The user new avatar image.
      */
-    updateUser({ commit }, payload) {
+    updateUser({ commit, state }, payload) {
         commit('setLoading', true);
 
         const userInfo = {

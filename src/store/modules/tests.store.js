@@ -714,9 +714,9 @@ const actions = {
      * @param {Object} payload - The action payload.
      * @param {boolean} payload.all - Whether will restore all database tests or only from the current user.
      * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
-     * @param {import('./signUser.store.js').UserInfo} payload.user - The current user info.
+     * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
      */
-    restoreAllMarkedTests({ commit, dispatch }, payload) {
+    restoreAllMarkedTests({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { all, isSearching, user } = payload;
@@ -855,7 +855,7 @@ const actions = {
      * @param {Store} store - The vuex store.
      * @param {Object} payload - The action payload.
      * @param {TestCreation} payload.testData - The test to be created.
-     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
      */
     createTest({ commit, dispatch }, payload) {
         commit('setLoading', true);

@@ -367,7 +367,7 @@ const actions = {
      * @param {number} payload.itemsPerPage - The amount of items per page.
      * @param {"next"|"previous"} payload.type - The request type.
      */
-    loadPaperPage({ commit, dispatch }, payload) {
+    loadPaperPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, type } = payload;
@@ -431,7 +431,7 @@ const actions = {
      * @param {number} payload.itemsPerPage - The amount of items per page.
      * @param {"first"|"last"} payload.mode - The request mode.
      */
-    loadFOLPaperPage({ commit, dispatch }, payload) {
+    loadFOLPaperPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { page, itemsPerPage, mode } = payload;
@@ -719,9 +719,9 @@ const actions = {
      * @param {Object} payload - The action payload.
      * @param {boolean} payload.all - Whether will restore all database papers or only from the current user.
      * @param {boolean} payload.isSearching - Whether the application is using filtered papers or not.
-     * @param {import('./signUser.store.js').UserInfo} payload.user - The current user info.
+     * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
      */
-    restoreAllMarkedPapers({ commit, dispatch }, payload) {
+    restoreAllMarkedPapers({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { all, isSearching, user } = payload;
@@ -878,7 +878,7 @@ const actions = {
      * @param {Store} store - The vuex store.
      * @param {Object} payload - The action payload.
      * @param {PaperCreation} payload.paperData - The paper to be created.
-     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
      */
     createPaper({ commit }, payload) {
         commit('setLoading', true);

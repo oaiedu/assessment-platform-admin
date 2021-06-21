@@ -365,7 +365,7 @@ const actions = {
      * @param {Object} payload - The action payload.
      * @param {RequestCreation} payload.request - The request to be created.
      * @param {string} payload.email - The current user e-mail.
-     * @param {import('./signUser.store.js').UserInfo} payload.user - The current user info.
+     * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
      */
     createQuestionRequest({ commit }, payload) {
         commit('setLoading', true);
@@ -431,7 +431,7 @@ const actions = {
      * @param {Request} payload.request - The request to be updated.
      * @param {RequestStatus} payload.status - The request new status.
      * @param {"reqUpdate"|"sttUpdate"} payload.mode - If reqUpdate, update all the request data. Otherwise, update only it's status.
-     * @param {import('./signUser.store.js').UserInfo} payload.user - The request to be updated.
+     * @param {import('./user.store.js').UserInfo} payload.user - The request to be updated.
      */
     updateQuestionRequest({ commit }, payload) {
         commit('setLoading', true);
@@ -474,10 +474,10 @@ const actions = {
      * @param {number} payload.page - The page number.
      * @param {number} payload.itemsPerPage - The amount of items per page.
      * @param {"next"|"previous"} payload.type - The data request type.
-     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
-     * @param {import('./signUser.store.js').UserClaims} payload.claims - The current user claims.
+     * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
      */
-    loadRequestPage({ commit, dispatch }, payload) {
+    loadRequestPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { claims, page, itemsPerPage, type, userInfo } = payload;
@@ -547,10 +547,10 @@ const actions = {
      * @param {number} payload.page - The page number.
      * @param {number} payload.itemsPerPage - The amount of items per page.
      * @param {"first"|"last"} payload.mode - The data request mode.
-     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
-     * @param {import('./signUser.store.js').UserClaims} payload.claims - The current user claims.
+     * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
      */
-    loadFOLRequestPage({ commit, dispatch }, payload) {
+    loadFOLRequestPage({ commit, dispatch, state }, payload) {
         commit('setLoading', true);
 
         const { claims, page, itemsPerPage, mode, userInfo } = payload;
@@ -620,8 +620,8 @@ const actions = {
      * @param {Store} store - The vuex store.
      * @param {Object} payload - The action payload.
      * @param {string} payload.key - The string to be searched.
-     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
-     * @param {import('./signUser.store.js').UserClaims} payload.claims - The current user claims.
+     * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
      */
     searchRequests({ commit, dispatch }, payload) {
         commit('setLoading', true);
@@ -792,7 +792,7 @@ const actions = {
      * @param {Store} store - The vuex store.
      * @param {Object} payload - The action payload.
      * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
-     * @param {import('./signUser.store.js').UserInfo} payload.user - The current user info.
+     * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
      */
     restoreAllMarkedRequests({ commit, state }, payload) {
         commit('setLoading', true);
@@ -941,7 +941,7 @@ const actions = {
      *
      * @param {Store} store - The vuex store.
      * @param {Object} payload - The action payload.
-     * @param {import('./signUser.store.js').UserInfo} payload.userInfo - The current user info.
+     * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
      */
     deleteApprovedRequests({ commit }, payload) {
         const { userInfo } = payload;

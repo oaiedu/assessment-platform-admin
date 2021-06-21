@@ -107,7 +107,7 @@ const actions = {
      *
      * @param {Store} store - The vuex store.
      */
-    addTestsByWeek({ commit }) {
+    addTestsByWeek({ commit, state }) {
         const thisWeek = getWeekInterval(new Date())[0];
 
         let data = {...state.dataSize.testsByWeek};
@@ -160,7 +160,7 @@ const actions = {
      * @param {Object} payload - The payload of the action.
      * @param {Test[]} payload.tests - The tests that will be removed.
      */
-    async removeTestsByWeek({ commit }, payload) {
+    async removeTestsByWeek({ commit, state }, payload) {
         const { tests } = payload;
 
         let data = {...state.dataSize.testsByWeek};
