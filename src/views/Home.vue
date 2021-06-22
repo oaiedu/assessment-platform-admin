@@ -1,6 +1,6 @@
 <template>
     <div class="home-page">
-        <Dashboard />
+        <Dashboard v-if="userInfo" />
     </div>
 </template>
 
@@ -11,6 +11,11 @@
         name: 'home',
         components: {
             Dashboard
+        },
+        computed: {
+            userInfo() {
+                return this.$store.getters.userInfo;
+            }
         }
     }
 </script>
