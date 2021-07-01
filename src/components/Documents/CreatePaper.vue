@@ -182,7 +182,7 @@
                                 const imageToUpload = { id, name: this.paperName, images: this.images[0] }
                                 this.$store.dispatch("uploadImagePaper", imageToUpload)
                                     .then(result => {
-                                        paperData.paperImage = result;
+                                        paperData.image = result;
                                         this.$store.dispatch("createPaper", { paperData, userInfo: this.userInfo })
                                             .then(() => {
                                                 this.$emit("load");
