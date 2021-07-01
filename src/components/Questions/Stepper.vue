@@ -453,7 +453,7 @@ export default {
                                 let aux = null;
 
                                 if(this.userClaims['admin']) {
-                                    aux = this.$store.dispatch("createQuestion", questionData);
+                                    aux = this.$store.dispatch("createQuestion", { question: questionData });
                                 } else {
                                     aux = this.$store.dispatch('createQuestionRequest', {
                                         request: {
