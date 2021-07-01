@@ -295,7 +295,7 @@
                         } else {
                             this.$store.dispatch('createQuestion', { question: toCreate, isRequest: true })
                                 .then(async () => {
-                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request });
+                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: this.userInfo });
                                     this.$store.commit('setSuccess', 'Solicitação aprovada com sucesso!');
                                 });
                         }

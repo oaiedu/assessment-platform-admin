@@ -419,10 +419,7 @@ export default {
             const question = {
                 ...questionData,
                 status: 'Pendente',
-                user: {
-                    name: this.userInfo.name,
-                    email: this.userInfo.email
-                }
+                userId: this.userInfo.id
             }
             aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', question, user: this.userInfo });
           }
