@@ -424,7 +424,7 @@ export default {
                     email: this.userInfo.email
                 }
             }
-            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', question });
+            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', question, user: this.userInfo });
           }
           aux.then(() => {
             this.close();
