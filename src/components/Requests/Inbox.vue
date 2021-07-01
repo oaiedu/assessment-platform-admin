@@ -289,13 +289,13 @@
                         if(fQuestion && fQuestion.toDelete && !fQuestion.toDelete.status) {
                             this.$store.dispatch('restoreMarkedQuestion', { iq: fQuestion.iq, isSearching: false, isRequest: true })
                                 .then(() => {
-                                    this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: this.userInfo });
+                                    this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: request.user });
                                     this.$store.commit('setSuccess', 'Solicitação aprovada com sucesso!');
                                 })
                         } else {
                             this.$store.dispatch('createQuestion', { question: toCreate, isRequest: true })
                                 .then(async () => {
-                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: this.userInfo });
+                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: request.user });
                                     this.$store.commit('setSuccess', 'Solicitação aprovada com sucesso!');
                                 });
                         }
@@ -316,7 +316,7 @@
                         if(result.length === 0) {
                             this.$store.dispatch('changeDeleteStatusQuestions', { iq: request.iq, isSearching: false })
                                 .then(async () => {
-                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', request, user: this.userInfo });
+                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', request, user: request.user });
                                     this.$store.commit('setSuccess', 'Solicitação rejeitada com sucesso!');
                                 });
                         } else {
