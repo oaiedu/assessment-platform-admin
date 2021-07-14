@@ -1,9 +1,9 @@
-import { Store } from 'vuex';
-import uuid from 'uuid-random';
+import { Store } from "vuex";
+import uuid from "uuid-random";
 
-import { db } from '../../main';
-import { getNowISOString } from '../../utils/date';
-import { createErrorLog, showErrorMessage } from '../../utils/errors';
+import { db } from "../../main";
+import { getNowISOString } from "../../utils/date";
+import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
  * @typedef {import('./questions.store.js').Question} Question
@@ -140,7 +140,7 @@ const mutations = {
     updateDeleteMarkTest(state, data) {
         const tests = [...state.deleteMarkTests];
         tests.forEach((item, index) => {
-            if(item.id === data.id) {
+            if (item.id === data.id) {
                 tests[index] = data;
             }
         });
@@ -155,10 +155,10 @@ const mutations = {
     removeDeleteMarkTest(state, data) {
         const tests = [...state.deleteMarkTests];
         tests.forEach((item, index) => {
-            if(item.id === data) {
+            if (item.id === data) {
                 state.deleteMarkTests.splice(index, 1);
             }
-        })
+        });
     },
     /**
      * Sets the array of tests marked to be deleted.
@@ -179,11 +179,14 @@ const mutations = {
      */
     setDeleteMarkTest(state, data) {
         const tests = state.tests;
-        for(let key in tests) {
-            if(tests[key]) {
+        for (let key in tests) {
+            if (tests[key]) {
                 tests[key].forEach((item, index) => {
-                    if(item.id === data.id) {
-                        state.tests[key][index] = { ...item, toDelete: data.toDelete };
+                    if (item.id === data.id) {
+                        state.tests[key][index] = {
+                            ...item,
+                            toDelete: data.toDelete
+                        };
                     }
                 });
             }
@@ -200,7 +203,7 @@ const mutations = {
     setDeleteMarkFilteredTest(state, data) {
         const tests = [...state.filteredTests];
         tests.forEach((item, index) => {
-            if(item.id === data.id) {
+            if (item.id === data.id) {
                 tests[index] = { ...item, toDelete: data.toDelete };
             }
         });
@@ -226,13 +229,13 @@ const mutations = {
      */
     createTest(state, data) {
         const page = data.page;
-        const tests = state.tests['p' + page] || [];
+        const tests = state.tests["p" + page] || [];
         const amount = data.amount;
-        const oneBefore = state.tests['p' + (page - 1)] || [];
-        if(tests.length > 0 || oneBefore.length === 8 || amount === 0) {
+        const oneBefore = state.tests["p" + (page - 1)] || [];
+        if (tests.length > 0 || oneBefore.length === 8 || amount === 0) {
             tests.push(data.data);
-            state.tests['p' + page] = [...tests];
-            if(amount === 0) {
+            state.tests["p" + page] = [...tests];
+            if (amount === 0) {
                 state.currentTestsPage.push(data.data);
             }
         }
@@ -245,10 +248,10 @@ const mutations = {
      */
     updateTest(state, data) {
         const tests = state.tests;
-        for(let key in tests) {
-            if(tests[key]) {
+        for (let key in tests) {
+            if (tests[key]) {
                 tests[key].forEach((item, index) => {
-                    if(item.id === data.id) {
+                    if (item.id === data.id) {
                         state.tests[key][index] = data;
                     }
                 });
@@ -264,7 +267,7 @@ const mutations = {
     updateFilteredTest(state, data) {
         const tests = [...state.filteredTests];
         tests.forEach((item, index) => {
-            if(item.id === data.id) {
+            if (item.id === data.id) {
                 tests[index] = data;
             }
         });
@@ -279,7 +282,7 @@ const mutations = {
     updateCurrentTestsPage(state, data) {
         const tests = [...state.currentTestsPage];
         tests.forEach((item, index) => {
-            if(item.id === data.id) {
+            if (item.id === data.id) {
                 tests[index] = data;
             }
         });
@@ -293,10 +296,10 @@ const mutations = {
      */
     deleteTest(state, data) {
         const tests = state.tests;
-        for(let key in tests) {
-            if(tests[key]) {
+        for (let key in tests) {
+            if (tests[key]) {
                 tests[key].forEach((item, index) => {
-                    if(item.id === data) {
+                    if (item.id === data) {
                         state.tests[key].splice(index, 1);
                     }
                 });
@@ -312,7 +315,7 @@ const mutations = {
     deleteFilteredTest(state, data) {
         const tests = state.filteredTests;
         tests.forEach((item, index) => {
-            if(item.id === data) {
+            if (item.id === data) {
                 state.filteredTests.splice(index, 1);
             }
         });
@@ -337,7 +340,7 @@ const mutations = {
             state[key] = newState[key];
         });
     }
-}
+};
 
 const actions = {
     /**
@@ -350,33 +353,43 @@ const actions = {
      * @param {"next"|"previous"} payload.type - The request type.
      */
     loadTestPage({ commit, dispatch, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { page, itemsPerPage, type } = payload;
         const data = [];
 
         const pages = Object.keys(state.tests);
 
-        if(!pages.includes('p' + page)) {
+        if (!pages.includes("p" + page)) {
             let request = null;
-            const ref = db.collection('tests').orderBy('id');
+            const ref = db.collection("tests").orderBy("id");
 
-            if(type === 'next') {
-                request = ref.startAfter(state.lastTestDocument[1]).limit(itemsPerPage).get();
+            if (type === "next") {
+                request = ref
+                    .startAfter(state.lastTestDocument[1])
+                    .limit(itemsPerPage)
+                    .get();
             } else {
-                request = ref.endBefore(state.lastTestDocument[0]).limitToLast(itemsPerPage).get();
+                request = ref
+                    .endBefore(state.lastTestDocument[0])
+                    .limitToLast(itemsPerPage)
+                    .get();
             }
 
             let first = null,
                 last = null;
 
-            request.then(async snapshot => {
-                    if(snapshot.docs.length > 0) {
+            request
+                .then(async snapshot => {
+                    if (snapshot.docs.length > 0) {
                         first = snapshot.docs[0].data().id;
-                        last = snapshot.docs[snapshot.docs.length - 1].data().id;
+                        last = snapshot.docs[snapshot.docs.length - 1].data()
+                            .id;
 
                         const promises = snapshot.docs.map(async doc => {
-                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            const userData = await dispatch("getUserById", {
+                                id: doc.data().userId
+                            });
                             data.push({ ...doc.data(), user: userData });
                             return userData;
                         });
@@ -385,25 +398,32 @@ const actions = {
                     }
                 })
                 .then(() => {
-                    commit('setCurrentTestsPage', data);
-                    commit('setTestPage', { page: 'p' + page, data });
-                    commit('setLastTestDocument', [first, last]);
-                    commit('setLoading', false);
+                    commit("setCurrentTestsPage", data);
+                    commit("setTestPage", { page: "p" + page, data });
+                    commit("setLastTestDocument", [first, last]);
+                    commit("setLoading", false);
                 })
                 .catch(error => {
-                    commit('setLoading', false);
-                    const errorModel = showErrorMessage('load', 'Provas', error.message);
-                    commit('setError', { message: errorModel });
-                    createErrorLog('Test Page Load', error.message, { payload, data });
+                    commit("setLoading", false);
+                    const errorModel = showErrorMessage(
+                        "load",
+                        "Provas",
+                        error.message
+                    );
+                    commit("setError", { message: errorModel });
+                    createErrorLog("Test Page Load", error.message, {
+                        payload,
+                        data
+                    });
                 });
         } else {
-            const pageContent = state.tests['p' + page];
+            const pageContent = state.tests["p" + page];
             const first = pageContent[0].id;
             const last = pageContent[pageContent.length - 1].id;
 
-            commit('setCurrentTestsPage', pageContent);
-            commit('setLastTestDocument', [first, last]);
-            commit('setLoading', false);
+            commit("setCurrentTestsPage", pageContent);
+            commit("setLastTestDocument", [first, last]);
+            commit("setLoading", false);
         }
     },
     /**
@@ -416,7 +436,7 @@ const actions = {
      * @param {"first"|"last"} payload.mode - The request mode.
      */
     loadFOLTestPage({ commit, dispatch, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { page, itemsPerPage, mode } = payload;
         const data = [];
@@ -426,11 +446,11 @@ const actions = {
         const testAmount = this.getters.getDataSize.tests;
         const amount = testAmount % 10;
 
-        if(!pages.includes('p' + page)) {
+        if (!pages.includes("p" + page)) {
             let request = null;
-            const ref = db.collection('tests').orderBy('id');
+            const ref = db.collection("tests").orderBy("id");
 
-            if(mode === 'first') {
+            if (mode === "first") {
                 request = ref.limit(itemsPerPage).get();
             } else {
                 request = ref.limitToLast(amount || 10).get();
@@ -439,13 +459,17 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(async snapshot => {
-                    if(snapshot.docs.length > 0) {
+            request
+                .then(async snapshot => {
+                    if (snapshot.docs.length > 0) {
                         first = snapshot.docs[0].data().id;
-                        last = snapshot.docs[snapshot.docs.length - 1].data().id;
+                        last = snapshot.docs[snapshot.docs.length - 1].data()
+                            .id;
 
                         const promises = snapshot.docs.map(async doc => {
-                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            const userData = await dispatch("getUserById", {
+                                id: doc.data().userId
+                            });
                             data.push({ ...doc.data(), user: userData });
                             return userData;
                         });
@@ -454,27 +478,34 @@ const actions = {
                     }
                 })
                 .then(() => {
-                    if(data.length > 0) {
-                        commit('setCurrentTestsPage', data);
-                        commit('setTestPage', { page: 'p' + page, data });
-                        commit('setLastTestDocument', [first, last]);
+                    if (data.length > 0) {
+                        commit("setCurrentTestsPage", data);
+                        commit("setTestPage", { page: "p" + page, data });
+                        commit("setLastTestDocument", [first, last]);
                     }
-                    commit('setLoading', false);
+                    commit("setLoading", false);
                 })
                 .catch(error => {
-                    commit('setLoading', false);
-                    const errorModel = showErrorMessage('load', 'Provas', error.message);
-                    commit('setError', { message: errorModel });
-                    createErrorLog('Test FOL Page Load', error.message, { payload, data });
+                    commit("setLoading", false);
+                    const errorModel = showErrorMessage(
+                        "load",
+                        "Provas",
+                        error.message
+                    );
+                    commit("setError", { message: errorModel });
+                    createErrorLog("Test FOL Page Load", error.message, {
+                        payload,
+                        data
+                    });
                 });
         } else {
-            const pageContent = state.tests['p' + page];
+            const pageContent = state.tests["p" + page];
             const first = pageContent[0].id;
             const last = pageContent[pageContent.length - 1].id;
 
-            commit('setCurrentTestsPage', pageContent);
-            commit('setLastTestDocument', [first, last]);
-            commit('setLoading', false);
+            commit("setCurrentTestsPage", pageContent);
+            commit("setLastTestDocument", [first, last]);
+            commit("setLoading", false);
         }
     },
     /**
@@ -487,17 +518,26 @@ const actions = {
     async testExists(store, payload) {
         return new Promise((resolve, reject) => {
             try {
-                db.collection('tests').where('title', '==', payload).get()
+                db.collection("tests")
+                    .where("title", "==", payload)
+                    .get()
                     .then(snapshot => {
-                        if(snapshot.docs.length > 0) resolve(snapshot.docs.length);
+                        if (snapshot.docs.length > 0)
+                            resolve(snapshot.docs.length);
                         else resolve(0);
                     })
                     .catch(error => {
-                        const errorModel = showErrorMessage('connection', '', error.message);
-                        commit('setError', { message: errorModel });
-                        createErrorLog('Test Exists Check', error.message, { payload });
+                        const errorModel = showErrorMessage(
+                            "connection",
+                            "",
+                            error.message
+                        );
+                        commit("setError", { message: errorModel });
+                        createErrorLog("Test Exists Check", error.message, {
+                            payload
+                        });
                     });
-            } catch(error) {
+            } catch (error) {
                 reject();
             }
         });
@@ -509,13 +549,14 @@ const actions = {
      * @param {string} payload - The string to be searched.
      */
     searchTests({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const data = [];
 
-        db.collection('tests').orderBy('title')
-            .where('title', '>=', payload)
-            .where('title', '<=', payload + '~')
+        db.collection("tests")
+            .orderBy("title")
+            .where("title", ">=", payload)
+            .where("title", "<=", payload + "~")
             .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
@@ -523,28 +564,30 @@ const actions = {
                 });
             })
             .then(() => {
-                db.collection('tests').orderBy('title')
-                    .where('title', '>=', payload.toUpperCase())
-                    .where('title', '<=', payload.toUpperCase() + '~')
+                db.collection("tests")
+                    .orderBy("title")
+                    .where("title", ">=", payload.toUpperCase())
+                    .where("title", "<=", payload.toUpperCase() + "~")
                     .get()
                     .then(snap => {
                         const ids = data.map(t => t.id);
                         snap.forEach(document => {
-                            if(!ids.includes(document.data().id)) {
+                            if (!ids.includes(document.data().id)) {
                                 data.push(document.data());
                             }
                         });
                     });
             })
             .then(() => {
-                db.collection('tests').orderBy('title')
-                    .where('title', '>=', payload.toLowerCase())
-                    .where('title', '<=', payload.toLowerCase() + '~')
+                db.collection("tests")
+                    .orderBy("title")
+                    .where("title", ">=", payload.toLowerCase())
+                    .where("title", "<=", payload.toLowerCase() + "~")
                     .get()
                     .then(snap => {
                         const ids = data.map(t => t.id);
                         snap.forEach(document => {
-                            if(!ids.includes(document.data().id)) {
+                            if (!ids.includes(document.data().id)) {
                                 data.push(document.data());
                             }
                         });
@@ -552,7 +595,9 @@ const actions = {
             })
             .then(async () => {
                 const promises = data.map(async (doc, index) => {
-                    const userData = await dispatch('getUserById', { id: doc.userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.userId
+                    });
                     data[index] = { ...doc, user: userData };
                     return userData;
                 });
@@ -560,14 +605,18 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setFilteredTests', data);
-                commit('setLoading', false);
+                commit("setFilteredTests", data);
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Provas', 'Searching error - ' + error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test Search', error.message, { payload, data });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Provas",
+                    "Searching error - " + error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Test Search", error.message, { payload, data });
             });
     },
     /**
@@ -577,7 +626,7 @@ const actions = {
      * @param {Test} payload - The test payload.
      */
     loadTestQuestions({ commit }, payload) {
-        commit('setTestQuestions', [...payload.questions]);
+        commit("setTestQuestions", [...payload.questions]);
     },
     /**
      * Loads all tests that are marked to be deleted.
@@ -587,10 +636,14 @@ const actions = {
     checkDeleteMarkTests({ commit, dispatch }) {
         const data = [];
 
-        db.collection('tests').where('toDelete.status', '==', true).get()
+        db.collection("tests")
+            .where("toDelete.status", "==", true)
+            .get()
             .then(async snapshot => {
                 const promises = snapshot.docs.map(async doc => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data.push({ ...doc.data(), user: userData });
                     return userData;
                 });
@@ -598,12 +651,16 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setDeleteMarkTests', data);
+                commit("setDeleteMarkTests", data);
             })
             .catch(error => {
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test Mark Check', error.message, { data });
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Test Mark Check", error.message, { data });
             });
     },
     /**
@@ -616,38 +673,50 @@ const actions = {
      * @param {string} payload.userEmail - The current user e-mail.
      */
     deleteMarkTest({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { id, isSearching, userEmail } = payload;
 
-        db.collection('tests').where('id', '==', id).get()
+        db.collection("tests")
+            .where("id", "==", id)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
 
                 const toDelete = {
                     status: true,
                     userEmail
-                }
+                };
 
                 doc.ref.update({ toDelete });
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch("getUserById", {
+                    id: doc.data().userId
+                });
 
-                commit('setDeleteMarkTest', { id, toDelete });
+                commit("setDeleteMarkTest", { id, toDelete });
 
-                if(isSearching) {
-                    commit('setDeleteMarkFilteredTest', { id, toDelete });
+                if (isSearching) {
+                    commit("setDeleteMarkFilteredTest", { id, toDelete });
                 }
 
-                commit('updateCurrentTestsPage', { ...doc.data(), toDelete, user });
-                commit('addDeleteMarkTest', { ...doc.data(), toDelete, user });
-                commit('setLoading', false);
+                commit("updateCurrentTestsPage", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                commit("addDeleteMarkTest", { ...doc.data(), toDelete, user });
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test Delete Mark', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Test Delete Mark", error.message, { payload });
             });
     },
     /**
@@ -658,13 +727,15 @@ const actions = {
      * @param {string} payload.id - The test id.
      * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
      */
-    restoreMarkedTest({ commit }, payload) {
-        commit('setLoading', true);
+    restoreMarkedTest({ commit, dispatch }, payload) {
+        commit("setLoading", true);
 
         const { id, isSearching } = payload;
         let docData = null;
 
-        db.collection('tests').where('id', '==', id).get()
+        db.collection("tests")
+            .where("id", "==", id)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
@@ -680,31 +751,38 @@ const actions = {
                     type: data.type,
                     userId: data.userId,
                     created: data.created,
-                    editedBy: data.editedBy,
+                    editedBy: data.editedBy || null,
                     purpose: data.purpose
-                }
+                };
 
                 doc.ref.set(test);
 
-                const user = await dispatch('getUserById', { id: test.userId });
-                test['user'] = user;
+                const user = await dispatch("getUserById", { id: test.userId });
+                test["user"] = user;
 
-                commit('updateTest', test);
+                commit("updateTest", test);
 
-                if(isSearching) {
-                    commit('updateFilteredTest', test);
+                if (isSearching) {
+                    commit("updateFilteredTest", test);
                 }
 
-                commit('removeDeleteMarkTest', id);
-                commit('updateCurrentTestsPage', test);
-                commit('setLoading', false);
-                commit('setSuccess', 'Prova restaurada com sucesso!');
+                commit("removeDeleteMarkTest", id);
+                commit("updateCurrentTestsPage", test);
+                commit("setLoading", false);
+                commit("setSuccess", "Prova restaurada com sucesso!");
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test Restore', error.message, { payload, docData });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Test Restore", error.message, {
+                    payload,
+                    docData
+                });
             });
     },
     /**
@@ -717,21 +795,22 @@ const actions = {
      * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
      */
     restoreAllMarkedTests({ commit, dispatch, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { all, isSearching, user } = payload;
         let docData = null;
 
-        const ref = db.collection('tests').where('toDelete.status', '==', true);
+        const ref = db.collection("tests").where("toDelete.status", "==", true);
         let request = null;
 
-        if(all) {
+        if (all) {
             request = ref;
         } else {
-            request = ref.where('toDelete.userEmail', '==', user.email);
+            request = ref.where("toDelete.userEmail", "==", user.email);
         }
 
-        request.get()
+        request
+            .get()
             .then(snapshot => {
                 snapshot.forEach(async doc => {
                     const data = doc.data();
@@ -747,34 +826,47 @@ const actions = {
                         type: data.type,
                         userId: data.userId,
                         created: data.created,
-                        editedId: data.editedId,
+                        editedId: data.editedId || null,
                         purpose: data.purpose
-                    }
+                    };
 
                     doc.ref.set(test);
 
-                    const userData = await dispatch('getUserById', { id: test.userId });
-                    test['user'] = userData;
+                    const userData = await dispatch("getUserById", {
+                        id: test.userId
+                    });
+                    test["user"] = userData;
 
-                    if(all) {
-                        const falseMarkedTests = state.deleteMarkTests.filter(t => !t.toDelete.status);
-                        commit('setDeleteMarkTests', falseMarkedTests);
+                    if (all) {
+                        const falseMarkedTests = state.deleteMarkTests.filter(
+                            t => !t.toDelete.status
+                        );
+                        commit("setDeleteMarkTests", falseMarkedTests);
                     } else {
-                        const markedTests = state.deleteMarkTests.filter(t => t.id !== test.id);
-                        commit('setDeleteMarkTests', markedTests);
+                        const markedTests = state.deleteMarkTests.filter(
+                            t => t.id !== test.id
+                        );
+                        commit("setDeleteMarkTests", markedTests);
                     }
-                    commit('updateTest', test);
-                    commit('updateCurrentTestsPage', test);
-                    if(isSearching) commit('updateFilteredTest', test);
-                    commit('setSuccess', 'Provas restauradas com sucesso!');
+                    commit("updateTest", test);
+                    commit("updateCurrentTestsPage", test);
+                    if (isSearching) commit("updateFilteredTest", test);
+                    commit("setSuccess", "Provas restauradas com sucesso!");
                 });
             })
-            .then(() => commit('setLoading', false))
+            .then(() => commit("setLoading", false))
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test Restore All', error.message, { payload, docData });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Test Restore All", error.message, {
+                    payload,
+                    docData
+                });
             });
     },
     /**
@@ -786,32 +878,55 @@ const actions = {
      * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
      */
     changeDeleteStatusTests({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
         const { id, isSearching } = payload;
 
-        db.collection('tests').where('id', '==', id).get()
+        db.collection("tests")
+            .where("id", "==", id)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const toDelete = {
                     status: false
-                }
+                };
 
                 doc.ref.update({ ...doc.data(), toDelete: { status: false } });
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch("getUserById", {
+                    id: doc.data().userId
+                });
 
-                commit('updateCurrentTestsPage', { ...doc.data(), toDelete, user });
-                commit('updateTest', { ...doc.data(), toDelete, user });
-                commit('updateDeleteMarkTest', { ...doc.data(), toDelete, user });
-                if(isSearching) commit('updateFilteredTest', { ...doc.data(), toDelete, user });
+                commit("updateCurrentTestsPage", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                commit("updateTest", { ...doc.data(), toDelete, user });
+                commit("updateDeleteMarkTest", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                if (isSearching)
+                    commit("updateFilteredTest", {
+                        ...doc.data(),
+                        toDelete,
+                        user
+                    });
 
-                commit('setLoading', false);
-                commit('setSuccess', 'Provas excluídas com sucesso!');
+                commit("setLoading", false);
+                commit("setSuccess", "Provas excluídas com sucesso!");
             })
             .catch(error => {
-                const errorModel = showErrorMessage('exclusion', 'Provas', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test Confirm Delete', error.message, { payload });
+                const errorModel = showErrorMessage(
+                    "exclusion",
+                    "Provas",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Test Confirm Delete", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -822,31 +937,40 @@ const actions = {
     deleteTests({ commit, dispatch }) {
         const data = [];
 
-        db.collection("tests").where('toDelete.status', '==', false).get()
+        db.collection("tests")
+            .where("toDelete.status", "==", false)
+            .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.delete();
                     data.push(doc.data());
                 });
 
-                db.collection('data-size').get()
+                db.collection("data-size")
+                    .get()
                     .then(snap => {
                         const document = snap.docs[0];
                         const size = document.data().tests;
 
-                        document.ref.update({ tests: size - snapshot.docs.length });
-                        commit('addRemoveSize', { key: 'tests', data: size - snapshot.docs.length });
+                        document.ref.update({
+                            tests: size - snapshot.docs.length
+                        });
+                        commit("addRemoveSize", {
+                            key: "tests",
+                            data: size - snapshot.docs.length
+                        });
                     })
                     .catch(error => {
                         console.error(error);
                     });
             })
             .then(() => {
-                if (data.length > 0) dispatch('removeTestsByWeek', { tests: data });
+                if (data.length > 0)
+                    dispatch("removeTestsByWeek", { tests: data });
             })
             .catch(error => {
                 console.error("Error removing test: ", error);
-                createErrorLog('Test DB Delete', error.message, { data });
+                createErrorLog("Test DB Delete", error.message, { data });
             });
     },
     /**
@@ -858,7 +982,7 @@ const actions = {
      * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
      */
     createTest({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const createdDate = getNowISOString();
         const { testData, userInfo } = payload;
@@ -868,31 +992,37 @@ const actions = {
             ...testData,
             created: createdDate,
             updated: createdDate
-        }
+        };
 
         const testAmount = this.getters.getDataSize.tests;
         const pageAmount = Math.ceil(testAmount / 8);
         const amount = testAmount % 10;
 
-        db.collection("tests").add(test)
+        db.collection("tests")
+            .add(test)
             .then(() => {
-                commit('setLoading', false);
-                commit('createTest', {
-                    page: (amount === 0 ? pageAmount + 1 : pageAmount),
-                    data: { ...test, user: {...userInfo} },
+                commit("setLoading", false);
+                commit("createTest", {
+                    page: amount === 0 ? pageAmount + 1 : pageAmount,
+                    data: { ...test, user: { ...userInfo } },
                     amount: testAmount
                 });
-                commit('setSuccess', 'Prova criada com sucesso!');
+                commit("setSuccess", "Prova criada com sucesso!");
 
-                db.collection('data-size').get()
+                db.collection("data-size")
+                    .get()
                     .then(snap => {
                         const document = snap.docs[0];
                         const size = document.data().tests;
 
-                        document.ref.update({ tests: size + 1 })
+                        document.ref
+                            .update({ tests: size + 1 })
                             .then(() => {
-                                commit('addRemoveSize', { key: 'tests', data: size + 1 });
-                                dispatch('addTestsByWeek');
+                                commit("addRemoveSize", {
+                                    key: "tests",
+                                    data: size + 1
+                                });
+                                dispatch("addTestsByWeek");
                             })
                             .catch(error => {
                                 console.error(error);
@@ -903,10 +1033,14 @@ const actions = {
                     });
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('creation', 'Prova', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test DB Insert', error.message, { test });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "creation",
+                    "Prova",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Test DB Insert", error.message, { test });
             });
     },
     /**
@@ -916,24 +1050,32 @@ const actions = {
      * @param {Test} payload - The test to be updated.
      */
     updateTest({ commit, dispatch }, payload) {
-        const test = { ...payload, updated: getNowISOString() }
-        db.collection("tests").where('id', '==', test.id).get()
+        const test = { ...payload, updated: getNowISOString() };
+        db.collection("tests")
+            .where("id", "==", test.id)
+            .get()
             .then(async snapshot => {
                 snapshot.docs[0].ref.update(test);
 
-                const user = await dispatch('getUserById', { id: snapshot.docs[0].userId });
-                test['user'] = user;
+                const user = await dispatch("getUserById", {
+                    id: snapshot.docs[0].userId
+                });
+                test["user"] = user;
 
-                commit('updateTest', test);
-                commit('updateCurrentTestsPage', test);
-                commit('setLoading', false);
-                commit('setSuccess', 'Prova editada com sucesso!');
+                commit("updateTest", test);
+                commit("updateCurrentTestsPage", test);
+                commit("setLoading", false);
+                commit("setSuccess", "Prova editada com sucesso!");
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('edition', 'Prova', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Test DB Update', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "edition",
+                    "Prova",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Test DB Update", error.message, { payload });
             });
     },
     /**
@@ -948,18 +1090,25 @@ const actions = {
 
         return new Promise((resolve, reject) => {
             try {
-                db.collection('question-subjects').where('name', '==', subject).get()
+                db.collection("question-subjects")
+                    .where("name", "==", subject)
+                    .get()
                     .then(snapshot => {
                         const questions = snapshot.docs[0].data().questions;
                         resolve(questions);
                     })
                     .catch(error => {
-                        const errorModel = showErrorMessage('load', 'IQs' + error.message);
-                        commit('setError', { message: errorModel });
-                        createErrorLog('Test Subject IQs', error.message, { payload });
+                        const errorModel = showErrorMessage(
+                            "load",
+                            "IQs" + error.message
+                        );
+                        commit("setError", { message: errorModel });
+                        createErrorLog("Test Subject IQs", error.message, {
+                            payload
+                        });
                     });
-            } catch(error) {
-                reject('getSubjectIQS');
+            } catch (error) {
+                reject("getSubjectIQS");
             }
         });
     },
@@ -969,16 +1118,21 @@ const actions = {
      * @param {Store} store - The vuex store.
      */
     loadLastTests({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { limit } = payload;
 
         const data = [];
 
-        db.collection('tests').orderBy('updated', 'desc').limit(limit || 5).get()
+        db.collection("tests")
+            .orderBy("updated", "desc")
+            .limit(limit || 5)
+            .get()
             .then(async snapshot => {
                 const promises = snapshot.docs.map(async doc => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data.push({ ...doc.data(), user: userData });
                     return userData;
                 });
@@ -986,14 +1140,20 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setLastTests', data);
-                commit('setLoading', false);
+                commit("setLastTests", data);
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Provas', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Last Tests Loading', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Provas",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Last Tests Loading", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -1002,9 +1162,9 @@ const actions = {
      * @param {Store} store - The vuex store.
      */
     resetTests({ commit }) {
-        commit('RESETTests');
+        commit("RESETTests");
     }
-}
+};
 
 const getters = {
     /**
@@ -1023,7 +1183,9 @@ const getters = {
      * @returns {Test[]} An array of tests.
      */
     getLastTests(state) {
-        return [...state.lastTests].sort((t1, t2) => t1.updated > t2.updated ? -1 : 1);
+        return [...state.lastTests].sort((t1, t2) =>
+            t1.updated > t2.updated ? -1 : 1
+        );
     },
     /**
      * Gets an array of tests that are marked to be deleted.
@@ -1042,7 +1204,7 @@ const getters = {
      * @returns {Test[]} An array of tests.
      */
     getTestsByPage: state => page => {
-        return state.tests['p' + page];
+        return state.tests["p" + page];
     },
     /**
      * Gets an array of the current page tests.
@@ -1080,15 +1242,13 @@ const getters = {
      * @returns {(subject: string, questions: Question[]) => number} The number of questions of the subject.
      */
     getNumberOfQuestionBySubjectOnTest(state) {
-
         return (subject, questions) => {
             let counter = 0;
             questions.forEach(question => {
-                if (question.subject === subject)
-                    counter++;
-            })
+                if (question.subject === subject) counter++;
+            });
             return counter;
-        }
+        };
     },
     /**
      * Gets a test from the test state based on it's id.
@@ -1104,19 +1264,19 @@ const getters = {
             test = state.lastTests.find(t => t.id == id);
 
             if (!test) {
-                for(let key in state.tests) {
+                for (let key in state.tests) {
                     test = state.tests[key].find(t => t.id == id);
                 }
             }
 
             return test;
-        }
+        };
     }
-}
+};
 
 export default {
     state,
     mutations,
     actions,
     getters
-}
+};

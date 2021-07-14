@@ -1,8 +1,8 @@
-import { Store } from 'vuex';
+import { Store } from "vuex";
 
-import { db, storage } from '../../main';
-import { getNowISOString } from '../../utils/date';
-import { createErrorLog, showErrorMessage } from '../../utils/errors';
+import { db, storage } from "../../main";
+import { getNowISOString } from "../../utils/date";
+import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
  * @typedef {Object} DeleteStatus
@@ -132,7 +132,7 @@ const mutations = {
     updateDeleteMarkPaper(state, data) {
         const papers = [...state.deleteMarkPapers];
         papers.forEach((item, index) => {
-            if(item.id === data.id) {
+            if (item.id === data.id) {
                 papers[index] = data;
             }
         });
@@ -147,10 +147,10 @@ const mutations = {
     removeDeleteMarkPaper(state, data) {
         const papers = [...state.deleteMarkPapers];
         papers.forEach((item, index) => {
-            if(item.id === data) {
+            if (item.id === data) {
                 state.deleteMarkPapers.splice(index, 1);
             }
-        })
+        });
     },
     /**
      * Sets the array of papers marked to be deleted.
@@ -171,11 +171,14 @@ const mutations = {
      */
     setDeleteMarkPaper(state, data) {
         const papers = state.papers;
-        for(let key in papers) {
-            if(papers[key]) {
+        for (let key in papers) {
+            if (papers[key]) {
                 papers[key].forEach((item, index) => {
-                    if(item.id === data.id) {
-                        state.papers[key][index] = { ...item, toDelete: data.toDelete };
+                    if (item.id === data.id) {
+                        state.papers[key][index] = {
+                            ...item,
+                            toDelete: data.toDelete
+                        };
                     }
                 });
             }
@@ -192,7 +195,7 @@ const mutations = {
     setDeleteMarkFilteredPaper(state, data) {
         const papers = [...state.filteredPapers];
         papers.forEach((item, index) => {
-            if(item.id === data.id) {
+            if (item.id === data.id) {
                 papers[index] = { ...item, toDelete: data.toDelete };
             }
         });
@@ -209,13 +212,13 @@ const mutations = {
      */
     createPaper(state, data) {
         const page = data.page;
-        const papers = state.papers['p' + page] || [];
+        const papers = state.papers["p" + page] || [];
         const amount = data.amount;
-        const oneBefore = state.papers['p' + (page - 1)] || [];
-        if(papers.length > 0 || oneBefore.length === 8 || amount === 0) {
+        const oneBefore = state.papers["p" + (page - 1)] || [];
+        if (papers.length > 0 || oneBefore.length === 8 || amount === 0) {
             papers.push(data.data);
-            state.papers['p' + page] = [...papers];
-            if(amount === 0) {
+            state.papers["p" + page] = [...papers];
+            if (amount === 0) {
                 state.currentPapersPage.push(data.data);
             }
         }
@@ -227,11 +230,11 @@ const mutations = {
      * @param {Paper} data - The paper to be updated.
      */
     updatePaper(state, data) {
-        const papers = {...state.papers};
-        for(let key in papers) {
-            if(papers[key]) {
+        const papers = { ...state.papers };
+        for (let key in papers) {
+            if (papers[key]) {
                 papers[key].forEach((item, index) => {
-                    if(item.id === data.id) {
+                    if (item.id === data.id) {
                         papers[key][index] = data;
                     }
                 });
@@ -248,7 +251,7 @@ const mutations = {
     updateFilteredPaper(state, data) {
         const papers = [...state.filteredPapers];
         papers.forEach((item, index) => {
-            if(item.id === data.id) {
+            if (item.id === data.id) {
                 papers[index] = data;
             }
         });
@@ -263,7 +266,7 @@ const mutations = {
     updateCurrentPapersPage(state, data) {
         const papers = [...state.currentPapersPage];
         papers.forEach((item, index) => {
-            if(item.id === data.id) {
+            if (item.id === data.id) {
                 papers[index] = data;
             }
         });
@@ -277,10 +280,10 @@ const mutations = {
      */
     removePaper(state, data) {
         const papers = state.papers;
-        for(let key in papers) {
-            if(papers[key]) {
+        for (let key in papers) {
+            if (papers[key]) {
                 papers[key].forEach((item, index) => {
-                    if(item.id === data) {
+                    if (item.id === data) {
                         state.papers[key].splice(index, 1);
                     }
                 });
@@ -296,7 +299,7 @@ const mutations = {
     removeFilteredPaper(state, data) {
         const papers = state.filteredPapers;
         papers.forEach((item, index) => {
-            if(item.id === data) {
+            if (item.id === data) {
                 state.filteredPapers.splice(index, 1);
             }
         });
@@ -321,7 +324,7 @@ const mutations = {
             state[key] = newState[key];
         });
     }
-}
+};
 
 const actions = {
     /**
@@ -334,26 +337,35 @@ const actions = {
      * @returns {string} The image url.
      */
     uploadImagePaper({ commit }, payload) {
-        const request = new Promise((resolve,reject) => {
+        const request = new Promise((resolve, reject) => {
             try {
                 const storageRef = storage.ref();
                 const file = payload.images;
                 const paperId = payload.id;
-                const type = file.type.split('/')[1];
+                const type = file.type.split("/")[1];
                 const format = `documents/document-$${paperId}.${type}`;
-                storageRef.child(format).put(file)
+                storageRef
+                    .child(format)
+                    .put(file)
                     .then(snapshot => {
                         snapshot.ref.getDownloadURL().then(downloadURL => {
                             resolve(downloadURL.toString());
                         });
                     })
                     .catch(error => {
-                        const errorModel = showErrorMessage('connection', '', 'Image upload error - ' + error.message);
-                        commit('setError', { message: errorModel });
-                        createErrorLog('Docs Image Upload', error.message, { payload, format });
+                        const errorModel = showErrorMessage(
+                            "connection",
+                            "",
+                            "Image upload error - " + error.message
+                        );
+                        commit("setError", { message: errorModel });
+                        createErrorLog("Docs Image Upload", error.message, {
+                            payload,
+                            format
+                        });
                     });
-            } catch(error) {
-                reject('Paper Image Upload Error');
+            } catch (error) {
+                reject("Paper Image Upload Error");
             }
         });
         return request;
@@ -368,32 +380,41 @@ const actions = {
      * @param {"next"|"previous"} payload.type - The request type.
      */
     loadPaperPage({ commit, dispatch, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { page, itemsPerPage, type } = payload;
         const data = [];
 
         const pages = Object.keys(state.papers);
 
-        if(!pages.includes('p' + page)) {
+        if (!pages.includes("p" + page)) {
             let request = null;
-            const ref = db.collection('papers').orderBy('id');
+            const ref = db.collection("papers").orderBy("id");
 
-            if(type === 'next') {
-                request = ref.startAfter(state.lastPaperDocument[1]).limit(itemsPerPage).get();
+            if (type === "next") {
+                request = ref
+                    .startAfter(state.lastPaperDocument[1])
+                    .limit(itemsPerPage)
+                    .get();
             } else {
-                request = ref.endBefore(state.lastPaperDocument[0]).limitToLast(itemsPerPage).get();
+                request = ref
+                    .endBefore(state.lastPaperDocument[0])
+                    .limitToLast(itemsPerPage)
+                    .get();
             }
 
             let first = null,
                 last = null;
 
-            request.then(async snapshot => {
+            request
+                .then(async snapshot => {
                     first = snapshot.docs[0].data().id;
                     last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
                     const promises = snapshot.docs.map(async doc => {
-                        const userData = await dispatch('getUserById', { id: doc.data().userId });
+                        const userData = await dispatch("getUserById", {
+                            id: doc.data().userId
+                        });
                         data.push({ ...doc.data(), user: userData });
                         return userData;
                     });
@@ -401,25 +422,32 @@ const actions = {
                     await Promise.all(promises);
                 })
                 .then(() => {
-                    commit('setCurrentPapersPage', data);
-                    commit('setPaperPage', { page: 'p' + page, data });
-                    commit('setLastPaperDocument', [first, last]);
-                    commit('setLoading', false);
+                    commit("setCurrentPapersPage", data);
+                    commit("setPaperPage", { page: "p" + page, data });
+                    commit("setLastPaperDocument", [first, last]);
+                    commit("setLoading", false);
                 })
                 .catch(error => {
-                    commit('setLoading', false);
-                    const errorModel = showErrorMessage('load', 'Documentos', error.message);
-                    commit('setError', { message: errorModel });
-                    createErrorLog('Document Page Load', error.message, { payload, data });
+                    commit("setLoading", false);
+                    const errorModel = showErrorMessage(
+                        "load",
+                        "Documentos",
+                        error.message
+                    );
+                    commit("setError", { message: errorModel });
+                    createErrorLog("Document Page Load", error.message, {
+                        payload,
+                        data
+                    });
                 });
         } else {
-            const pageContent = state.papers['p' + page];
+            const pageContent = state.papers["p" + page];
             const first = pageContent[0].id;
             const last = pageContent[pageContent.length - 1].id;
 
-            commit('setCurrentPapersPage', pageContent);
-            commit('setLastPaperDocument', [first, last]);
-            commit('setLoading', false);
+            commit("setCurrentPapersPage", pageContent);
+            commit("setLastPaperDocument", [first, last]);
+            commit("setLoading", false);
         }
     },
     /**
@@ -432,7 +460,7 @@ const actions = {
      * @param {"first"|"last"} payload.mode - The request mode.
      */
     loadFOLPaperPage({ commit, dispatch, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { page, itemsPerPage, mode } = payload;
         const data = [];
@@ -442,11 +470,11 @@ const actions = {
         const paperAmount = this.getters.getDataSize.papers;
         const amount = paperAmount % 10;
 
-        if(!pages.includes('p' + page)) {
+        if (!pages.includes("p" + page)) {
             let request = null;
-            const ref = db.collection('papers').orderBy('id');
+            const ref = db.collection("papers").orderBy("id");
 
-            if(mode === 'first') {
+            if (mode === "first") {
                 request = ref.limit(itemsPerPage).get();
             } else {
                 request = ref.limitToLast(amount || 10).get();
@@ -455,13 +483,17 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(async snapshot => {
-                    if(snapshot.docs.length > 0) {
+            request
+                .then(async snapshot => {
+                    if (snapshot.docs.length > 0) {
                         first = snapshot.docs[0].data().id;
-                        last = snapshot.docs[snapshot.docs.length - 1].data().id;
+                        last = snapshot.docs[snapshot.docs.length - 1].data()
+                            .id;
 
                         const promises = snapshot.docs.map(async doc => {
-                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            const userData = await dispatch("getUserById", {
+                                id: doc.data().userId
+                            });
                             data.push({ ...doc.data(), user: userData });
                             return userData;
                         });
@@ -470,27 +502,34 @@ const actions = {
                     }
                 })
                 .then(() => {
-                    if(data.length > 0) {
-                        commit('setCurrentPapersPage', data);
-                        commit('setPaperPage', { page: 'p' + page, data });
-                        commit('setLastPaperDocument', [first, last]);
+                    if (data.length > 0) {
+                        commit("setCurrentPapersPage", data);
+                        commit("setPaperPage", { page: "p" + page, data });
+                        commit("setLastPaperDocument", [first, last]);
                     }
-                    commit('setLoading', false);
+                    commit("setLoading", false);
                 })
                 .catch(error => {
-                    commit('setLoading', false);
-                    const errorModel = showErrorMessage('load', 'Documentos', error.message);
-                    commit('setError', { message: errorModel });
-                    createErrorLog('Document FOL Page Load', error.message, { payload, data });
+                    commit("setLoading", false);
+                    const errorModel = showErrorMessage(
+                        "load",
+                        "Documentos",
+                        error.message
+                    );
+                    commit("setError", { message: errorModel });
+                    createErrorLog("Document FOL Page Load", error.message, {
+                        payload,
+                        data
+                    });
                 });
         } else {
-            const pageContent = state.papers['p' + page];
+            const pageContent = state.papers["p" + page];
             const first = pageContent[0].id;
             const last = pageContent[pageContent.length - 1].id;
 
-            commit('setCurrentPapersPage', pageContent);
-            commit('setLastPaperDocument', [first, last]);
-            commit('setLoading', false);
+            commit("setCurrentPapersPage", pageContent);
+            commit("setLastPaperDocument", [first, last]);
+            commit("setLoading", false);
         }
     },
     /**
@@ -500,13 +539,14 @@ const actions = {
      * @param {string} payload - The string to be searched.
      */
     searchPapers({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const data = [];
 
-        db.collection('papers').orderBy('name')
-            .where('name', '>=', payload)
-            .where('name', '<=', payload + '~')
+        db.collection("papers")
+            .orderBy("name")
+            .where("name", ">=", payload)
+            .where("name", "<=", payload + "~")
             .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
@@ -514,28 +554,30 @@ const actions = {
                 });
             })
             .then(() => {
-                db.collection('papers').orderBy('name')
-                    .where('name', '>=', payload.toUpperCase())
-                    .where('name', '<=', payload.toUpperCase() + '~')
+                db.collection("papers")
+                    .orderBy("name")
+                    .where("name", ">=", payload.toUpperCase())
+                    .where("name", "<=", payload.toUpperCase() + "~")
                     .get()
                     .then(snapshot => {
                         const ids = data.map(t => t.id);
                         snapshot.forEach(doc => {
-                            if(!ids.includes(doc.data().id)) {
+                            if (!ids.includes(doc.data().id)) {
                                 data.push(doc.data());
                             }
                         });
                     });
             })
             .then(() => {
-                db.collection('papers').orderBy('name')
-                    .where('name', '>=', payload.toLowerCase())
-                    .where('name', '<=', payload.toLowerCase() + '~')
+                db.collection("papers")
+                    .orderBy("name")
+                    .where("name", ">=", payload.toLowerCase())
+                    .where("name", "<=", payload.toLowerCase() + "~")
                     .get()
                     .then(snapshot => {
                         const ids = data.map(t => t.id);
                         snapshot.forEach(doc => {
-                            if(!ids.includes(doc.data().id)) {
+                            if (!ids.includes(doc.data().id)) {
                                 data.push(doc.data());
                             }
                         });
@@ -543,7 +585,9 @@ const actions = {
             })
             .then(async () => {
                 const promises = snapshot.docs.map(async (doc, index) => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data[index] = { ...doc.data(), user: userData };
                     return userData;
                 });
@@ -551,14 +595,21 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setFilteredPapers', data);
-                commit('setLoading', false);
+                commit("setFilteredPapers", data);
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Documentos', 'Searching error - ' + error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document Searching', error.message, { payload, data });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Documentos",
+                    "Searching error - " + error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Document Searching", error.message, {
+                    payload,
+                    data
+                });
             });
     },
     /**
@@ -571,17 +622,29 @@ const actions = {
     async paperExists(store, payload) {
         return new Promise((resolve, reject) => {
             try {
-                db.collection('papers').where('name', '==', payload).get()
+                db.collection("papers")
+                    .where("name", "==", payload)
+                    .get()
                     .then(snapshot => {
-                        if(snapshot.docs.length > 0) resolve({ id: snapshot.docs[0].data().id, exist: true });
+                        if (snapshot.docs.length > 0)
+                            resolve({
+                                id: snapshot.docs[0].data().id,
+                                exist: true
+                            });
                         else resolve({ id: null, exist: false });
                     })
                     .catch(error => {
-                        const errorModel = showErrorMessage('connection', '', error.message);
-                        commit('setError', { message: errorModel });
-                        createErrorLog('Document Exist Test', error.message, { payload });
+                        const errorModel = showErrorMessage(
+                            "connection",
+                            "",
+                            error.message
+                        );
+                        commit("setError", { message: errorModel });
+                        createErrorLog("Document Exist Test", error.message, {
+                            payload
+                        });
                     });
-            } catch(error) {
+            } catch (error) {
                 reject();
             }
         });
@@ -594,10 +657,14 @@ const actions = {
     checkDeleteMarkPapers({ commit, dispatch }) {
         const data = [];
 
-        db.collection('papers').where('toDelete.status', '==', true).get()
+        db.collection("papers")
+            .where("toDelete.status", "==", true)
+            .get()
             .then(async snapshot => {
                 const promises = snapshot.docs.map(async doc => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data.push({ ...doc.data(), user: userData });
                     return userData;
                 });
@@ -605,12 +672,16 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setDeleteMarkPapers', data);
+                commit("setDeleteMarkPapers", data);
             })
             .catch(error => {
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document Mark Check', error.message, { data });
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Document Mark Check", error.message, { data });
             });
     },
     /**
@@ -623,38 +694,52 @@ const actions = {
      * @param {string} payload.userEmail - The current user e-mail.
      */
     deleteMarkPaper({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { id, isSearching, userEmail } = payload;
 
-        db.collection('papers').where('id', '==', id).get()
+        db.collection("papers")
+            .where("id", "==", id)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
 
                 const toDelete = {
                     status: true,
                     userEmail
-                }
+                };
 
                 doc.ref.update({ toDelete });
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch("getUserById", {
+                    id: doc.data().userId
+                });
 
-                commit('setDeleteMarkPaper', { id, toDelete });
+                commit("setDeleteMarkPaper", { id, toDelete });
 
-                if(isSearching) {
-                    commit('setDeleteMarkFilteredPaper', { id, toDelete });
+                if (isSearching) {
+                    commit("setDeleteMarkFilteredPaper", { id, toDelete });
                 }
 
-                commit('updateCurrentPapersPage', { ...doc.data(), toDelete, user });
-                commit('addDeleteMarkPaper', { ...doc.data(), toDelete, user });
-                commit('setLoading', false);
+                commit("updateCurrentPapersPage", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                commit("addDeleteMarkPaper", { ...doc.data(), toDelete, user });
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document Delete Mark', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Document Delete Mark", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -666,11 +751,13 @@ const actions = {
      * @param {boolean} payload.isSearching - Whether the application is using filtered papers or not.
      */
     restoreMarkedPaper({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { id, isSearching } = payload;
 
-        db.collection('papers').where('id', '==', id).get()
+        db.collection("papers")
+            .where("id", "==", id)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
@@ -685,31 +772,37 @@ const actions = {
                     name: data.name,
                     created: data.created,
                     updated: data.updated,
-                    editedBy: data.editedBy,
+                    editedBy: data.editedBy || null,
                     userId: data.userId
-                }
+                };
 
                 doc.ref.set(paper);
 
-                const user = await dispatch('getUserById', { id: paper.userId });
-                paper['user'] = user;
+                const user = await dispatch("getUserById", {
+                    id: paper.userId
+                });
+                paper["user"] = user;
 
-                commit('updatePaper', paper);
+                commit("updatePaper", paper);
 
-                if(isSearching) {
-                    commit('updateFilteredPaper', paper);
+                if (isSearching) {
+                    commit("updateFilteredPaper", paper);
                 }
 
-                commit('removeDeleteMarkPaper', id);
-                commit('updateCurrentPapersPage', paper);
-                commit('setLoading', false);
-                commit('setSuccess', 'Documento restaurado com sucesso!');
+                commit("removeDeleteMarkPaper", id);
+                commit("updateCurrentPapersPage", paper);
+                commit("setLoading", false);
+                commit("setSuccess", "Documento restaurado com sucesso!");
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document Restore', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Document Restore", error.message, { payload });
             });
     },
     /**
@@ -722,20 +815,23 @@ const actions = {
      * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
      */
     restoreAllMarkedPapers({ commit, dispatch, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { all, isSearching, user } = payload;
 
-        const ref = db.collection('papers').where('toDelete.status', '==', true);
+        const ref = db
+            .collection("papers")
+            .where("toDelete.status", "==", true);
         let request = null;
 
-        if(all) {
+        if (all) {
             request = ref;
         } else {
-            request = ref.where('toDelete.userEmail', '==', user.email);
+            request = ref.where("toDelete.userEmail", "==", user.email);
         }
 
-        request.get()
+        request
+            .get()
             .then(snapshot => {
                 snapshot.forEach(async doc => {
                     const data = doc.data();
@@ -750,34 +846,46 @@ const actions = {
                         name: data.name,
                         created: data.created,
                         updated: data.updated,
-                        editedBy: data.editedBy,
+                        editedBy: data.editedBy || null,
                         userId: data.userId
-                    }
+                    };
 
                     doc.ref.set(paper);
 
-                    const user = await dispatch('getUserById', { id: paper.userId });
-                    paper['user'] = user;
+                    const user = await dispatch("getUserById", {
+                        id: paper.userId
+                    });
+                    paper["user"] = user;
 
-                    if(all) {
-                        const falseMarkedPapers = state.deleteMarkPapers.filter(t => !t.toDelete.status);
-                        commit('setDeleteMarkPapers', falseMarkedPapers);
+                    if (all) {
+                        const falseMarkedPapers = state.deleteMarkPapers.filter(
+                            t => !t.toDelete.status
+                        );
+                        commit("setDeleteMarkPapers", falseMarkedPapers);
                     } else {
-                        const markedPapers = state.deleteMarkPapers.filter(t => t.id !== paper.id);
-                        commit('setDeleteMarkPapers', markedPapers);
+                        const markedPapers = state.deleteMarkPapers.filter(
+                            t => t.id !== paper.id
+                        );
+                        commit("setDeleteMarkPapers", markedPapers);
                     }
-                    commit('updatePaper', paper);
-                    commit('updateCurrentPapersPage', paper);
-                    if(isSearching) commit('updateFilteredPaper', paper);
-                    commit('setSuccess', 'Documentos restaurados com sucesso!');
+                    commit("updatePaper", paper);
+                    commit("updateCurrentPapersPage", paper);
+                    if (isSearching) commit("updateFilteredPaper", paper);
+                    commit("setSuccess", "Documentos restaurados com sucesso!");
                 });
             })
-            .then(() => commit('setLoading', false))
+            .then(() => commit("setLoading", false))
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document Restore All', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Document Restore All", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -789,26 +897,29 @@ const actions = {
      * @param {boolean} payload.isSearching - Whether the application is using filtered papers or not.
      */
     changeDeleteStatusPapers({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
         const { id, isSearching } = payload;
 
-        db.collection('papers').where('id', '==', id).get()
+        db.collection("papers")
+            .where("id", "==", id)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const toDelete = {
                     status: false
-                }
+                };
 
                 doc.ref.update({ ...doc.data(), toDelete });
 
-                db.collection('paper-names').get()
+                db.collection("paper-names")
+                    .get()
                     .then(snapNames => {
                         const docNames = snapNames.docs[0];
                         const dPapers = docNames.data().papers;
                         let newPapers = [...dPapers];
 
                         dPapers.forEach((p, i) => {
-                            if(p.id === id) {
+                            if (p.id === id) {
                                 newPapers.splice(i, 1);
                             }
                         });
@@ -819,20 +930,41 @@ const actions = {
                         console.error(error);
                     });
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch("getUserById", {
+                    id: doc.data().userId
+                });
 
-                commit('updateCurrentPapersPage', { ...doc.data(), toDelete, user });
-                commit('updatePaper', { ...doc.data(), toDelete, user });
-                commit('updateDeleteMarkPaper', { ...doc.data(), toDelete, user });
-                if(isSearching) commit('updateFilteredPaper', { ...doc.data(), toDelete, user });
+                commit("updateCurrentPapersPage", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                commit("updatePaper", { ...doc.data(), toDelete, user });
+                commit("updateDeleteMarkPaper", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                if (isSearching)
+                    commit("updateFilteredPaper", {
+                        ...doc.data(),
+                        toDelete,
+                        user
+                    });
 
-                commit('setLoading', false);
-                commit('setSuccess', 'Documento excluído com sucesso!');
+                commit("setLoading", false);
+                commit("setSuccess", "Documento excluído com sucesso!");
             })
             .catch(error => {
-                const errorModel = showErrorMessage('exclusion', 'Documento', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document Confirm Delete', error.message, { payload });
+                const errorModel = showErrorMessage(
+                    "exclusion",
+                    "Documento",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Document Confirm Delete", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -842,26 +974,39 @@ const actions = {
      */
     deletePapers({ commit }) {
         const data = [];
-        db.collection("papers").where('toDelete.status', '==', false).get()
+        db.collection("papers")
+            .where("toDelete.status", "==", false)
+            .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.delete();
                     data.push(doc.data());
-                    if(doc.data().image && doc.data().image.length > 0) {
+                    if (doc.data().image && doc.data().image.length > 0) {
                         const image = doc.data().image;
-                        const childImage = image.split('?alt=media')[0].split('/o/')[1];
+                        const childImage = image
+                            .split("?alt=media")[0]
+                            .split("/o/")[1];
                         const child = decodeURIComponent(childImage);
-                        storage.ref().child(child).delete();
+                        storage
+                            .ref()
+                            .child(child)
+                            .delete();
                     }
                 });
 
-                db.collection('data-size').get()
+                db.collection("data-size")
+                    .get()
                     .then(snap => {
                         const document = snap.docs[0];
                         const size = document.data().papers;
 
-                        document.ref.update({ papers: size - snapshot.docs.length });
-                        commit('addRemoveSize', { key: 'papers', data: size - snapshot.docs.length });
+                        document.ref.update({
+                            papers: size - snapshot.docs.length
+                        });
+                        commit("addRemoveSize", {
+                            key: "papers",
+                            data: size - snapshot.docs.length
+                        });
                     })
                     .catch(error => {
                         console.error(error);
@@ -869,7 +1014,7 @@ const actions = {
             })
             .catch(error => {
                 console.error("Error removing document: ", error);
-                createErrorLog('Document DB Delete', error.message, { data });
+                createErrorLog("Document DB Delete", error.message, { data });
             });
     },
     /**
@@ -881,7 +1026,7 @@ const actions = {
      * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
      */
     createPaper({ commit }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const createdDate = getNowISOString();
 
@@ -891,30 +1036,39 @@ const actions = {
             ...paperData,
             created: createdDate,
             updated: createdDate
-        }
+        };
 
         const paperAmount = this.getters.getDataSize.papers;
         const pageAmount = Math.ceil(paperAmount / 10);
         const amount = paperAmount % 10;
 
-        db.collection("papers").add(paper)
+        db.collection("papers")
+            .add(paper)
             .then(async () => {
-                commit('createPaper', {
-                    page: (amount === 0 ? pageAmount + 1 : pageAmount),
+                commit("createPaper", {
+                    page: amount === 0 ? pageAmount + 1 : pageAmount,
                     data: { ...paper, user: { ...userInfo } },
                     amount: paperAmount
                 });
-                commit('setLoading', false);
+                commit("setLoading", false);
 
-                db.collection('data-size').get()
+                db.collection("data-size")
+                    .get()
                     .then(snap => {
                         const document = snap.docs[0];
                         const size = document.data().papers;
 
-                        document.ref.update({ papers: size + 1 })
+                        document.ref
+                            .update({ papers: size + 1 })
                             .then(() => {
-                                commit('addRemoveSize', { key: 'papers', data: size + 1 });
-                                commit('setSuccess', 'Documento criado com sucesso!');
+                                commit("addRemoveSize", {
+                                    key: "papers",
+                                    data: size + 1
+                                });
+                                commit(
+                                    "setSuccess",
+                                    "Documento criado com sucesso!"
+                                );
                             })
                             .catch(error => {
                                 console.error(error);
@@ -925,7 +1079,8 @@ const actions = {
                     });
             })
             .then(() => {
-                db.collection('paper-names').get()
+                db.collection("paper-names")
+                    .get()
                     .then(snapshot => {
                         const doc = snapshot.docs[0];
                         const dPapers = doc.data().papers;
@@ -938,10 +1093,16 @@ const actions = {
                     });
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('creation', 'Document', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document DB Insert', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "creation",
+                    "Document",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Document DB Insert", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -954,22 +1115,28 @@ const actions = {
         const paper = {
             ...payload,
             updated: getNowISOString()
-        }
+        };
 
-        db.collection("papers").where('id', '==', paper.id).get()
+        db.collection("papers")
+            .where("id", "==", paper.id)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 doc.ref.update(paper);
 
-                db.collection('paper-names').get()
+                db.collection("paper-names")
+                    .get()
                     .then(snapNames => {
                         const docNames = snapNames.docs[0];
                         const dPapers = docNames.data().papers;
                         let newPapers = [...dPapers];
 
                         dPapers.forEach((p, i) => {
-                            if(p.id === paper.id) {
-                                newPapers[i] = { id: paper.id, name: paper.name };
+                            if (p.id === paper.id) {
+                                newPapers[i] = {
+                                    id: paper.id,
+                                    name: paper.name
+                                };
                             }
                         });
 
@@ -979,19 +1146,27 @@ const actions = {
                         console.error(error);
                     });
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
-                paper['user'] = user;
+                const user = await dispatch("getUserById", {
+                    id: doc.data().userId
+                });
+                paper["user"] = user;
 
-                commit('updatePaper', paper);
-                commit('updateCurrentPapersPage', paper);
-                commit('setLoading', false);
-                commit('setSuccess', 'Documento editado com sucesso!');
+                commit("updatePaper", paper);
+                commit("updateCurrentPapersPage", paper);
+                commit("setLoading", false);
+                commit("setSuccess", "Documento editado com sucesso!");
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('edition', 'Document', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Document DB Update', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "edition",
+                    "Document",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Document DB Update", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -1002,7 +1177,8 @@ const actions = {
     async getPaperNames(store) {
         return new Promise((resolve, reject) => {
             try {
-                db.collection('paper-names').get()
+                db.collection("paper-names")
+                    .get()
                     .then(snapshot => {
                         const data = snapshot.docs[0].data();
                         resolve(data.papers);
@@ -1010,8 +1186,8 @@ const actions = {
                     .catch(error => {
                         console.error(error);
                     });
-            } catch(error) {
-                reject('getPaperNames error');
+            } catch (error) {
+                reject("getPaperNames error");
             }
         });
     },
@@ -1026,7 +1202,9 @@ const actions = {
 
         return new Promise((resolve, reject) => {
             try {
-                db.collection('papers').where('id', '==', id).get()
+                db.collection("papers")
+                    .where("id", "==", id)
+                    .get()
                     .then(async snapshot => {
                         const doc = snapshot.docs[0];
 
@@ -1035,18 +1213,26 @@ const actions = {
                          */
                         const paper = doc.data();
 
-                        const user = await dispatch('getUserById', { id: paper.userId });
-                        paper['user'] = user;
+                        const user = await dispatch("getUserById", {
+                            id: paper.userId
+                        });
+                        paper["user"] = user;
 
                         resolve(paper);
                     })
                     .catch(error => {
-                        const errorModel = showErrorMessage('load', 'Documento', error.message);
-                        commit('setError', { message: errorModel });
-                        createErrorLog('Document ID Load', error.message, { data });
+                        const errorModel = showErrorMessage(
+                            "load",
+                            "Documento",
+                            error.message
+                        );
+                        commit("setError", { message: errorModel });
+                        createErrorLog("Document ID Load", error.message, {
+                            data
+                        });
                     });
-            } catch(error) {
-                reject('getPaperById error')
+            } catch (error) {
+                reject("getPaperById error");
             }
         });
     },
@@ -1056,14 +1242,19 @@ const actions = {
      * @param {Store} store - The vuex store.
      */
     loadLastPapers({ commit, dispatch }) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const data = [];
 
-        db.collection('papers').orderBy('updated', 'desc').limit(6).get()
+        db.collection("papers")
+            .orderBy("updated", "desc")
+            .limit(6)
+            .get()
             .then(async snapshot => {
                 const promises = snapshot.docs.map(async doc => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data.push({ ...doc.data(), user: userData });
                     return userData;
                 });
@@ -1071,15 +1262,21 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setLastPapers', data);
-                commit('setLoading', false);
+                commit("setLastPapers", data);
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Documentos', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Last Documents Loading', error.message, { data });
-            })
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Documentos",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Last Documents Loading", error.message, {
+                    data
+                });
+            });
     },
     /**
      * Resets the paper state to it's initial state.
@@ -1087,9 +1284,9 @@ const actions = {
      * @param {Store} store - The vuex store.
      */
     resetPapers({ commit }) {
-        commit('RESETPapers');
+        commit("RESETPapers");
     }
-}
+};
 
 const getters = {
     /**
@@ -1118,7 +1315,7 @@ const getters = {
      * @returns {(page: number) => Paper[]} An array of papers.
      */
     getPapersByPage(state) {
-        return page => state.papers['p' + page];
+        return page => state.papers["p" + page];
     },
     /**
      * Gets an array of the current page papers.
@@ -1161,19 +1358,19 @@ const getters = {
             paper = state.lastPapers.find(t => t.id == id);
 
             if (!paper) {
-                for(let key in state.papers) {
+                for (let key in state.papers) {
                     paper = state.papers[key].find(t => t.id == id);
                 }
             }
 
             return paper;
-        }
+        };
     }
-}
+};
 
 export default {
     state,
     mutations,
     actions,
     getters
-}
+};
