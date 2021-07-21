@@ -402,7 +402,6 @@
         },
         beforeDestroy() {
             if(this.userClaims && this.userClaims['appraiser'] && this.hasApprovedRequests) {
-                console.log('here');
                 this.$store.dispatch('deleteApprovedRequests', { userInfo: this.userInfo });
             }
 
