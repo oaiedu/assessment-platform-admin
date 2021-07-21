@@ -77,7 +77,7 @@
         </v-tooltip>
     </v-row>
 
-    <v-row v-if="!userClaims.student">
+    <v-row v-if="userClaims && !userClaims.student">
         <v-tooltip left>
             <template v-slot:activator='{ on }'>
                 <v-btn

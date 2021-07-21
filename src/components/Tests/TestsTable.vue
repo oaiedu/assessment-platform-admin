@@ -37,7 +37,7 @@
                         <v-tooltip top>
                             <template v-slot:activator='{ on, attrs }'>
                                 <v-icon
-                                    v-if='!userClaims["student"]'
+                                    v-if='userClaims && !userClaims["student"]'
                                     v-on='on'
                                     v-bind='attrs'
                                     class="ml-2"
@@ -51,7 +51,7 @@
                         <v-tooltip top>
                             <template v-slot:activator='{ on, attrs }'>
                                 <v-icon
-                                    v-if='!userClaims["student"]'
+                                    v-if='userClaims && !userClaims["student"]'
                                     v-on='on'
                                     v-bind='attrs'
                                     class="ml-2"
@@ -68,9 +68,9 @@
                             style="padding: 0 !important; font-weight: bold !important;"
                             color='red'
                             text
-                            :disabled='userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email'
+                            :disabled='userClaims && userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email'
                             @click='onRestoreClick(item)' >
-                            {{ userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email ? 'Indisponível' : 'Restaurar' }}
+                            {{ userClaims && userClaims["teacher"] && item.toDelete.userEmail !== userInfo.email ? 'Indisponível' : 'Restaurar' }}
                         </v-btn>
                     </v-row>
 
@@ -114,6 +114,9 @@
             },
             userClaims() {
                 return this.$store.getters.getUserClaims;
+            },
+            userInfo() {
+                return this.$store.getters.userInfo;
             }
         },
         methods: {

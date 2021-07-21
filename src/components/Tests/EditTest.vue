@@ -176,7 +176,7 @@ export default {
       ],
       showedQuestions: [],
       search: "",
-      isSearching: '',
+      isSearching: false,
       page: 1,
       searchPage: 1,
       pageCount: 15,
@@ -316,7 +316,7 @@ export default {
                     }
 
                     this.close();
-                    this.$store.dispatch("updateTest", testData);
+                    this.$emit('updateTest', testData);
                 }
             });
         }

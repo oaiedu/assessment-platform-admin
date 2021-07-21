@@ -14,28 +14,28 @@
           </v-container>
       </v-container>
 
-      <v-container v-if='hasDeleteMarkTests && (userClaims["admin"] ||
+      <v-container v-if='hasDeleteMarkTests && ((userClaims && userClaims["admin"]) ||
         (markedTestsByUser && markedTestsByUser.length > 0) ||
-        (deleteMarkTests.filter(t => t.toDelete.userEmail === userInfo.email)))'>
+        (deleteMarkTests.filter(t => userInfo && t.toDelete.userEmail === userInfo.email)).length > 0)'>
         <DeleteAlert
             :confirmCondition='deleteConfirmed'
             :itemsCondition='hasTrueMarkStatus'
             itemsText='As seguintes provas foram marcadas para exclusão:'
             :items='markedTestsByUser'
-            :isAdmin='userClaims["admin"]'
+            :isAdmin='userClaims && userClaims["admin"]'
             :adminItems='markedTestsAdmin' />
 
-        <v-row justify="start" v-if='hasTrueMarkStatus && (userClaims["admin"] || markedTestsByUser)'>
+        <v-row justify="start" v-if='hasTrueMarkStatus && ((userClaims && userClaims["admin"]) || markedTestsByUser)'>
             <v-btn
                 class='ml-10'
                 color='red'
-                :dark='!(userClaims["admin"] && markedTestsAdmin.length === 0)'
-                :disabled="userClaims['admin'] && markedTestsAdmin.length === 0"
+                :dark='!(userClaims && userClaims["admin"] && markedTestsAdmin.length === 0)'
+                :disabled="userClaims && userClaims['admin'] && markedTestsAdmin.length === 0"
                 @click="deleteConfirmed = true; deleteTests(false)" >
-                {{ userClaims['admin'] ? 'Confirmar Meus' : 'Confirmar' }}
+                {{ userClaims && userClaims['admin'] ? 'Confirmar Meus' : 'Confirmar' }}
             </v-btn>
             <v-btn
-                v-if="userClaims['admin']"
+                v-if="userClaims && userClaims['admin']"
                 class='ml-3'
                 color='red'
                 dark
@@ -45,13 +45,13 @@
             <v-btn
                 class='ml-3'
                 color='grey darken-1'
-                :dark='!(userClaims["admin"] && markedTestsAdmin.length === 0)'
-                :disabled="userClaims['admin'] && markedTestsAdmin.length === 0"
+                :dark='!(userClaims && userClaims["admin"] && markedTestsAdmin.length === 0)'
+                :disabled="userClaims && userClaims['admin'] && markedTestsAdmin.length === 0"
                 @click="restoreAll(false)" >
-                {{ userClaims['admin'] ? 'Restaurar Meus' : 'Restaurar' }}
+                {{ userClaims && userClaims['admin'] ? 'Restaurar Meus' : 'Restaurar' }}
             </v-btn>
             <v-btn
-                v-if="userClaims['admin']"
+                v-if="userClaims && userClaims['admin']"
                 class='ml-3'
                 color='grey darken-1'
                 dark
@@ -70,7 +70,7 @@
         @deleteClick='deleteTestSnackBar = true; deleteSelect = $event;'
         @restoreClick='restoreTest($event)' />
 
-      <v-tooltip left v-if='!userClaims["student"]'>
+      <v-tooltip left v-if='userClaims && !userClaims["student"]'>
         <template v-slot:activator="{ on }">
           <v-btn
             v-on="on"
@@ -92,7 +92,7 @@
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditTest">
-        <EditTest @closeDialogNew="dialogEditTest = false" :test="selectedTest"></EditTest>
+        <EditTest @closeDialogNew="dialogEditTest = false" @updateTest="updateTest($event)" :test="selectedTest"></EditTest>
       </v-dialog>
 
       <div class="text-center pt-2">
@@ -155,15 +155,15 @@
                 return this.$store.getters.getDeleteMarkTests;
             },
             markedTestsAdmin() {
-                const tests = this.deleteMarkTests.filter(t => t.toDelete.userEmail === this.userInfo.email);
+                const tests = this.deleteMarkTests.filter(t => this.userInfo && t.toDelete.userEmail === this.userInfo.email);
                 const titles = tests.filter(t => t.toDelete && t.toDelete.status);
                 return titles.map(t => t.title).join(', ');
             },
             markedTestsByUser() {
-                const isAdmin = this.userClaims['admin'];
+                const isAdmin = this.userClaims && this.userClaims['admin'];
                 const tests = isAdmin
                     ? this.deleteMarkTests
-                    : this.deleteMarkTests.filter(t => t.toDelete.userEmail === this.userInfo.email);
+                    : this.deleteMarkTests.filter(t => this.userInfo && t.toDelete.userEmail === this.userInfo.email);
 
                 const titles = [];
 
@@ -189,12 +189,15 @@
             },
             pageAmount() {
                 const testsAmount = this.$store.getters.getDataSize.tests;
-                return Math.ceil(testsAmount / this.itemsPerPage);
+                return Math.ceil(testsAmount / this.itemsPerPage) || 1;
             }
         },
         methods: {
             printTest(item) {
                 this.$router.push('/tests/' + item);
+            },
+            updateTest(testData) {
+                this.$store.dispatch("updateTest", { testData, isSearching: this.isSearching });
             },
             deleteTest(id) {
                 this.deleteTestSnackBar = false;
