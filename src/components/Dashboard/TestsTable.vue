@@ -56,7 +56,7 @@
                     { text: 'Tipo', sortable: false, value: 'type', align: 'left' },
                     { text: 'Questões', sortable: false, value: 'questions.length', align: 'left' },
                     { text: 'Usuário', sortable: false, value: 'user', align: 'left' },
-                    { text: 'Data de criação', sortable: false, value: 'updated', align: 'left' },
+                    { text: 'Última atualização', sortable: false, value: 'updated', align: 'left' },
                 ],
                 mdiCheckboxMultipleMarked,
                 mdiShuffleVariant
@@ -118,13 +118,13 @@
                 }
             },
             onRowClick(item) {
-                if (this.userClaims['admin'] || this.userClaims['teacher']) {
+                if (this.userClaims && (this.userClaims['admin'] || this.userClaims['teacher'])) {
                     this.$router.push('/tests/' + item.id);
                 }
             }
         },
         created() {
-            if (this.userClaims['student']) {
+            if (this.userClaims && (this.userClaims['student'])) {
                 this.$store.dispatch('loadLastTests', 10);
             } else {
                 this.$store.dispatch('loadLastTests', 5);

@@ -67,7 +67,7 @@
             }
         },
         mounted() {
-            if (this.userClaims['appraiser']) {
+            if (this.userClaims && this.userClaims['appraiser']) {
                 this.$store.dispatch('loadUserRequests', { userId: this.userInfo.id, mode: 'current', limit: 4 });
             }
         }

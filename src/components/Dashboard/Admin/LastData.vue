@@ -114,7 +114,7 @@
             }
         },
         mounted() {
-            if (this.userClaims['admin']) {
+            if (this.userClaims && this.userClaims['admin']) {
                 this.$store.dispatch('loadLastBackup');
                 this.$store.dispatch('loadLastLog');
                 this.$store.dispatch('loadLastUser');

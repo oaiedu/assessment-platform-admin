@@ -73,7 +73,7 @@
             }
         },
         mounted() {
-            if (this.userClaims['teacher']) {
+            if (this.userClaims && this.userClaims['teacher']) {
                 this.$store.dispatch('loadLastPapers');
             }
         }

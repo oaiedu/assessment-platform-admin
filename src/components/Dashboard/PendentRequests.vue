@@ -4,7 +4,7 @@
             <h2 class="card-title">{{ cardTitle }}</h2>
             <span
                 class="see-all"
-                v-if="userClaims['admin'] && requests && requests.length >= limit"
+                v-if="userClaims && userClaims['admin'] && requests && requests.length >= limit"
                 @click="pushUrl"
             >
                 Ver todas
@@ -38,7 +38,7 @@
                     : this.windowWidth > 960 || (this.windowWidth <= 900 && this.windowWidth > 760) ? 6 : 4;
             },
             requests() {
-                return this.userClaims['appraiser'] ? this.$store.getters.getOtherUserRequests : this.$store.getters.getLastPendentRequests;
+                return this.userClaims && this.userClaims['appraiser'] ? this.$store.getters.getOtherUserRequests : this.$store.getters.getLastPendentRequests;
             },
             getFlexStyle() {
                 if ((this.windowWidth <= 1000 && this.windowWidth > 960) || (this.windowWidth <= 900 && this.windowWidth > 760)) {
@@ -58,7 +58,7 @@
                 return this.$store.getters.userInfo;
             },
             cardTitle() {
-                if (this.userClaims['admin'] || this.userClaims['appraiser']) {
+                if (this.userClaims && (this.userClaims['admin'] || this.userClaims['appraiser'])) {
                     return 'Solicitações pendentes';
                 } else {
                     return 'Questões pendentes';
@@ -71,7 +71,7 @@
             }
         },
         created() {
-            if (this.userClaims['appraiser']) {
+            if (this.userClaims && this.userClaims['appraiser']) {
                 this.$store.dispatch('loadUserRequests', { userId: this.userInfo.id, mode: 'other', limit: this.limit });
             } else {
                 this.$store.dispatch('loadLastPendentRequests', { limit: this.limit });
