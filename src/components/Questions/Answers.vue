@@ -44,7 +44,7 @@
         },
         computed: {
             isMultiColumn() {
-                return typeof(this.answers[0].text) !== 'string';
+                return this.answers && this.answers[0] && typeof(this.answers[0].text) !== 'string';
             }
         }
     }

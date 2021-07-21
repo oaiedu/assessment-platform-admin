@@ -29,7 +29,7 @@
                             <span>Visualizar PDF</span>
                         </v-tooltip>
 
-                        <v-tooltip top v-if='userClaims["admin"]'>
+                        <v-tooltip top v-if='userClaims && userClaims["admin"]'>
                             <template v-slot:activator='{ on, attrs }'>
                                 <v-icon
                                     v-on='on'
@@ -42,7 +42,7 @@
                             <span>Editar</span>
                         </v-tooltip>
 
-                        <v-tooltip top v-if='userClaims["admin"]'>
+                        <v-tooltip top v-if='userClaims && userClaims["admin"]'>
                             <template v-slot:activator='{ on, attrs }'>
                                 <v-icon
                                     v-on='on'
@@ -61,9 +61,9 @@
                             style="padding: 0 !important; font-weight: bold !important;"
                             color='red'
                             text
-                            :disabled="!userClaims['admin']"
+                            :disabled="userClaims && !userClaims['admin']"
                             @click='onRestoreClick(item)' >
-                            {{ userClaims['admin'] ? 'Restaurar' : 'Indisponível' }}
+                            {{ userClaims && userClaims['admin'] ? 'Restaurar' : 'Indisponível' }}
                         </v-btn>
                     </v-row>
 

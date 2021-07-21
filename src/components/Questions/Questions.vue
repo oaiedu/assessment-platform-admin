@@ -14,7 +14,7 @@
         </v-container>
       </v-container>
 
-      <v-container v-if='hasDeleteMarkQuestions && (userClaims["admin"])'>
+      <v-container v-if='hasDeleteMarkQuestions && (userClaims && userClaims["admin"])'>
         <DeleteAlert
             :confirmCondition='deleteConfirmed'
             :itemsCondition='hasTrueMarkStatus'
@@ -49,7 +49,7 @@
         @deleteClick='deleteQuestionSnackBar = true; deleteSelect = $event;'
         @restoreClick='restoreQuestion($event)' />
 
-      <v-tooltip left v-if='userClaims["appraiser"] || userClaims["admin"]' >
+      <v-tooltip left v-if='userClaims && (userClaims["appraiser"] || userClaims["admin"])' >
         <template v-slot:activator="{ on }">
           <v-btn
             v-on="on"
@@ -87,7 +87,7 @@
           :userClaims="userClaims"
           :userInfo="userInfo"
           :isSearching="isSearching"
-          @closeDialogEdit="dialogEditQuestion = false" />
+          @closeDialogEdit="dialogEditQuestion = false; selectedEdit = {}" />
       </v-dialog>
 
       <v-dialog
@@ -223,7 +223,7 @@
                 return this.$store.getters.getDeleteMarkQuestions;
             },
             markedQuestionsByUser() {
-                const isAdmin = this.userClaims['admin'];
+                const isAdmin = this.userClaims && this.userClaims['admin'];
                 const questions = isAdmin
                     ? this.deleteMarkQuestions
                     : this.deleteMarkQuestions.filter(q => q.toDelete.userEmail === this.userInfo.email);
@@ -254,7 +254,7 @@
             },
             pageAmount() {
                 const questionAmount = this.$store.getters.getDataSize.questions.general;
-                return Math.ceil(questionAmount / this.itemsPerPage);
+                return Math.ceil(questionAmount / this.itemsPerPage) || 1;
             },
             getQuestionTests() {
                 const titles = this.questionTests.map(t => "'" + t.title + "'");

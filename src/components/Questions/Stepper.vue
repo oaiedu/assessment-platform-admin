@@ -56,6 +56,7 @@
                 fixed
                 bottom
                 right
+                :loading="loading"
                 @click="onCreateQuestion()" >
                 <v-icon color="white">{{ mdiContentSave }}</v-icon>
             </v-btn>
@@ -223,7 +224,7 @@
                             </v-radio-group>
                           </v-col>
                           <v-col v-for="(answerItem, index) in item.text" :key="index">
-                            <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
+                            <v-text-field v-if="answerItem" outlined v-model="answerItem.answerDescription"></v-text-field>
                           </v-col>
                         </v-row>
                       </v-main>
@@ -367,6 +368,9 @@ export default {
         },
         userInfo() {
             return this.$store.getters.userInfo;
+        },
+        loading() {
+            return this.$store.getters.loading;
         }
     },
     watch: {
@@ -375,12 +379,16 @@ export default {
                 this.answers.forEach(element => {
                     const aux = [];
                     for (let i = 0; i < val; i++) {
-                        const text = element.text[i] && element.text[i].answerDescription
-                            ? element.text[i].answerDescription
-                            : (i === 0 && oldVal === 1 ? element.text : '');
-                        const title = element.text[i] && element.text[i].title
-                            ? element.text[i].title : '';
-                        aux.push({ title: title || this.auxTitle[i] || "", answerDescription: text || "" });
+                        if (element.text || element.text[i]) {
+                            const text = element.text[i] && element.text[i].answerDescription
+                                ? element.text[i].answerDescription
+                                : (i === 0 && oldVal === 1 ? element.text : '');
+                            const title = element.text[i] && element.text[i].title
+                                ? element.text[i].title : '';
+                            aux.push({ title: title || this.auxTitle[i] || "", answerDescription: text || "" });
+                        } else {
+                            aux.push({ title: '', answerDescription: '' });
+                        }
                     }
                     element.text = aux;
                 });
@@ -388,7 +396,7 @@ export default {
                 this.confirmTitle = true;
             } else {
                 this.answers.forEach(element => {
-                    element.text = element.text[0].answerDescription || "";
+                    element.text = element.text && element.text[0] ? element.text[0].answerDescription : "";
                 });
                 this.confirmTitle = false;
             }
@@ -452,7 +460,7 @@ export default {
 
                                 let aux = null;
 
-                                if(this.userClaims['admin']) {
+                                if(this.userClaims && this.userClaims['admin']) {
                                     aux = this.$store.dispatch("createQuestion", { question: questionData });
                                 } else {
                                     aux = this.$store.dispatch('createQuestionRequest', {
@@ -485,7 +493,7 @@ export default {
 
                             let aux = null;
 
-                            if(this.userClaims['admin']) {
+                            if(this.userClaims && this.userClaims['admin']) {
                                     aux = this.$store.dispatch("createQuestion", { question: questionData, page: this.page });
                             } else {
                                 aux = this.$store.dispatch('createQuestionRequest', {

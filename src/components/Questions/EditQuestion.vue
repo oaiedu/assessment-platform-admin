@@ -56,6 +56,7 @@
                 fixed
                 bottom
                 right
+                :loading="loading"
                 @click="onEditQuestion()" >
                 <v-icon color="white">{{ mdiContentSave }}</v-icon>
             </v-btn>
@@ -181,7 +182,7 @@
                             </v-radio-group>
                           </v-col>
                           <v-col v-for="(answerItem, index) in item.text" :key="index">
-                            <v-text-field outlined v-model="answerItem.answerDescription"></v-text-field>
+                            <v-text-field v-if="answerItem" outlined v-model="answerItem.answerDescription"></v-text-field>
                           </v-col>
                         </v-row>
                       </v-main>
@@ -243,7 +244,7 @@ export default {
       imagePreview: '',
       letters: ["A", "B", "C", "D"],
       confirmTitle: false,
-      editedQuestionDescription: null,
+      editedQuestionDescription: '',
       e1: 1,
       radios: null,
       columns: this.number,
@@ -285,12 +286,7 @@ export default {
   },
   computed: {
     hasImages() {
-      if (
-        typeof this.question.image === "undefined" ||
-        this.question.image === ""
-      )
-        return false;
-      else return true;
+      return !!this.question.image;
     },
     formIsValid() {
       return (
@@ -305,11 +301,14 @@ export default {
         // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.editedIq = this.question.iq;
         return this.question.iq;
+    },
+    loading() {
+        return this.$store.getters.loading;
     }
   },
   watch: {
-    editedIq() {
-        this.update();
+    editedIq(value) {
+        if (value) this.update();
     },
     auxTitle(val) {
       if (this.confirmTitle) {
@@ -370,8 +369,8 @@ export default {
       this.editedQuestionDescription = variable;
     },
     onEditQuestion() {
-      if (typeof this.images[0] !== "undefined") {
-        const imageToUpload = { images: this.images[0], id: this.question.id };
+      if (this.images[0]) {
+        const imageToUpload = { image: this.images[0], iq: this.question.iq };
         const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
 
 
@@ -407,21 +406,22 @@ export default {
 
           let aux = null;
 
-          if(this.userClaims['admin']) {
+          if(this.userClaims && this.userClaims['admin']) {
             const sendInfo = {
                 oldData,
                 questionData,
-                user: this.$store.getters.user.id
+                user: this.$store.getters.user.id,
+                isSearching: this.isSearching
             }
 
             aux = this.$store.dispatch("editQuestion", sendInfo);
           } else {
-            const question = {
+            const request = {
                 ...questionData,
                 status: 'Pendente',
                 userId: this.userInfo.id
             }
-            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', question, user: this.userInfo });
+            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', request, user: this.userInfo, isSearching: this.isSearching });
           }
           aux.then(() => {
             this.close();
@@ -457,7 +457,7 @@ export default {
 
         let aux = null;
 
-        if(this.userClaims['admin']) {
+        if(this.userClaims && this.userClaims['admin']) {
             const sendInfo = {
                 oldData,
                 questionData,
@@ -467,12 +467,12 @@ export default {
 
             aux = this.$store.dispatch("editQuestion", sendInfo);
         } else {
-            const question = {
+            const request = {
                 ...questionData,
                 status: 'Pendente',
                 userId: this.userInfo.id
             }
-            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', request: question, user: this.userInfo });
+            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', request, user: this.userInfo, isSearching: this.isSearching });
         }
         aux.then(() => {
           this.close();
@@ -481,7 +481,7 @@ export default {
     },
     setInitialData() {
       this.confirmTitle = false;
-      this.editedQuestionDescription = null;
+      this.editedQuestionDescription = '';
       this.e1 = 1;
       this.radios = null;
       this.columns = this.number;
@@ -505,10 +505,10 @@ export default {
         if(event && event[0] && event[0].type) {
             if(!event[0].type.match(/image.*/)) {
                 this.$store.commit('setError', { message: 'O arquivo inserido NÃO é uma imagem!' });
-                this.images = this.editedImages || [];
+                this.images = [];
             } else if (event[0].size > 2000000) {
                 this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
-                this.images = this.editedImages || [];
+                this.images = [];
             } else {
                 const file = event[0];
                 const reader = new FileReader();

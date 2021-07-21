@@ -10,18 +10,17 @@
             <br />
 
             <br />
-            <vue-markdown :source="questionDesc" />
+            <vue-markdown v-if="questionDesc" :source="questionDesc" />
             <br />
 
             <v-row
                 justify="center"
-                style="margin-top: 20px"
                 v-if="image && image !== ''"
             >
-                <img style="max-height: 250px; max-width: 180px" :src="image" alt='image' />
+                <img style="max-height: 360px; max-width: 480px" :src="image" alt='image' />
             </v-row>
 
-            <Answers :answers='answers' />
+            <Answers :answers='answers' :style="{ marginTop: (image ? 30 : 0) + 'px' }" />
         </v-card-text>
     </v-card>
 </template>
