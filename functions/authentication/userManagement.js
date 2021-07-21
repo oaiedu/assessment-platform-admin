@@ -1,11 +1,12 @@
-const fs = require('fs');
-const { auth, db } = require('../admin');
-const { hash } = require('../.env');
+const fs = require("fs");
+const { auth, db } = require("../admin");
+const { hash } = require("../.env");
 
 exports.checkAuthUser = async (req, res) => {
-    const uid = req.body['uid'];
+    const uid = req.body["uid"];
 
-    await auth.getUser(uid)
+    await auth
+        .getUser(uid)
         .then(user => {
             console.log(user);
             return user;
@@ -15,45 +16,56 @@ exports.checkAuthUser = async (req, res) => {
         });
 
     res.send({ uid });
-}
+};
 
 exports.userDefaultRole = async (req, res) => {
-    const uid = req.headers['uid'];
+    const uid = req.headers["uid"];
 
-    await auth.setCustomUserClaims(uid, { admin: false, appraiser: false, teacher: false, student: true })
-        .catch(error => {
-            console.log(error);
-        });
+    if (uid) {
+        await auth
+            .setCustomUserClaims(uid, {
+                admin: false,
+                appraiser: false,
+                teacher: false,
+                student: true
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
 
-    res.append('Access-Control-Allow-Origin', '*');
-    res.append('Access-Control-Allow-Headers', ['Content-Type', 'uid']);
+    res.append("Access-Control-Allow-Origin", "*");
+    res.append("Access-Control-Allow-Headers", ["Content-Type", "uid"]);
     res.send({ endDate: new Date().toISOString() });
-}
+};
 
 exports.setRole = async (req, res) => {
-    let email = '';
-    let role = '';
-    if(req.body.data) {
-        email = req.body.data['email'];
-        role = req.body.data['role'];
+    let email = "";
+    let role = "";
+    if (req.body.data) {
+        email = req.body.data["email"];
+        role = req.body.data["role"];
     }
 
     let uid = null;
 
-    if(email && role) {
-        await auth.getUserByEmail(email)
+    if (email && role) {
+        await auth
+            .getUserByEmail(email)
             .then(user => {
                 uid = user.uid;
                 customClaims = {
                     student: false,
                     admin: false,
                     appraiser: false,
-                    teacher: false,
-                }
-                auth.setCustomUserClaims(user.uid, { ...customClaims, [role]: true })
-                    .catch(error => {
-                        console.log(error);
-                    });
+                    teacher: false
+                };
+                auth.setCustomUserClaims(user.uid, {
+                    ...customClaims,
+                    [role]: true
+                }).catch(error => {
+                    console.log(error);
+                });
                 return { ...user, customClaims };
             })
             .catch(error => {
@@ -61,22 +73,28 @@ exports.setRole = async (req, res) => {
             });
     }
 
-    res.append('Access-Control-Allow-Origin', '*');
-    res.append('Access-Control-Allow-Headers', 'Content-Type, email, role');
+    res.append("Access-Control-Allow-Origin", "*");
+    res.append("Access-Control-Allow-Headers", "Content-Type, email, role");
     res.send({ uid });
-}
+};
 
 exports.setDefaultRoleToAll = async (req, res) => {
-    await db.collection('users').get()
+    await db
+        .collection("users")
+        .get()
         .then(snapshot => {
             snapshot.forEach(doc => {
-                if(!doc.data().role || doc.data().role === 'student') {
-                    doc.ref.update({ role: 'student' });
+                if (!doc.data().role || doc.data().role === "student") {
+                    doc.ref.update({ role: "student" });
 
-                    auth.setCustomUserClaims(doc.id, { admin: false, appraiser: false, teacher: false, student: true })
-                        .catch(error => {
-                            console.log(error);
-                        });
+                    auth.setCustomUserClaims(doc.id, {
+                        admin: false,
+                        appraiser: false,
+                        teacher: false,
+                        student: true
+                    }).catch(error => {
+                        console.log(error);
+                    });
                 }
             });
 
@@ -86,12 +104,12 @@ exports.setDefaultRoleToAll = async (req, res) => {
             console.log(error);
         });
 
-    res.send('Roles Updated!');
-}
+    res.send("Roles Updated!");
+};
 
 exports.importAuth = async (req, res) => {
-    const folderRootName = 'backups';
-    const timestamp = '2020-11-27T16-43-04.696Z';
+    const folderRootName = "backups";
+    const timestamp = "2020-11-27T16-43-04.696Z";
     const path = `../../${folderRootName}/${timestamp}`;
 
     const jsonPath = `${path}/auth-${timestamp}.json`;
@@ -99,13 +117,15 @@ exports.importAuth = async (req, res) => {
     const json = JSON.parse(file);
 
     await json.forEach(user => {
-        user.passwordHash = Buffer.from(user.passwordHash, 'base64');
-        user.passwordSalt = Buffer.from(user.passwordSalt, 'base64');
+        user.passwordHash = Buffer.from(user.passwordHash, "base64");
+        user.passwordSalt = Buffer.from(user.passwordSalt, "base64");
     });
 
-    await auth.importUsers(json, { hash })
+    await auth
+        .importUsers(json, { hash })
         .then(results => {
-            const error = results.errors.length > 0 ? results.errors[0].error : 'Ok!';
+            const error =
+                results.errors.length > 0 ? results.errors[0].error : "Ok!";
             console.log(error);
             return error;
         })
@@ -113,11 +133,12 @@ exports.importAuth = async (req, res) => {
             console.log(error);
         });
 
-    res.send('Authentication users imported!');
-}
+    res.send("Authentication users imported!");
+};
 
 exports.deleteAuth = async (req, res) => {
-    await auth.listUsers()
+    await auth
+        .listUsers()
         .then(snapshot => {
             snapshot.users.forEach(user => {
                 auth.deleteUser(user.uid);
@@ -126,5 +147,5 @@ exports.deleteAuth = async (req, res) => {
         })
         .catch(console.log);
 
-    res.send('Authentication registers deleted!');
-}
+    res.send("Authentication registers deleted!");
+};
