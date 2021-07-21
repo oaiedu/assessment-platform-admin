@@ -22,7 +22,7 @@
 
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-row justify="end" v-if='!item.toDelete'>
-                        <v-tooltip top v-if='userClaims["admin"]'>
+                        <v-tooltip top v-if='userClaims && userClaims["admin"]'>
                             <template v-slot:activator='{ on, attrs }'>
                                 <v-icon
                                     v-on='on'
@@ -47,7 +47,7 @@
                             <span>Visualizar PDF</span>
                         </v-tooltip>
 
-                        <v-tooltip top v-if='userClaims["admin"]'>
+                        <v-tooltip top v-if='userClaims && userClaims["admin"]'>
                             <template v-slot:activator='{ on, attrs }'>
                                 <v-icon
                                     v-on='on'
@@ -61,7 +61,7 @@
                             <span>Aprovar</span>
                         </v-tooltip>
 
-                        <v-tooltip top v-if='userClaims["appraiser"]'>
+                        <v-tooltip top v-if='userClaims && userClaims["appraiser"]'>
                             <template v-slot:activator='{ on, attrs }'>
                                 <v-icon
                                     v-on='on'
@@ -81,14 +81,14 @@
                                     v-on='on'
                                     v-bind='attrs'
                                     class="ml-3"
-                                    :disabled='userClaims["admin"] ? item.status === "Rejeitado" : item.status === "Aprovado"'
-                                    @click="userClaims['admin']
+                                    :disabled='userClaims && userClaims["admin"] ? item.status === "Rejeitado" : item.status === "Aprovado"'
+                                    @click="userClaims && userClaims['admin']
                                         ? onRejectClick(item)
                                         : onDeleteClick(item)" >
-                                    {{ userClaims['admin'] ? mdiClose : mdiDelete }}
+                                    {{ userClaims && userClaims['admin'] ? mdiClose : mdiDelete }}
                                 </v-icon>
                             </template>
-                            <span>{{ userClaims['admin'] ? 'Rejeitar' : 'Excluir' }}</span>
+                            <span>{{ userClaims && userClaims['admin'] ? 'Rejeitar' : 'Excluir' }}</span>
                         </v-tooltip>
                     </v-row>
 
@@ -97,9 +97,9 @@
                             style="padding: 0 !important; font-weight: bold !important;"
                             color='red'
                             text
-                            :disabled="!userClaims['appraiser']"
+                            :disabled="userClaims && !userClaims['appraiser']"
                             @click='onRestoreClick(item)' >
-                            {{ userClaims['appraiser'] ? 'Restaurar' : 'Indisponível' }}
+                            {{ userClaims && userClaims['appraiser'] ? 'Restaurar' : 'Indisponível' }}
                         </v-btn>
                     </v-row>
 
@@ -129,7 +129,7 @@
         ],
         computed: {
             headers() {
-                return this.userClaims['admin']
+                return this.userClaims && this.userClaims['admin']
                     ? [
                         { text: 'IQ', sortable: true, value: 'iq', align: 'left' },
                         { text: 'Usuário', value: 'user.name', sortable: true, align: 'center' },

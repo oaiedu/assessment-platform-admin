@@ -14,7 +14,7 @@
                 </v-container>
             </v-container>
 
-            <v-container v-if='hasApprovedRequests && userClaims["appraiser"]'>
+            <v-container v-if='hasApprovedRequests && userClaims && userClaims["appraiser"]'>
                 <v-alert
                     text
                     prominent
@@ -25,7 +25,7 @@
                 </v-alert>
             </v-container>
 
-            <v-container v-if='(hasDeleteMarkRequests && userClaims["appraiser"] && (markedRequestsByUser ||
+            <v-container v-if='(hasDeleteMarkRequests && userClaims && userClaims["appraiser"] && (markedRequestsByUser ||
                                 deleteMarkRequests.filter(r => r.toDelete.userId === userInfo.id)))'>
                 <DeleteAlert
                     :confirmCondition='deleteConfirmed'
@@ -79,6 +79,7 @@
                     :question="editItem"
                     :userClaims='userClaims'
                     :userInfo='userInfo'
+                    :isSearching="isSearching"
                     @closeDialogEdit="dialogEditRequest = false" >
                 </EditQuestion>
             </v-dialog>
@@ -153,7 +154,6 @@
         data() {
             return {
                 mdiAlert,
-                deleteApproved: false,
                 page: 1,
                 pageCount: 15,
                 dialogPDF: false,
@@ -171,7 +171,7 @@
         },
         computed: {
             headers() {
-                return this.userClaims['admin']
+                return this.userClaims && this.userClaims['admin']
                     ? [
                         { text: 'IQ', sortable: true, value: 'iq', align: 'left' },
                         { text: 'Usuário', value: 'user.name', sortable: true, align: 'center' },
@@ -234,8 +234,8 @@
             },
             pageAmount() {
                 const requestAmount = this.$store.getters.getDataSize['question-requests'];
-                const amount = this.userClaims['admin'] ? requestAmount.general : requestAmount.users[this.userInfo.email];
-                return Math.ceil(amount / this.itemsPerPage);
+                const amount = this.userClaims && this.userClaims['admin'] ? requestAmount.general : requestAmount.users[this.userInfo.id];
+                return Math.ceil(amount / this.itemsPerPage) || 1;
             },
             getQuestionTests() {
                 const titles = this.questionTests.map(t => "'" + t.title + "'");
@@ -286,16 +286,16 @@
                 }
                 this.$store.dispatch('getQuestionByIQ', request.iq)
                     .then(fQuestion => {
-                        if(fQuestion && fQuestion.toDelete && !fQuestion.toDelete.status) {
-                            this.$store.dispatch('restoreMarkedQuestion', { iq: fQuestion.iq, isSearching: false, isRequest: true })
+                        if(fQuestion && fQuestion.toDelete) {
+                            this.$store.dispatch('restoreMarkedQuestion', { iq: fQuestion.iq, isSearching: false, isRequest: true, data: toCreate })
                                 .then(() => {
-                                    this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: request.user });
+                                    this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: request.user, isSearching: this.isSearching  });
                                     this.$store.commit('setSuccess', 'Solicitação aprovada com sucesso!');
                                 })
                         } else {
                             this.$store.dispatch('createQuestion', { question: toCreate, isRequest: true })
                                 .then(async () => {
-                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: request.user });
+                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Aprovado', request, user: request.user, isSearching: this.isSearching  });
                                     this.$store.commit('setSuccess', 'Solicitação aprovada com sucesso!');
                                 });
                         }
@@ -316,7 +316,7 @@
                         if(result.length === 0) {
                             this.$store.dispatch('changeDeleteStatusQuestions', { iq: request.iq, isSearching: false })
                                 .then(async () => {
-                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', request, user: request.user });
+                                    await this.$store.dispatch('updateQuestionRequest', { mode: 'sttUpdate', status: 'Rejeitado', request, user: request.user, isSearching: this.isSearching });
                                     this.$store.commit('setSuccess', 'Solicitação rejeitada com sucesso!');
                                 });
                         } else {
@@ -398,17 +398,11 @@
                     page: 1,
                     itemsPerPage: this.itemsPerPage,
                     mode: 'first'
-                })
-                .then(() => {
-                    if(this.userClaims['appraiser'] && this.hasApprovedRequests) {
-                        this.deleteApproved = true;
-                    } else {
-                        this.deleteApproved = false;
-                    }
                 });
         },
         beforeDestroy() {
-            if(this.deleteApproved) {
+            if(this.userClaims && this.userClaims['appraiser'] && this.hasApprovedRequests) {
+                console.log('here');
                 this.$store.dispatch('deleteApprovedRequests', { userInfo: this.userInfo });
             }
 
