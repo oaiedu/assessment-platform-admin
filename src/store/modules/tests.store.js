@@ -232,10 +232,10 @@ const mutations = {
         const tests = state.tests["p" + page] || [];
         const amount = data.amount;
         const oneBefore = state.tests["p" + (page - 1)] || [];
-        if (tests.length > 0 || oneBefore.length === 8 || amount === 0) {
+        if (tests.length > 0 || oneBefore.length === 10 || amount === 0) {
             tests.push(data.data);
             state.tests["p" + page] = [...tests];
-            if (amount === 0) {
+            if (amount === 0 || state.currentTestsPage.length < 10) {
                 state.currentTestsPage.push(data.data);
             }
         }
@@ -500,11 +500,13 @@ const actions = {
                 });
         } else {
             const pageContent = state.tests["p" + page];
-            const first = pageContent[0].id;
-            const last = pageContent[pageContent.length - 1].id;
 
-            commit("setCurrentTestsPage", pageContent);
-            commit("setLastTestDocument", [first, last]);
+            if (pageContent && pageContent[0]) {
+                const first = pageContent[0].id;
+                const last = pageContent[pageContent.length - 1].id;
+                commit("setCurrentTestsPage", pageContent);
+                commit("setLastTestDocument", [first, last]);
+            }
             commit("setLoading", false);
         }
     },
@@ -563,8 +565,9 @@ const actions = {
                     data.push(doc.data());
                 });
             })
-            .then(() => {
-                db.collection("tests")
+            .then(async () => {
+                await db
+                    .collection("tests")
                     .orderBy("title")
                     .where("title", ">=", payload.toUpperCase())
                     .where("title", "<=", payload.toUpperCase() + "~")
@@ -578,8 +581,9 @@ const actions = {
                         });
                     });
             })
-            .then(() => {
-                db.collection("tests")
+            .then(async () => {
+                await db
+                    .collection("tests")
                     .orderBy("title")
                     .where("title", ">=", payload.toLowerCase())
                     .where("title", "<=", payload.toLowerCase() + "~")
@@ -603,8 +607,7 @@ const actions = {
                 });
 
                 await Promise.all(promises);
-            })
-            .then(() => {
+
                 commit("setFilteredTests", data);
                 commit("setLoading", false);
             })
@@ -995,7 +998,7 @@ const actions = {
         };
 
         const testAmount = this.getters.getDataSize.tests;
-        const pageAmount = Math.ceil(testAmount / 8);
+        const pageAmount = Math.ceil(testAmount / 10);
         const amount = testAmount % 10;
 
         db.collection("tests")
@@ -1047,10 +1050,14 @@ const actions = {
      * Updates a test based on it's id.
      *
      * @param {Store} store - The vuex store.
-     * @param {Test} payload - The test to be updated.
+     * @param {Object} payload - The action payload.
+     * @param {Test} payload.testData - The test to be updated.
+     * @param {boolean} payload.isSearching - Whether the filtered tests is being used or not.
      */
     updateTest({ commit, dispatch }, payload) {
-        const test = { ...payload, updated: getNowISOString() };
+        const { testData, isSearching } = payload;
+
+        const test = { ...testData, updated: getNowISOString() };
         db.collection("tests")
             .where("id", "==", test.id)
             .get()
@@ -1058,12 +1065,14 @@ const actions = {
                 snapshot.docs[0].ref.update(test);
 
                 const user = await dispatch("getUserById", {
-                    id: snapshot.docs[0].userId
+                    id: test.userId
                 });
                 test["user"] = user;
 
                 commit("updateTest", test);
                 commit("updateCurrentTestsPage", test);
+                if (isSearching) commit("updateFilteredTest", test);
+
                 commit("setLoading", false);
                 commit("setSuccess", "Prova editada com sucesso!");
             })

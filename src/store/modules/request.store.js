@@ -1,8 +1,8 @@
-import { Store } from 'vuex';
+import { Store } from "vuex";
 
-import { db, storage } from '../../main';
-import { createErrorLog, showErrorMessage } from '../../utils/errors';
-import { getNowISOString } from '../../utils/date';
+import { db, storage } from "../../main";
+import { createErrorLog, showErrorMessage } from "../../utils/errors";
+import { getNowISOString } from "../../utils/date";
 
 /**
  * @typedef {import('./questions.store.js').DeleteStatus} DeleteStatus
@@ -166,7 +166,7 @@ const mutations = {
     updateDeleteMarkRequest(state, data) {
         const requests = [...state.deleteMarkRequests];
         requests.forEach((item, index) => {
-            if(item.iq === data.iq) {
+            if (item.iq === data.iq) {
                 requests[index] = data;
             }
         });
@@ -181,10 +181,10 @@ const mutations = {
     removeDeleteMarkRequest(state, data) {
         const requests = [...state.deleteMarkRequests];
         requests.forEach((item, index) => {
-            if(item.iq === data) {
+            if (item.iq === data) {
                 state.deleteMarkRequests.splice(index, 1);
             }
-        })
+        });
     },
     /**
      * Sets the array of requests marked to be deleted.
@@ -205,11 +205,14 @@ const mutations = {
      */
     setDeleteMarkRequest(state, data) {
         const requests = state.requests;
-        for(let key in requests) {
-            if(requests[key]) {
+        for (let key in requests) {
+            if (requests[key]) {
                 requests[key].forEach((item, index) => {
-                    if(item.iq === data.iq) {
-                        state.requests[key][index] = { ...item, toDelete: data.toDelete };
+                    if (item.iq === data.iq) {
+                        state.requests[key][index] = {
+                            ...item,
+                            toDelete: data.toDelete
+                        };
                     }
                 });
             }
@@ -226,7 +229,7 @@ const mutations = {
     setDeleteMarkFilteredRequest(state, data) {
         const requests = [...state.filteredRequests];
         requests.forEach((item, index) => {
-            if(item.iq === data.iq) {
+            if (item.iq === data.iq) {
                 requests[index] = { ...item, toDelete: data.toDelete };
             }
         });
@@ -243,14 +246,17 @@ const mutations = {
      */
     addRequest(state, data) {
         const page = data.page;
-        const requests = state.requests['p' + page] || [];
+        const requests = state.requests["p" + page] || [];
         const amount = data.amount;
-        const oneBefore = state.requests['p' + (page - 1)] || [];
-        if(requests.length > 0 || oneBefore.length === 8 || amount === 0) {
+        const oneBefore = state.requests["p" + (page - 1)] || [];
+        if (requests.length > 0 || oneBefore.length === 8 || amount === 0) {
             requests.push(data.data);
-            state.requests['p' + page] = [...requests];
-            if(amount === 0) {
-                state.currentRequestsPage.push(data.data);
+            state.requests["p" + page] = [...requests];
+            if (amount === 0 || state.currentRequestsPage.length < 8) {
+                state.currentRequestsPage = [
+                    ...state.currentRequestsPage,
+                    data.data
+                ];
             }
         }
     },
@@ -261,11 +267,11 @@ const mutations = {
      * @param {Request} data - The request to be updated.
      */
     updateRequest(state, data) {
-        const requests = {...state.requests};
-        for(let key in requests) {
-            if(requests[key]) {
+        const requests = { ...state.requests };
+        for (let key in requests) {
+            if (requests[key]) {
                 requests[key].forEach((item, index) => {
-                    if(item.iq === data.iq) {
+                    if (item.iq === data.iq) {
                         requests[key][index] = { ...data, user: item.user };
                     }
                 });
@@ -282,7 +288,7 @@ const mutations = {
     updateFilteredRequest(state, data) {
         const requests = [...state.filteredRequests];
         requests.forEach((item, index) => {
-            if(item.iq === data.iq) {
+            if (item.iq === data.iq) {
                 requests[index] = data;
             }
         });
@@ -297,11 +303,11 @@ const mutations = {
     updateCurrentRequestsPage(state, data) {
         const requests = [...state.currentRequestsPage];
         requests.forEach((item, index) => {
-            if(item.iq === data.iq) {
+            if (item.iq === data.iq) {
                 requests[index] = data;
             }
         });
-        state.currentRequestsPage = [...requests];
+        state.currentRequestsPage = requests;
     },
     /**
      * Removes a request from the requests object.
@@ -311,10 +317,10 @@ const mutations = {
      */
     removeRequest(state, data) {
         const requests = state.requests;
-        for(let key in requests) {
-            if(requests[key]) {
+        for (let key in requests) {
+            if (requests[key]) {
                 requests[key].forEach((item, index) => {
-                    if(item.iq === data) {
+                    if (item.iq === data) {
                         state.requests[key].splice(index, 1);
                     }
                 });
@@ -330,7 +336,7 @@ const mutations = {
     removeFilteredRequest(state, data) {
         const request = state.filteredRequests;
         request.forEach((item, index) => {
-            if(item.iq === data) {
+            if (item.iq === data) {
                 state.filteredRequests.splice(index, 1);
             }
         });
@@ -355,7 +361,7 @@ const mutations = {
             state[key] = newState[key];
         });
     }
-}
+};
 
 const actions = {
     /**
@@ -364,11 +370,12 @@ const actions = {
      * @param {Store} store - The vuex store.
      * @param {Object} payload - The action payload.
      * @param {RequestCreation} payload.request - The request to be created.
-     * @param {string} payload.email - The current user e-mail.
      * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
      */
     createQuestionRequest({ commit }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
+
+        const { user } = payload;
 
         const createdDate = getNowISOString();
 
@@ -377,36 +384,50 @@ const actions = {
             created: createdDate,
             updated: createdDate,
             edited: []
-        }
+        };
 
-        const requestAmount = this.getters.getDataSize['question-requests'].users[payload.email];
+        const requestAmount = this.getters.getDataSize["question-requests"]
+            .users[user.id];
         const pageAmount = Math.ceil(requestAmount / 8);
         const amount = requestAmount % 8;
 
-        db.collection('question-requests').add(request)
+        db.collection("question-requests")
+            .add(request)
             .then(() => {
-                commit('addRequest', { page: (amount === 0 ? pageAmount + 1 : pageAmount), data: { ...request, user: payload.user } });
-                commit('setLoading', false);
-                commit('setSuccess', 'Solicitação criada com sucesso!');
+                commit("addRequest", {
+                    page: amount === 0 ? pageAmount + 1 : pageAmount,
+                    data: { ...request, user: user },
+                    amount: requestAmount
+                });
+                commit("setLoading", false);
+                commit("setSuccess", "Solicitação criada com sucesso!");
 
-                db.collection('data-size').get()
+                db.collection("data-size")
+                    .get()
                     .then(snap => {
                         const document = snap.docs[0];
-                        const general = document.data()['question-requests'].general;
-                        const userId = request.id;
-                        const subSize = document.data()['question-requests'].users[userId];
+                        const general = document.data()["question-requests"]
+                            .general;
+                        const subSize =
+                            document.data()["question-requests"].users[
+                                user.id
+                            ] || 0;
 
                         const questionRequests = {
                             general: general + 1,
                             users: {
-                                ...document.data()['question-requests'].users,
-                                [userId]: subSize + 1
+                                ...document.data()["question-requests"].users,
+                                [user.id]: subSize + 1
                             }
-                        }
+                        };
 
-                        document.ref.update({ ['question-requests']: questionRequests })
+                        document.ref
+                            .update({ ["question-requests"]: questionRequests })
                             .then(() => {
-                                commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
+                                commit("addRemoveSize", {
+                                    key: "question-requests",
+                                    data: questionRequests
+                                });
                             })
                             .catch(error => {
                                 console.error(error);
@@ -417,10 +438,17 @@ const actions = {
                     });
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('creation', 'Solicitação', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request DB Insert', error.message, { payload, requestAmount });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "creation",
+                    "Solicitação",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request DB Insert", error.message, {
+                    payload,
+                    requestAmount
+                });
             });
     },
     /**
@@ -429,41 +457,72 @@ const actions = {
      * @param {Store} store - The vuex store.
      * @param {Object} payload - The action payload.
      * @param {Request} payload.request - The request to be updated.
-     * @param {RequestStatus} payload.status - The request new status.
+     * @param {RequestStatus|undefined} payload.status - The request new status.
      * @param {"reqUpdate"|"sttUpdate"} payload.mode - If reqUpdate, update all the request data. Otherwise, update only it's status.
      * @param {import('./user.store.js').UserInfo} payload.user - The request to be updated.
      */
     updateQuestionRequest({ commit }, payload) {
-        commit('setLoading', true);
-        const { mode, request, user } = payload;
+        commit("setLoading", true);
+        const { mode, request, user, isSearching } = payload;
 
-        const toUpdate = { ...request, status: payload.status, updated: getNowISOString() };
+        const toUpdate = {
+            ...request,
+            updated: getNowISOString()
+        };
 
-        db.collection('question-requests').where('iq', '==', request.iq).get()
+        db.collection("question-requests")
+            .where("iq", "==", request.iq)
+            .get()
             .then(snapshot => {
-                if(mode === 'sttUpdate') {
-                    snapshot.docs[0].ref.update({ status: payload.status, updated: getNowISOString() })
+                if (mode === "sttUpdate") {
+                    snapshot.docs[0].ref
+                        .update({
+                            status: payload.status,
+                            updated: toUpdate.updated
+                        })
                         .then(() => {
-                            request.status = payload.status;
-                            commit('updateRequest', { ...toUpdate, user});
-                            commit('updateCurrentRequestsPage', { ...toUpdate, user});
-                            commit('setLoading', false);
+                            toUpdate.status = payload.status;
+                            commit("updateRequest", { ...toUpdate, user });
+                            commit("updateCurrentRequestsPage", {
+                                ...toUpdate,
+                                user
+                            });
+                            if (isSearching)
+                                commit("updateFilteredRequest", {
+                                    ...toUpdate,
+                                    user
+                                });
+                            commit("setLoading", false);
                         });
                 } else {
-                    snapshot.docs[0].ref.update(toUpdate)
-                        .then(() => {
-                            commit('updateRequest', { ...toUpdate, user });
-                            commit('updateCurrentRequestsPage', { ...toUpdate, user });
-                            commit('setLoading', false);
-                            commit('setSuccess', 'Solicitação editada com sucesso!');
+                    snapshot.docs[0].ref.update(toUpdate).then(() => {
+                        commit("updateRequest", { ...toUpdate, user });
+                        commit("updateCurrentRequestsPage", {
+                            ...toUpdate,
+                            user
                         });
+                        if (isSearching)
+                            commit("updateFilteredRequest", {
+                                ...toUpdate,
+                                user
+                            });
+                        commit("setLoading", false);
+                        commit(
+                            "setSuccess",
+                            "Solicitação editada com sucesso!"
+                        );
+                    });
                 }
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('edition', 'Solicitação', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request DB Update', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "edition",
+                    "Solicitação",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request DB Update", error.message, { payload });
             });
     },
     /**
@@ -478,38 +537,51 @@ const actions = {
      * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
      */
     loadRequestPage({ commit, dispatch, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { claims, page, itemsPerPage, type, userInfo } = payload;
         const data = [];
         const pages = Object.keys(state.requests);
 
-        if(!pages.includes('p' + page)) {
+        if (!pages.includes("p" + page)) {
             let request = null;
             let ref = null;
 
-            if(claims['admin']) {
-                ref = db.collection('question-requests').orderBy('iq');
+            if (claims && claims["admin"]) {
+                ref = db.collection("question-requests").orderBy("iq");
             } else {
-                ref = db.collection('question-requests').orderBy('iq').where('userId', '==', userInfo.id);
+                ref = db
+                    .collection("question-requests")
+                    .orderBy("iq")
+                    .where("userId", "==", userInfo.id);
             }
 
-            if(type === 'next') {
-                request = ref.startAfter(state.lastRequestDocument[1]).limit(itemsPerPage).get();
+            if (type === "next") {
+                request = ref
+                    .startAfter(state.lastRequestDocument[1])
+                    .limit(itemsPerPage)
+                    .get();
             } else {
-                request = ref.endBefore(state.lastRequestDocument[0]).limitToLast(itemsPerPage).get();
+                request = ref
+                    .endBefore(state.lastRequestDocument[0])
+                    .limitToLast(itemsPerPage)
+                    .get();
             }
 
             let first = null,
                 last = null;
 
-            request.then(async snapshot => {
+            request
+                .then(async snapshot => {
                     if (snapshot.docs.length > 0) {
                         first = snapshot.docs[0].data().iq;
-                        last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+                        last = snapshot.docs[snapshot.docs.length - 1].data()
+                            .iq;
 
                         const promises = snapshot.docs.map(async doc => {
-                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            const userData = await dispatch("getUserById", {
+                                id: doc.data().userId
+                            });
                             data.push({ ...doc.data(), user: userData });
                             return userData;
                         });
@@ -518,25 +590,32 @@ const actions = {
                     }
                 })
                 .then(() => {
-                    commit('setCurrentRequestsPage', data);
-                    commit('setRequestPage', { page: 'p' + page, data });
-                    commit('setLastRequestDocument', [first, last]);
-                    commit('setLoading', false);
+                    commit("setCurrentRequestsPage", data);
+                    commit("setRequestPage", { page: "p" + page, data });
+                    commit("setLastRequestDocument", [first, last]);
+                    commit("setLoading", false);
                 })
                 .catch(error => {
-                    commit('setLoading', false);
-                    const errorModel = showErrorMessage('load', 'Solicitações', error.message);
-                    commit('setError', { message: errorModel });
-                    createErrorLog('Request Page Load', error.message, { payload, data });
+                    commit("setLoading", false);
+                    const errorModel = showErrorMessage(
+                        "load",
+                        "Solicitações",
+                        error.message
+                    );
+                    commit("setError", { message: errorModel });
+                    createErrorLog("Request Page Load", error.message, {
+                        payload,
+                        data
+                    });
                 });
         } else {
-            const pageContent = state.request['p' + page];
+            const pageContent = state.request["p" + page];
             const first = pageContent[0].iq;
             const last = pageContent[pageContent.length - 1].iq;
 
-            commit('setCurrentRequestsPage', pageContent);
-            commit('setLastRequestDocument', [first, last]);
-            commit('setLoading', false);
+            commit("setCurrentRequestsPage", pageContent);
+            commit("setLastRequestDocument", [first, last]);
+            commit("setLoading", false);
         }
     },
     /**
@@ -551,26 +630,30 @@ const actions = {
      * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
      */
     loadFOLRequestPage({ commit, dispatch, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { claims, page, itemsPerPage, mode, userInfo } = payload;
         const data = [];
         const pages = Object.keys(state.requests);
 
-        const requestAmount = this.getters.getDataSize['question-requests'].users[userInfo.id];
+        const requestAmount = this.getters.getDataSize["question-requests"]
+            .users[userInfo.id];
         const amount = requestAmount % 8;
 
-        if(!pages.includes('p' + page)) {
+        if (!pages.includes("p" + page)) {
             let request = null;
             let ref = null;
 
-            if(claims['admin']) {
-                ref = db.collection('question-requests').orderBy('iq');
+            if (claims && claims["admin"]) {
+                ref = db.collection("question-requests").orderBy("iq");
             } else {
-                ref = db.collection('question-requests').orderBy('iq').where('userId', '==', userInfo.id);
+                ref = db
+                    .collection("question-requests")
+                    .orderBy("iq")
+                    .where("userId", "==", userInfo.id);
             }
 
-            if(mode === 'first') {
+            if (mode === "first") {
                 request = ref.limit(itemsPerPage).get();
             } else {
                 request = ref.limitToLast(amount || 8).get();
@@ -579,39 +662,60 @@ const actions = {
             let first = null,
                 last = null;
 
-            request.then(async snapshot => {
-                if(snapshot.docs.length > 0) {
-                        first = snapshot.docs.length > 0 ? snapshot.docs[0].data().iq : '';
-                        last = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1].data().iq : '';
+            request
+                .then(async snapshot => {
+                    if (snapshot.docs.length > 0) {
+                        first =
+                            snapshot.docs.length > 0
+                                ? snapshot.docs[0].data().iq
+                                : "";
+                        last =
+                            snapshot.docs.length > 0
+                                ? snapshot.docs[snapshot.docs.length - 1].data()
+                                      .iq
+                                : "";
 
                         const promises = snapshot.docs.map(async doc => {
-                            const userData = await dispatch('getUserById', { id: doc.data().userId });
+                            const userData = await dispatch("getUserById", {
+                                id: doc.data().userId
+                            });
                             data.push({ ...doc.data(), user: userData });
                             return userData;
                         });
 
                         await Promise.all(promises);
 
-                        commit('setCurrentRequestsPage', data);
-                        commit('setRequestPage', { page: 'p' + page, data });
-                        commit('setLastRequestDocument', [first, last]);
+                        commit("setCurrentRequestsPage", data);
+                        commit("setRequestPage", { page: "p" + page, data });
+                        commit("setLastRequestDocument", [first, last]);
                     }
-                    commit('setLoading', false);
+                    commit("setLoading", false);
                 })
                 .catch(error => {
-                    commit('setLoading', false);
-                    const errorModel = showErrorMessage('load', 'Solicitações', error.message);
-                    commit('setError', { message: errorModel });
-                    createErrorLog('Request FOL Page Load', error.message, { payload, data, requestAmount });
+                    commit("setLoading", false);
+                    const errorModel = showErrorMessage(
+                        "load",
+                        "Solicitações",
+                        error.message
+                    );
+                    commit("setError", { message: errorModel });
+                    createErrorLog("Request FOL Page Load", error.message, {
+                        payload,
+                        data,
+                        requestAmount
+                    });
                 });
         } else {
-            const pageContent = state.requests['p' + page];
-            const first = pageContent[0].iq;
-            const last = pageContent[pageContent.length - 1].iq;
+            const pageContent = state.requests["p" + page];
 
-            commit('setCurrentRequestsPage', pageContent);
-            commit('setLastRequestDocument', [first, last]);
-            commit('setLoading', false);
+            if (pageContent && pageContent[0]) {
+                const first = pageContent[0].iq;
+                const last = pageContent[pageContent.length - 1].iq;
+                commit("setCurrentRequestsPage", pageContent);
+                commit("setLastRequestDocument", [first, last]);
+            }
+
+            commit("setLoading", false);
         }
     },
     /**
@@ -624,23 +728,27 @@ const actions = {
      * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
      */
     searchRequests({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { claims, key, userInfo } = payload;
         const data = [];
 
-        let req = db.collection('question-requests').orderBy('iq')
-            .where('iq', '>=', key.toUpperCase())
-            .where('iq', '<=', key.toUpperCase() + '~');
+        let req = db
+            .collection("question-requests")
+            .orderBy("iq")
+            .where("iq", ">=", key.toUpperCase())
+            .where("iq", "<=", key.toUpperCase() + "~");
 
-        if(!claims['admin']) {
-            req = req.where('userId', '==', userInfo.id);
+        if (claims && !claims["admin"]) {
+            req = req.where("userId", "==", userInfo.id);
         }
 
         req.get()
             .then(async snapshot => {
                 const promises = snapshot.docs.map(async doc => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data.push({ ...doc.data(), user: userData });
                     return userData;
                 });
@@ -648,14 +756,21 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setFilteredRequests', data);
-                commit('setLoading', false);
+                commit("setFilteredRequests", data);
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Solicitações', 'Searching error - ' + error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request Searching', error.message, { payload, data });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Solicitações",
+                    "Searching error - " + error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request Searching", error.message, {
+                    payload,
+                    data
+                });
             });
     },
     /**
@@ -666,10 +781,14 @@ const actions = {
     checkDeleteMarkRequests({ commit, dispatch }) {
         const data = [];
 
-        db.collection('question-requests').where('toDelete.status', '==', true).get()
+        db.collection("question-requests")
+            .where("toDelete.status", "==", true)
+            .get()
             .then(async snapshot => {
                 const promises = snapshot.docs.map(async doc => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data.push({ ...doc.data(), user: userData });
                     return userData;
                 });
@@ -677,12 +796,16 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setDeleteMarkRequests', data);
+                commit("setDeleteMarkRequests", data);
             })
             .catch(error => {
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request Mark Check', error.message, { data });
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request Mark Check", error.message, { data });
             });
     },
     /**
@@ -695,38 +818,60 @@ const actions = {
      * @param {string} payload.userId - The current user id.
      */
     deleteMarkRequest({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { iq, isSearching, userId } = payload;
 
-        db.collection('question-requests').where('iq', '==', iq).get()
+        db.collection("question-requests")
+            .where("iq", "==", iq)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
 
                 const toDelete = {
                     status: true,
                     userId
-                }
+                };
 
                 doc.ref.update({ toDelete });
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch("getUserById", {
+                    id: doc.data().userId
+                });
 
-                commit('setDeleteMarkRequest', { iq, toDelete, user });
+                commit("setDeleteMarkRequest", { iq, toDelete, user });
 
-                if(isSearching) {
-                    commit('setDeleteMarkFilteredRequest', { iq, toDelete, user });
+                if (isSearching) {
+                    commit("setDeleteMarkFilteredRequest", {
+                        iq,
+                        toDelete,
+                        user
+                    });
                 }
 
-                commit('updateCurrentRequestsPage', { ...doc.data(), toDelete, user });
-                commit('addDeleteMarkRequest', { ...doc.data(), toDelete, user });
-                commit('setLoading', false);
+                commit("updateCurrentRequestsPage", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                commit("addDeleteMarkRequest", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request Delete Mark', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request Delete Mark", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -738,12 +883,14 @@ const actions = {
      * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
      */
     restoreMarkedRequest({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { iq, isSearching } = payload;
         let docData = null;
 
-        db.collection('question-requests').where('iq', '==', iq).get()
+        db.collection("question-requests")
+            .where("iq", "==", iq)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const data = doc.data();
@@ -765,25 +912,34 @@ const actions = {
                     edited: data.edited || []
                 };
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch("getUserById", {
+                    id: doc.data().userId
+                });
 
                 doc.ref.set(request);
-                commit('updateRequest', { ...request, user });
+                commit("updateRequest", { ...request, user });
 
-                if(isSearching) {
-                    commit('updateFilteredRequest', { ...request, user });
+                if (isSearching) {
+                    commit("updateFilteredRequest", { ...request, user });
                 }
 
-                commit('removeDeleteMarkRequest', iq);
-                commit('updateCurrentRequestsPage', { ...request, user });
-                commit('setLoading', false);
-                commit('setSuccess', 'Solicitação restaurada com sucesso!');
+                commit("removeDeleteMarkRequest", iq);
+                commit("updateCurrentRequestsPage", { ...request, user });
+                commit("setLoading", false);
+                commit("setSuccess", "Solicitação restaurada com sucesso!");
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request Restore', error.message, { payload, docData });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request Restore", error.message, {
+                    payload,
+                    docData
+                });
             });
     },
     /**
@@ -795,13 +951,15 @@ const actions = {
      * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
      */
     restoreAllMarkedRequests({ commit, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { isSearching, user } = payload;
         let docData = null;
 
-        db.collection('question-requests').where('toDelete.status', '==', true)
-            .where('toDelete.userId', '==', user.id).get()
+        db.collection("question-requests")
+            .where("toDelete.status", "==", true)
+            .where("toDelete.userId", "==", user.id)
+            .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -824,20 +982,33 @@ const actions = {
                     };
 
                     doc.ref.set(request);
-                    const falseMarkedRequests = state.deleteMarkRequests.filter(q => !q.toDelete.status);
-                    commit('setDeleteMarkRequests', falseMarkedRequests);
-                    commit('updateRequest', { ...request, user });
-                    commit('updateCurrentRequestsPage', { ...request, user });
-                    if(isSearching) commit('updateFilteredRequest', { ...request, user });
-                    commit('setSuccess', 'Solicitações restauradas com sucesso!');
+                    const falseMarkedRequests = state.deleteMarkRequests.filter(
+                        q => !q.toDelete.status
+                    );
+                    commit("setDeleteMarkRequests", falseMarkedRequests);
+                    commit("updateRequest", { ...request, user });
+                    commit("updateCurrentRequestsPage", { ...request, user });
+                    if (isSearching)
+                        commit("updateFilteredRequest", { ...request, user });
+                    commit(
+                        "setSuccess",
+                        "Solicitações restauradas com sucesso!"
+                    );
                 });
             })
-            .then(() => commit('setLoading', false))
+            .then(() => commit("setLoading", false))
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request Restore All', error.message, { payload, docData });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request Restore All", error.message, {
+                    payload,
+                    docData
+                });
             });
     },
     /**
@@ -849,32 +1020,55 @@ const actions = {
      * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
      */
     changeDeleteStatusRequests({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
         const { iq, isSearching } = payload;
 
-        db.collection('question-requests').where('iq', '==', iq).get()
+        db.collection("question-requests")
+            .where("iq", "==", iq)
+            .get()
             .then(async snapshot => {
                 const doc = snapshot.docs[0];
                 const toDelete = {
                     status: false
-                }
+                };
 
                 doc.ref.update({ ...doc.data(), toDelete: { status: false } });
 
-                const user = await dispatch('getUserById', { id: doc.data().userId });
+                const user = await dispatch("getUserById", {
+                    id: doc.data().userId
+                });
 
-                commit('updateCurrentRequestsPage', { ...doc.data(), toDelete, user });
-                commit('updateRequest', { ...doc.data(), toDelete, user });
-                commit('updateDeleteMarkRequest', { ...doc.data(), toDelete, user });
-                if(isSearching) commit('updateFilteredRequest', { ...doc.data(), toDelete, user });
+                commit("updateCurrentRequestsPage", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                commit("updateRequest", { ...doc.data(), toDelete, user });
+                commit("updateDeleteMarkRequest", {
+                    ...doc.data(),
+                    toDelete,
+                    user
+                });
+                if (isSearching)
+                    commit("updateFilteredRequest", {
+                        ...doc.data(),
+                        toDelete,
+                        user
+                    });
 
-                commit('setLoading', false);
-                commit('setSuccess', 'Solicitação excluída com sucesso!');
+                commit("setLoading", false);
+                commit("setSuccess", "Solicitação excluída com sucesso!");
             })
             .catch(error => {
-                const errorModel = showErrorMessage('exclusion', 'Solicitação', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request Confirm Delete', error.message, { payload });
+                const errorModel = showErrorMessage(
+                    "exclusion",
+                    "Solicitação",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request Confirm Delete", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -885,43 +1079,57 @@ const actions = {
     deleteRequests({ commit }) {
         const data = [];
 
-        db.collection("question-requests").where('toDelete.status', '==', false).get()
+        db.collection("question-requests")
+            .where("toDelete.status", "==", false)
+            .get()
             .then(snapshot => {
-                const users = {}
+                const users = {};
                 snapshot.forEach(doc => {
                     doc.ref.delete();
                     data.push(doc.data());
-                    if(doc.data().image && doc.data().image.length > 0) {
+                    if (doc.data().image && doc.data().image.length > 0) {
                         const image = doc.data().image;
-                        const childImage = image.split('?alt=media')[0].split('/o/')[1];
+                        const childImage = image
+                            .split("?alt=media")[0]
+                            .split("/o/")[1];
                         const child = decodeURIComponent(childImage);
-                        storage.ref().child(child).delete();
+                        storage
+                            .ref()
+                            .child(child)
+                            .delete();
                     }
-                    if(users[doc.data().userId]) {
+                    if (users[doc.data().userId]) {
                         users[doc.data().userId] += 1;
                     } else {
                         users[doc.data().userId] = 1;
                     }
                 });
-                db.collection('data-size').get()
+
+                db.collection("data-size")
+                    .get()
                     .then(snap => {
                         const document = snap.docs[0];
-                        const general = document.data()['question-requests'].general;
+                        const general = document.data()["question-requests"]
+                            .general;
 
                         const questionRequests = {
                             general: general - snapshot.docs.length,
                             users: {
-                                ...document.data()['question-requests'].users
+                                ...document.data()["question-requests"].users
                             }
-                        }
+                        };
 
-                        for(let key in users) {
+                        for (let key in users) {
                             questionRequests.users[key] -= users[key];
                         }
 
-                        document.ref.update({ ['question-requests']: questionRequests })
+                        document.ref
+                            .update({ ["question-requests"]: questionRequests })
                             .then(() => {
-                                commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
+                                commit("addRemoveSize", {
+                                    key: "question-requests",
+                                    data: questionRequests
+                                });
                             })
                             .catch(error => {
                                 console.error(error);
@@ -933,7 +1141,7 @@ const actions = {
             })
             .catch(error => {
                 console.error("Error removing request: ", error);
-                createErrorLog('Request DB Delete', error.message, { data });
+                createErrorLog("Request DB Delete", error.message, { data });
             });
     },
     /**
@@ -946,34 +1154,41 @@ const actions = {
     deleteApprovedRequests({ commit }, payload) {
         const { userInfo } = payload;
 
-        db.collection('question-requests')
-            .where('userId', '==', userInfo.id)
-            .where('status', '==', 'Aprovado')
+        db.collection("question-requests")
+            .where("userId", "==", userInfo.id)
+            .where("status", "==", "Aprovado")
             .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     doc.ref.delete();
-                    commit('removeRequest', doc.data().iq);
+                    commit("removeRequest", doc.data().iq);
                 });
 
-                db.collection('data-size').get()
+                db.collection("data-size")
+                    .get()
                     .then(snap => {
                         const document = snap.docs[0];
-                        const general = document.data()['question-requests'].general;
+                        const general = document.data()["question-requests"]
+                            .general;
                         const userId = userInfo.id;
-                        const subSize = document.data()['question-requests'].users[userId];
+                        const subSize = document.data()["question-requests"]
+                            .users[userId];
 
                         const questionRequests = {
-                            general: general - 1,
+                            general: general - snapshot.docs.length,
                             users: {
-                                ...document.data()['question-requests'].users,
-                                [userId]: subSize - 1
+                                ...document.data()["question-requests"].users,
+                                [userId]: subSize - snapshot.docs.length
                             }
-                        }
+                        };
 
-                        document.ref.update({ ['question-requests']: questionRequests })
+                        document.ref
+                            .update({ ["question-requests"]: questionRequests })
                             .then(() => {
-                                commit('addRemoveSize', { key: 'question-requests', data: questionRequests });
+                                commit("addRemoveSize", {
+                                    key: "question-requests",
+                                    data: questionRequests
+                                });
                             })
                             .catch(error => {
                                 console.error(error);
@@ -984,10 +1199,16 @@ const actions = {
                     });
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('connection', '', 'Requests auto delete error - ' + error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Request Approved Delete', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "connection",
+                    "",
+                    "Requests auto delete error - " + error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Request Approved Delete", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -998,18 +1219,20 @@ const actions = {
      * @param {number} payload.limit - The limit of requests on the response.
      */
     loadLastPendentRequests({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const data = [];
 
-        db.collection('question-requests')
-            .orderBy('updated', 'desc')
-            .where('status', '==', 'Pendente')
+        db.collection("question-requests")
+            .orderBy("updated", "desc")
+            .where("status", "==", "Pendente")
             .limit(payload ? payload.limit : 5)
             .get()
             .then(async snapshot => {
                 const promises = snapshot.docs.map(async doc => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data.push({ ...doc.data(), user: userData });
                     return userData;
                 });
@@ -1017,14 +1240,20 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                commit('setLastPendentRequests', data);
-                commit('setLoading', false);
+                commit("setLastPendentRequests", data);
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Solicitações Pendentes', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Pendent Requests Loading', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Solicitações Pendentes",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Pendent Requests Loading", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -1037,26 +1266,35 @@ const actions = {
      * @param {"current"|"other"} payload.mode - The data request mode.
      */
     loadUserRequests({ commit, dispatch }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { userId, mode, limit } = payload;
 
         const data = [];
 
-        const reference = db.collection('question-requests');
+        const reference = db.collection("question-requests");
 
         let request = null;
 
-        if (mode === 'other') {
-            request = reference.orderBy('userId').orderBy('updated', 'desc').where('userId', '!=', userId);
+        if (mode === "other") {
+            request = reference
+                .orderBy("userId")
+                .orderBy("updated", "desc")
+                .where("userId", "!=", userId);
         } else {
-            request = reference.orderBy('updated', 'desc').where('userId', '==', userId);
+            request = reference
+                .orderBy("updated", "desc")
+                .where("userId", "==", userId);
         }
 
-        request.limit(limit || 5).get()
+        request
+            .limit(limit || 5)
+            .get()
             .then(async snapshot => {
                 const promises = snapshot.docs.map(async doc => {
-                    const userData = await dispatch('getUserById', { id: doc.data().userId });
+                    const userData = await dispatch("getUserById", {
+                        id: doc.data().userId
+                    });
                     data.push({ ...doc.data(), user: userData });
                     return userData;
                 });
@@ -1064,18 +1302,26 @@ const actions = {
                 await Promise.all(promises);
             })
             .then(() => {
-                if (mode === 'other') {
-                    commit('setOtherUserRequests', data);
+                if (mode === "other") {
+                    commit("setOtherUserRequests", data);
                 } else {
-                    commit('setCurrentUserRequests', data);
+                    commit("setCurrentUserRequests", data);
                 }
-                commit('setLoading', false);
+                commit("setLoading", false);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', mode === 'other' ? 'Solicitações Pendentes' : 'Solicitações do Usuário', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Pendent User Requests Load', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    mode === "other"
+                        ? "Solicitações Pendentes"
+                        : "Solicitações do Usuário",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Pendent User Requests Load", error.message, {
+                    payload
+                });
             });
     },
     /**
@@ -1084,9 +1330,9 @@ const actions = {
      * @param {Store} store - The vuex store.
      */
     resetRequests({ commit }) {
-        commit('RESETRequests');
+        commit("RESETRequests");
     }
-}
+};
 
 const getters = {
     /**
@@ -1106,7 +1352,7 @@ const getters = {
      * @returns {(page: number) => Request[]} An array of requests.
      */
     getRequestsByPage(state) {
-        return page => state.requests['p' + page];
+        return page => state.requests["p" + page];
     },
     /**
      * Gets an array of the current page requests.
@@ -1153,11 +1399,11 @@ const getters = {
     getOtherUserRequests(state) {
         return state.otherUserRequests;
     }
-}
+};
 
 export default {
     state,
     mutations,
     actions,
     getters
-}
+};

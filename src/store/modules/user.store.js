@@ -1,9 +1,9 @@
-import { Store } from 'vuex';
-import axios from 'axios';
+import { Store } from "vuex";
+import axios from "axios";
 
-import { auth, db, storage } from '../../main';
-import { getNowISOString } from '../../utils/date';
-import { createErrorLog, showErrorMessage } from '../../utils/errors';
+import { auth, db, storage } from "../../main";
+import { getNowISOString } from "../../utils/date";
+import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
  * @typedef {Object} UserInfo
@@ -99,11 +99,11 @@ const mutations = {
      * @param {string} data.role - The user new role.
      */
     setUserRole(state, data) {
-        const { email, role } = data;
+        const { email, role, updated } = data;
         const users = [];
 
         state.users.forEach(user => {
-            if(user.email === email) {
+            if (user.email === email) {
                 users.push({
                     ...user,
                     role,
@@ -127,7 +127,7 @@ const mutations = {
             state[key] = newState[key];
         });
     }
-}
+};
 
 const actions = {
     /**
@@ -143,22 +143,34 @@ const actions = {
             try {
                 const storageRef = storage.ref();
                 const file = payload.images;
-                const name = 'avatar';
+                const name = "avatar";
                 const subfolder = auth.currentUser.uid;
-                const type = file.type.split('/')[1];
+                const type = file.type.split("/")[1];
                 const format = `users/${subfolder}/${name}.${type}`;
-                storageRef.child(format).put(file)
+                storageRef
+                    .child(format)
+                    .put(file)
                     .then(snapshot => {
-                        snapshot.ref.getDownloadURL().then(function (downloadURL) {
-                            resolve(downloadURL.toString())
-                        });
+                        snapshot.ref
+                            .getDownloadURL()
+                            .then(function(downloadURL) {
+                                resolve(downloadURL.toString());
+                            });
                     })
                     .catch(error => {
-                        const errorModel = showErrorMessage('connection', '', 'Avatar upload error - ' + error.message);
-                        commit('setError', { message: errorModel });
-                        createErrorLog('Avatar Upload', error.message, { payload, format, subfolder });
+                        const errorModel = showErrorMessage(
+                            "connection",
+                            "",
+                            "Avatar upload error - " + error.message
+                        );
+                        commit("setError", { message: errorModel });
+                        createErrorLog("Avatar Upload", error.message, {
+                            payload,
+                            format,
+                            subfolder
+                        });
                     });
-            } catch(error) {
+            } catch (error) {
                 reject();
             }
         });
@@ -173,54 +185,71 @@ const actions = {
      * @param {string} payload.email - The new user email.
      * @param {string} payload.password - The new user password.
      */
-    signUserUp({ commit, dispatch }, payload) {
-        commit('setLoading', true);
-        commit('clearError');
+    signUserUp({ commit, dispatch, state }, payload) {
+        commit("setLoading", true);
+        commit("clearError");
 
         auth.createUserWithEmailAndPassword(payload.email, payload.password)
-            .then(user => {
-                commit('setLoading', false);
+            .then(async user => {
+                commit("setLoading", false);
 
                 const newUser = {
                     id: user.user.uid
-                }
+                };
 
                 const createdAt = getNowISOString();
 
                 const userInfo = {
                     name: payload.name,
-                    profileImages: '',
+                    profileImages: "",
                     email: payload.email,
-                    role: 'student',
+                    role: "student",
                     created: createdAt,
                     updated: createdAt
-                }
+                };
 
-                let url = '';
+                let url = "";
 
-                if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
-                    url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-userDefaultRole';
-                } else if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator') {
-                    url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole';
+                if (
+                    process.env.VUE_APP_FIREBASE_PROJECT_ID ===
+                    "pwr-quiz-generator-develop"
+                ) {
+                    url =
+                        "http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-userDefaultRole";
+                } else if (
+                    process.env.VUE_APP_FIREBASE_PROJECT_ID ===
+                    "pwr-quiz-generator"
+                ) {
+                    url =
+                        "https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole";
                 } else {
-                    url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole';
+                    url =
+                        "https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole";
                 }
 
-                db.collection("users").doc(newUser.id).set(userInfo)
+                db.collection("users")
+                    .doc(newUser.id)
+                    .set(userInfo)
                     .then(async () => {
-                        axios.get(url, { headers: { uid: newUser.id } })
+                        axios
+                            .get(url, { headers: { uid: newUser.id } })
                             .catch(error => {
                                 console.error(error);
                             });
 
-                        db.collection('data-size').get()
+                        db.collection("data-size")
+                            .get()
                             .then(snap => {
                                 const document = snap.docs[0];
                                 const size = document.data().users;
 
-                                document.ref.update({ users: size + 1 })
+                                document.ref
+                                    .update({ users: size + 1 })
                                     .then(() => {
-                                        commit('addRemoveSize', { key: 'users', data: size + 1 });
+                                        commit("addRemoveSize", {
+                                            key: "users",
+                                            data: size + 1
+                                        });
                                     })
                                     .catch(error => {
                                         console.error(error);
@@ -231,22 +260,31 @@ const actions = {
                             });
                     })
                     .catch(error => {
-                        commit('setLoading', false);
-                        commit('setError', error);
-                        createErrorLog('Sign Up DB Insert', error.message,
-                            { payload, newUser, userInfo: { ...userInfo, id: newUser.id }, url });
+                        commit("setLoading", false);
+                        commit("setError", error);
+                        createErrorLog("Sign Up DB Insert", error.message, {
+                            payload,
+                            newUser,
+                            userInfo: { ...userInfo, id: newUser.id },
+                            url
+                        });
                     });
 
-                dispatch('loadUserClaims', true);
-                commit('setUserInfo', { ...userInfo, id: newUser.id });
-                commit('setUser', newUser);
+                await dispatch("loadUserClaims", true);
+                commit("setUserInfo", { ...userInfo, id: newUser.id });
+                commit("setUser", newUser);
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('default', '', 'Sign up error - ' + error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Sign Up', error.message, { email: payload.email });
-
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "default",
+                    "",
+                    "Sign up error - " + error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Sign Up", error.message, {
+                    email: payload.email
+                });
             });
     },
     /**
@@ -258,33 +296,43 @@ const actions = {
      * @param {string} payload.profileImages - The user new avatar image.
      */
     updateUser({ commit, state }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const userInfo = {
             name: payload.name,
             profileImages: payload.profileImages,
             updated: getNowISOString()
-        }
+        };
 
-        db.collection("users").doc(state.user.id).update({
+        db.collection("users")
+            .doc(state.user.id)
+            .update({
                 ...userInfo
             })
             .then(() => {
-                commit('setUserInfo', {
+                commit("setUserInfo", {
                     ...userInfo,
                     id: state.userInfo.id,
                     email: state.userInfo.email,
                     role: state.userInfo.role,
                     created: state.userInfo.created
                 });
-                commit('setLoading', false);
-                commit('setSuccess', `'${userInfo.name || userInfo.email}' editado(a) com sucesso!`);
+                commit("setLoading", false);
+                commit(
+                    "setSuccess",
+                    `'${userInfo.name ||
+                        userInfo.email}' editado(a) com sucesso!`
+                );
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('default', '', 'User update error - ' + error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('User DB Update', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "default",
+                    "",
+                    "User update error - " + error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("User DB Update", error.message, { payload });
             });
     },
     /**
@@ -296,30 +344,34 @@ const actions = {
      * @param {string} payload.password - The user password.
      */
     signUserIn({ commit, dispatch }, payload) {
-        commit('setLoading', true);
-        commit('clearError');
-        commit('clearSuccess');
+        commit("setLoading", true);
+        commit("clearError");
+        commit("clearSuccess");
 
-        dispatch('loadDataSize');
-        dispatch('resetPapers');
-        dispatch('resetQuestions');
-        dispatch('resetRequests');
-        dispatch('resetTests');
+        dispatch("loadDataSize");
+        dispatch("resetPapers");
+        dispatch("resetQuestions");
+        dispatch("resetRequests");
+        dispatch("resetTests");
 
         auth.signInWithEmailAndPassword(payload.email, payload.password)
             .then(user => {
-                    commit('setLoading', false);
-                    commit('setUser', { id: user.user.uid });
-                    dispatch('loadUserInfo', { id: user.user.uid });
-                }
-            )
+                commit("setLoading", false);
+                commit("setUser", { id: user.user.uid });
+                dispatch("loadUserInfo", { id: user.user.uid });
+            })
             .catch(error => {
-                    commit('setLoading', false);
-                    const errorModel = showErrorMessage('default', '', 'Login error - ' + error.message);
-                    commit('setError', { message: errorModel });
-                    createErrorLog('Login', error.message, { email: payload.email });
-                }
-            );
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "default",
+                    "",
+                    "Login error - " + error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Login", error.message, {
+                    email: payload.email
+                });
+            });
     },
     /**
      * Loads the current user info base on it's uid.
@@ -329,12 +381,14 @@ const actions = {
      * @param {string} payload.id - The user uid.
      */
     loadUserInfo({ commit }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
-        db.collection("users").doc(payload.id).get()
+        db.collection("users")
+            .doc(payload.id)
+            .get()
             .then(doc => {
-                commit('setUserInfo', { ...doc.data(), id: payload.id });
-                commit('setLoading', false);
+                commit("setUserInfo", { ...doc.data(), id: payload.id });
+                commit("setLoading", false);
             });
     },
     /**
@@ -342,23 +396,47 @@ const actions = {
      *
      * @param {Store} store - The vuex store.
      * @param {boolean} payload - Whether is to apply the default role or not.
+     * @returns {Promise<Object>} The user claims.
      */
-    loadUserClaims({ commit }, payload) {
-        auth.currentUser && auth.currentUser.getIdTokenResult()
-            .then(idTokenResult => {
-                if(idTokenResult.claims) {
-                    if (payload) {
-                        commit('setUserClaims', { ...idTokenResult.claims, admin: false, appraiser: false, teacher: false, student: true });
-                    } else {
-                        commit('setUserClaims', idTokenResult.claims);
-                    }
-                }
-            })
-            .catch(error => {
-                const errorModel = showErrorMessage('load', 'User Claims', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('User Claims Load', error.message, { currentUser: auth.currentUser });
-            });
+    async loadUserClaims({ commit, state }, payload) {
+        return new Promise(async (res, rej) => {
+            auth.currentUser &&
+                !state.userClaims &&
+                (await auth.currentUser
+                    .getIdTokenResult()
+                    .then(idTokenResult => {
+                        if (idTokenResult.claims) {
+                            if (payload) {
+                                const claims = {
+                                    ...idTokenResult.claims,
+                                    admin: false,
+                                    appraiser: false,
+                                    teacher: false,
+                                    student: true
+                                };
+
+                                commit("setUserClaims", claims);
+                                res(claims);
+                            } else {
+                                commit("setUserClaims", idTokenResult.claims);
+                                res(idTokenResult.claims);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        const errorModel = showErrorMessage(
+                            "load",
+                            "User Claims",
+                            error.message
+                        );
+                        commit("setError", { message: errorModel });
+                        createErrorLog("User Claims Load", error.message, {
+                            currentUser: auth.currentUser
+                        });
+                    }));
+
+            res(null);
+        });
     },
     /**
      * Loads all the application users.
@@ -368,19 +446,24 @@ const actions = {
     loadUsers({ commit }) {
         const users = [];
 
-        db.collection('users').get()
+        db.collection("users")
+            .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     users.push({ ...doc.data(), id: doc.id });
                 });
             })
             .then(() => {
-                commit('setUsers', users);
+                commit("setUsers", users);
             })
             .catch(error => {
-                const errorModel = showErrorMessage('load', 'Usuários', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Users Load', error.message, { users });
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Usuários",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Users Load", error.message, { users });
             });
     },
     /**
@@ -389,20 +472,27 @@ const actions = {
      * @param {Store} store - The vuex store.
      */
     loadLastUser({ commit }) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
-        db.collection('users').orderBy('created', 'desc').limit(1).get()
+        db.collection("users")
+            .orderBy("created", "desc")
+            .limit(1)
+            .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
-                    commit('setLastUser', { ...doc.data(), id: doc.id });
-                    commit('setLoading', false);
+                    commit("setLastUser", { ...doc.data(), id: doc.id });
+                    commit("setLoading", false);
                 });
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Usuário', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('Last User Loading', error.message, { users });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Usuário",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("Last User Loading", error.message, { users });
             });
     },
     /**
@@ -414,22 +504,30 @@ const actions = {
      * @returns {Promise<UserInfo>} An user.
      */
     async getUserById({ commit }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { id } = payload;
 
         return new Promise((resolve, reject) => {
             try {
-                db.collection('users').doc(id).get()
+                db.collection("users")
+                    .doc(id)
+                    .get()
                     .then(doc => {
                         resolve({ ...doc.data(), id });
-                        commit('setLoading', false);
+                        commit("setLoading", false);
                     });
             } catch (error) {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('load', 'Usuário', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('User By Id Loading', error.message, { payload });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "load",
+                    "Usuário",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("User By Id Loading", error.message, {
+                    payload
+                });
             }
         });
     },
@@ -442,46 +540,68 @@ const actions = {
      * @param {string} payload.role - The user new role.
      */
     setUserRole({ commit }, payload) {
-        commit('setLoading', true);
+        commit("setLoading", true);
 
         const { email, role } = payload;
 
-        let url = '';
+        let url = "";
 
-        if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator-develop') {
-            url = 'http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-setRole';
-        } else if(process.env.VUE_APP_FIREBASE_PROJECT_ID === 'pwr-quiz-generator') {
-            url = 'https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-setRole';
+        if (
+            process.env.VUE_APP_FIREBASE_PROJECT_ID ===
+            "pwr-quiz-generator-develop"
+        ) {
+            url =
+                "http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-setRole";
+        } else if (
+            process.env.VUE_APP_FIREBASE_PROJECT_ID === "pwr-quiz-generator"
+        ) {
+            url =
+                "https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-setRole";
         } else {
-            url = 'https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-setRole';
+            url =
+                "https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-setRole";
         }
 
-        db.collection('users').where('email', '==', email).get()
+        db.collection("users")
+            .where("email", "==", email)
+            .get()
             .then(snapshot => {
                 const doc = snapshot.docs[0];
                 const updated = getNowISOString();
 
                 doc.ref.update({ role, updated });
 
-                commit('setUserRole', { payload, updated });
-                commit('setLoading', false);
-                commit('setSuccess', `'${doc.data().name || email}' editado(a) com sucesso!`);
+                commit("setUserRole", { email, role, updated });
+                commit("setLoading", false);
+                commit(
+                    "setSuccess",
+                    `'${doc.data().name || email}' editado(a) com sucesso!`
+                );
 
-                axios.post(url, {
-                    data: {
-                        email,
-                        role
-                    }
-                })
-                .catch(error => {
-                    commit('setError', error);
-                })
+                axios
+                    .post(url, {
+                        data: {
+                            email,
+                            role
+                        }
+                    })
+                    .catch(error => {
+                        commit("setError", error);
+                    });
             })
             .catch(error => {
-                commit('setLoading', false);
-                const errorModel = showErrorMessage('edition', 'Cargo de Usuário', error.message);
-                commit('setError', { message: errorModel });
-                createErrorLog('User Role Update', error.message, { payload, url, updated });
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "edition",
+                    "Cargo de Usuário",
+                    error.message
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("User Role Update", error.message, {
+                    payload,
+                    url,
+                    updated
+                });
             });
     },
     /**
@@ -491,9 +611,9 @@ const actions = {
      */
     logout({ commit }) {
         auth.signOut();
-        commit('setUser', null);
-        commit('setUserInfo', null);
-        commit('setUserClaims', null);
+        commit("setUser", null);
+        commit("setUserInfo", null);
+        commit("setUserClaims", null);
     },
     /**
      * Auto sign in an user if it's id is already into the browser local storage.
@@ -502,10 +622,10 @@ const actions = {
      * @param {Object} payload - The action payload.
      * @param {string} payload.uid - The user uid.
      */
-    autoSignIn({ commit, dispatch }, payload) {
-        dispatch('loadUserInfo', { id: payload.uid });
-        dispatch('loadUserClaims');
-        commit('setUser', { id: payload.uid });
+    async autoSignIn({ commit, dispatch }, payload) {
+        await dispatch("loadUserClaims");
+        dispatch("loadUserInfo", { id: payload.uid });
+        commit("setUser", { id: payload.uid });
     },
     /**
      * Resets the user password according to it's e-mail.
@@ -517,14 +637,22 @@ const actions = {
     resetPassword({ commit }, payload) {
         const { email } = payload;
 
-        auth.sendPasswordResetEmail(email).then(() => {
-            commit('setSuccess', `E-mail enviado para ${email}`);
-        }).catch(error => {
-            commit('setLoading', false);
-            const errorModel = showErrorMessage('admin', '', 'Não foi possível enviar o e-mail para redefinir a senha.');
-            commit('setError', { message: errorModel });
-            createErrorLog('User Password Reset', error.message, { payload });
-        });
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                commit("setSuccess", `E-mail enviado para ${email}`);
+            })
+            .catch(error => {
+                commit("setLoading", false);
+                const errorModel = showErrorMessage(
+                    "admin",
+                    "",
+                    "Não foi possível enviar o e-mail para redefinir a senha."
+                );
+                commit("setError", { message: errorModel });
+                createErrorLog("User Password Reset", error.message, {
+                    payload
+                });
+            });
     },
     /**
      * Resets the user state to it's initial state.
@@ -532,9 +660,9 @@ const actions = {
      * @param {Store} store - The vuex store.
      */
     resetUsers({ commit }) {
-        commit('RESETUsers');
+        commit("RESETUsers");
     }
-}
+};
 
 const getters = {
     /**
@@ -582,11 +710,11 @@ const getters = {
     getLastUser(state) {
         return state.lastUser;
     }
-}
+};
 
 export default {
     state,
     mutations,
     actions,
     getters
-}
+};

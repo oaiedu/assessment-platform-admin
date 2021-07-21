@@ -215,10 +215,10 @@ const mutations = {
         const papers = state.papers["p" + page] || [];
         const amount = data.amount;
         const oneBefore = state.papers["p" + (page - 1)] || [];
-        if (papers.length > 0 || oneBefore.length === 8 || amount === 0) {
+        if (papers.length > 0 || oneBefore.length === 10 || amount === 0) {
             papers.push(data.data);
             state.papers["p" + page] = [...papers];
-            if (amount === 0) {
+            if (amount === 0 || state.currentPapersPage.length < 10) {
                 state.currentPapersPage.push(data.data);
             }
         }
@@ -524,11 +524,13 @@ const actions = {
                 });
         } else {
             const pageContent = state.papers["p" + page];
-            const first = pageContent[0].id;
-            const last = pageContent[pageContent.length - 1].id;
 
-            commit("setCurrentPapersPage", pageContent);
-            commit("setLastPaperDocument", [first, last]);
+            if (pageContent && pageContent[0]) {
+                const first = pageContent[0].id;
+                const last = pageContent[pageContent.length - 1].id;
+                commit("setCurrentPapersPage", pageContent);
+                commit("setLastPaperDocument", [first, last]);
+            }
             commit("setLoading", false);
         }
     },
@@ -550,11 +552,12 @@ const actions = {
             .get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
-                    data.push(doc.algo.data());
+                    data.push(doc.data());
                 });
             })
-            .then(() => {
-                db.collection("papers")
+            .then(async () => {
+                await db
+                    .collection("papers")
                     .orderBy("name")
                     .where("name", ">=", payload.toUpperCase())
                     .where("name", "<=", payload.toUpperCase() + "~")
@@ -568,8 +571,9 @@ const actions = {
                         });
                     });
             })
-            .then(() => {
-                db.collection("papers")
+            .then(async () => {
+                await db
+                    .collection("papers")
                     .orderBy("name")
                     .where("name", ">=", payload.toLowerCase())
                     .where("name", "<=", payload.toLowerCase() + "~")
@@ -584,17 +588,16 @@ const actions = {
                     });
             })
             .then(async () => {
-                const promises = snapshot.docs.map(async (doc, index) => {
+                const promises = data.map(async (doc, index) => {
                     const userData = await dispatch("getUserById", {
-                        id: doc.data().userId
+                        id: doc.userId
                     });
-                    data[index] = { ...doc.data(), user: userData };
+                    data[index] = { ...doc, user: userData };
                     return userData;
                 });
 
                 await Promise.all(promises);
-            })
-            .then(() => {
+
                 commit("setFilteredPapers", data);
                 commit("setLoading", false);
             })
@@ -911,25 +914,6 @@ const actions = {
 
                 doc.ref.update({ ...doc.data(), toDelete });
 
-                db.collection("paper-names")
-                    .get()
-                    .then(snapNames => {
-                        const docNames = snapNames.docs[0];
-                        const dPapers = docNames.data().papers;
-                        let newPapers = [...dPapers];
-
-                        dPapers.forEach((p, i) => {
-                            if (p.id === id) {
-                                newPapers.splice(i, 1);
-                            }
-                        });
-
-                        docNames.ref.update({ papers: newPapers });
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
-
                 const user = await dispatch("getUserById", {
                     id: doc.data().userId
                 });
@@ -965,6 +949,39 @@ const actions = {
                 createErrorLog("Document Confirm Delete", error.message, {
                     payload
                 });
+            });
+    },
+    /**
+     * Remove the names of papers from paper-names collection.
+     *
+     * @param {Store} store - The vuex store.
+     * @param {Object} payload - The action payload.
+     * @param {string[]} payload.papers - An array of paper ids.
+     */
+    removePaperNames(store, payload) {
+        const { papers } = payload;
+        console.log(papers);
+
+        db.collection("paper-names")
+            .get()
+            .then(async snapshot => {
+                const paperNames = snapshot.docs[0];
+                const dPapers = paperNames.data().papers;
+                const newPapers = [];
+
+                const promises = dPapers.map(p => {
+                    if (!papers.includes(p.id)) {
+                        newPapers.push(p);
+                    }
+                    return p;
+                });
+
+                await Promise.all(promises);
+
+                paperNames.ref.update({ papers: newPapers });
+            })
+            .catch(error => {
+                console.error(error);
             });
     },
     /**
@@ -1109,11 +1126,15 @@ const actions = {
      * Updates a paper based on it's id.
      *
      * @param {Store} store - The vuex store.
-     * @param {Paper} payload - The paper to be updated.
+     * @param {Object} payload - The action payload.
+     * @param {Paper} payload.paperData - The paper to be updated.
+     * @param {boolean} payload.isSearching - Whether the filtered papers is being used or not.
      */
     updatePaper({ commit, dispatch }, payload) {
+        const { paperData, isSearching } = payload;
+
         const paper = {
-            ...payload,
+            ...paperData,
             updated: getNowISOString()
         };
 
@@ -1153,6 +1174,8 @@ const actions = {
 
                 commit("updatePaper", paper);
                 commit("updateCurrentPapersPage", paper);
+                if (isSearching) commit("updateFilteredPaper", paper);
+
                 commit("setLoading", false);
                 commit("setSuccess", "Documento editado com sucesso!");
             })
