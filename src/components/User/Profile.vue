@@ -20,7 +20,7 @@
                             src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
                             v-if=" imagesAsURL === null "
                             />
-                            <img :src="imagesAsURL" v-else />
+                            <img class="profile-page-photo" :src="imagesAsURL" v-else />
                         </v-avatar>
                         <v-container>
                             <h4 class="text-center grey--text">{{ roleName }}</h4>
@@ -153,20 +153,22 @@ export default {
             document.getElementById("fileUpload").click();
         },
         readUrl(imageFile) {
-            if(!imageFile.type.match(/image.*/)) {
-                alert('The file is not an image!');
-                return;
-            } else if (imageFile.size > 2000000) {
-                alert('O tamanho da imagem deve ser no MÁXIMO 2 MB!');
-                return;
-            }
+            if (imageFile) {
+                if(!imageFile.type.match(/image.*/)) {
+                    alert('The file is not an image!');
+                    return;
+                } else if (imageFile.size > 2000000) {
+                    alert('O tamanho da imagem deve ser no MÁXIMO 2 MB!');
+                    return;
+                }
 
-            const reader = new FileReader();
-            reader.onload = e => {
-                this.changedImage = true;
-                this.imagesAsURL = e.target.result;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    this.changedImage = true;
+                    this.imagesAsURL = e.target.result;
+                }
+                reader.readAsDataURL(imageFile);
             }
-            reader.readAsDataURL(imageFile);
         },
         submit() {
             const imageToUpload = { images: this.avatarImage };
@@ -209,5 +211,9 @@ export default {
     .v-avatar.avatar-edit:hover {
         cursor: pointer;
         opacity: 0.8;
+    }
+
+    .v-avatar .profile-page-photo {
+        object-fit: cover;
     }
 </style>
