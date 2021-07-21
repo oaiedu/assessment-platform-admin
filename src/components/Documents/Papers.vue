@@ -14,28 +14,28 @@
           </v-container>
       </v-container>
 
-      <v-container v-if='hasDeleteMarkPapers && (userClaims["admin"] ||
+      <v-container v-if='hasDeleteMarkPapers && ((userClaims && userClaims["admin"]) ||
         (markedPapersByUser && markedPapersByUser.length > 0) ||
-        (deleteMarkPapers.filter(p => p.toDelete.userEmail === userInfo.email)))' >
+        (deleteMarkPapers.filter(p => userInfo && p.toDelete.userEmail === userInfo.email)).length > 0)' >
         <DeleteAlert
             :confirmCondition='deleteConfirmed'
             :itemsCondition='hasTrueMarkStatus'
             itemsText='Os seguintes documentos foram marcados para exclusão:'
             :items='markedPapersByUser'
-            :isAdmin='userClaims["admin"]'
+            :isAdmin='userClaims && userClaims["admin"]'
             :adminItems='markedPapersAdmin' />
 
-        <v-row justify="start" v-if='hasTrueMarkStatus && (userClaims["admin"] || markedPapersByUser)'>
+        <v-row justify="start" v-if='hasTrueMarkStatus && ((userClaims && userClaims["admin"]) || markedPapersByUser)'>
             <v-btn
                 class='ml-10'
                 color='red'
-                :dark='!(userClaims["admin"] && markedPapersAdmin.length === 0)'
-                :disabled="userClaims['admin'] && markedPapersAdmin.length === 0"
+                :dark='!(userClaims && userClaims["admin"] && markedPapersAdmin.length === 0)'
+                :disabled="userClaims && userClaims['admin'] && markedPapersAdmin.length === 0"
                 @click="deleteConfirmed = true; deletePapers(false)" >
-                {{ userClaims['admin'] ? 'Confirmar Meus' : 'Confirmar'}}
+                {{ userClaims && userClaims['admin'] ? 'Confirmar Meus' : 'Confirmar'}}
             </v-btn>
             <v-btn
-                v-if="userClaims['admin']"
+                v-if="userClaims && userClaims['admin']"
                 class='ml-3'
                 color='red'
                 dark
@@ -45,13 +45,13 @@
             <v-btn
                 class='ml-3'
                 color='grey darken-1'
-                :dark='!(userClaims["admin"] && markedPapersAdmin.length === 0)'
-                :disabled="userClaims['admin'] && markedPapersAdmin.length === 0"
+                :dark='!(userClaims && userClaims["admin"] && markedPapersAdmin.length === 0)'
+                :disabled="userClaims && userClaims['admin'] && markedPapersAdmin.length === 0"
                 @click="restoreAll(false)" >
-                {{ userClaims['admin'] ? 'Restaurar Meus' : 'Restaurar' }}
+                {{ userClaims && userClaims['admin'] ? 'Restaurar Meus' : 'Restaurar' }}
             </v-btn>
             <v-btn
-                v-if="userClaims['admin']"
+                v-if="userClaims && userClaims['admin']"
                 class='ml-3'
                 color='grey darken-1'
                 dark
@@ -92,7 +92,7 @@
       </v-dialog>
 
       <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditPaper">
-        <EditPaper :paper="selectedEdit" @closeDialogEdit="dialogEditPaper = false"></EditPaper>
+        <EditPaper :paper="selectedEdit" @updatePaper="updatePaper($event)" @closeDialogEdit="dialogEditPaper = false"></EditPaper>
       </v-dialog>
 
       <div class="text-center pt-2">
@@ -233,15 +233,15 @@
                 return this.$store.getters.getDeleteMarkPapers;
             },
             markedPapersAdmin() {
-                const papers = this.deleteMarkPapers.filter(p => p.toDelete.userEmail === this.userInfo.email);
+                const papers = this.deleteMarkPapers.filter(p => this.userInfo && p.toDelete.userEmail === this.userInfo.email);
                 const titles = papers.filter(p => p.toDelete && p.toDelete.status);
                 return titles.map(p => p.name).join(', ');
             },
             markedPapersByUser() {
-                const isAdmin = this.userClaims['admin'];
+                const isAdmin = this.userClaims && this.userClaims['admin'];
                 const papers = isAdmin
                     ? this.deleteMarkPapers
-                    : this.deleteMarkPapers.filter(p => p.toDelete.userEmail === this.userInfo.email);
+                    : this.deleteMarkPapers.filter(p => this.userInfo && p.toDelete.userEmail === this.userInfo.email);
 
                 const titles = [];
 
@@ -267,10 +267,13 @@
             },
             pageAmount() {
                 const papersAmount = this.$store.getters.getDataSize.papers;
-                return Math.ceil(papersAmount / this.itemsPerPage);
+                return Math.ceil(papersAmount / this.itemsPerPage) || 1;
             }
         },
         methods: {
+            updatePaper(paperData) {
+                this.$store.dispatch("updatePaper", { paperData, isSearching: this.isSearching });
+            },
             deletePaper({ id }) {
                 this.deletePaperSnackBar = false;
                 this.$store.dispatch('deleteMarkPaper', {
@@ -281,11 +284,14 @@
             },
             deletePapers(all) {
                 const papers = this.deleteMarkPapers;
+
                 papers.forEach(paper => {
                     if(paper.toDelete.status && (this.userInfo.email === paper.toDelete.userEmail || all)){
                         this.$store.dispatch("changeDeleteStatusPapers", { id: paper.id, isSearching: this.isSearching });
                     }
                 });
+
+                this.$store.dispatch('removePaperNames', { papers: papers.map(paper => paper.id) });
             },
             openDialogView(item) {
                 if(item === 'Introdução') {

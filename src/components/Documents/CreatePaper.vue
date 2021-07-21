@@ -57,10 +57,14 @@
                       <v-col>
                           <v-file-input
                             chips
+                            clearable
                             multiple
                             dense
                             label="Imagem"
+                            placeholder="Escolha uma imagem"
                             v-model="images"
+                            @change="checkImageType"
+                            accept='image/png, image/jpeg, image/bmp'
                           />
                       </v-col>
                     </v-row>
@@ -85,7 +89,8 @@
               <v-col cols="12">
                 <Preview
                     :title='paperName'
-                    :description='paperDescription' />
+                    :description='paperDescription'
+                    :image='imagePreview' />
               </v-col>
             </v-row>
           </v-col>
@@ -135,10 +140,11 @@
                 mdiClose,
                 mdiContentSave,
                 createErrorSnackBar: false,
-                paperDescription: null,
-                paperName: null,
+                paperDescription: '',
+                paperName: '',
                 images: [],
-                paperImage: ""
+                imagePreview: '',
+                paperImage: ''
             }
         },
         computed: {
@@ -152,10 +158,33 @@
                 this.$emit("closeDialogNew");
             },
             setInitialData() {
-                this.paperDescription = null,
-                this.paperName = null,
-                this.paperImage = "",
-                this.image = []
+                this.paperDescription = null;
+                this.paperName = null;
+                this.paperImage = null;
+                this.images = [];
+                this.imagePreview = '';
+            },
+            checkImageType(event) {
+                if(event && event[0] && event[0].type) {
+                    if(!event[0].type.match(/image.*/)) {
+                        this.$store.commit('setError', { message: 'O arquivo inserido NÃO é uma imagem!' });
+                        this.images = [];
+                    } else if (event[0].size > 2000000) {
+                        this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
+                        this.images = [];
+                    } else {
+                        const file = event[0];
+                        const reader = new FileReader();
+
+                        reader.onload = readerEvent => {
+                            this.imagePreview = readerEvent.target.result;
+                        }
+
+                        reader.readAsDataURL(file);
+                    }
+                } else if (this.imagePreview && this.imagePreview !== '') {
+                    this.imagePreview = this.paperImage || '';
+                }
             },
             onCreatePaper() {
                 if((this.paperName === "" && this.paperDescription === "") || (this.paperName === "" && typeof this.images[0] === 'undefined')){

@@ -57,10 +57,14 @@
                       <v-col>
                           <v-file-input
                             chips
+                            clearable
                             multiple
                             dense
                             label="Imagem"
+                            placeholder="Escolha uma imagem"
                             v-model="images"
+                            @change="checkImageType"
+                            accept='image/png, image/jpeg, image/bmp'
                           />
                       </v-col>
                     </v-row>
@@ -83,11 +87,10 @@
             <v-row fill-width>
               <v-col cols="12">
                 <v-card>
-                  <v-card-title>{{name}}</v-card-title>
-                  <v-row justify="center">
-                    <img v-if="hasImage" :src="paperImage" style="max-width: 400px">
-                  </v-row>
-                  <v-card-text>{{paperDescription}}</v-card-text>
+                  <Preview
+                    :title='paperName || name'
+                    :description='paperDescription'
+                    :image="imagePreview" />
                 </v-card>
               </v-col>
             </v-row>
@@ -127,10 +130,11 @@
     import 'simplemde/dist/simplemde.min.css';
     import VueSimplemde from 'vue-simplemde';
     import { mdiClose, mdiContentSave } from '@mdi/js';
+    import Preview from './Preview';
 
     export default {
         props: ["paper"],
-        components: { VueSimplemde },
+        components: { VueSimplemde, Preview },
         data() {
             return {
                 mdiClose,
@@ -139,7 +143,8 @@
                 paperDescription: "",
                 paperName: "",
                 images: [],
-                paperImage: ""
+                paperImage: "",
+                imagePreview: ''
             }
         },
 
@@ -164,21 +169,44 @@
         methods: {
             update() {
                 this.paperDescription = this.paper.description;
-                this.paperImage = this.paper.image;
+                this.paperImage = this.paper.image || '';
+                this.imagePreview = this.paper.image || '';
             },
             hasImage() {
                 return !!this.paperImage;
             },
             close() {
                 this.setInitialData();
-                this.update();
                 this.$emit("closeDialogEdit");
             },
             setInitialData() {
-                this.paperDescription = null,
-                this.paperName = null,
-                this.paperImage = "",
-                this.image = []
+                this.paperDescription = null;
+                this.paperName = null;
+                this.paperImage = null;
+                this.images = [];
+                this.imagePreview = '';
+            },
+            checkImageType(event) {
+                if(event && event[0] && event[0].type) {
+                    if(!event[0].type.match(/image.*/)) {
+                        this.$store.commit('setError', { message: 'O arquivo inserido NÃO é uma imagem!' });
+                        this.images = [];
+                    } else if (event[0].size > 2000000) {
+                        this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
+                        this.images = [];
+                    } else {
+                        const file = event[0];
+                        const reader = new FileReader();
+
+                        reader.onload = readerEvent => {
+                            this.imagePreview = readerEvent.target.result;
+                        }
+
+                        reader.readAsDataURL(file);
+                    }
+                } else if (this.imagePreview && this.imagePreview !== '') {
+                    this.imagePreview = this.paperImage || '';
+                }
             },
             onEditPaper() {
                 if((this.paperName === "" && this.paperDescription === "") || (this.paperName === "" && typeof this.images[0] === 'undefined')){
@@ -211,18 +239,12 @@
                                 this.$store.dispatch("uploadImagePaper", imageToUpload)
                                     .then(result => {
                                         paperData.image = result;
-                                        this.$store.dispatch("updatePaper", paperData)
-                                        .then(()=>{
-                                            this.$emit("load");
-                                            this.close();
-                                        });
+                                        this.close();
+                                        this.$emit('updatePaper', paperData);
                                     });
                             } else {
-                                this.$store.dispatch("updatePaper", paperData)
-                                    .then(()=>{
-                                        this.$emit("load");
-                                        this.close();
-                                });
+                                this.close();
+                                this.$emit('updatePaper', paperData);
                             }
                         }
                     });
