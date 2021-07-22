@@ -121,12 +121,7 @@ exports.deleteNonexistentReferences = async (req, res) => {
             collections.forEach(async collection => {
                 const cn = collection.id;
 
-                if (
-                    cn === "users" ||
-                    cn === "questions" ||
-                    cn === "edited questions" ||
-                    cn === "papers"
-                ) {
+                if (cn === "users" || cn === "questions" || cn === "papers") {
                     await db
                         .collection(cn)
                         .get()
@@ -135,8 +130,6 @@ exports.deleteNonexistentReferences = async (req, res) => {
                                 let imageUrl = "";
                                 if (cn === "users") {
                                     imageUrl = doc.data().profileImages;
-                                } else if (cn === "papers") {
-                                    imageUrl = doc.data().image;
                                 } else {
                                     imageUrl = doc.data().image;
                                 }
@@ -159,10 +152,23 @@ exports.deleteNonexistentReferences = async (req, res) => {
                                             image.includes("home-background")
                                         )
                                     ) {
-                                        db.collection(cn)
-                                            .doc(doc.id)
-                                            .set({ ...doc.data(), image: "" })
-                                            .catch(console.log);
+                                        if (cn === "users") {
+                                            db.collection(cn)
+                                                .doc(doc.id)
+                                                .set({
+                                                    ...doc.data(),
+                                                    profileImages: ""
+                                                })
+                                                .catch(console.log);
+                                        } else {
+                                            db.collection(cn)
+                                                .doc(doc.id)
+                                                .set({
+                                                    ...doc.data(),
+                                                    image: ""
+                                                })
+                                                .catch(console.log);
+                                        }
                                     }
                                 }
                             });
@@ -297,7 +303,7 @@ exports.importFirestore = async (req, res) => {
 };
 
 exports.rearrangeQuestions = async (req, res) => {
-    const cn = "edited questions";
+    const cn = "questions";
     await db
         .collection(cn)
         .get()
@@ -307,6 +313,8 @@ exports.rearrangeQuestions = async (req, res) => {
                 const data = doc.data();
                 const newData = {
                     iq: data.iq || data.IQ,
+                    created: data.created || null,
+                    updated: data.updated || null,
                     question: data.question || data.PERGUNTA,
                     subject: data.subject || data.DISCIPLINA,
                     knowledge: data.knowledge || data.CONHECIMENTO,
@@ -314,13 +322,9 @@ exports.rearrangeQuestions = async (req, res) => {
                     knowledgeBWR: data.knowledgeBWR || data.RELEVANCIA_OSR,
                     answers: data.answers || data.RESPOSTAS,
                     image: data.image || data.IMAGENS || "",
+                    imageSize: data.imageSize || data.TAMANHO_IMAGEM || "1x",
                     edited: data.edited || []
                 };
-
-                if (data.imageSize || data.TAMANHO_IMAGEM) {
-                    newData["imageSize"] =
-                        data.imageSize || data.TAMANHO_IMAGEM;
-                }
 
                 doc.ref.set(newData);
             });
@@ -397,6 +401,14 @@ exports.countData = async (req, res) => {
                 } else {
                     data[collection] = snapshot.docs.length;
                 }
+
+                data["testsByWeek"] = {
+                    "2021-06-27": 0,
+                    "2021-07-04": 0,
+                    "2021-07-11": 0,
+                    "2021-07-18": 0,
+                    "2021-07-25": 0
+                };
 
                 return snapshot;
             })
