@@ -662,8 +662,9 @@ const actions = {
                     .get()
                     .then(snap => {
                         const document = snap.docs[0];
-                        const index = document.data().questions.indexOf(iq);
                         const questions = document.data().questions;
+                        const index = questions.indexOf(iq);
+
                         if (index !== -1) questions.splice(index, 1);
                         document.ref.update({ questions });
                     })
@@ -746,9 +747,15 @@ const actions = {
                     .get()
                     .then(snap => {
                         const document = snap.docs[0];
-                        const questions = [...document.data().questions, iq];
-                        questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
-                        document.ref.update({ questions });
+
+                        if (!document.data().questions.includes(question.iq)) {
+                            const questions = [
+                                ...document.data().questions,
+                                iq
+                            ];
+                            questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
+                            document.ref.update({ questions });
+                        }
                     })
                     .catch(error => {
                         console.error(error);
@@ -834,10 +841,14 @@ const actions = {
                         .get()
                         .then(snapshot => {
                             const doc = snapshot.docs[0];
-                            const questions = [
-                                ...doc.data().questions,
-                                ...questionsData[subject]
-                            ];
+                            const questions = [...doc.data().questions];
+
+                            questionsData[subject].forEach(q => {
+                                if (!questions.includes(q)) {
+                                    questions.push(q);
+                                }
+                            });
+
                             questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
                             doc.ref.update({ questions });
                         })
@@ -957,6 +968,22 @@ const actions = {
                             .child(child)
                             .delete();
                     }
+
+                    db.collection("question-subjects")
+                        .where("name", "==", doc.data().subject)
+                        .get()
+                        .then(snap => {
+                            const document = snap.docs[0];
+                            const questions = document.data().questions;
+                            const index = questions.indexOf(doc.data().iq);
+
+                            if (index !== -1) questions.splice(index, 1);
+
+                            document.ref.update({ questions });
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
                 });
                 db.collection("data-size")
                     .get()
@@ -1314,12 +1341,15 @@ const actions = {
                     .get()
                     .then(snap => {
                         const document = snap.docs[0];
-                        const questions = [
-                            ...document.data().questions,
-                            question.iq
-                        ];
-                        questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
-                        document.ref.update({ questions });
+
+                        if (!document.data().questions.includes(question.iq)) {
+                            const questions = [
+                                ...document.data().questions,
+                                question.iq
+                            ];
+                            questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
+                            document.ref.update({ questions });
+                        }
                     })
                     .catch(error => {
                         console.error(error);
