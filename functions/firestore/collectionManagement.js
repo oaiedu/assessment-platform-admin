@@ -303,7 +303,7 @@ exports.importFirestore = async (req, res) => {
 };
 
 exports.rearrangeQuestions = async (req, res) => {
-    const cn = "questions";
+    const cn = "edited questions";
     await db
         .collection(cn)
         .get()
@@ -312,7 +312,7 @@ exports.rearrangeQuestions = async (req, res) => {
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const newData = {
-                    iq: data.iq || data.IQ,
+                    iq: data.iq || data.IQ || doc.id,
                     created: data.created || null,
                     updated: data.updated || null,
                     question: data.question || data.PERGUNTA,
