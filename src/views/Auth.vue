@@ -8,7 +8,7 @@
                     src="../assets/CINA.png"
                     alt="CINA Image" >
                 <div class="sign-info">
-                    <h2>PWR Quiz Generator</h2>
+                    <h2 class="app-name">Clarice Terui</h2>
                     <h1>Centro Industrial Nuclear de Aramar</h1>
                 </div>
             </div>
@@ -153,7 +153,7 @@
         color: #333;
     }
 
-    .sign-info > h2 {
+    .sign-info > .app-name {
         font-weight: normal;
         color: #2196f3;
     }
