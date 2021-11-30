@@ -217,11 +217,10 @@ const actions = {
                     url =
                         "http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-userDefaultRole";
                 } else if (
-                    process.env.VUE_APP_FIREBASE_PROJECT_ID ===
-                    "pwr-quiz-generator"
+                    process.env.VUE_APP_FIREBASE_PROJECT_ID === "clarice-terui"
                 ) {
                     url =
-                        "https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole";
+                        "https://us-central1-clarice-terui.cloudfunctions.net/authentication-userDefaultRole";
                 } else {
                     url =
                         "https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-userDefaultRole";
@@ -553,10 +552,10 @@ const actions = {
             url =
                 "http://localhost:5001/pwr-quiz-generator-develop/us-central1/authentication-setRole";
         } else if (
-            process.env.VUE_APP_FIREBASE_PROJECT_ID === "pwr-quiz-generator"
+            process.env.VUE_APP_FIREBASE_PROJECT_ID === "clarice-terui"
         ) {
             url =
-                "https://us-central1-pwr-quiz-generator.cloudfunctions.net/authentication-setRole";
+                "https://us-central1-clarice-terui.cloudfunctions.net/authentication-setRole";
         } else {
             url =
                 "https://us-central1-stage-pwr-quiz-generator.cloudfunctions.net/authentication-setRole";
