@@ -1,7 +1,7 @@
 <template>
     <v-container fluid class="sign-card fill-height">
         <div class="sign-pwr">
-            <h2>Clarice Terui</h2>
+            <h2>Plataforma Clarice Terui</h2>
         </div>
         <div class="sign-title">
             <h2>{{ showSignIn ? "Entrar" : "Registrar" }}</h2>

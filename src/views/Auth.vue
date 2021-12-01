@@ -8,8 +8,9 @@
                     src="../assets/CINA.png"
                     alt="CINA Image" >
                 <div class="sign-info">
-                    <h2 class="app-name">Clarice Terui</h2>
-                    <h1>Centro Industrial Nuclear de Aramar</h1>
+                    <h1 class="app-name">Plataforma Clarice Terui</h1>
+                    <p class="app-subtitle">Gerador de questionários PWR</p>
+                    <h3>Centro de Instrução e Adestramento Nuclear de Aramar</h3>
                 </div>
             </div>
             <SignUser @forgotPassword="isResetUserPwdModalVisible = true"/>
@@ -149,13 +150,20 @@
         align-items: flex-start;
     }
 
-    .sign-info > h1 {
+    .sign-info > h3 {
+        font-weight: normal;
+        color: #3d3d3d;
+    }
+
+    .sign-info > .app-subtitle {
+        font-size: 1.5rem;
         color: #333;
     }
 
     .sign-info > .app-name {
-        font-weight: normal;
         color: #2196f3;
+        line-height: 2rem;
+        font-size: 2.4rem;
     }
 
     .sign-container {
@@ -194,7 +202,7 @@
         }
 
         .sign-info {
-            flex-direction: column-reverse;
+            flex-direction: column;
             align-items: center;
             text-align: center;
         }
