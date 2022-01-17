@@ -34,7 +34,7 @@
     </v-navigation-drawer>
     <v-app-bar app v-if="user" color="blue darken-1" dark dense absolute>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Clarice Terui</v-toolbar-title>
+      <v-toolbar-title>LG Quiz Generator</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn text v-for="item in menuItems" :key="item.title" :to="item.link">
         <v-icon left>{{ item.icon }}</v-icon>
