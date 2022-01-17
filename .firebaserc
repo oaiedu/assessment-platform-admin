@@ -1,7 +1,6 @@
 {
   "projects": {
-    "default": "clarice-terui",
-    "develop": "pwr-quiz-generator-develop",
-    "stage": "stage-pwr-quiz-generator"
+    "default": "develop-lg-quiz-generator",
+    "develop": "develop-lg-quiz-generator"
   }
 }
