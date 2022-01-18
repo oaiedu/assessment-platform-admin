@@ -405,7 +405,6 @@ const actions = {
           claims[payload ? "student" : doc.data().role] = true;
 
           commit("setUserClaims", claims);
-          console.log(claims);
           res(claims);
         }
 
