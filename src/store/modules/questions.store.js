@@ -379,8 +379,10 @@ const actions = {
 
       request
         .then(snapshot => {
-          first = snapshot.docs[0].data().iq;
-          last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+          if (snapshot.docs.length > 0) {
+            first = snapshot.docs[0].data().iq;
+            last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+          }
 
           snapshot.forEach(doc => {
             data.push(doc.data());
@@ -407,11 +409,13 @@ const actions = {
         });
     } else {
       const pageContent = state.questions["p" + page];
-      const first = pageContent[0].iq;
-      const last = pageContent[pageContent.length - 1].iq;
+      if (pageContent && pageContent.length > 0) {
+        const first = pageContent[0].iq;
+        const last = pageContent[pageContent.length - 1].iq;
+        commit("setLastQuestionDocument", [first, last]);
+      }
 
       commit("setCurrentQuestionsPage", pageContent);
-      commit("setLastQuestionDocument", [first, last]);
       commit("setLoading", false);
     }
   },
@@ -450,8 +454,10 @@ const actions = {
 
       request
         .then(snapshot => {
-          first = snapshot.docs[0].data().iq;
-          last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+          if (snapshot.docs.length > 0) {
+            first = snapshot.docs[0].data().iq;
+            last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+          }
 
           snapshot.forEach(doc => {
             data.push(doc.data());
@@ -625,7 +631,7 @@ const actions = {
         });
         commit("addDeleteMarkQuestion", { ...doc.data(), toDelete });
 
-        db.collection("question-subjects")
+        db.collection("subjects")
           .where("name", "==", doc.data().subject)
           .get()
           .then(snap => {
@@ -706,7 +712,7 @@ const actions = {
         commit("removeDeleteMarkQuestion", iq);
         commit("updateCurrentQuestionsPage", question);
 
-        db.collection("question-subjects")
+        db.collection("subjects")
           .where("name", "==", question.subject)
           .get()
           .then(snap => {
@@ -792,7 +798,7 @@ const actions = {
       })
       .then(() => {
         for (let subject in questionsData) {
-          db.collection("question-subjects")
+          db.collection("subjects")
             .where("name", "==", subject)
             .get()
             .then(snapshot => {
@@ -919,7 +925,7 @@ const actions = {
               .delete();
           }
 
-          db.collection("question-subjects")
+          db.collection("subjects")
             .where("name", "==", doc.data().subject)
             .get()
             .then(snap => {
@@ -1100,7 +1106,7 @@ const actions = {
               console.error(error);
             });
 
-          db.collection("question-subjects")
+          db.collection("subjects")
             .where("name", "==", question.subject)
             .get()
             .then(snapshot => {
@@ -1113,7 +1119,7 @@ const actions = {
               console.error(error);
             });
 
-          db.collection("question-subjects")
+          db.collection("subjects")
             .where("name", "==", oldSubject)
             .get()
             .then(snapshot => {
@@ -1276,7 +1282,7 @@ const actions = {
             console.error(error);
           });
 
-        db.collection("question-subjects")
+        db.collection("subjects")
           .where("name", "==", question.subject)
           .get()
           .then(snap => {
