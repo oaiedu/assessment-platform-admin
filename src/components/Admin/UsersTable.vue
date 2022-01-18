@@ -7,12 +7,6 @@
       :headers="headers"
       :loading="loading"
     >
-      <template v-slot:top>
-        <v-toolbar flat color="blue">
-          <v-toolbar-title class="white--text">Usuários</v-toolbar-title>
-        </v-toolbar>
-      </template>
-
       <template v-slot:[`item.role`]="{ item }">
         <span :class="item.email === currentUser.email && 'highlight'">{{
           getRoleName(item.role)
