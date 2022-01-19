@@ -163,15 +163,15 @@ export default {
     deleteItem: null,
     headers: [
       { text: "Nome", align: "left", value: "name", sortable: true },
-      { text: "Questões", align: "center", value: "questions", sortable: true },
+      { text: "Questões", align: "center", value: "amount", sortable: true },
       { text: "Ações", align: "right", value: "actions", sortable: false }
     ]
   }),
   computed: {
     subjects() {
-      return [...this.$store.state.Subject.subjects].sort((s1, s2) =>
-        s1.name < s2.name ? -1 : 1
-      );
+      return [...this.$store.state.Subject.subjects]
+        .sort((s1, s2) => (s1.name < s2.name ? -1 : 1))
+        .map(s => ({ ...s, amount: this.getQuestionsAmount(s.name) }));
     },
     loading() {
       return this.$store.getters.loading;
@@ -186,6 +186,9 @@ export default {
     }
   },
   methods: {
+    getQuestionsAmount(subjectName) {
+      return this.$store.getters.getNumberOfQuestionBySubject(subjectName);
+    },
     async addSubject() {
       await this.$store.dispatch("createSubject", this.subjectName);
       this.subjectName = "";
@@ -195,7 +198,7 @@ export default {
       this.deleteSnackbar = false;
       this.deleteItem = null;
 
-      if (subject.questions.length > 0) {
+      if (this.getQuestionsAmount(subject.name) > 0) {
         this.deleteWarning = true;
         return;
       }

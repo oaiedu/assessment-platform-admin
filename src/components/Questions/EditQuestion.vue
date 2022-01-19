@@ -1,7 +1,12 @@
 <template>
   <v-card>
-    <link rel="preload" as="style" type="text/css" onload="this.rel = 'stylesheet'"
-        href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
+    <link
+      rel="preload"
+      as="style"
+      type="text/css"
+      onload="this.rel = 'stylesheet'"
+      href="https://unpkg.com/katex@0.6.0/dist/katex.min.css"
+    />
     <v-toolbar dark color="primary">
       <v-btn icon dark @click="close()" class="mr-2">
         <v-icon>{{ mdiClose }}</v-icon>
@@ -10,58 +15,61 @@
       <v-spacer></v-spacer>
     </v-toolbar>
 
-    <v-tooltip right v-if='e1 > 1'>
-        <template v-slot:activator='{ on }'>
-            <v-btn
-                color="grey lighten-3"
-                v-on="on"
-                dark
-                fab
-                fixed
-                bottom
-                left
-                @click="e1 = e1 - 1" >
-                <v-icon color="blue darken-1">{{ mdiArrowLeft }}</v-icon>
-            </v-btn>
-        </template>
-        <span>Voltar</span>
+    <v-tooltip right v-if="e1 > 1">
+      <template v-slot:activator="{ on }">
+        <v-btn
+          color="grey lighten-3"
+          v-on="on"
+          dark
+          fab
+          fixed
+          bottom
+          left
+          @click="e1 = e1 - 1"
+        >
+          <v-icon color="blue darken-1">{{ mdiArrowLeft }}</v-icon>
+        </v-btn>
+      </template>
+      <span>Voltar</span>
     </v-tooltip>
 
-    <v-tooltip left v-if='e1 < 3'>
-        <template v-slot:activator='{ on }'>
-            <v-btn
-                color="blue darken-1"
-                class="mr-4"
-                v-on="on"
-                dark
-                fab
-                fixed
-                bottom
-                right
-                @click="e1 == 1 ? e1 = 2 : e1 = 3" >
-                <v-icon color="white">{{ mdiArrowRight }}</v-icon>
-            </v-btn>
-        </template>
-        <span>Continuar</span>
+    <v-tooltip left v-if="e1 < 3">
+      <template v-slot:activator="{ on }">
+        <v-btn
+          color="blue darken-1"
+          class="mr-4"
+          v-on="on"
+          dark
+          fab
+          fixed
+          bottom
+          right
+          @click="e1 == 1 ? (e1 = 2) : (e1 = 3)"
+        >
+          <v-icon color="white">{{ mdiArrowRight }}</v-icon>
+        </v-btn>
+      </template>
+      <span>Continuar</span>
     </v-tooltip>
 
     <v-tooltip left v-else>
-        <template v-slot:activator='{ on }'>
-            <v-btn
-                color="blue darken-1"
-                class="mr-4"
-                v-on="on"
-                dark
-                fab
-                fixed
-                bottom
-                right
-                :loading="loading"
-                @click="onEditQuestion()" >
-                <v-icon color="white">{{ mdiContentSave }}</v-icon>
-            </v-btn>
-        </template>
-        <span>Salvar</span>
+      <template v-slot:activator="{ on }">
+        <v-btn
+          color="blue darken-1"
+          class="mr-4"
+          v-on="on"
+          dark
+          fab
+          fixed
+          bottom
+          right
+          :loading="loading"
+          @click="onEditQuestion()"
+        >
+          <v-icon color="white">{{ mdiContentSave }}</v-icon>
+        </v-btn>
+      </template>
+      <span>Salvar</span>
     </v-tooltip>
 
     <v-container fluid>
@@ -72,19 +80,19 @@
               <v-stepper alt-labels v-model="e1">
                 <v-stepper-header>
                   <v-stepper-step editable :complete="e1 > 1" step="1">
-                      Detalhes
+                    Detalhes
                   </v-stepper-step>
 
                   <v-divider></v-divider>
 
                   <v-stepper-step editable :complete="e1 > 2" step="2">
-                      Enunciado
+                    Enunciado
                   </v-stepper-step>
 
                   <v-divider></v-divider>
 
                   <v-stepper-step editable step="3">
-                      Respostas
+                    Respostas
                   </v-stepper-step>
                 </v-stepper-header>
 
@@ -123,7 +131,7 @@
 
                       <v-row>
                         <v-select
-                          :items="subjectItems"
+                          :items="subjectItems.map(s => s.name)"
                           name="subject"
                           id="subject"
                           v-model="editedSubject"
@@ -137,24 +145,23 @@
                   <v-stepper-content step="2">
                     <v-container>
                       <v-row>
-                        <VueSimplemde v-model="editedQuestionDescription"/>
+                        <VueSimplemde v-model="editedQuestionDescription" />
                       </v-row>
 
                       <v-row>
                         <v-file-input
-                            chips
-                            clearable
-                            multiple
-                            label="Imagem"
-                            placeholder="Escolha uma imagem"
-                            v-model="images"
-                            @change="checkImageType"
-                            accept='image/png, image/jpeg, image/bmp' />
+                          chips
+                          clearable
+                          multiple
+                          label="Imagem"
+                          placeholder="Escolha uma imagem"
+                          v-model="images"
+                          @change="checkImageType"
+                          accept="image/png, image/jpeg, image/bmp"
+                        />
                       </v-row>
 
-                      <v-main
-                        v-if="editedImages"
-                      >
+                      <v-main v-if="editedImages">
                         <v-row justify="center">
                           <v-radio-group v-model="editedImageSize" row>
                             <v-radio label="1x" value="1x"></v-radio>
@@ -172,30 +179,49 @@
                         <v-row justify="end">
                           <v-col cols="1"></v-col>
                           <v-col v-for="i in number" :key="i">
-                            <v-text-field outlined v-model="auxTitle[i-1]"></v-text-field>
+                            <v-text-field
+                              outlined
+                              v-model="auxTitle[i - 1]"
+                            ></v-text-field>
                           </v-col>
                         </v-row>
-                        <v-row v-for="(item, index) in editedAnswers" :key="index">
+                        <v-row
+                          v-for="(item, index) in editedAnswers"
+                          :key="index"
+                        >
                           <v-col cols="12" md="1" sm="1" xs="1">
                             <v-radio-group v-model="radios">
                               <v-radio :value="item.ansId"></v-radio>
                             </v-radio-group>
                           </v-col>
-                          <v-col v-for="(answerItem, index) in item.text" :key="index">
-                            <v-text-field v-if="answerItem" outlined v-model="answerItem.answerDescription"></v-text-field>
+                          <v-col
+                            v-for="(answerItem, index) in item.text"
+                            :key="index"
+                          >
+                            <v-text-field
+                              v-if="answerItem"
+                              outlined
+                              v-model="answerItem.answerDescription"
+                            ></v-text-field>
                           </v-col>
                         </v-row>
                       </v-main>
 
                       <v-main v-else>
-                        <v-row v-for="(item, index) in editedAnswers" :key="index">
+                        <v-row
+                          v-for="(item, index) in editedAnswers"
+                          :key="index"
+                        >
                           <v-col cols="12" md="1" sm="1" xs="1">
                             <v-radio-group v-model="radios">
                               <v-radio :value="item.ansId"></v-radio>
                             </v-radio-group>
                           </v-col>
                           <v-col>
-                            <v-text-field outlined v-model="item.text"></v-text-field>
+                            <v-text-field
+                              outlined
+                              v-model="item.text"
+                            ></v-text-field>
                           </v-col>
                         </v-row>
                       </v-main>
@@ -209,14 +235,15 @@
 
         <v-col>
           <Preview
-            :iq='iq'
-            :subject='editedSubject'
-            :knowledge='editedKnowledge'
-            :knowledgePWR='editedKnowledgePWR'
-            :knowledgeBWR='editedKnowledgeBWR'
-            :questionDesc='editedQuestionDescription'
-            :answers='editedAnswers'
-            :image='imagePreview' />
+            :iq="iq"
+            :subject="editedSubject"
+            :knowledge="editedKnowledge"
+            :knowledgePWR="editedKnowledgePWR"
+            :knowledgeBWR="editedKnowledgeBWR"
+            :questionDesc="editedQuestionDescription"
+            :answers="editedAnswers"
+            :image="imagePreview"
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -224,27 +251,27 @@
 </template>
 
 <script>
-import 'simplemde/dist/simplemde.min.css';
-import VueSimplemde from 'vue-simplemde';
-import { mdiClose, mdiArrowLeft, mdiArrowRight, mdiContentSave } from '@mdi/js';
-import Preview from './Preview';
+import "simplemde/dist/simplemde.min.css";
+import VueSimplemde from "vue-simplemde";
+import { mdiClose, mdiArrowLeft, mdiArrowRight, mdiContentSave } from "@mdi/js";
+import Preview from "./Preview";
 
 export default {
   components: {
     VueSimplemde,
     Preview
   },
-  props: ['question', 'userClaims', 'userInfo', 'isSearching'],
+  props: ["question", "userClaims", "userInfo", "isSearching"],
   data() {
     return {
       mdiClose,
       mdiArrowLeft,
       mdiArrowRight,
       mdiContentSave,
-      imagePreview: '',
+      imagePreview: "",
       letters: ["A", "B", "C", "D"],
       confirmTitle: false,
-      editedQuestionDescription: '',
+      editedQuestionDescription: "",
       e1: 1,
       radios: null,
       columns: this.number,
@@ -266,20 +293,6 @@ export default {
       editedKnowledgePWR: null,
       editedImageSize: null,
       editedKnowledgeBWR: null,
-      subjectItems: [
-        "Teoria do Reator",
-        "Termodinâmica",
-        "Instrumentação e Controle",
-        "Válvulas e Bombas",
-        "Eletricidade",
-        "Mecânica dos Fluidos",
-        "Tratamento Qúimico Refrigerante",
-        "Análise Integrada",
-        "Instrumentação Nuclear",
-        "Física Nuclear",
-        "Transferência de Calor",
-        "Materiais"
-      ],
       number: 0,
       dialogState: false
     };
@@ -298,17 +311,20 @@ export default {
       );
     },
     iq() {
-        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.editedIq = this.question.iq;
-        return this.question.iq;
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      this.editedIq = this.question.iq;
+      return this.question.iq;
+    },
+    subjectItems() {
+      return this.$store.state.Subject.subjects;
     },
     loading() {
-        return this.$store.getters.loading;
+      return this.$store.getters.loading;
     }
   },
   watch: {
     editedIq(value) {
-        if (value) this.update();
+      if (value) this.update();
     },
     auxTitle(val) {
       if (this.confirmTitle) {
@@ -334,9 +350,7 @@ export default {
       this.editedKnowledgePWR = this.question.knowledgePWR;
       this.editedKnowledgeBWR = this.question.knowledgeBWR;
       this.editedImageSize = this.question.imageSize;
-      this.editedAnswers = JSON.parse(
-        JSON.stringify(this.question.answers)
-      );
+      this.editedAnswers = JSON.parse(JSON.stringify(this.question.answers));
       this.editedQuestionDescription = this.question.question;
 
       if (
@@ -346,10 +360,9 @@ export default {
         this.editedImages = "";
       else this.editedImages = this.question.image;
 
-      this.imagePreview = this.editedImages || '';
+      this.imagePreview = this.editedImages || "";
 
-      if (typeof this.question.answers[0].text == "string")
-        this.number = 1;
+      if (typeof this.question.answers[0].text == "string") this.number = 1;
       else this.number = this.question.answers[0].text.length;
 
       if (this.number > 1) this.confirmTitle = true;
@@ -373,7 +386,6 @@ export default {
         const imageToUpload = { image: this.images[0], iq: this.question.iq };
         const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
 
-
         URL.then(result => {
           this.editedImages = result;
 
@@ -388,7 +400,7 @@ export default {
             answers: this.question.answers,
             image: this.question.image,
             edited: this.question.edited,
-            imageSize: this.question.imageSize || "1x",
+            imageSize: this.question.imageSize || "1x"
           };
 
           const questionData = {
@@ -402,26 +414,31 @@ export default {
             answers: this.editedAnswers,
             image: this.editedImages,
             imageSize: this.editedImageSize
-          }
+          };
 
           let aux = null;
 
-          if(this.userClaims && this.userClaims['admin']) {
+          if (this.userClaims && this.userClaims["admin"]) {
             const sendInfo = {
-                oldData,
-                questionData,
-                user: this.$store.getters.user.id,
-                isSearching: this.isSearching
-            }
+              oldData,
+              questionData,
+              user: this.$store.getters.user.id,
+              isSearching: this.isSearching
+            };
 
             aux = this.$store.dispatch("editQuestion", sendInfo);
           } else {
             const request = {
-                ...questionData,
-                status: 'Pendente',
-                userId: this.userInfo.id
-            }
-            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', request, user: this.userInfo, isSearching: this.isSearching });
+              ...questionData,
+              status: "Pendente",
+              userId: this.userInfo.id
+            };
+            aux = this.$store.dispatch("updateQuestionRequest", {
+              mode: "reqUpdate",
+              request,
+              user: this.userInfo,
+              isSearching: this.isSearching
+            });
           }
           aux.then(() => {
             this.close();
@@ -442,7 +459,7 @@ export default {
           imageSize: this.question.imageSize
         };
 
-        const  questionData = {
+        const questionData = {
           iq: this.editedIq,
           created: this.question.created || null,
           subject: this.editedSubject,
@@ -457,22 +474,27 @@ export default {
 
         let aux = null;
 
-        if(this.userClaims && this.userClaims['admin']) {
-            const sendInfo = {
-                oldData,
-                questionData,
-                user: this.$store.getters.user.id,
-                isSearching: this.isSearching
-            }
+        if (this.userClaims && this.userClaims["admin"]) {
+          const sendInfo = {
+            oldData,
+            questionData,
+            user: this.$store.getters.user.id,
+            isSearching: this.isSearching
+          };
 
-            aux = this.$store.dispatch("editQuestion", sendInfo);
+          aux = this.$store.dispatch("editQuestion", sendInfo);
         } else {
-            const request = {
-                ...questionData,
-                status: 'Pendente',
-                userId: this.userInfo.id
-            }
-            aux = this.$store.dispatch('updateQuestionRequest', { mode: 'reqUpdate', request, user: this.userInfo, isSearching: this.isSearching });
+          const request = {
+            ...questionData,
+            status: "Pendente",
+            userId: this.userInfo.id
+          };
+          aux = this.$store.dispatch("updateQuestionRequest", {
+            mode: "reqUpdate",
+            request,
+            user: this.userInfo,
+            isSearching: this.isSearching
+          });
         }
         aux.then(() => {
           this.close();
@@ -481,7 +503,7 @@ export default {
     },
     setInitialData() {
       this.confirmTitle = false;
-      this.editedQuestionDescription = '';
+      this.editedQuestionDescription = "";
       this.e1 = 1;
       this.radios = null;
       this.columns = this.number;
@@ -491,7 +513,7 @@ export default {
       this.chips = [];
       this.items = [];
       this.images = [];
-      this.imagePreview = '';
+      this.imagePreview = "";
       this.editedAnswers = [];
       this.editedIq = null;
       this.editedSubject = null;
@@ -502,26 +524,30 @@ export default {
       this.number = 0;
     },
     checkImageType(event) {
-        if(event && event[0] && event[0].type) {
-            if(!event[0].type.match(/image.*/)) {
-                this.$store.commit('setError', { message: 'O arquivo inserido NÃO é uma imagem!' });
-                this.images = [];
-            } else if (event[0].size > 2000000) {
-                this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
-                this.images = [];
-            } else {
-                const file = event[0];
-                const reader = new FileReader();
+      if (event && event[0] && event[0].type) {
+        if (!event[0].type.match(/image.*/)) {
+          this.$store.commit("setError", {
+            message: "O arquivo inserido NÃO é uma imagem!"
+          });
+          this.images = [];
+        } else if (event[0].size > 2000000) {
+          this.$store.commit("setError", {
+            message: "O tamanho da imagem deve ser no MÁXIMO 2 MB!"
+          });
+          this.images = [];
+        } else {
+          const file = event[0];
+          const reader = new FileReader();
 
-                reader.onload = readerEvent => {
-                    this.imagePreview = readerEvent.target.result;
-                }
+          reader.onload = readerEvent => {
+            this.imagePreview = readerEvent.target.result;
+          };
 
-                reader.readAsDataURL(file);
-            }
-        } else if (this.imagePreview && this.imagePreview !== '') {
-            this.imagePreview = this.editedImages || '';
+          reader.readAsDataURL(file);
         }
+      } else if (this.imagePreview && this.imagePreview !== "") {
+        this.imagePreview = this.editedImages || "";
+      }
     },
     close() {
       this.setInitialData();
@@ -532,11 +558,11 @@ export default {
 </script>
 
 <style>
-    .answer-block {
-        margin: 0 !important;
-    }
+.answer-block {
+  margin: 0 !important;
+}
 
-    .answer-block .col {
-        padding: 0 10px 0 10px !important;
-    }
+.answer-block .col {
+  padding: 0 10px 0 10px !important;
+}
 </style>

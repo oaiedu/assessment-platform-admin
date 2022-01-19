@@ -49,6 +49,41 @@ const mutations = {
   },
 
   /**
+   * Adds/Removes a question from a subject.
+   *
+   * If the question already exists into the subject, it will
+   * be removed, otherwise it will be added.
+   *
+   * @param {SubjectState} state The subject state.
+   * @param {Object} data
+   * @param {string} data.subjectId The subject id.
+   * @param {string} data.questionId The question id.
+   * @param {boolean} data.remove Whether the question will be removed.
+   */
+  addRemoveQuestion(state, data) {
+    const subjects = [...state.subjects];
+    const subjectIndex = subjects.findIndex(s => s.id === data.subjectId);
+
+    if (!subjects[subjectIndex]) {
+      return;
+    }
+
+    const index = subjects[subjectIndex].questions.findIndex(
+      qid => qid === data.questionId
+    );
+
+    if (data.remove && index !== -1) {
+      subjects[subjectIndex].questions.splice(index, 1);
+    } else if (index === -1) {
+      subjects[subjectIndex].questions.push(data.questionId);
+    }
+
+    subjects[subjectIndex].questions.sort((q1, q2) => (q1 < q2 ? -1 : 1));
+
+    state.subjects = subjects;
+  },
+
+  /**
    * Removes a subject from the state by its id.
    *
    * @param {SubjectState} state The subject state.

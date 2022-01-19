@@ -192,13 +192,18 @@ export default {
     },
     questionsBySubject() {
       const statistics = [];
-      const subjects = this.$store.getters.getSubjects;
+      const subjects = this.$store.state.Subject.subjects;
+
       subjects.forEach(element => {
         const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubject(
-          element
+          element.name
         );
-        statistics.push({ name: element, value: numberOfQuestions });
+
+        if (numberOfQuestions) {
+          statistics.push({ name: element.name, value: numberOfQuestions });
+        }
       });
+
       return statistics.sort((a, b) => (a.value - b.value) * -1);
     },
     numberOfQuestions() {

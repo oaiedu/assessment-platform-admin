@@ -1,7 +1,12 @@
 <template>
   <v-card>
-    <link rel="preload" as="style" type="text/css" onload="this.rel = 'stylesheet'"
-        href="https://unpkg.com/katex@0.6.0/dist/katex.min.css" />
+    <link
+      rel="preload"
+      as="style"
+      type="text/css"
+      onload="this.rel = 'stylesheet'"
+      href="https://unpkg.com/katex@0.6.0/dist/katex.min.css"
+    />
     <v-toolbar dark color="primary">
       <v-btn icon dark @click="close()" class="mr-2">
         <v-icon>{{ mdiClose }}</v-icon>
@@ -10,58 +15,61 @@
       <v-spacer></v-spacer>
     </v-toolbar>
 
-    <v-tooltip right v-if='e1 > 1'>
-        <template v-slot:activator='{ on }'>
-            <v-btn
-                color="grey lighten-3"
-                v-on="on"
-                dark
-                fab
-                fixed
-                bottom
-                left
-                @click="e1 = e1 - 1" >
-                <v-icon color="blue darken-1">{{ mdiArrowLeft }}</v-icon>
-            </v-btn>
-        </template>
-        <span>Voltar</span>
+    <v-tooltip right v-if="e1 > 1">
+      <template v-slot:activator="{ on }">
+        <v-btn
+          color="grey lighten-3"
+          v-on="on"
+          dark
+          fab
+          fixed
+          bottom
+          left
+          @click="e1 = e1 - 1"
+        >
+          <v-icon color="blue darken-1">{{ mdiArrowLeft }}</v-icon>
+        </v-btn>
+      </template>
+      <span>Voltar</span>
     </v-tooltip>
 
-    <v-tooltip left v-if='e1 < 3'>
-        <template v-slot:activator='{ on }'>
-            <v-btn
-                color="blue darken-1"
-                class="mr-4"
-                v-on="on"
-                dark
-                fab
-                fixed
-                bottom
-                right
-                @click="e1 == 1 ? e1 = 2 : e1 = 3" >
-                <v-icon color="white">{{ mdiArrowRight }}</v-icon>
-            </v-btn>
-        </template>
-        <span>Continuar</span>
+    <v-tooltip left v-if="e1 < 3">
+      <template v-slot:activator="{ on }">
+        <v-btn
+          color="blue darken-1"
+          class="mr-4"
+          v-on="on"
+          dark
+          fab
+          fixed
+          bottom
+          right
+          @click="e1 == 1 ? (e1 = 2) : (e1 = 3)"
+        >
+          <v-icon color="white">{{ mdiArrowRight }}</v-icon>
+        </v-btn>
+      </template>
+      <span>Continuar</span>
     </v-tooltip>
 
     <v-tooltip left v-else>
-        <template v-slot:activator='{ on }'>
-            <v-btn
-                color="blue darken-1"
-                class="mr-4"
-                v-on="on"
-                dark
-                fab
-                fixed
-                bottom
-                right
-                :loading="loading"
-                @click="onCreateQuestion()" >
-                <v-icon color="white">{{ mdiContentSave }}</v-icon>
-            </v-btn>
-        </template>
-        <span>Salvar</span>
+      <template v-slot:activator="{ on }">
+        <v-btn
+          color="blue darken-1"
+          class="mr-4"
+          v-on="on"
+          dark
+          fab
+          fixed
+          bottom
+          right
+          :loading="loading"
+          @click="onCreateQuestion()"
+        >
+          <v-icon color="white">{{ mdiContentSave }}</v-icon>
+        </v-btn>
+      </template>
+      <span>Salvar</span>
     </v-tooltip>
 
     <v-container fluid>
@@ -72,19 +80,19 @@
               <v-stepper alt-labels v-model="e1">
                 <v-stepper-header>
                   <v-stepper-step editable :complete="e1 > 1" step="1">
-                      Detalhes
+                    Detalhes
                   </v-stepper-step>
 
                   <v-divider></v-divider>
 
                   <v-stepper-step editable :complete="e1 > 2" step="2">
-                      Enunciado
+                    Enunciado
                   </v-stepper-step>
 
                   <v-divider></v-divider>
 
                   <v-stepper-step editable step="3">
-                      Respostas
+                    Respostas
                   </v-stepper-step>
                 </v-stepper-header>
 
@@ -93,7 +101,13 @@
                     <v-container>
                       <v-row>
                         <v-col>
-                          <v-text-field name="iq" label="IQ" id="iq" v-model="iq" required></v-text-field>
+                          <v-text-field
+                            name="iq"
+                            label="IQ"
+                            id="iq"
+                            v-model="iq"
+                            required
+                          ></v-text-field>
                         </v-col>
                       </v-row>
 
@@ -136,7 +150,7 @@
                       <v-row>
                         <v-col>
                           <v-select
-                            :items="subjectItems"
+                            :items="subjectItems.map(s => s.name)"
                             name="subject"
                             id="subject"
                             v-model="subject"
@@ -152,8 +166,7 @@
                     <v-container>
                       <v-row justify="center">
                         <v-col cols="12">
-                          <VueSimplemde
-                            v-model="questionDescription" />
+                          <VueSimplemde v-model="questionDescription" />
                         </v-col>
                       </v-row>
                       <v-row justify="center">
@@ -166,7 +179,8 @@
                             placeholder="Escolha uma imagem"
                             v-model="images"
                             @change="checkImageType"
-                            accept='image/png, image/jpeg, image/bmp' />
+                            accept="image/png, image/jpeg, image/bmp"
+                          />
                         </v-col>
                       </v-row>
                       <v-main v-if="images && images.length != 0">
@@ -214,7 +228,10 @@
                         <v-row justify="end">
                           <v-col cols="1"></v-col>
                           <v-col v-for="i in number" :key="i">
-                            <v-text-field outlined v-model="auxTitle[i-1]"></v-text-field>
+                            <v-text-field
+                              outlined
+                              v-model="auxTitle[i - 1]"
+                            ></v-text-field>
                           </v-col>
                         </v-row>
                         <v-row v-for="(item, index) in answers" :key="index">
@@ -223,8 +240,15 @@
                               <v-radio :value="item.ansId"></v-radio>
                             </v-radio-group>
                           </v-col>
-                          <v-col v-for="(answerItem, index) in item.text" :key="index">
-                            <v-text-field v-if="answerItem" outlined v-model="answerItem.answerDescription"></v-text-field>
+                          <v-col
+                            v-for="(answerItem, index) in item.text"
+                            :key="index"
+                          >
+                            <v-text-field
+                              v-if="answerItem"
+                              outlined
+                              v-model="answerItem.answerDescription"
+                            ></v-text-field>
                           </v-col>
                         </v-row>
                       </v-main>
@@ -237,7 +261,10 @@
                             </v-radio-group>
                           </v-col>
                           <v-col>
-                            <v-text-field outlined v-model="item.text"></v-text-field>
+                            <v-text-field
+                              outlined
+                              v-model="item.text"
+                            ></v-text-field>
                           </v-col>
                         </v-row>
                       </v-main>
@@ -251,14 +278,15 @@
 
         <v-col>
           <Preview
-            :iq='iq'
-            :subject='subject'
-            :knowledge='knowledge'
-            :knowledgePWR='knowledgePWR'
-            :knowledgeBWR='knowledgeBWR'
-            :questionDesc='questionDescription'
-            :answers='answers'
-            :image='imagePreview' />
+            :iq="iq"
+            :subject="subject"
+            :knowledge="knowledge"
+            :knowledgePWR="knowledgePWR"
+            :knowledgeBWR="knowledgeBWR"
+            :questionDesc="questionDescription"
+            :answers="answers"
+            :image="imagePreview"
+          />
         </v-col>
       </v-row>
 
@@ -269,21 +297,23 @@
         right
         top
         vertical
-        :timeout="15000" >
-        <span style='color: white; font-size: 1rem'>
-            Uma questão com este IQ já foi criada!
-            <br>
-            Por favor, mude o IQ.
+        :timeout="15000"
+      >
+        <span style="color: white; font-size: 1rem">
+          Uma questão com este IQ já foi criada!
+          <br />
+          Por favor, mude o IQ.
         </span>
-        <template v-slot:action='{ attrs }'>
-            <v-btn
-                dark
-                color="white"
-                text
-                v-bind='attrs'
-                @click="createErrorSnackBar = false" >
-                Fechar
-            </v-btn>
+        <template v-slot:action="{ attrs }">
+          <v-btn
+            dark
+            color="white"
+            text
+            v-bind="attrs"
+            @click="createErrorSnackBar = false"
+          >
+            Fechar
+          </v-btn>
         </template>
       </v-snackbar>
     </v-container>
@@ -291,308 +321,310 @@
 </template>
 
 <script>
-import 'simplemde/dist/simplemde.min.css';
-import VueSimplemde from 'vue-simplemde';
-import { mdiClose, mdiPlus, mdiMinus, mdiArrowLeft, mdiArrowRight, mdiContentSave } from '@mdi/js';
-import Preview from './Preview';
+import "simplemde/dist/simplemde.min.css";
+import VueSimplemde from "vue-simplemde";
+import {
+  mdiClose,
+  mdiPlus,
+  mdiMinus,
+  mdiArrowLeft,
+  mdiArrowRight,
+  mdiContentSave
+} from "@mdi/js";
+import Preview from "./Preview";
 
 export default {
-    components: {
-        Preview,
-        VueSimplemde
+  components: {
+    Preview,
+    VueSimplemde
+  },
+  props: ["questionRequest", "page"],
+  data() {
+    return {
+      mdiClose,
+      mdiPlus,
+      mdiMinus,
+      mdiArrowLeft,
+      mdiArrowRight,
+      mdiContentSave,
+      imagePreview: "",
+      images: [],
+      imagesAsURL: "",
+      imageSize: "1x",
+      confirmTitle: false,
+      questionDescription: "",
+      createErrorSnackBar: false,
+      e1: 1,
+      test: null,
+      columns: null,
+      radios: "",
+      multipleAnswer: false,
+      auxTitle: [],
+      chips: [],
+      items: [],
+      answers: [
+        { text: "", ansId: "radio-1", value: false },
+        { text: "", ansId: "radio-2", value: false },
+        { text: "", ansId: "radio-3", value: false },
+        { text: "", ansId: "radio-4", value: false }
+      ],
+      iq: "",
+      subject: "",
+      knowledge: "",
+      knowledgePWR: "",
+      knowledgeBWR: "",
+      number: 1
+    };
+  },
+  computed: {
+    formIsValid() {
+      return (
+        this.iq !== "" &&
+        this.knowledge !== "" &&
+        this.knowledgePWR !== "" &&
+        this.knowledgeBWR !== "" &&
+        this.subject !== ""
+      );
     },
-    props: ['questionRequest', 'page'],
-    data() {
-        return {
-            mdiClose,
-            mdiPlus,
-            mdiMinus,
-            mdiArrowLeft,
-            mdiArrowRight,
-            mdiContentSave,
-            imagePreview: '',
-            images: [],
-            imagesAsURL: "",
-            imageSize: "1x",
-            confirmTitle: false,
-            questionDescription: "",
-            createErrorSnackBar: false,
-            e1: 1,
-            test: null,
-            columns: null,
-            radios: "",
-            multipleAnswer: false,
-            auxTitle: [],
-            chips: [],
-            items: [],
-            answers: [
-                { text: "", ansId: "radio-1", value: false },
-                { text: "", ansId: "radio-2", value: false },
-                { text: "", ansId: "radio-3", value: false },
-                { text: "", ansId: "radio-4", value: false }
-            ],
-            iq: "",
-            subject: "",
-            knowledge: "",
-            knowledgePWR: "",
-            knowledgeBWR: "",
-            subjectItems: [
-                "Teoria do Reator",
-                "Termodinâmica",
-                "Instrumentação e Controle",
-                "Válvulas e Bombas",
-                "Eletricidade",
-                "Mecânica dos Fluidos",
-                "Tratamento Qúimico Refrigerante",
-                "Análise Integrada",
-                "Instrumentação Nuclear",
-                "Física Nuclear",
-                "Transferência de Calor",
-                "Materiais"
-            ],
-            number: 1
-        };
+    userClaims() {
+      return this.$store.getters.getUserClaims;
     },
-    computed: {
-        formIsValid() {
-            return (
-                this.iq !== "" &&
-                this.knowledge !== "" &&
-                this.knowledgePWR !== "" &&
-                this.knowledgeBWR !== "" &&
-                this.subject !== ""
-            );
-        },
-        userClaims() {
-            return this.$store.getters.getUserClaims;
-        },
-        userInfo() {
-            return this.$store.getters.userInfo;
-        },
-        loading() {
-            return this.$store.getters.loading;
-        }
+    userInfo() {
+      return this.$store.getters.userInfo;
     },
-    watch: {
-        number(val, oldVal) {
-            if (val > 1) {
-                this.answers.forEach(element => {
-                    const aux = [];
-                    for (let i = 0; i < val; i++) {
-                        if (element.text || element.text[i]) {
-                            const text = element.text[i] && element.text[i].answerDescription
-                                ? element.text[i].answerDescription
-                                : (i === 0 && oldVal === 1 ? element.text : '');
-                            const title = element.text[i] && element.text[i].title
-                                ? element.text[i].title : '';
-                            aux.push({ title: title || this.auxTitle[i] || "", answerDescription: text || "" });
-                        } else {
-                            aux.push({ title: '', answerDescription: '' });
-                        }
-                    }
-                    element.text = aux;
-                });
-
-                this.confirmTitle = true;
-            } else {
-                this.answers.forEach(element => {
-                    element.text = element.text && element.text[0] ? element.text[0].answerDescription : "";
-                });
-                this.confirmTitle = false;
-            }
-        },
-        auxTitle(val) {
-            if(this.auxTitle.length > 0) {
-                this.answers.forEach(element => {
-                    for (let i = 0; i < this.number; i++) {
-                        element.text[i].title = this.auxTitle[i];
-                    }
-                });
-            }
-        },
-        radios(val) {
-            this.answers.forEach(element => {
-                if (element.ansId === val) {
-                    element.value = true;
-                } else {
-                    element.value = false;
-                }
-            });
-        }
+    subjectItems() {
+      return this.$store.state.Subject.subjects;
     },
-    methods: {
-        decreaseColumns() {
-            if (this.number > 1) {
-                this.number--;
-            }
-        },
-        increaseColumns() {
-            if (this.number < 5) {
-                this.number++;
-            }
-        },
-        updateData(variable) {
-            this.questionDescription = variable;
-        },
-        onCreateQuestion() {
-            this.$store.dispatch('questionExists', this.iq)
-                .then(exist => {
-                    if(exist) {
-                        this.createErrorSnackBar = true;
-                    } else {
-                        if (this.images && this.images[0]) {
-                            const imageToUpload = { iq: this.iq, image: this.images[0] };
-                            const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
-
-                            URL.then(result => {
-                                this.imagesAsURL = result;
-                                const questionData = {
-                                    iq: this.iq.toUpperCase(),
-                                    subject: this.subject,
-                                    question: this.questionDescription,
-                                    knowledge: this.knowledge,
-                                    knowledgePWR: this.knowledgePWR,
-                                    knowledgeBWR: this.knowledgeBWR,
-                                    answers: this.answers,
-                                    image: this.imagesAsURL,
-                                    imageSize: this.imageSize,
-                                };
-
-                                let aux = null;
-
-                                if(this.userClaims && this.userClaims['admin']) {
-                                    aux = this.$store.dispatch("createQuestion", { question: questionData });
-                                } else {
-                                    aux = this.$store.dispatch('createQuestionRequest', {
-                                        request: {
-                                            ...questionData,
-                                            userId: this.userInfo.id,
-                                            status: 'Pendente'
-                                        },
-                                        user: this.userInfo
-                                    });
-                                }
-
-                                aux.then(() => {
-                                    this.setInitialData();
-                                    this.close();
-                                });
-                            });
-                        } else {
-                            const questionData = {
-                                iq: this.iq.toUpperCase(),
-                                subject: this.subject,
-                                question: this.questionDescription,
-                                knowledge: this.knowledge,
-                                knowledgePWR: this.knowledgePWR,
-                                knowledgeBWR: this.knowledgeBWR,
-                                answers: this.answers,
-                                image: "",
-                                imageSize: this.imageSize,
-                            };
-
-                            let aux = null;
-
-                            if(this.userClaims && this.userClaims['admin']) {
-                                    aux = this.$store.dispatch("createQuestion", { question: questionData, page: this.page });
-                            } else {
-                                aux = this.$store.dispatch('createQuestionRequest', {
-                                    request: {
-                                        ...questionData,
-                                        userId: this.userInfo.id,
-                                        status: 'Pendente'
-                                    },
-                                    user: this.userInfo
-                                });
-                            }
-
-                            aux.then(() => {
-                                this.setInitialData();
-                                this.close();
-                            });
-                        }
-                    }
-                });
-
-
-        },
-        setInitialData() {
-            this.confirmTitle = false;
-            this.questionDescription = "";
-            this.imageSize = "1x";
-            this.e1 = 1;
-            this.test = null;
-            this.columns = null;
-            this.radios = "aaaa";
-            this.multipleAnswer = false;
-            this.auxTitle = [];
-            this.chips = [];
-            this.items = [];
-            this.answers = [
-                { text: [], ansId: "radio-1", value: false },
-                { text: [], ansId: "radio-2", value: false },
-                { text: [], ansId: "radio-3", value: false },
-                { text: [], ansId: "radio-4", value: false }
-            ];
-            this.iq = "";
-            this.subject = "";
-            this.knowledge = "";
-            this.knowledgePWR = "";
-            this.knowledgeBWR = "";
-            this.subjectItems = [
-                "Teoria do Reator",
-                "Termodinâmica",
-                "Instrumentação e Controle",
-                "Válvulas e Bombas",
-                "Eletricidade",
-                "Mecânica dos Fluidos",
-                "Tratamento Qúimico Refrigerante",
-                "Análise Integrada",
-                "Instrumentação Nuclear",
-                "Física Nuclear",
-                "Transferência de Calor",
-                "Materiais"
-            ];
-            this.number = 0;
-            this.images = [];
-            this.imagesAsBase64 = "";
-        },
-        checkImageType(event) {
-            if(event && event[0] && event[0].type) {
-                if(!event[0].type.match(/image.*/)) {
-                    this.$store.commit('setError', { message: 'O arquivo inserido NÃO é uma imagem!' });
-                    this.images = [];
-                } else if (event[0].size > 2000000) {
-                    this.$store.commit('setError', { message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!' });
-                    this.images = [];
-                } else {
-                    const file = event[0];
-                    const reader = new FileReader();
-
-                    reader.onload = readerEvent => {
-                        this.imagePreview = readerEvent.target.result;
-                    }
-
-                    reader.readAsDataURL(file);
-                }
-            } else if (this.imagePreview && this.imagePreview !== '') {
-                this.imagePreview = '';
-            }
-        },
-        close() {
-            this.setInitialData();
-            this.$emit("closeDialogNew");
-        }
+    loading() {
+      return this.$store.getters.loading;
     }
+  },
+  watch: {
+    number(val, oldVal) {
+      if (val > 1) {
+        this.answers.forEach(element => {
+          const aux = [];
+          for (let i = 0; i < val; i++) {
+            if (element.text || element.text[i]) {
+              const text =
+                element.text[i] && element.text[i].answerDescription
+                  ? element.text[i].answerDescription
+                  : i === 0 && oldVal === 1
+                  ? element.text
+                  : "";
+              const title =
+                element.text[i] && element.text[i].title
+                  ? element.text[i].title
+                  : "";
+              aux.push({
+                title: title || this.auxTitle[i] || "",
+                answerDescription: text || ""
+              });
+            } else {
+              aux.push({ title: "", answerDescription: "" });
+            }
+          }
+          element.text = aux;
+        });
+
+        this.confirmTitle = true;
+      } else {
+        this.answers.forEach(element => {
+          element.text =
+            element.text && element.text[0]
+              ? element.text[0].answerDescription
+              : "";
+        });
+        this.confirmTitle = false;
+      }
+    },
+    auxTitle(val) {
+      if (this.auxTitle.length > 0) {
+        this.answers.forEach(element => {
+          for (let i = 0; i < this.number; i++) {
+            element.text[i].title = this.auxTitle[i];
+          }
+        });
+      }
+    },
+    radios(val) {
+      this.answers.forEach(element => {
+        if (element.ansId === val) {
+          element.value = true;
+        } else {
+          element.value = false;
+        }
+      });
+    }
+  },
+  methods: {
+    decreaseColumns() {
+      if (this.number > 1) {
+        this.number--;
+      }
+    },
+    increaseColumns() {
+      if (this.number < 5) {
+        this.number++;
+      }
+    },
+    updateData(variable) {
+      this.questionDescription = variable;
+    },
+    onCreateQuestion() {
+      this.$store.dispatch("questionExists", this.iq).then(exist => {
+        if (exist) {
+          this.createErrorSnackBar = true;
+        } else {
+          if (this.images && this.images[0]) {
+            const imageToUpload = { iq: this.iq, image: this.images[0] };
+            const URL = this.$store.dispatch(
+              "uploadImageQuestion",
+              imageToUpload
+            );
+
+            URL.then(result => {
+              this.imagesAsURL = result;
+              const questionData = {
+                iq: this.iq.toUpperCase(),
+                subject: this.subject,
+                question: this.questionDescription,
+                knowledge: this.knowledge,
+                knowledgePWR: this.knowledgePWR,
+                knowledgeBWR: this.knowledgeBWR,
+                answers: this.answers,
+                image: this.imagesAsURL,
+                imageSize: this.imageSize
+              };
+
+              let aux = null;
+
+              if (this.userClaims && this.userClaims["admin"]) {
+                aux = this.$store.dispatch("createQuestion", {
+                  question: questionData
+                });
+              } else {
+                aux = this.$store.dispatch("createQuestionRequest", {
+                  request: {
+                    ...questionData,
+                    userId: this.userInfo.id,
+                    status: "Pendente"
+                  },
+                  user: this.userInfo
+                });
+              }
+
+              aux.then(() => {
+                this.setInitialData();
+                this.close();
+              });
+            });
+          } else {
+            const questionData = {
+              iq: this.iq.toUpperCase(),
+              subject: this.subject,
+              question: this.questionDescription,
+              knowledge: this.knowledge,
+              knowledgePWR: this.knowledgePWR,
+              knowledgeBWR: this.knowledgeBWR,
+              answers: this.answers,
+              image: "",
+              imageSize: this.imageSize
+            };
+
+            let aux = null;
+
+            if (this.userClaims && this.userClaims["admin"]) {
+              aux = this.$store.dispatch("createQuestion", {
+                question: questionData,
+                page: this.page
+              });
+            } else {
+              aux = this.$store.dispatch("createQuestionRequest", {
+                request: {
+                  ...questionData,
+                  userId: this.userInfo.id,
+                  status: "Pendente"
+                },
+                user: this.userInfo
+              });
+            }
+
+            aux.then(() => {
+              this.setInitialData();
+              this.close();
+            });
+          }
+        }
+      });
+    },
+    setInitialData() {
+      this.confirmTitle = false;
+      this.questionDescription = "";
+      this.imageSize = "1x";
+      this.e1 = 1;
+      this.test = null;
+      this.columns = null;
+      this.radios = "aaaa";
+      this.multipleAnswer = false;
+      this.auxTitle = [];
+      this.chips = [];
+      this.items = [];
+      this.answers = [
+        { text: [], ansId: "radio-1", value: false },
+        { text: [], ansId: "radio-2", value: false },
+        { text: [], ansId: "radio-3", value: false },
+        { text: [], ansId: "radio-4", value: false }
+      ];
+      this.iq = "";
+      this.subject = "";
+      this.knowledge = "";
+      this.knowledgePWR = "";
+      this.knowledgeBWR = "";
+      this.number = 0;
+      this.images = [];
+      this.imagesAsBase64 = "";
+    },
+    checkImageType(event) {
+      if (event && event[0] && event[0].type) {
+        if (!event[0].type.match(/image.*/)) {
+          this.$store.commit("setError", {
+            message: "O arquivo inserido NÃO é uma imagem!"
+          });
+          this.images = [];
+        } else if (event[0].size > 2000000) {
+          this.$store.commit("setError", {
+            message: "O tamanho da imagem deve ser no MÁXIMO 2 MB!"
+          });
+          this.images = [];
+        } else {
+          const file = event[0];
+          const reader = new FileReader();
+
+          reader.onload = readerEvent => {
+            this.imagePreview = readerEvent.target.result;
+          };
+
+          reader.readAsDataURL(file);
+        }
+      } else if (this.imagePreview && this.imagePreview !== "") {
+        this.imagePreview = "";
+      }
+    },
+    close() {
+      this.setInitialData();
+      this.$emit("closeDialogNew");
+    }
+  }
 };
 </script>
 
 <style>
-    .answer-block {
-        margin: 0 !important;
-    }
+.answer-block {
+  margin: 0 !important;
+}
 
-    .answer-block .col {
-        padding: 0 10px 0 10px !important;
-    }
+.answer-block .col {
+  padding: 0 10px 0 10px !important;
+}
 </style>

@@ -82,12 +82,15 @@ export default {
   computed: {
     statistics() {
       let statisticsObj = [];
-      const subjects = this.$store.getters.getSubjects;
+      const subjects = this.$store.getters.Subject.subjects;
       subjects.forEach(element => {
         const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubject(
-          element
+          element.name
         );
-        statisticsObj.push({ name: element, questions: numberOfQuestions });
+        statisticsObj.push({
+          name: element.name,
+          questions: numberOfQuestions
+        });
       });
       return statisticsObj;
     },

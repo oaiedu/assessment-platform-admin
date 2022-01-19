@@ -86,7 +86,11 @@ export default {
       if (number === 0 && !this.isBackupsLoaded) {
         this.$store.dispatch("loadBackups");
         this.isBackupsLoaded = true;
-      } else if (number === 1 && !this.isSubjectsLoaded) {
+      } else if (
+        number === 1 &&
+        !this.isSubjectsLoaded &&
+        this.$store.state.Subject.subjects.length === 0
+      ) {
         this.$store.dispatch("loadSubjects");
         this.isSubjectsLoaded = true;
       } else if (number === 2 && !this.isUsersLoaded) {

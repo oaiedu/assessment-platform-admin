@@ -76,7 +76,6 @@ const initialState = () => ({
   questions: {},
   filteredQuestions: [],
   currentQuestionsPage: [],
-  subjects: [],
   lastQuestionDocument: null,
   deleteMarkQuestions: []
 });
@@ -536,12 +535,11 @@ const actions = {
   /**
    * Gets all tests that includes a question based on it's IQ.
    *
-   * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
    * @param {string} payload.iq - The question IQ.
    * @returns {Promise<Test[]>} An array of tests.
    */
-  async checkQuestionInTests(store, payload) {
+  async checkQuestionInTests(_, payload) {
     const { iq } = payload;
 
     return new Promise((resolve, reject) => {
@@ -641,6 +639,12 @@ const actions = {
 
             if (index !== -1) questions.splice(index, 1);
             document.ref.update({ questions });
+
+            commit("addRemoveQuestion", {
+              subjectId: document.id,
+              questionId: iq,
+              remove: true
+            });
           })
           .catch(error => {
             console.error(error);
@@ -660,11 +664,11 @@ const actions = {
   /**
    * Restores a question from being marked to be deleted.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.iq - The question IQ.
-   * @param {boolean} payload.isSearching - Whether the application is using filtered questions or not.
-   * @param {boolean} payload.isRequest - Whether the question is a request or not.
+   * @param {Store} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.iq The question IQ.
+   * @param {boolean} payload.isSearching Whether the application is using filtered questions or not.
+   * @param {boolean} payload.isRequest Whether the question is a request or not.
    */
   restoreMarkedQuestion({ commit }, payload) {
     commit("setLoading", true);
@@ -722,6 +726,11 @@ const actions = {
               const questions = [...document.data().questions, iq];
               questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
               document.ref.update({ questions });
+
+              commit("addRemoveQuestion", {
+                subjectId: document.id,
+                questionId: iq
+              });
             }
           })
           .catch(error => {
@@ -809,6 +818,11 @@ const actions = {
                 if (!questions.includes(q)) {
                   questions.push(q);
                 }
+
+                commit("addRemoveQuestion", {
+                  subjectId: doc.id,
+                  questionId: q
+                });
               });
 
               questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
@@ -887,26 +901,21 @@ const actions = {
   /**
    * Deletes all questions that are marked to be deleted (toDelete.status = false).
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store} store The vuex store.
    */
-  deleteQuestions({ commit }) {
+  deleteQuestions({ commit, rootState }) {
     /**
      * @type {Object.<string, number>}
      */
-    const subjects = {
-      "Teoria do Reator": 0,
-      Termodinâmica: 0,
-      "Instrumentação e Controle": 0,
-      "Válvulas e Bombas": 0,
-      Eletricidade: 0,
-      "Mecânica dos Fluidos": 0,
-      "Tratamento Qúimico Refrigerante": 0,
-      "Análise Integrada": 0,
-      "Instrumentação Nuclear": 0,
-      "Física Nuclear": 0,
-      "Transferência de Calor": 0,
-      Materiais: 0
-    };
+    const subjects = {};
+
+    for (const key in rootState.Subject.subjects) {
+      /**
+       * @type {import('./subject.store').Subject}
+       */
+      const sub = rootState.Subject.subjects[key];
+      subjects[sub.name] = 0;
+    }
 
     db.collection("questions")
       .where("toDelete.status", "==", false)
@@ -915,6 +924,7 @@ const actions = {
         snapshot.forEach(doc => {
           doc.ref.delete();
           subjects[doc.data().subject] += 1;
+
           if (doc.data().image && doc.data().image.length > 0) {
             const image = doc.data().image;
             const childImage = image.split("?alt=media")[0].split("/o/")[1];
@@ -936,6 +946,12 @@ const actions = {
               if (index !== -1) questions.splice(index, 1);
 
               document.ref.update({ questions });
+
+              commit("addRemoveQuestion", {
+                subjectId: document.id,
+                questionId: doc.data().iq,
+                remove: true
+              });
             })
             .catch(error => {
               console.error(error);
@@ -1114,6 +1130,11 @@ const actions = {
               const questions = [...doc.data().questions, question.iq];
               questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
               doc.ref.update({ questions });
+
+              commit("addRemoveQuestion", {
+                subjectId: doc.id,
+                questionId: question.iq
+              });
             })
             .catch(error => {
               console.error(error);
@@ -1128,6 +1149,12 @@ const actions = {
               const questions = doc.data().questions;
               if (index !== -1) questions.splice(index, 1);
               doc.ref.update({ questions });
+
+              commit("addRemoveQuestion", {
+                subjectId: doc.id,
+                questionId: question.iq,
+                remove: true
+              });
             })
             .catch(error => {
               console.error(error);
@@ -1256,7 +1283,7 @@ const actions = {
             const document = snap.docs[0];
             const general = document.data().questions.general;
             const sub = question.subject;
-            const subSize = document.data().questions.subject[sub];
+            const subSize = document.data().questions.subject[sub] || 0;
 
             const questions = {
               general: general + 1,
@@ -1292,6 +1319,11 @@ const actions = {
               const questions = [...document.data().questions, question.iq];
               questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
               document.ref.update({ questions });
+
+              commit("addRemoveQuestion", {
+                subjectId: document.id,
+                questionId: question.iq
+              });
             }
           })
           .catch(error => {
@@ -1314,10 +1346,9 @@ const actions = {
   /**
    * Gets a question by it's IQ.
    *
-   * @param {Store} store - The vuex store.
    * @param {string} payload - The question IQ.
    */
-  async getQuestionByIQ(store, payload) {
+  async getQuestionByIQ(_, payload) {
     return new Promise((resolve, reject) => {
       try {
         db.collection("questions")
@@ -1354,15 +1385,6 @@ const actions = {
 };
 
 const getters = {
-  /**
-   * Gets all the subjects.
-   *
-   * @param {QuestionsState} state - The questions state.
-   * @returns {Subject[]} An array of subjects.
-   */
-  getSubjects(state) {
-    return state.subjects;
-  },
   /**
    * Gets an object with all loaded pages and it's questions.
    *
