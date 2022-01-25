@@ -113,12 +113,12 @@ export default {
   },
   watch: {
     userInfo() {
-      if (this.userInfo) this.$router.push("/");
+      if (this.userInfo) this.$router.push(this.$route.params.to || "/");
     }
   },
   mounted() {
     if (this.user) {
-      this.$router.push("/");
+      this.$router.push(this.$route.params.to || "/");
     }
   }
 };
