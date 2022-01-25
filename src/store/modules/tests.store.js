@@ -310,7 +310,7 @@ const mutations = {
    * Deletes a test from the filtered tests array, according to the given data.
    *
    * @param {TestsState} state - The tests state.
-   * @param {string} data - The IQ of the test to be deleted.
+   * @param {string} data - The id of the test to be deleted.
    */
   deleteFilteredTest(state, data) {
     const tests = state.filteredTests;
@@ -321,7 +321,7 @@ const mutations = {
     });
   },
   /**
-   * Sets the last test request IQs.
+   * Sets the last test request ids.
    *
    * @param {TestsState} state - The tests state.
    * @param {[string, string]} data An array of strings containing the first and last test ids from the last request.
@@ -1052,13 +1052,13 @@ const actions = {
       });
   },
   /**
-   * Gets all the questions IQs from a subject.
+   * Gets all the questions names from a subject.
    *
    * @param {Store} store - The vuex store.
    * @param {string} payload - The subject name.
-   * @returns {Promise<string[]>} An array of IQs.
+   * @returns {Promise<string[]>} An array of names.
    */
-  async getSubjectIQS({ commit }, payload) {
+  async getSubjectNames({ commit }, payload) {
     const subject = payload;
 
     return new Promise((resolve, reject) => {
@@ -1071,14 +1071,17 @@ const actions = {
             resolve(questions);
           })
           .catch(error => {
-            const errorModel = showErrorMessage("load", "IQs" + error.message);
+            const errorModel = showErrorMessage(
+              "load",
+              "Nomes" + error.message
+            );
             commit("setError", { message: errorModel });
-            createErrorLog("Test Subject IQs", error.message, {
+            createErrorLog("Test Subject Names", error.message, {
               payload
             });
           });
       } catch (error) {
-        reject("getSubjectIQS");
+        reject("getSubjectNames");
       }
     });
   },
