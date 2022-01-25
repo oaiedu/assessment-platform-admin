@@ -33,7 +33,7 @@
       <span>Voltar</span>
     </v-tooltip>
 
-    <v-tooltip left v-if="e1 < 3">
+    <v-tooltip left v-if="e1 < 2">
       <template v-slot:activator="{ on }">
         <v-btn
           color="blue darken-1"
@@ -44,7 +44,7 @@
           fixed
           bottom
           right
-          @click="e1 == 1 ? (e1 = 2) : (e1 = 3)"
+          @click="e1 = 2"
         >
           <v-icon color="white">{{ mdiArrowRight }}</v-icon>
         </v-btn>
@@ -85,13 +85,7 @@
 
                   <v-divider></v-divider>
 
-                  <v-stepper-step editable :complete="e1 > 2" step="2">
-                    Enunciado
-                  </v-stepper-step>
-
-                  <v-divider></v-divider>
-
-                  <v-stepper-step editable step="3">
+                  <v-stepper-step editable step="2">
                     Respostas
                   </v-stepper-step>
                 </v-stepper-header>
@@ -102,46 +96,10 @@
                       <v-row>
                         <v-col>
                           <v-text-field
-                            name="iq"
-                            label="IQ"
-                            id="iq"
-                            v-model="iq"
-                            required
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-
-                      <v-row>
-                        <v-col>
-                          <v-text-field
-                            name="knowledge"
-                            label="Conhecimento"
-                            id="knowledge"
-                            v-model="knowledge"
-                            required
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-
-                      <v-row>
-                        <v-col>
-                          <v-text-field
-                            name="knowledgePWR"
-                            label="Relevância OR"
-                            id="knowledgePWR"
-                            v-model="knowledgePWR"
-                            required
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-
-                      <v-row>
-                        <v-col>
-                          <v-text-field
-                            name="knowledgeBWR"
-                            label="Relevância OSR"
-                            id="knowledgeBWR"
-                            v-model="knowledgeBWR"
+                            name="name"
+                            label="Nome"
+                            id="name"
+                            v-model="name"
                             required
                           ></v-text-field>
                         </v-col>
@@ -159,16 +117,13 @@
                           ></v-select>
                         </v-col>
                       </v-row>
-                    </v-container>
-                  </v-stepper-content>
 
-                  <v-stepper-content step="2">
-                    <v-container>
                       <v-row justify="center">
                         <v-col cols="12">
                           <VueSimplemde v-model="questionDescription" />
                         </v-col>
                       </v-row>
+
                       <v-row justify="center">
                         <v-col cols="12">
                           <v-file-input
@@ -183,6 +138,7 @@
                           />
                         </v-col>
                       </v-row>
+
                       <v-main v-if="images && images.length != 0">
                         <v-row justify="center">
                           <v-radio-group v-model="imageSize" row>
@@ -195,7 +151,7 @@
                     </v-container>
                   </v-stepper-content>
 
-                  <v-stepper-content step="3">
+                  <v-stepper-content step="2">
                     <v-container>
                       <v-row>
                         <v-container>
@@ -278,11 +234,8 @@
 
         <v-col>
           <Preview
-            :iq="iq"
+            :name="name"
             :subject="subject"
-            :knowledge="knowledge"
-            :knowledgePWR="knowledgePWR"
-            :knowledgeBWR="knowledgeBWR"
             :questionDesc="questionDescription"
             :answers="answers"
             :image="imagePreview"
@@ -300,9 +253,9 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Uma questão com este IQ já foi criada!
+          Uma questão com este Nome já foi criada!
           <br />
-          Por favor, mude o IQ.
+          Por favor, mude o Nome.
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -368,23 +321,14 @@ export default {
         { text: "", ansId: "radio-3", value: false },
         { text: "", ansId: "radio-4", value: false }
       ],
-      iq: "",
+      name: "",
       subject: "",
-      knowledge: "",
-      knowledgePWR: "",
-      knowledgeBWR: "",
       number: 1
     };
   },
   computed: {
     formIsValid() {
-      return (
-        this.iq !== "" &&
-        this.knowledge !== "" &&
-        this.knowledgePWR !== "" &&
-        this.knowledgeBWR !== "" &&
-        this.subject !== ""
-      );
+      return this.name !== "" && this.subject !== "";
     },
     userClaims() {
       return this.$store.getters.getUserClaims;
@@ -449,11 +393,7 @@ export default {
     },
     radios(val) {
       this.answers.forEach(element => {
-        if (element.ansId === val) {
-          element.value = true;
-        } else {
-          element.value = false;
-        }
+        element.value = element.ansId === val;
       });
     }
   },
@@ -472,12 +412,12 @@ export default {
       this.questionDescription = variable;
     },
     onCreateQuestion() {
-      this.$store.dispatch("questionExists", this.iq).then(exist => {
+      this.$store.dispatch("questionExists", this.name).then(exist => {
         if (exist) {
           this.createErrorSnackBar = true;
         } else {
           if (this.images && this.images[0]) {
-            const imageToUpload = { iq: this.iq, image: this.images[0] };
+            const imageToUpload = { name: this.name, image: this.images[0] };
             const URL = this.$store.dispatch(
               "uploadImageQuestion",
               imageToUpload
@@ -486,12 +426,9 @@ export default {
             URL.then(result => {
               this.imagesAsURL = result;
               const questionData = {
-                iq: this.iq.toUpperCase(),
+                name: this.name.toUpperCase(),
                 subject: this.subject,
                 question: this.questionDescription,
-                knowledge: this.knowledge,
-                knowledgePWR: this.knowledgePWR,
-                knowledgeBWR: this.knowledgeBWR,
                 answers: this.answers,
                 image: this.imagesAsURL,
                 imageSize: this.imageSize
@@ -521,12 +458,9 @@ export default {
             });
           } else {
             const questionData = {
-              iq: this.iq.toUpperCase(),
+              name: this.name.toUpperCase(),
               subject: this.subject,
               question: this.questionDescription,
-              knowledge: this.knowledge,
-              knowledgePWR: this.knowledgePWR,
-              knowledgeBWR: this.knowledgeBWR,
               answers: this.answers,
               image: "",
               imageSize: this.imageSize
@@ -576,11 +510,8 @@ export default {
         { text: [], ansId: "radio-3", value: false },
         { text: [], ansId: "radio-4", value: false }
       ];
-      this.iq = "";
+      this.name = "";
       this.subject = "";
-      this.knowledge = "";
-      this.knowledgePWR = "";
-      this.knowledgeBWR = "";
       this.number = 0;
       this.images = [];
       this.imagesAsBase64 = "";

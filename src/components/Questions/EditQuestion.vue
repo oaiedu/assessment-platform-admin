@@ -11,7 +11,7 @@
       <v-btn icon dark @click="close()" class="mr-2">
         <v-icon>{{ mdiClose }}</v-icon>
       </v-btn>
-      <h2>Editar questão - {{ iq }}</h2>
+      <h2>Editar questão - {{ name }}</h2>
       <v-spacer></v-spacer>
     </v-toolbar>
 
@@ -33,7 +33,7 @@
       <span>Voltar</span>
     </v-tooltip>
 
-    <v-tooltip left v-if="e1 < 3">
+    <v-tooltip left v-if="e1 < 2">
       <template v-slot:activator="{ on }">
         <v-btn
           color="blue darken-1"
@@ -44,7 +44,7 @@
           fixed
           bottom
           right
-          @click="e1 == 1 ? (e1 = 2) : (e1 = 3)"
+          @click="e1 = 2"
         >
           <v-icon color="white">{{ mdiArrowRight }}</v-icon>
         </v-btn>
@@ -85,13 +85,7 @@
 
                   <v-divider></v-divider>
 
-                  <v-stepper-step editable :complete="e1 > 2" step="2">
-                    Enunciado
-                  </v-stepper-step>
-
-                  <v-divider></v-divider>
-
-                  <v-stepper-step editable step="3">
+                  <v-stepper-step editable step="2">
                     Respostas
                   </v-stepper-step>
                 </v-stepper-header>
@@ -99,36 +93,6 @@
                 <v-stepper-items>
                   <v-stepper-content step="1">
                     <v-container>
-                      <v-row>
-                        <v-text-field
-                          name="knowledge"
-                          label="Conhecimento"
-                          id="knowledge"
-                          v-model="editedKnowledge"
-                          required
-                        ></v-text-field>
-                      </v-row>
-
-                      <v-row>
-                        <v-text-field
-                          name="knowledgePWR"
-                          label="Relevância OR"
-                          id="knowledgePWR"
-                          v-model="editedKnowledgePWR"
-                          required
-                        ></v-text-field>
-                      </v-row>
-
-                      <v-row>
-                        <v-text-field
-                          name="knowledgeBWR"
-                          label="Relevância OSR"
-                          id="knowledgeBWR"
-                          v-model="editedKnowledgeBWR"
-                          required
-                        ></v-text-field>
-                      </v-row>
-
                       <v-row>
                         <v-select
                           :items="subjectItems.map(s => s.name)"
@@ -139,11 +103,7 @@
                           solo
                         ></v-select>
                       </v-row>
-                    </v-container>
-                  </v-stepper-content>
 
-                  <v-stepper-content step="2">
-                    <v-container>
                       <v-row>
                         <VueSimplemde v-model="editedQuestionDescription" />
                       </v-row>
@@ -173,7 +133,7 @@
                     </v-container>
                   </v-stepper-content>
 
-                  <v-stepper-content step="3">
+                  <v-stepper-content step="2">
                     <v-container>
                       <v-main v-if="confirmTitle">
                         <v-row justify="end">
@@ -235,11 +195,8 @@
 
         <v-col>
           <Preview
-            :iq="iq"
+            :name="name"
             :subject="editedSubject"
-            :knowledge="editedKnowledge"
-            :knowledgePWR="editedKnowledgePWR"
-            :knowledgeBWR="editedKnowledgeBWR"
             :questionDesc="editedQuestionDescription"
             :answers="editedAnswers"
             :image="imagePreview"
@@ -287,12 +244,9 @@ export default {
         { text: "", ansId: "radio-3", value: false },
         { text: "", ansId: "radio-4", value: false }
       ],
-      editedIq: null,
+      editedName: null,
       editedSubject: null,
-      editedKnowledge: null,
-      editedKnowledgePWR: null,
       editedImageSize: null,
-      editedKnowledgeBWR: null,
       number: 0,
       dialogState: false
     };
@@ -302,18 +256,12 @@ export default {
       return !!this.question.image;
     },
     formIsValid() {
-      return (
-        this.editedIq !== "" &&
-        this.editedKnowledge !== "" &&
-        this.editedKnowledgePWR !== "" &&
-        this.editedKnowledgeBWR !== "" &&
-        this.editedSubject !== ""
-      );
+      return this.editedName !== "" && this.editedSubject !== "";
     },
-    iq() {
+    name() {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      this.editedIq = this.question.iq;
-      return this.question.iq;
+      this.editedName = this.question.name;
+      return this.question.name;
     },
     subjectItems() {
       return this.$store.state.Subject.subjects;
@@ -323,7 +271,7 @@ export default {
     }
   },
   watch: {
-    editedIq(value) {
+    editedName(value) {
       if (value) this.update();
     },
     auxTitle(val) {
@@ -344,11 +292,8 @@ export default {
   },
   methods: {
     update() {
-      this.editedIq = this.question.iq;
+      this.editedName = this.question.name;
       this.editedSubject = this.question.subject;
-      this.editedKnowledge = this.question.knowledge;
-      this.editedKnowledgePWR = this.question.knowledgePWR;
-      this.editedKnowledgeBWR = this.question.knowledgeBWR;
       this.editedImageSize = this.question.imageSize;
       this.editedAnswers = JSON.parse(JSON.stringify(this.question.answers));
       this.editedQuestionDescription = this.question.question;
@@ -383,20 +328,20 @@ export default {
     },
     onEditQuestion() {
       if (this.images[0]) {
-        const imageToUpload = { image: this.images[0], iq: this.question.iq };
+        const imageToUpload = {
+          image: this.images[0],
+          name: this.question.name
+        };
         const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
 
         URL.then(result => {
           this.editedImages = result;
 
           const oldData = {
-            iq: this.question.iq,
+            name: this.question.name,
             created: this.question.created || null,
             subject: this.question.subject,
             question: this.question.question,
-            knowledge: this.question.knowledge,
-            knowledgePWR: this.question.knowledgePWR,
-            knowledgeBWR: this.question.knowledgeBWR,
             answers: this.question.answers,
             image: this.question.image,
             edited: this.question.edited,
@@ -404,13 +349,10 @@ export default {
           };
 
           const questionData = {
-            iq: this.editedIq,
+            name: this.editedName,
             created: this.question.created || null,
             subject: this.editedSubject,
             question: this.editedQuestionDescription,
-            knowledge: this.editedKnowledge,
-            knowledgePWR: this.editedKnowledgePWR,
-            knowledgeBWR: this.editedKnowledgeBWR,
             answers: this.editedAnswers,
             image: this.editedImages,
             imageSize: this.editedImageSize
@@ -446,13 +388,10 @@ export default {
         });
       } else {
         const oldData = {
-          iq: this.question.iq,
+          name: this.question.name,
           created: this.question.created || null,
           subject: this.question.subject,
           question: this.question.question,
-          knowledge: this.question.knowledge,
-          knowledgePWR: this.question.knowledgePWR,
-          knowledgeBWR: this.question.knowledgeBWR,
           answers: this.question.answers,
           image: this.question.image,
           edited: this.question.edited,
@@ -460,13 +399,10 @@ export default {
         };
 
         const questionData = {
-          iq: this.editedIq,
+          name: this.editedName,
           created: this.question.created || null,
           subject: this.editedSubject,
           question: this.editedQuestionDescription,
-          knowledge: this.editedKnowledge,
-          knowledgePWR: this.editedKnowledgePWR,
-          knowledgeBWR: this.editedKnowledgeBWR,
           answers: this.editedAnswers,
           imageSize: this.editedImageSize,
           image: this.question.image
@@ -515,11 +451,8 @@ export default {
       this.images = [];
       this.imagePreview = "";
       this.editedAnswers = [];
-      this.editedIq = null;
+      this.editedName = null;
       this.editedSubject = null;
-      this.editedKnowledge = null;
-      this.editedKnowledgePWR = null;
-      this.editedKnowledgeBWR = null;
       this.editedImageSize = null;
       this.number = 0;
     },
