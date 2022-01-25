@@ -1,8 +1,8 @@
 <template>
   <v-container class="subjects-table">
     <v-data-table
-      no-data-text="Não há assuntos"
-      loading-text="Carregando assuntos"
+      no-data-text="Não há disciplinas"
+      loading-text="Carregando disciplinas"
       :headers="headers"
       :items="subjects"
       :loading="loading"
@@ -17,7 +17,7 @@
             color="blue"
             @click="addingSubject = true"
           >
-            Adicionar assunto
+            Adicionar disciplina
             <v-icon right dark size="24">{{ mdiPlus }}</v-icon>
           </v-btn>
 
@@ -97,7 +97,7 @@
       top
       :timeout="15000"
     >
-      Tem certeza de que deseja excluir este Assunto?
+      Tem certeza de que deseja excluir este Disciplina?
 
       <v-btn
         dark
@@ -132,7 +132,7 @@
     >
       <v-row class="pa-0 ma-0" align="center">
         <span class="font-weight-medium">
-          Não é possível excluir assuntos que estão sendo usados em questões!
+          Não é possível excluir disciplinas que estão sendo usados em questões!
           <br />
           Certifique-se de que o número de questões seja igual a 0.
         </span>

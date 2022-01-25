@@ -16,7 +16,7 @@
           <v-icon left>
             {{ mdiBallot }}
           </v-icon>
-          Assuntos
+          Disciplinas
         </v-tab>
         <v-tab>
           <v-icon left>

@@ -79,7 +79,6 @@ import {
   mdiAccountCog,
   mdiFileQuestionOutline,
   mdiFileMultipleOutline,
-  mdiFileDocument,
   mdiInbox,
   mdiAccount
 } from "@mdi/js";
@@ -128,19 +127,13 @@ export default {
             icon: mdiFileQuestionOutline,
             title: "Gerenciar Questões",
             link: "/questions",
-            grantAccess: ["admin", "appraiser", "teacher"]
+            grantAccess: ["admin", "appraiser"]
           },
           {
             icon: mdiFileMultipleOutline,
             title: "Gerenciar Provas",
             link: "/tests",
-            grantAccess: ["admin", "teacher", "student"]
-          },
-          {
-            icon: mdiFileDocument,
-            title: "Gerenciar Documentos",
-            link: "/papers",
-            grantAccess: ["admin", "teacher"]
+            grantAccess: ["admin", "student"]
           },
           {
             icon: mdiInbox,
@@ -159,7 +152,7 @@ export default {
         const claims = this.currentUserClaims;
         let role = null;
 
-        const roles = ["admin", "appraiser", "teacher", "student"];
+        const roles = ["admin", "appraiser", "student"];
 
         for (let key in claims) {
           if (claims[key] && roles.includes(key)) {
@@ -187,7 +180,6 @@ export default {
       const role = this.user.role;
       if (role === "admin") return "Administrador";
       else if (role === "appraiser") return "Avaliador";
-      else if (role === "teacher") return "Professor";
       else return "Aluno";
     }
   },

@@ -6,7 +6,6 @@ import { getWeekInterval } from "../../utils/date";
 
 /**
  * @typedef {Object} DataSize
- * @property {number} papers - The amount of papers.
  * @property {Object} question-requests - The question requests amount object.
  * @property {number} question-requests.general - The question requests total amount.
  * @property {Object.<string, number>} question-requests.users - The question requests amount by user.
