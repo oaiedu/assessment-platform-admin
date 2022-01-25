@@ -63,7 +63,7 @@
                   rounded
                   dense
                   :append-icon="mdiMagnify"
-                  label="Procurar por IQ"
+                  label="Procurar por Nome"
                   single-line
                   hide-details
                 ></v-text-field>
@@ -82,7 +82,7 @@
                     loading-text="Carregando questões..."
                     show-select
                     @toggle-select-all="selectAllToggle"
-                    item-key="iq"
+                    item-key="name"
                     :item-class="itemRowStyle"
                     hide-default-footer
                     class="elevation-1"
@@ -186,10 +186,7 @@ export default {
       pageCount: 15,
       itemsPerPage: 8,
       headers: [
-        { text: "IQ", align: "left", sortable: false, value: "iq" },
-        { text: "Conhecimento", value: "knowledge" },
-        { text: "Relevância OR", value: "knowledgePWR" },
-        { text: "Relevância OSR", value: "knowledgeBWR" },
+        { text: "Nome", align: "left", sortable: false, value: "name" },
         { text: "Disciplina", value: "subject", sortable: false },
         { text: "", value: "actions", sortable: false }
       ],

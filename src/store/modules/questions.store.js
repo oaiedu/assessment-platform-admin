@@ -29,12 +29,9 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
  * @typedef {Object} QuestionCreation
- * @property {string} iq - The question IQ.
+ * @property {string} name - The question name.
  * @property {string} subject - The question subject.
  * @property {string} question - The question description.
- * @property {string} knowledge - The question knowledge.
- * @property {string} knowledgeBWR - The question knowledge (BWR).
- * @property {string} knowledgePWR - The question knowledge (PWR).
  * @property {string} image - The question image url.
  * @property {string} imageSize - The size of the image.
  * @property {Answer[]} answers - The question answers.
@@ -42,12 +39,9 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
  * @typedef {Object} Question
- * @property {string} iq - The question IQ.
+ * @property {string} name - The question name.
  * @property {string} subject - The question subject.
  * @property {string} question - The question description.
- * @property {string} knowledge - The question knowledge.
- * @property {string} knowledgeBWR - The question knowledge (BWR).
- * @property {string} knowledgePWR - The question knowledge (PWR).
  * @property {string} image - The question image url.
  * @property {string} imageSize - The size of the image.
  * @property {string|undefined} created - The question creation date.
@@ -60,10 +54,10 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
 /**
  * @typedef {Object} QuestionsState
  * @property {Object.<string, Question[]>} questions - The pages with it's questions list.
- * @property {Question[]} filteredQuestions - An array of questions filtered by IQ.
+ * @property {Question[]} filteredQuestions - An array of questions filtered by name.
  * @property {Question[]} currentQuestionsPage - An array of questions of the current page.
  * @property {string[]} subjects - An array of subjects.
- * @property {[string, string]|null} lastQuestionDocument - An array with the first and last question IQ from the last request.
+ * @property {[string, string]|null} lastQuestionDocument - An array with the first and last question name from the last request.
  * @property {Question[]} deleteMarkQuestions - An array of questions that were marked to be deleted.
  */
 
@@ -137,7 +131,7 @@ const mutations = {
   updateDeleteMarkQuestion(state, data) {
     const questions = [...state.deleteMarkQuestions];
     questions.forEach((item, index) => {
-      if (item.iq === data.iq) {
+      if (item.name === data.name) {
         questions[index] = data;
       }
     });
@@ -147,12 +141,12 @@ const mutations = {
    * Removes a question from the array of questions marked to be deleted.
    *
    * @param {QuestionsState} state - The questions state.
-   * @param {Question} data - The IQ of the question to be removed.
+   * @param {Question} data - The name of the question to be removed.
    */
   removeDeleteMarkQuestion(state, data) {
     const questions = [...state.deleteMarkQuestions];
     questions.forEach((item, index) => {
-      if (item.iq === data) {
+      if (item.name === data) {
         state.deleteMarkQuestions.splice(index, 1);
       }
     });
@@ -170,8 +164,8 @@ const mutations = {
    * Sets a question as marked to be deleted.
    *
    * @param {QuestionsState} state - The questions state.
-   * @param {Object} data - The data containing the question IQ and the deletion status.
-   * @param {string} data.iq - The question IQ.
+   * @param {Object} data - The data containing the question name and the deletion status.
+   * @param {string} data.name - The question name.
    * @param {DeleteStatus} data.toDelete - The question deletion status.
    */
   setDeleteMarkQuestion(state, data) {
@@ -179,7 +173,7 @@ const mutations = {
     for (let key in questions) {
       if (questions[key]) {
         questions[key].forEach((item, index) => {
-          if (item.iq === data.iq) {
+          if (item.name === data.name) {
             state.questions[key][index] = {
               ...item,
               toDelete: data.toDelete
@@ -193,14 +187,14 @@ const mutations = {
    * Sets a question as marked to be deleted into the filtered questions array.
    *
    * @param {QuestionsState} state - The questions state.
-   * @param {Object} data - The data containing the question IQ and the deletion status.
-   * @param {string} data.iq - The question IQ.
+   * @param {Object} data - The data containing the question name and the deletion status.
+   * @param {string} data.name - The question name.
    * @param {DeleteStatus} data.toDelete - The question deletion status.
    */
   setDeleteMarkFilteredQuestion(state, data) {
     const questions = [...state.filteredQuestions];
     questions.forEach((item, index) => {
-      if (item.iq === data.iq) {
+      if (item.name === data.name) {
         questions[index] = { ...item, toDelete: data.toDelete };
       }
     });
@@ -226,19 +220,19 @@ const mutations = {
    */
   createQuestion(state, data) {
     const page = data.page;
-    const questions = state.questions["p" + page] || [];
+    const questions = [...(state.questions["p" + page] || [])];
     const oneBefore = state.questions["p" + (page - 1)] || [];
     const amount = data.amount;
     if (questions.length > 0 || oneBefore.length === 8 || amount === 0) {
       questions.push(data.data);
-      state.questions["p" + page] = [...questions];
+      state.questions["p" + page] = questions;
       if (amount === 0 || state.currentQuestionsPage.length < 8) {
         state.currentQuestionsPage.push(data.data);
       }
     }
   },
   /**
-   * Updates a question into the question object, according to the question's IQ.
+   * Updates a question into the question object, according to the question's name.
    *
    * @param {QuestionsState} state - The questions state.
    * @param {Question} data - The question to be updated.
@@ -248,7 +242,7 @@ const mutations = {
     for (let key in questions) {
       if (questions[key]) {
         questions[key].forEach((item, index) => {
-          if (item.iq === data.iq) {
+          if (item.name === data.name) {
             state.questions[key][index] = data;
           }
         });
@@ -256,7 +250,7 @@ const mutations = {
     }
   },
   /**
-   * Updates a question that's in the filtered questions array, according to the question's IQ.
+   * Updates a question that's in the filtered questions array, according to the question's name.
    *
    * @param {QuestionsState} state - The questions state.
    * @param {Question} data - The question to be updated.
@@ -264,14 +258,14 @@ const mutations = {
   updateFilteredQuestion(state, data) {
     const questions = [...state.filteredQuestions];
     questions.forEach((item, index) => {
-      if (item.iq === data.iq) {
+      if (item.name === data.name) {
         questions[index] = data;
       }
     });
     state.filteredQuestions = questions;
   },
   /**
-   * Updates a question that's in the current questions page array, according to the question's IQ.
+   * Updates a question that's in the current questions page array, according to the question's name.
    *
    * @param {QuestionsState} state - The questions state.
    * @param {Question} data - The question to be updated.
@@ -279,7 +273,7 @@ const mutations = {
   updateCurrentQuestionsPage(state, data) {
     const questions = [...state.currentQuestionsPage];
     questions.forEach((item, index) => {
-      if (item.iq === data.iq) {
+      if (item.name === data.name) {
         questions[index] = data;
       }
     });
@@ -289,14 +283,14 @@ const mutations = {
    * Deletes a question from the question object, according to the given data.
    *
    * @param {QuestionsState} state - The questions state.
-   * @param {string} data - The IQ of the question to be deleted.
+   * @param {string} data - The name of the question to be deleted.
    */
   deleteQuestion(state, data) {
     const questions = state.questions;
     for (let key in questions) {
       if (questions[key]) {
         questions[key].forEach((item, index) => {
-          if (item.iq === data) {
+          if (item.name === data) {
             state.questions[key].splice(index, 1);
           }
         });
@@ -307,21 +301,21 @@ const mutations = {
    * Deletes a question from the filtered questions array, according to the given data.
    *
    * @param {QuestionsState} state - The questions state.
-   * @param {string} data - The IQ of the question to be deleted.
+   * @param {string} data - The name of the question to be deleted.
    */
   deleteFilteredQuestion(state, data) {
     const questions = [...state.filteredQuestions];
     questions.forEach((item, index) => {
-      if (item.iq === data) {
+      if (item.name === data) {
         state.filteredQuestions.splice(index, 1);
       }
     });
   },
   /**
-   * Sets the last question request IQs.
+   * Sets the last question request names.
    *
    * @param {QuestionsState} state - The questions state.
-   * @param {[string, string]} data An array of strings containing the first and last question IQs from the last request.
+   * @param {[string, string]} data An array of strings containing the first and last question names from the last request.
    */
   setLastQuestionDocument(state, data) {
     state.lastQuestionDocument = data;
@@ -359,7 +353,7 @@ const actions = {
 
     if (!pages.includes("p" + page)) {
       let request = null;
-      const ref = db.collection("questions").orderBy("iq");
+      const ref = db.collection("questions").orderBy("name");
 
       if (type === "next") {
         request = ref
@@ -379,8 +373,8 @@ const actions = {
       request
         .then(snapshot => {
           if (snapshot.docs.length > 0) {
-            first = snapshot.docs[0].data().iq;
-            last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+            first = snapshot.docs[0].data().name;
+            last = snapshot.docs[snapshot.docs.length - 1].data().name;
           }
 
           snapshot.forEach(doc => {
@@ -409,8 +403,8 @@ const actions = {
     } else {
       const pageContent = state.questions["p" + page];
       if (pageContent && pageContent.length > 0) {
-        const first = pageContent[0].iq;
-        const last = pageContent[pageContent.length - 1].iq;
+        const first = pageContent[0].name;
+        const last = pageContent[pageContent.length - 1].name;
         commit("setLastQuestionDocument", [first, last]);
       }
 
@@ -440,7 +434,7 @@ const actions = {
 
     if (!pages.includes("p" + page)) {
       let request = null;
-      const ref = db.collection("questions").orderBy("iq");
+      const ref = db.collection("questions").orderBy("name");
 
       if (mode === "first") {
         request = ref.limit(itemsPerPage).get();
@@ -454,8 +448,8 @@ const actions = {
       request
         .then(snapshot => {
           if (snapshot.docs.length > 0) {
-            first = snapshot.docs[0].data().iq;
-            last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+            first = snapshot.docs[0].data().name;
+            last = snapshot.docs[snapshot.docs.length - 1].data().name;
           }
 
           snapshot.forEach(doc => {
@@ -485,8 +479,8 @@ const actions = {
       const pageContent = state.questions["p" + page];
 
       if (pageContent && pageContent[0]) {
-        const first = pageContent[0].iq;
-        const last = pageContent[pageContent.length - 1].iq;
+        const first = pageContent[0].name;
+        const last = pageContent[pageContent.length - 1].name;
         commit("setCurrentQuestionsPage", pageContent);
         commit("setLastQuestionDocument", [first, last]);
       }
@@ -494,7 +488,7 @@ const actions = {
     }
   },
   /**
-   * Searches for questions based on their IQ.
+   * Searches for questions based on their name.
    *
    * @param {Store} store - The vuex store.
    * @param {string} payload - The string to be searched.
@@ -505,9 +499,9 @@ const actions = {
     const data = [];
 
     db.collection("questions")
-      .orderBy("iq")
-      .where("iq", ">=", payload.toUpperCase())
-      .where("iq", "<=", payload.toUpperCase() + "~")
+      .orderBy("name")
+      .where("name", ">=", payload.toUpperCase())
+      .where("name", "<=", payload.toUpperCase() + "~")
       .get()
       .then(snapshot => {
         snapshot.forEach(doc => {
@@ -533,21 +527,21 @@ const actions = {
       });
   },
   /**
-   * Gets all tests that includes a question based on it's IQ.
+   * Gets all tests that includes a question based on it's name.
    *
    * @param {Object} payload - The action payload.
-   * @param {string} payload.iq - The question IQ.
+   * @param {string} payload.name - The question name.
    * @returns {Promise<Test[]>} An array of tests.
    */
   async checkQuestionInTests(_, payload) {
-    const { iq } = payload;
+    const { name } = payload;
 
     return new Promise((resolve, reject) => {
       try {
         const tests = [];
 
         db.collection("tests")
-          .where("questions", "array-contains", iq)
+          .where("questions", "array-contains", name)
           .get()
           .then(snapshot => {
             snapshot.forEach(doc => {
@@ -595,17 +589,17 @@ const actions = {
    *
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
-   * @param {string} payload.iq - The question IQ.
+   * @param {string} payload.name - The question name.
    * @param {boolean} payload.isSearching - Whether the application is using filtered questions or not.
    * @param {string} payload.userEmail - The current user e-mail.
    */
   deleteMarkQuestion({ commit }, payload) {
     commit("setLoading", true);
 
-    const { iq, isSearching, userEmail } = payload;
+    const { name, isSearching, userEmail } = payload;
 
     db.collection("questions")
-      .where("iq", "==", iq)
+      .where("name", "==", name)
       .get()
       .then(snapshot => {
         const doc = snapshot.docs[0];
@@ -617,10 +611,10 @@ const actions = {
 
         doc.ref.update({ toDelete });
 
-        commit("setDeleteMarkQuestion", { iq, toDelete });
+        commit("setDeleteMarkQuestion", { name, toDelete });
 
         if (isSearching) {
-          commit("setDeleteMarkFilteredQuestion", { iq, toDelete });
+          commit("setDeleteMarkFilteredQuestion", { name, toDelete });
         }
 
         commit("updateCurrentQuestionsPage", {
@@ -635,14 +629,14 @@ const actions = {
           .then(snap => {
             const document = snap.docs[0];
             const questions = document.data().questions;
-            const index = questions.indexOf(iq);
+            const index = questions.indexOf(name);
 
             if (index !== -1) questions.splice(index, 1);
             document.ref.update({ questions });
 
             commit("addRemoveQuestion", {
               subjectId: document.id,
-              questionId: iq,
+              questionId: name,
               remove: true
             });
           })
@@ -666,17 +660,17 @@ const actions = {
    *
    * @param {Store} store The vuex store.
    * @param {Object} payload The action payload.
-   * @param {string} payload.iq The question IQ.
+   * @param {string} payload.name The question name.
    * @param {boolean} payload.isSearching Whether the application is using filtered questions or not.
    * @param {boolean} payload.isRequest Whether the question is a request or not.
    */
   restoreMarkedQuestion({ commit }, payload) {
     commit("setLoading", true);
 
-    const { iq, isSearching, isRequest } = payload;
+    const { name, isSearching, isRequest } = payload;
 
     db.collection("questions")
-      .where("iq", "==", iq)
+      .where("name", "==", name)
       .get()
       .then(snapshot => {
         const doc = snapshot.docs[0];
@@ -691,14 +685,11 @@ const actions = {
           question = { ...payload.data };
         } else {
           question = {
-            iq: data.iq,
+            name: data.name,
             created: data.created || null,
             updated: data.updated || null,
             subject: data.subject,
             question: data.question,
-            knowledge: data.knowledge,
-            knowledgePWR: data.knowledgePWR,
-            knowledgeBWR: data.knowledgeBWR,
             answers: data.answers,
             image: data.image,
             imageSize: data.imageSize || "1x",
@@ -713,7 +704,7 @@ const actions = {
           commit("updateFilteredQuestion", question);
         }
 
-        commit("removeDeleteMarkQuestion", iq);
+        commit("removeDeleteMarkQuestion", name);
         commit("updateCurrentQuestionsPage", question);
 
         db.collection("subjects")
@@ -722,14 +713,14 @@ const actions = {
           .then(snap => {
             const document = snap.docs[0];
 
-            if (!document.data().questions.includes(question.iq)) {
-              const questions = [...document.data().questions, iq];
+            if (!document.data().questions.includes(question.name)) {
+              const questions = [...document.data().questions, name];
               questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
               document.ref.update({ questions });
 
               commit("addRemoveQuestion", {
                 subjectId: document.id,
-                questionId: iq
+                questionId: name
               });
             }
           })
@@ -771,14 +762,11 @@ const actions = {
            * @type {Question}
            */
           const question = {
-            iq: data.iq,
+            name: data.name,
             created: data.created || null,
             updated: data.updated || null,
             subject: data.subject,
             question: data.question,
-            knowledge: data.knowledge,
-            knowledgePWR: data.knowledgePWR,
-            knowledgeBWR: data.knowledgeBWR,
             answers: data.answers,
             image: data.image,
             imageSize: data.imageSize || "1x",
@@ -788,10 +776,10 @@ const actions = {
           if (questionsData[question.subject]) {
             questionsData[question.subject] = [
               ...questionsData[question.subject],
-              question.iq
+              question.name
             ];
           } else {
-            questionsData[question.subject] = [question.iq];
+            questionsData[question.subject] = [question.name];
           }
 
           doc.ref.set(question);
@@ -849,15 +837,15 @@ const actions = {
    *
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
-   * @param {string} payload.iq - The question IQ.
+   * @param {string} payload.name - The question name.
    * @param {boolean} payload.isSearching - Whether the application is using filtered questions or not.
    */
   changeDeleteStatusQuestions({ commit }, payload) {
     commit("setLoading", true);
-    const { iq, isSearching } = payload;
+    const { name, isSearching } = payload;
 
     db.collection("questions")
-      .where("iq", "==", iq)
+      .where("name", "==", name)
       .get()
       .then(snapshot => {
         const doc = snapshot.docs[0];
@@ -941,7 +929,7 @@ const actions = {
             .then(snap => {
               const document = snap.docs[0];
               const questions = document.data().questions;
-              const index = questions.indexOf(doc.data().iq);
+              const index = questions.indexOf(doc.data().name);
 
               if (index !== -1) questions.splice(index, 1);
 
@@ -949,7 +937,7 @@ const actions = {
 
               commit("addRemoveQuestion", {
                 subjectId: document.id,
-                questionId: doc.data().iq,
+                questionId: doc.data().name,
                 remove: true
               });
             })
@@ -971,7 +959,8 @@ const actions = {
             };
 
             for (let key in questions.subject) {
-              questions.subject[key] -= subjects[key];
+              if (questions && subjects[key])
+                questions.subject[key] -= subjects[key];
             }
 
             document.ref
@@ -1003,7 +992,7 @@ const actions = {
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
    * @param {File} payload.image - The image to be uploaded.
-   * @param {string} payload.iq - The question IQ.
+   * @param {string} payload.name - The question name.
    * @returns {Promise<string>} The image url.
    */
   async uploadImageQuestion({ commit }, payload) {
@@ -1011,9 +1000,9 @@ const actions = {
       try {
         const storageRef = storage.ref();
         const file = payload.image;
-        const questionIQ = payload.iq;
+        const questionName = payload.name;
         const type = file.type.split("/")[1];
-        const format = `questions/question-${questionIQ}.${type}`;
+        const format = `questions/question-${questionName}.${type}`;
 
         storageRef
           .child(format)
@@ -1041,7 +1030,7 @@ const actions = {
     });
   },
   /**
-   * Updates a question based on it's IQ.
+   * Updates a question based on it's name.
    *
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
@@ -1050,7 +1039,7 @@ const actions = {
    * @param {string} payload.user - The current user id.
    * @param {isSearching} payload.isSearching - Whether the application is using the filtered questions or not.
    */
-  editQuestion({ commit, dispatch }, payload) {
+  editQuestion({ commit }, payload) {
     commit("setLoading", true);
 
     const question = {
@@ -1058,33 +1047,22 @@ const actions = {
       updated: getNowISOString()
     };
 
-    const today = new Date();
-    const edition = payload.oldData.edited;
-    edition.push({
-      id: payload.user,
-      date: today,
-      question: payload.oldData.iq + "-" + (payload.oldData.edited.length + 1)
-    });
-
     let oldSubject = null;
 
     db.collection("questions")
-      .where("iq", "==", question.iq)
+      .where("name", "==", question.name)
       .get()
       .then(snapshot => {
         snapshot.forEach(doc => {
           if (question.subject !== doc.data().subject) {
             oldSubject = doc.data().subject;
           }
-          doc.ref.update({ ...question, edited: edition });
+          doc.ref.update(question);
         });
       })
       .then(() => {
-        commit("updateQuestion", { ...question, edited: edition });
-        commit("updateCurrentQuestionsPage", {
-          ...question,
-          edited: edition
-        });
+        commit("updateQuestion", question);
+        commit("updateCurrentQuestionsPage", question);
         if (payload.isSearching) commit("updateFilteredQuestion", question);
 
         if (oldSubject) {
@@ -1127,13 +1105,13 @@ const actions = {
             .get()
             .then(snapshot => {
               const doc = snapshot.docs[0];
-              const questions = [...doc.data().questions, question.iq];
+              const questions = [...doc.data().questions, question.name];
               questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
               doc.ref.update({ questions });
 
               commit("addRemoveQuestion", {
                 subjectId: doc.id,
-                questionId: question.iq
+                questionId: question.name
               });
             })
             .catch(error => {
@@ -1145,14 +1123,14 @@ const actions = {
             .get()
             .then(snapshot => {
               const doc = snapshot.docs[0];
-              const index = doc.data().questions.indexOf(question.iq);
+              const index = doc.data().questions.indexOf(question.name);
               const questions = doc.data().questions;
               if (index !== -1) questions.splice(index, 1);
               doc.ref.update({ questions });
 
               commit("addRemoveQuestion", {
                 subjectId: doc.id,
-                questionId: question.iq,
+                questionId: question.name,
                 remove: true
               });
             })
@@ -1163,7 +1141,6 @@ const actions = {
 
         commit("setLoading", false);
         commit("setSuccess", "Questão editada com sucesso!");
-        dispatch("createdEditedQuestion", payload.oldData);
       })
       .catch(error => {
         commit("setLoading", false);
@@ -1179,45 +1156,23 @@ const actions = {
       });
   },
   /**
-   * Creates a question with the non updated data version.
+   * Checks if a question with the given name exists.
    *
    * @param {Store} store - The vuex store.
-   * @param {Question} payload - The question to be kept.
-   */
-  createdEditedQuestion({ commit }, payload) {
-    commit("setLoading", true);
-
-    const editedQuestion = {
-      ...payload,
-      iq: payload.iq + "-" + payload.edited.length
-    };
-    db.collection("edited questions")
-      .add(editedQuestion)
-      .then(() => {
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        console.error("Error writing document: ", error);
-      });
-  },
-  /**
-   * Checks if a question with the given IQ exists.
-   *
-   * @param {Store} store - The vuex store.
-   * @param {string} payload - The question IQ.
+   * @param {string} payload - The question name.
    * @returns {Promise<boolean>} Whether the question exists or not.
    */
   async questionExists(store, payload) {
     return new Promise((resolve, reject) => {
       try {
         db.collection("questions")
-          .where("iq", "==", payload)
+          .where("name", "==", payload)
           .get()
           .then(snapshot => {
             if (snapshot.docs.length > 0) resolve(true);
             else {
               db.collection("question-requests")
-                .where("iq", "==", payload)
+                .where("name", "==", payload)
                 .get()
                 .then(snap => {
                   if (snap.docs.length > 0) resolve(true);
@@ -1257,11 +1212,12 @@ const actions = {
     const question = {
       created: createdDate,
       updated: createdDate,
-      ...payload.question,
-      edited: []
+      ...payload.question
     };
 
-    const questionAmount = this.getters.getDataSize.questions.general;
+    let questionAmount = this.getters.getDataSize.questions.general;
+    questionAmount = questionAmount <= 0 ? 0 : questionAmount;
+
     const pageAmount = Math.ceil(questionAmount / 8);
     const amount = questionAmount % 8;
 
@@ -1269,11 +1225,13 @@ const actions = {
       .add(question)
       .then(() => {
         commit("setLoading", false);
+
         commit("createQuestion", {
           page: amount === 0 ? pageAmount + 1 : pageAmount,
           data: question,
           amount: questionAmount
         });
+
         if (!payload.isRequest)
           commit("setSuccess", "Questão criada com sucesso!");
 
@@ -1315,14 +1273,14 @@ const actions = {
           .then(snap => {
             const document = snap.docs[0];
 
-            if (!document.data().questions.includes(question.iq)) {
-              const questions = [...document.data().questions, question.iq];
+            if (!document.data().questions.includes(question.name)) {
+              const questions = [...document.data().questions, question.name];
               questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
               document.ref.update({ questions });
 
               commit("addRemoveQuestion", {
                 subjectId: document.id,
-                questionId: question.iq
+                questionId: question.name
               });
             }
           })
@@ -1344,15 +1302,15 @@ const actions = {
       });
   },
   /**
-   * Gets a question by it's IQ.
+   * Gets a question by it's name.
    *
-   * @param {string} payload - The question IQ.
+   * @param {string} payload - The question name.
    */
-  async getQuestionByIQ(_, payload) {
+  async getQuestionByName(_, payload) {
     return new Promise((resolve, reject) => {
       try {
         db.collection("questions")
-          .where("iq", "==", payload)
+          .where("name", "==", payload)
           .get()
           .then(snapshot => {
             if (snapshot.docs.length > 0) resolve(snapshot.docs[0].data());
@@ -1365,7 +1323,7 @@ const actions = {
               error.message
             );
             commit("setError", { message: errorModel });
-            createErrorLog("Question IQ Load", error.message, {
+            createErrorLog("Question Name Load", error.message, {
               payload
             });
           });
@@ -1432,18 +1390,18 @@ const getters = {
     return state.filteredQuestions;
   },
   /**
-   * Gets an array of answers based on the question's IQ.
+   * Gets an array of answers based on the question's name.
    *
    * @param {QuestionsState} state - The questions state.
-   * @param {string} iq - The question IQ.
-   * @returns {(iq: string) => Answer[]} An array of answers.
+   * @param {string} name - The question name.
+   * @returns {(name: string) => Answer[]} An array of answers.
    */
   getAnswersById(state) {
-    return iq => {
+    return name => {
       const aux = [];
 
       for (let key in state.questions) {
-        if (state.questions[key].iq === iq) {
+        if (state.questions[key].name === name) {
           aux = state.questions[key];
         }
       }

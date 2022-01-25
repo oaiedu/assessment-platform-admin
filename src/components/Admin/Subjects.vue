@@ -203,7 +203,7 @@ export default {
         return;
       }
 
-      await this.$store.dispatch("deleteSubject", subject.id);
+      await this.$store.dispatch("deleteSubject", subject);
     }
   }
 };

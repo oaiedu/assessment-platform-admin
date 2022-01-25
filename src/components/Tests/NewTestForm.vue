@@ -177,7 +177,7 @@
                 :page="randomizedPage"
                 no-data-text="Não há questões a serem mostradas"
                 loading-text="Carregando questões..."
-                item-key="iq"
+                item-key="name"
                 show-select
                 :item-class="itemRowStyle"
                 hide-default-footer
@@ -208,7 +208,7 @@
                 rounded
                 dense
                 :append-icon="mdiMagnify"
-                label="Procurar por IQ"
+                label="Procurar por Nome"
                 single-line
                 hide-details
               ></v-text-field>
@@ -227,7 +227,7 @@
                   loading-text="Carregando questões..."
                   show-select
                   @toggle-select-all="selectAllToggle"
-                  item-key="iq"
+                  item-key="name"
                   :item-class="itemRowStyle"
                   hide-default-footer
                   class="elevation-1"
@@ -341,15 +341,12 @@ export default {
       pageCount: 15,
       itemsPerPage: 8,
       headers: [
-        { text: "IQ", align: "left", sortable: false, value: "iq" },
-        { text: "Conhecimento", value: "knowledge" },
-        { text: "Relevância OR", value: "knowledgePWR" },
-        { text: "Relevância OSR", value: "knowledgeBWR" },
+        { text: "Nome", align: "left", sortable: false, value: "name" },
         { text: "Disciplina", value: "subject", sortable: false },
         { text: "", value: "actions", sortable: false }
       ],
       randomHeaders: [
-        { text: "IQ", align: "center", value: "iq" },
+        { text: "Nome", align: "center", value: "name" },
         { text: "Disciplina", align: "center", value: "subject" }
       ],
       textRule: [v => !!v || "Necessário"],
@@ -367,7 +364,6 @@ export default {
       return this.$store.getters.loading;
     },
     subjects() {
-      console.log(this.$store.state.Subject.subjects);
       return this.$store.state.Subject.subjects;
     },
     questions() {
@@ -503,10 +499,10 @@ export default {
 
       const promises = subjects.map(subject => {
         return this.$store
-          .dispatch("getSubjectIQS", subject)
+          .dispatch("getSubjectNames", subject)
           .then(questions => {
             questions.forEach(question => {
-              allQuestions.push({ iq: question, subject });
+              allQuestions.push({ name: question, subject });
             });
           });
       });
@@ -518,11 +514,11 @@ export default {
         selected.length < allQuestions.length
       ) {
         const index = Math.floor(Math.random() * allQuestions.length);
-        if (!selected.includes(allQuestions[index].iq)) {
+        if (!selected.includes(allQuestions[index].name)) {
           const question = allQuestions[index];
-          selected.push(question.iq);
+          selected.push(question.name);
           this.selectedRandomQuestions.push({
-            iq: question.iq,
+            name: question.name,
             subject: question.subject
           });
         }
@@ -563,7 +559,7 @@ export default {
               this.selectedQuestions = [];
               const promises = this.selectedRandom.map(question => {
                 return this.$store
-                  .dispatch("getQuestionByIQ", question.iq)
+                  .dispatch("getQuestionByName", question.name)
                   .then(q => {
                     this.selectedQuestions.push(q);
                   });
