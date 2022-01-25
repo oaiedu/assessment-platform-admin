@@ -120,9 +120,9 @@ const actions = {
    */
   async loadSubjects({ commit }) {
     commit("setLoading", true);
+    const data = [];
 
     try {
-      const data = [];
       const subjects = await db.collection("subjects").get();
 
       subjects.forEach(doc => {
@@ -174,7 +174,7 @@ const actions = {
    * Deletes a subject from the Firestore.
    *
    * @param {Store} store The vuex store.
-   * @param {string} payload The subject id.
+   * @param {Subject} payload The subject data.
    */
   async deleteSubject({ commit }, payload) {
     commit("setLoading", true);
@@ -182,9 +182,28 @@ const actions = {
     try {
       await db
         .collection("subjects")
-        .doc(payload)
+        .doc(payload.id)
         .delete();
-      commit("removeSubject", payload);
+      commit("removeSubject", payload.id);
+
+      const dataSizeSnap = await db.collection("data-size").get();
+      const dataSize = dataSizeSnap.docs[0];
+
+      if (dataSize) {
+        /**
+         * @type {import("./dataSize.store").DataSize}
+         */
+        const data = dataSize.data();
+
+        delete data.questions.subject[payload.name];
+
+        dataSize.ref.update({ questions: data.questions });
+
+        commit("addRemoveSize", {
+          key: "questions",
+          data: data.questions
+        });
+      }
       commit("setSuccess", "Assunto excluído com sucesso!");
     } catch (error) {
       const errorModel = showErrorMessage(
@@ -194,7 +213,7 @@ const actions = {
       );
       commit("setError", { message: errorModel });
       createErrorLog("Subject Exclusion", error.message, {
-        data
+        payload
       });
     } finally {
       commit("setLoading", false);
