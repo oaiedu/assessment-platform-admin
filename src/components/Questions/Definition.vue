@@ -2,7 +2,7 @@
   <div>
     DISCIPLINA: {{ question.subject }}
     <br />
-    NOME: {{ question.name }}
+    <strong>{{ question.name }}</strong>
     <br />
 
     <br />
