@@ -17,7 +17,7 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  */
 
 /**
- * @typedef {{admin: boolean, appraiser: boolean, student: boolean, teacher: boolean}} UserClaims
+ * @typedef {{admin: boolean, appraiser: boolean, student: boolean}} UserClaims
  */
 
 /**
@@ -330,13 +330,13 @@ const actions = {
    * @param {string} payload.email - The user e-mail.
    * @param {string} payload.password - The user password.
    */
-  signUserIn({ commit, dispatch }, payload) {
+  async signUserIn({ commit, dispatch }, payload) {
     commit("setLoading", true);
     commit("clearError");
     commit("clearSuccess");
 
-    dispatch("loadDataSize");
-    dispatch("resetPapers");
+    await dispatch("loadDataSize");
+
     dispatch("resetQuestions");
     dispatch("resetRequests");
     dispatch("resetTests");
@@ -398,7 +398,6 @@ const actions = {
           const claims = {
             admin: false,
             appraiser: false,
-            teacher: false,
             student: false
           };
 

@@ -126,8 +126,7 @@ export default {
       roles: [
         { text: "Administrador", value: "admin" },
         { text: "Aluno", value: "student" },
-        { text: "Avaliador", value: "appraiser" },
-        { text: "Professor", value: "teacher" }
+        { text: "Avaliador", value: "appraiser" }
       ],
       headers: [
         {
@@ -172,7 +171,6 @@ export default {
     getRoleName(role) {
       if (role === "admin") return "Administrador";
       else if (role === "appraiser") return "Avaliador";
-      else if (role === "teacher") return "Professor";
       else return "Aluno";
     },
     sendEmail(email) {
