@@ -260,7 +260,7 @@ export default {
       dialogExam: false,
       dialogNewTest: false,
       dialogEditTest: false,
-      dialogGenerateTest: true,
+      dialogGenerateTest: false,
       page: 1,
       searchPage: 1,
       itemsPerPage: 10,
