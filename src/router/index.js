@@ -4,7 +4,6 @@ import Auth from "@/views/Auth.vue";
 import Profile from "@/components/User/Profile.vue";
 import Questions from "@/components/Questions/Questions.vue";
 import Tests from "@/components/Tests/Tests.vue";
-import PrintTest from "@/components/Tests/PrintTest.vue";
 import Inbox from "@/components/Requests/Inbox.vue";
 import Home from "@/views/Home.vue";
 import Management from "@/components/Admin/Management.vue";
@@ -46,12 +45,6 @@ const routes = [
     path: "/tests",
     component: Tests,
     name: "tests",
-    beforeEnter: AuthGuard
-  },
-  {
-    path: "/tests/:testId",
-    component: PrintTest,
-    name: "testsById",
     beforeEnter: AuthGuard
   },
   {

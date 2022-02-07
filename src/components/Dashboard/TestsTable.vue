@@ -140,10 +140,8 @@ export default {
         return `${this.months[parseInt(month)].substr(0, 3)} ${day} ${year}`;
       }
     },
-    onRowClick(item) {
-      if (this.userClaims && this.userClaims["admin"]) {
-        this.$router.push("/tests/" + item.id);
-      }
+    onRowClick() {
+      this.$router.push("/tests");
     }
   },
   created() {
