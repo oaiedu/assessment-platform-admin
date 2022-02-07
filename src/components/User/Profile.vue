@@ -27,13 +27,15 @@
                       :class="{ 'avatar-edit': this.$route.path == '/profile' }"
                     >
                       <img
-                        src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
                         v-if="imagesAsURL === null"
+                        src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                        style="object-fit: cover"
                       />
                       <img
-                        class="profile-page-photo"
-                        :src="imagesAsURL"
                         v-else
+                        class="profile-page-photo"
+                        style="object-fit: cover"
+                        :src="imagesAsURL"
                       />
                     </v-avatar>
                     <v-container>

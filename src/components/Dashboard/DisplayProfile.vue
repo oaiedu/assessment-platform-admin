@@ -71,6 +71,10 @@ export default {
   padding: 20px;
 }
 
+.avatar-container .display-profile-image-home {
+  object-fit: cover;
+}
+
 .user-info {
   display: flex;
   flex-direction: column;

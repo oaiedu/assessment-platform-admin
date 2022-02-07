@@ -49,7 +49,7 @@
                   class="ml-3"
                   @click="onPdfClick(item)"
                 >
-                  {{ mdiPdfBox }}
+                  {{ mdiFilePdfBox }}
                 </v-icon>
               </template>
               <span>Visualizar PDF</span>
@@ -151,7 +151,7 @@ import {
   mdiDelete,
   mdiPencil,
   mdiCheckBold,
-  mdiPdfBox,
+  mdiFilePdfBox,
   mdiEmail
 } from "@mdi/js";
 
@@ -219,7 +219,7 @@ export default {
       mdiDelete,
       mdiPencil,
       mdiCheckBold,
-      mdiPdfBox,
+      mdiFilePdfBox,
       mdiEmail
     };
   },

@@ -25,11 +25,16 @@
           <v-row justify="end" v-if="!item.toDelete">
             <v-tooltip top>
               <template v-slot:activator="{ on, attrs }">
-                <v-icon v-on="on" v-bind="attrs" @click="onPdfClick(item)">
-                  {{ mdiPdfBox }}
+                <v-icon
+                  v-on="on"
+                  v-bind="attrs"
+                  class="ml-2"
+                  @click="doExam(item)"
+                >
+                  {{ mdiFileEdit }}
                 </v-icon>
               </template>
-              <span>Visualizar PDF</span>
+              <span>Realizar prova</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -100,14 +105,14 @@
 </template>
 
 <script>
-import { mdiPdfBox, mdiPencil, mdiDelete } from "@mdi/js";
+import { mdiFileEdit, mdiPencil, mdiDelete } from "@mdi/js";
 
 export default {
   name: "TestsTable",
   props: ["items", "itemsPerPage", "page"],
   data() {
     return {
-      mdiPdfBox,
+      mdiFileEdit,
       mdiPencil,
       mdiDelete,
       headers: [
@@ -138,9 +143,6 @@ export default {
           : "item-deleted"
         : "";
     },
-    onPdfClick(item) {
-      this.$emit("pdfClick", item.id);
-    },
     onEditClick(item) {
       this.$emit("editClick", item);
     },
@@ -149,6 +151,23 @@ export default {
     },
     onRestoreClick(item) {
       this.$emit("restoreClick", item);
+    },
+    doExam(item) {
+      const questions = [...item.questions];
+      const randomQuestions = [];
+
+      let i = 0;
+
+      while (i < questions.length) {
+        const rand = Math.floor(Math.random() * questions.length);
+
+        if (!randomQuestions.find(q => q.name === questions[rand].name)) {
+          randomQuestions.push(questions[rand]);
+          i++;
+        }
+      }
+
+      this.$emit("doExam", { name: item.title, questions: randomQuestions });
     }
   }
 };
