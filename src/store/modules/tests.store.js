@@ -229,7 +229,7 @@ const mutations = {
    */
   createTest(state, data) {
     const page = data.page;
-    const tests = state.tests["p" + page] || [];
+    const tests = [...(state.tests["p" + page] || [])];
     const amount = data.amount;
     const oneBefore = state.tests["p" + (page - 1)] || [];
     if (tests.length > 0 || oneBefore.length === 10 || amount === 0) {
@@ -1058,7 +1058,7 @@ const actions = {
    * @param {string} payload - The subject name.
    * @returns {Promise<string[]>} An array of names.
    */
-  async getSubjectNames({ commit }, payload) {
+  async getSubjectQuestions({ commit }, payload) {
     const subject = payload;
 
     return new Promise((resolve, reject) => {
@@ -1081,7 +1081,7 @@ const actions = {
             });
           });
       } catch (error) {
-        reject("getSubjectNames");
+        reject("getSubjectQuestions");
       }
     });
   },
