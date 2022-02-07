@@ -8,8 +8,9 @@
               <img
                 class="display-profile-image"
                 rel="preload"
-                :src="profileImage"
+                style="object-fit: cover"
                 alt="Profile Image"
+                :src="profileImage"
               />
             </v-avatar>
             <v-list-item-content class="pl-4">
