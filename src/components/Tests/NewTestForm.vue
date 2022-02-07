@@ -499,7 +499,7 @@ export default {
 
       const promises = subjects.map(subject => {
         return this.$store
-          .dispatch("getSubjectNames", subject)
+          .dispatch("getSubjectQuestions", subject)
           .then(questions => {
             questions.forEach(question => {
               allQuestions.push({ name: question, subject });
