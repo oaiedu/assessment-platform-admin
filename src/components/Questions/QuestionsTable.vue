@@ -98,14 +98,14 @@
 </template>
 
 <script>
-import { mdiPdfBox, mdiPencil, mdiDelete } from "@mdi/js";
+import { mdiFilePdfBox, mdiPencil, mdiDelete } from "@mdi/js";
 
 export default {
   name: "QuestionsTable",
   props: ["items", "itemsPerPage", "page", "isActionsAvailable"],
   data() {
     return {
-      pdfIcon: mdiPdfBox,
+      pdfIcon: mdiFilePdfBox,
       pencilIcon: mdiPencil,
       deleteIcon: mdiDelete,
       headers: [
