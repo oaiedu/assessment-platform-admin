@@ -1,8 +1,8 @@
 <template>
   <div>
-    DISCIPLINA: {{ question.subject }}
-    <br />
     <strong>{{ question.name }}</strong>
+    <br />
+    {{ question.subject }}
     <br />
 
     <br />
