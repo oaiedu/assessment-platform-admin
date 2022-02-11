@@ -18,7 +18,6 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
 /**
  * @typedef {Object} TestCreation
  * @property {string} userId - The user that created the test.
- * @property {string|null} editedBy - The last user that edited the test.
  * @property {string} title - The test title.
  * @property {string} purpose - The test purpose.
  * @property {"selected"|"random"} type - The test type.
@@ -31,7 +30,6 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {string} created - The test creation date.
  * @property {string} updated - The test edition date.
  * @property {string} userId - The user that created the test.
- * @property {string|null} editedBy - The last user that edited the test.
  * @property {string} title - The test title.
  * @property {string} purpose - The test purpose.
  * @property {"selected"|"random"} type - The test type.
@@ -735,7 +733,6 @@ const actions = {
           type: data.type,
           userId: data.userId,
           created: data.created,
-          editedBy: data.editedBy || null,
           purpose: data.purpose
         };
 
