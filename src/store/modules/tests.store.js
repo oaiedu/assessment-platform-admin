@@ -10,42 +10,59 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  */
 
 /**
+ * @typedef {Object} Level
+ * @property {number} index Defines the level index.
+ * @property {'beginner' | 'intermediary' | 'advanced' | 'expert'} name Defines the level name.
+ */
+
+/**
  * @typedef {Object} DeleteStatus
- * @property {boolean} toDelete.status - If true, the question can be restored. If false, it will be deleted.
- * @property {string|undefined} toDelete.userEmail - The user that marked the question to be deleted.
+ * @property {boolean} toDelete.status If true, the question can be restored. If false, it will be deleted.
+ * @property {string|undefined} toDelete.userEmail The user that marked the question to be deleted.
+ */
+
+/**
+ * @typedef {Object} Time
+ * @property {number} hours Defines how many hours.
+ * @property {number} minutes Defines how many minutes.
+ * @property {number} seconds Defines how many seconds.
  */
 
 /**
  * @typedef {Object} TestCreation
- * @property {string} userId - The user that created the test.
- * @property {string} title - The test title.
- * @property {string} purpose - The test purpose.
- * @property {"selected"|"random"} type - The test type.
- * @property {Question[]} questions - The test questions.
+ * @property {string} userId The user that created the test.
+ * @property {string} title The test title.
+ * @property {string} instructions The test instructions.
+ * @property {"selected"|"random"} type The test type.
+ * @property {Question[]} questions The test questions.
  */
 
 /**
  * @typedef {Object} Test
- * @property {string} id - The test id.
- * @property {string} created - The test creation date.
- * @property {string} updated - The test edition date.
- * @property {string} userId - The user that created the test.
- * @property {string} title - The test title.
- * @property {string} purpose - The test purpose.
- * @property {"selected"|"random"} type - The test type.
- * @property {Question[]} questions - The test questions.
- * @property {DeleteStatus|undefined} toDelete - The test deletion status.
+ * @property {string} id The test id.
+ * @property {string} created The test creation date.
+ * @property {string} updated The test edition date.
+ * @property {string} userId The user that created the test.
+ * @property {string} title The test title.
+ * @property {string} instructions The test instructions.
+ * @property {number} questionsAmount Defines how many questions the test have.
+ * @property {boolean} unlimitedTime Defines whether the test has unlimited time.
+ * @property {Time} time Defines the test timer.
+ * @property {Level} level Defines the test level.
+ * @property {"selected"|"random"|"auto"} type The test type.
+ * @property {Question[]} questions The test questions.
+ * @property {DeleteStatus|undefined} toDelete The test deletion status.
  */
 
 /**
  * @typedef {Object} TestsState
- * @property {Object.<string, Test[]>} tests - The pages with it's tests list.
- * @property {Test[]} filteredTests - An array of tests filtered by id.
- * @property {Test[]} currentTestsPage - An array of tests of the current page.
- * @property {[string, string]|null} lastTestDocument - An array with the first and last test id from the last request.
- * @property {Question[]} testQuestions - An array of questions from a specific test.
- * @property {Test[]} deleteMarkTests - An array of tests that were marked to be deleted.
- * @property {Test[]} lastTests - An array of the most recent tests.
+ * @property {Object.<string, Test[]>} tests The pages with it's tests list.
+ * @property {Test[]} filteredTests An array of tests filtered by id.
+ * @property {Test[]} currentTestsPage An array of tests of the current page.
+ * @property {[string, string]|null} lastTestDocument An array with the first and last test id from the last request.
+ * @property {Question[]} testQuestions An array of questions from a specific test.
+ * @property {Test[]} deleteMarkTests An array of tests that were marked to be deleted.
+ * @property {Test[]} lastTests An array of the most recent tests.
  */
 
 /**
@@ -505,7 +522,7 @@ const actions = {
    * @param {string} payload - The test title.
    * @returns {Promise<number>} The number of tests that match the given title.
    */
-  async testExists(store, payload) {
+  async testExists(_, payload) {
     return new Promise((resolve, reject) => {
       try {
         db.collection("tests")
@@ -720,6 +737,10 @@ const actions = {
       .get()
       .then(async snapshot => {
         const doc = snapshot.docs[0];
+
+        /**
+         * @type {Test}
+         */
         const data = doc.data();
         docData = data;
 
@@ -729,12 +750,20 @@ const actions = {
         const test = {
           id: data.id,
           title: data.title,
-          questions: data.questions,
+          created: data.created,
+          updated: data.updated,
+          questionsAmount: data.questionsAmount,
+          time: data.time,
+          unlimitedTime: data.unlimitedTime,
+          level: data.level,
           type: data.type,
           userId: data.userId,
-          created: data.created,
-          purpose: data.purpose
+          instructions: data.instructions
         };
+
+        if (data.questions) {
+          test.questions = data.questions;
+        }
 
         doc.ref.set(test);
 
@@ -790,6 +819,9 @@ const actions = {
       .get()
       .then(snapshot => {
         snapshot.forEach(async doc => {
+          /**
+           * @type {Test}
+           */
           const data = doc.data();
           docData = data;
 
@@ -799,13 +831,20 @@ const actions = {
           const test = {
             id: data.id,
             title: data.title,
-            questions: data.questions,
+            created: data.created,
+            updated: data.updated,
+            questionsAmount: data.questionsAmount,
+            time: data.time,
+            unlimitedTime: data.unlimitedTime,
+            level: data.level,
             type: data.type,
             userId: data.userId,
-            created: data.created,
-            editedId: data.editedId || null,
-            purpose: data.purpose
+            instructions: data.instructions
           };
+
+          if (data.questions) {
+            test.questions = data.questions;
+          }
 
           doc.ref.set(test);
 
