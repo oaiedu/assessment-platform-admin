@@ -1,18 +1,12 @@
 <template>
   <div>
     <v-container>
-      <v-container>
-        <h1 class="text-center blue--text">Gerenciar Provas</h1>
-      </v-container>
-
-      <v-container>
-        <v-container>
-          <SearchBox
-            label="Procurar por Nome"
-            @enter="searchQuery($event)"
-            @textChange="searchTextChange($event)"
-          />
-        </v-container>
+      <v-container class="mt-10 mb-5">
+        <SearchBox
+          label="Procurar por Nome"
+          @enter="searchQuery($event)"
+          @textChange="searchTextChange($event)"
+        />
       </v-container>
 
       <v-container
@@ -137,7 +131,7 @@
             color="blue darken-1"
             @click.stop="
               userClaims && !userClaims['student']
-                ? (dialogNewTest = true)
+                ? (dialogTestForm = true)
                 : (dialogGenerateTest = true)
             "
           >
@@ -176,25 +170,29 @@
       </v-dialog>
 
       <v-dialog
+        v-model="dialogTestForm"
         fullscreen
         hide-overlay
         transition="dialog-bottom-transition"
-        v-model="dialogNewTest"
       >
-        <NewTest @closeDialogNew="dialogNewTest = false"></NewTest>
+        <TestForm
+          v-if="dialogTestForm"
+          @closeDialogNew="dialogTestForm = false"
+        ></TestForm>
       </v-dialog>
 
       <v-dialog
+        v-model="dialogEditTest"
         fullscreen
         hide-overlay
         transition="dialog-bottom-transition"
-        v-model="dialogEditTest"
       >
-        <EditTest
+        <TestForm
+          v-if="dialogEditTest"
+          :test="selectedTest"
           @closeDialogNew="dialogEditTest = false"
           @updateTest="updateTest($event)"
-          :test="selectedTest"
-        ></EditTest>
+        ></TestForm>
       </v-dialog>
 
       <div class="text-center pt-2">
@@ -229,8 +227,7 @@
 import { mdiPlus, mdiTextBoxPlus } from "@mdi/js";
 import GenerateCard from "./GenerateCard";
 import Exam from "./Exam";
-import NewTest from "./NewTestForm";
-import EditTest from "./EditTest";
+import TestForm from "./TestForm";
 import Paginator from "../Paginator";
 import TestsTable from "./TestsTable";
 import DeleteWarning from "../Shared/DeleteWarning";
@@ -242,8 +239,7 @@ export default {
   components: {
     GenerateCard,
     Exam,
-    NewTest,
-    EditTest,
+    TestForm,
     Paginator,
     TestsTable,
     DeleteWarning,
@@ -258,7 +254,7 @@ export default {
       deleteConfirmed: false,
       deleteTestSnackBar: false,
       dialogExam: false,
-      dialogNewTest: false,
+      dialogTestForm: false,
       dialogEditTest: false,
       dialogGenerateTest: false,
       page: 1,

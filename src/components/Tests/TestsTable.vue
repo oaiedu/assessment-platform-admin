@@ -2,32 +2,78 @@
   <v-container>
     <v-card>
       <v-data-table
+        hide-default-footer
+        class="elevation-1"
+        no-data-text="Não há provas a serem mostradas"
+        loading-text="Carregando provas..."
         :headers="headers"
         :items="items"
         :page="page"
         :items-per-page="itemsPerPage"
         :loading="loading"
-        no-data-text="Não há provas a serem mostradas"
-        loading-text="Carregando provas..."
-        hide-default-footer
         :item-class="itemRowStyle"
-        class="elevation-1"
       >
-        <template v-slot:[`item.type`]="{ item }">
-          {{ item.type === "selected" ? "Selecionado" : "Aleatório" }}
+        <template v-slot:[`header.actions`]="{ header }">
+          <v-row justify="center" class="ma-0 pa-0" style="width: 100px">
+            {{ header.text }}
+          </v-row>
         </template>
 
-        <template v-slot:[`item.user`]="{ item }">
-          {{ item.user.name || item.user.email }}
+        <template v-slot:[`item.info`]="{ item }">
+          <v-row class="test-info" justify="end">
+            <span class="grey--text text--darken-2 font-weight-medium">
+              <v-icon color="grey--darken-1">{{ mdiClipboardText }}</v-icon>
+
+              {{ item.questionsAmount }}
+            </span>
+
+            <span class="grey--text text--darken-2 font-weight-medium ml-4">
+              <v-icon color="grey--darken-1">{{ mdiClockOutline }}</v-icon>
+
+              {{ getTime(item) }}
+            </span>
+
+            <v-divider vertical class="mx-4 my-0 pa-0"></v-divider>
+
+            <span
+              class="font-weight-medium"
+              :class="(item.status ? 'green' : 'grey') + '--text'"
+            >
+              <v-icon :color="item.status ? 'green' : 'grey'">{{
+                item.status ? mdiCheckCircle : mdiCancel
+              }}</v-icon>
+
+              {{ item.status || "SEM TENTATIVAS" }}
+            </span>
+          </v-row>
         </template>
 
         <template v-slot:[`item.actions`]="{ item }">
-          <v-row justify="end" v-if="!item.toDelete">
-            <v-tooltip top>
+          <v-row
+            v-if="!item.toDelete"
+            class="ma-0 pa-0"
+            justify="center"
+            style="width: 100px"
+          >
+            <v-btn
+              v-if="userClaims && userClaims['student']"
+              rounded
+              dark
+              height="34px"
+              width="100px"
+              elevation="0"
+              color="indigo lighten-2"
+              @click="doExam(item)"
+            >
+              COMEÇAR
+            </v-btn>
+
+            <v-tooltip top v-if="userClaims && !userClaims['student']">
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
                   v-on="on"
                   v-bind="attrs"
+                  color="indigo lighten-2"
                   class="ml-2"
                   @click="doExam(item)"
                 >
@@ -37,12 +83,12 @@
               <span>Realizar prova</span>
             </v-tooltip>
 
-            <v-tooltip top>
+            <v-tooltip top v-if="userClaims && !userClaims['student']">
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
-                  v-if="userClaims && !userClaims['student']"
                   v-on="on"
                   v-bind="attrs"
+                  color="orange"
                   class="ml-2"
                   @click="onEditClick(item)"
                 >
@@ -52,12 +98,12 @@
               <span>Editar</span>
             </v-tooltip>
 
-            <v-tooltip top>
+            <v-tooltip top v-if="userClaims && !userClaims['student']">
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
-                  v-if="userClaims && !userClaims['student']"
                   v-on="on"
                   v-bind="attrs"
+                  color="red"
                   class="ml-2"
                   @click="onDeleteClick(item)"
                 >
@@ -69,8 +115,10 @@
           </v-row>
 
           <v-row
-            justify="end"
             v-else-if="item.toDelete && item.toDelete.status"
+            class="ma-0 ml-1 pa-0"
+            justify="center"
+            style="width: 100px"
           >
             <v-btn
               style="padding: 0 !important; font-weight: bold !important;"
@@ -89,7 +137,12 @@
             </v-btn>
           </v-row>
 
-          <v-row justify="end" v-else>
+          <v-row
+            v-else
+            class="ma-0 ml-1 pa-0"
+            justify="center"
+            style="width: 100px"
+          >
             <v-btn
               style="padding: 0 !important; font-weight: bold !important;"
               disabled
@@ -105,7 +158,16 @@
 </template>
 
 <script>
-import { mdiFileEdit, mdiPencil, mdiDelete } from "@mdi/js";
+import {
+  mdiFileEdit,
+  mdiPencil,
+  mdiDelete,
+  mdiCheckCircle,
+  mdiCancel,
+  mdiClockOutline,
+  mdiClipboardText,
+  mdiDumbbell
+} from "@mdi/js";
 
 export default {
   name: "TestsTable",
@@ -115,12 +177,26 @@ export default {
       mdiFileEdit,
       mdiPencil,
       mdiDelete,
+      mdiCheckCircle,
+      mdiCancel,
+      mdiClockOutline,
+      mdiClipboardText,
+      mdiDumbbell,
       headers: [
-        { text: "Nome", align: "start", value: "title" },
-        { text: "Questões", align: "left", value: "questions.length" },
-        { text: "Tipo", align: "left", value: "type" },
-        { text: "Usuário", align: "left", value: "user" },
-        { text: "Ações", align: "right", value: "actions", sortable: false }
+        { text: "Título", align: "start", value: "title" },
+        {
+          text: "",
+          align: "right",
+          value: "info",
+          sortable: false
+        },
+        {
+          text: "Ações",
+          align: "center",
+          value: "actions",
+          sortable: false,
+          class: "test-actions"
+        }
       ]
     };
   },
@@ -136,6 +212,11 @@ export default {
     }
   },
   methods: {
+    getTime(item) {
+      return item.unlimitedTime
+        ? "Ilimitado"
+        : `${item.time.hours}h ${item.time.minutes}m ${item.time.seconds}s`;
+    },
     itemRowStyle(item) {
       return item.toDelete
         ? item.toDelete.status
@@ -180,5 +261,13 @@ export default {
 
 .item-deleted {
   color: #c4c4c4;
+}
+
+th.test-actions {
+  width: 100px;
+}
+
+.test-info {
+  font-size: 0.9rem;
 }
 </style>

@@ -2,26 +2,37 @@
   <v-card>
     <v-form ref="formRef">
       <v-toolbar dark color="primary">
-        <v-btn icon dark @click="close()" class="mr-2">
+        <v-btn icon dark class="mr-2" @click="close()">
           <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
-        <h2>Criar nova prova</h2>
+        <h2>{{ !test ? "Criar nova" : "Editar" }} prova</h2>
         <v-spacer></v-spacer>
       </v-toolbar>
 
       <v-tooltip left>
         <template v-slot:activator="{ on }">
           <v-btn
-            color="blue darken-1"
-            class="mr-4"
             v-on="on"
-            dark
             fab
             fixed
             bottom
             right
-            :loading="loading && testType === 'Aleatório'"
-            @click="onCreateTest()"
+            color="blue darken-1"
+            class="mr-4"
+            :loading="loading"
+            :disabled="
+              !title ||
+                (testType !== 'auto' && testType === 'selected'
+                  ? !selectedQuestions.length
+                  : !selectedRandom.length)
+            "
+            :dark="
+              !!title &&
+                (testType !== 'auto' && testType === 'selected'
+                  ? !!selectedQuestions.length
+                  : !!selectedRandom.length)
+            "
+            @click="!test ? createTest() : editTest()"
           >
             <v-icon color="white">{{ mdiContentSave }}</v-icon>
           </v-btn>
@@ -32,103 +43,118 @@
       <v-container fluid class="pa-15 pt-10">
         <v-row>
           <v-col>
-            <v-row>
-              <v-col>
-                <v-text-field
-                  solo
-                  rounded
-                  flat
-                  filled
-                  outlined
-                  dense
-                  :rules="textRule"
-                  required
-                  label="Título"
-                  v-model="testName"
-                ></v-text-field>
-              </v-col>
+            <v-row class="pa-0 ma-0">
+              <v-text-field
+                v-model="title"
+                rounded
+                flat
+                outlined
+                dense
+                required
+                label="Título"
+                :rules="textRule"
+              ></v-text-field>
             </v-row>
 
-            <v-row>
-              <v-col>
+            <v-row class="ma-0 pa-0">
+              <v-textarea
+                outlined
+                rounded
+                required
+                no-resize
+                v-model="instructions"
+                label="Instruções (Opcional)"
+              ></v-textarea>
+            </v-row>
+
+            <v-row class="pa-0 ma-0">
+              <v-col class="pa-0 ma-0">
                 <v-select
-                  solo
+                  v-model="testType"
                   rounded
                   flat
-                  filled
                   outlined
                   dense
-                  label="Tipo de prova"
-                  v-model="testType"
+                  item-value="value"
+                  item-text="label"
                   :items="types"
+                  label="Tipo de prova"
                 >
                 </v-select>
               </v-col>
 
-              <v-col v-if="testType == 'Aleatório'">
+              <v-col v-if="testType !== 'selected'" class="pa-0 ma-0 ml-4">
                 <v-text-field
+                  v-model="randomQuestionsNumber"
                   dense
                   outlined
                   rounded
+                  id="randomQuestionsNumber"
                   name="randomQuestionsNumber"
                   label="Número de Questões"
-                  id="randomQuestionsNumber"
-                  v-model="randomQuestionsNumber"
                   type="number"
                   :rules="rule"
                 ></v-text-field>
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col v-if="testType == 'Aleatório'">
-                <v-select
-                  solo
-                  rounded
-                  flat
-                  filled
-                  outlined
-                  dense
-                  multiple
-                  label="Disciplina"
-                  v-model="testSubjects"
-                  :items="subjects.map(s => s.name)"
-                >
-                  <template v-slot:selection="{ item, index }">
-                    <span v-if="index === 0" style="margin-right: 5px;">
-                      {{ item }}
-                    </span>
-                    <span v-if="index === 1" class="grey--text caption">
-                      (+{{ testSubjects.length - 1 }} others)
-                    </span>
-                  </template>
-                  <template v-slot:prepend-item>
-                    <v-list-item ripple @click="toggle">
-                      <v-list-item-action>
-                        <v-icon
-                          :color="
-                            testSubjects.length > 0 ? 'blue darken-1' : ''
-                          "
-                        >
-                          {{ selectIcon }}
-                        </v-icon>
-                      </v-list-item-action>
-                      <v-list-item-content>
-                        <v-list-item-title>
-                          Selecionar todos
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                    <v-divider class="mt-2"></v-divider>
-                  </template>
-                </v-select>
-              </v-col>
+            <v-row v-if="testType !== 'selected'" class="pa-0 ma-0">
+              <v-select
+                v-model="testSubjects"
+                rounded
+                flat
+                outlined
+                dense
+                multiple
+                label="Disciplina"
+                :items="subjects.map(s => s.name)"
+              >
+                <template v-slot:selection="{ item, index }">
+                  <span v-if="index === 0" style="margin-right: 5px;">
+                    {{ item }}
+                  </span>
+                  <span v-if="index === 1" class="grey--text caption">
+                    (+{{ testSubjects.length - 1 }} others)
+                  </span>
+                </template>
+                <template v-slot:prepend-item>
+                  <v-list-item ripple @click="toggle">
+                    <v-list-item-action>
+                      <v-icon
+                        :color="testSubjects.length > 0 ? 'blue darken-1' : ''"
+                      >
+                        {{ selectIcon }}
+                      </v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        Selecionar todos
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-divider class="mt-2"></v-divider>
+                </template>
+              </v-select>
+            </v-row>
+
+            <v-row class="ma-0 pa-0">
+              <v-select
+                v-model="level"
+                rounded
+                flat
+                outlined
+                dense
+                label="Nível"
+                item-value="value"
+                item-text="label"
+                :items="levels"
+              ></v-select>
             </v-row>
 
             <v-row
-              v-if="testType == 'Aleatório'"
+              v-if="testType === 'random'"
               justify="center"
-              class="pb-10"
+              class="ma-0 py-2"
             >
               <v-btn
                 color="blue darken-1"
@@ -153,35 +179,59 @@
               </v-btn>
             </v-row>
 
-            <v-row>
-              <v-col>
-                <v-textarea
-                  outlined
-                  required
-                  :rules="textRule"
-                  v-model="purpose"
-                  label="Propósito"
-                ></v-textarea>
-              </v-col>
+            <v-row class="ma-0 pa-0">
+              <v-checkbox
+                v-model="unlimitedTime"
+                label="Tempo de prova ilimitado"
+              ></v-checkbox>
+            </v-row>
+
+            <v-row class="ma-0 pa-0">
+              <v-text-field
+                v-model="time.hours"
+                class="mr-3"
+                label="Horas"
+                type="number"
+                style="width: 100px; flex: none"
+                :rules="[v => v >= 0 || 'Valor inválido']"
+                :disabled="unlimitedTime"
+              ></v-text-field>
+
+              <v-text-field
+                v-model="time.minutes"
+                label="Minutos"
+                type="number"
+                style="width: 100px; flex: none"
+                :rules="[v => (v >= 0 && v < 60) || 'Valor inválido']"
+                :disabled="unlimitedTime"
+              ></v-text-field>
             </v-row>
           </v-col>
 
-          <v-col v-if="testType === 'Aleatório'">
+          <v-col v-if="testType === 'auto'" class="pt-10">
+            <p class="orange--text text-center pt-10">
+              Provas automáticas selecionam suas questões apenas quando são
+              iniciadas, de acordo com as disciplinas escolhidas e número de
+              questões.
+            </p>
+          </v-col>
+
+          <v-col v-if="testType === 'random'">
             <v-container>
               <v-data-table
                 v-model="selectedRandom"
+                show-select
+                hide-default-footer
+                item-key="name"
+                class="elevation-1"
+                no-data-text="Não há questões a serem mostradas"
+                loading-text="Carregando questões..."
+                :item-class="itemRowStyle"
                 :items="selectedRandomQuestions"
                 :headers="randomHeaders"
                 :items-per-page="itemsPerPage"
                 :loading="loading"
                 :page="randomizedPage"
-                no-data-text="Não há questões a serem mostradas"
-                loading-text="Carregando questões..."
-                item-key="name"
-                show-select
-                :item-class="itemRowStyle"
-                hide-default-footer
-                class="elevation-1"
               >
               </v-data-table>
             </v-container>
@@ -190,47 +240,47 @@
               <Paginator
                 :page="randomizedPage"
                 :length="
-                  Math.ceil(selectedRandomQuestions.length / itemsPerPage)
+                  Math.ceil(selectedRandomQuestions.length / itemsPerPage) || 1
                 "
                 @pageChange="randomizedPage = $event.page"
               />
             </div>
           </v-col>
 
-          <v-col v-if="testType === 'Selecionado'">
-            <v-container>
+          <v-col v-if="testType === 'selected'">
+            <v-container class="ma-0 pa-0">
               <v-text-field
                 id="searchFieldNew"
                 v-model="search"
-                @keydown="searchQuery($event)"
                 clearable
-                filled
                 rounded
                 dense
-                :append-icon="mdiMagnify"
-                label="Procurar por Nome"
                 single-line
+                outlined
                 hide-details
+                label="Procurar por Nome"
+                :append-icon="mdiMagnify"
+                @keydown="searchQuery($event)"
               ></v-text-field>
             </v-container>
 
-            <v-container>
-              <v-card v-if="selectedSubjects.length == 0">
+            <v-container class="mt-6 mb-4 pa-0">
+              <v-card v-if="selectedSubjects.length === 0" shaped flat outlined>
                 <v-data-table
                   v-model="selectedQuestions"
+                  show-select
+                  hide-default-footer
+                  item-key="name"
+                  class="elevation-1"
+                  no-data-text="Não há questões a serem mostradas"
+                  loading-text="Carregando questões..."
                   :headers="headers"
                   :items="isSearching ? filteredQuestions : questions"
                   :page="isSearching ? searchPage : page"
                   :items-per-page="itemsPerPage"
                   :loading="loading"
-                  no-data-text="Não há questões a serem mostradas"
-                  loading-text="Carregando questões..."
-                  show-select
-                  @toggle-select-all="selectAllToggle"
-                  item-key="name"
                   :item-class="itemRowStyle"
-                  hide-default-footer
-                  class="elevation-1"
+                  @toggle-select-all="selectAllToggle"
                 >
                   <template
                     v-slot:[`item.data-table-select`]="{
@@ -250,13 +300,14 @@
                 </v-data-table>
               </v-card>
             </v-container>
+
             <div class="text-center pt-2">
               <Paginator
                 :page="!isSearching ? page : searchPage"
                 :length="
                   !isSearching
                     ? pageAmount
-                    : Math.ceil(filteredQuestions.length / itemsPerPage)
+                    : Math.ceil(filteredQuestions.length / itemsPerPage) || 1
                 "
                 @pageChange="
                   !isSearching
@@ -274,10 +325,10 @@
     <v-snackbar
       v-model="createErrorSnackBar"
       light
-      color="red darken-2"
       right
       top
       vertical
+      color="red darken-2"
       :timeout="15000"
     >
       <span style="color: white; font-size: 1rem">
@@ -288,8 +339,8 @@
       <template v-slot:action="{ attrs }">
         <v-btn
           dark
-          color="white"
           text
+          color="white"
           v-bind="attrs"
           @click="createErrorSnackBar = false"
         >
@@ -315,12 +366,19 @@ import Ripple from "vuetify/lib/directives/ripple";
 export default {
   directives: { Ripple },
   components: { Paginator },
+  props: {
+    test: {
+      type: Object,
+      required: false,
+      default: null
+    }
+  },
   data() {
     return {
       mdiClose,
       mdiContentSave,
       mdiMagnify,
-      testType: "Selecionado",
+      testType: "selected",
       randomizedPage: 1,
       randomQuestionsNumber: 1,
       createErrorSnackBar: false,
@@ -329,10 +387,63 @@ export default {
       selectedRandomQuestions: [],
       selectedQuestions: [],
       testItems: [],
-      testName: "",
-      purpose: "",
+      title: "",
+      instructions: "",
+      unlimitedTime: true,
+      time: {
+        hours: 0,
+        minutes: 0,
+        seconds: 0
+      },
+      level: {
+        index: 0,
+        name: "beginner"
+      },
+      levels: [
+        {
+          value: {
+            index: 0,
+            name: "beginner"
+          },
+          label: "Iniciante"
+        },
+        {
+          value: {
+            index: 1,
+            name: "intermediary"
+          },
+          label: "Intermediário"
+        },
+        {
+          value: {
+            index: 2,
+            name: "advanced"
+          },
+          label: "Avançado"
+        },
+        {
+          value: {
+            index: 3,
+            name: "expert"
+          },
+          label: "Experiente"
+        }
+      ],
       testSubjects: [],
-      types: ["Aleatório", "Selecionado"],
+      types: [
+        {
+          value: "selected",
+          label: "Selecionado"
+        },
+        {
+          value: "random",
+          label: "Aleatório"
+        },
+        {
+          value: "auto",
+          label: "Automático"
+        }
+      ],
       showedQuestions: [],
       search: "",
       isSearching: false,
@@ -342,14 +453,20 @@ export default {
       itemsPerPage: 8,
       headers: [
         { text: "Nome", align: "left", sortable: false, value: "name" },
-        { text: "Disciplina", value: "subject", sortable: false },
-        { text: "", value: "actions", sortable: false }
+        {
+          text: "Disciplina",
+          align: "center",
+          sortable: false,
+          value: "subject"
+        },
+        { text: "Nível", align: "center", value: "level" }
       ],
       randomHeaders: [
         { text: "Nome", align: "center", value: "name" },
-        { text: "Disciplina", align: "center", value: "subject" }
+        { text: "Disciplina", align: "center", value: "subject" },
+        { text: "Nível", align: "center", value: "level" }
       ],
-      textRule: [v => !!v || "Necessário"],
+      textRule: [v => !!v || "Este campo é obrigatório"],
       rule: [
         v => v <= 50 || "Máximo de 50 questões",
         v => v >= 1 || "Apenas números positivos",
@@ -387,7 +504,7 @@ export default {
     },
     pageAmount() {
       const questionAmount = this.$store.getters.getDataSize.questions.general;
-      return Math.ceil(questionAmount / this.itemsPerPage);
+      return Math.ceil(questionAmount / this.itemsPerPage) || 1;
     },
     selectedAllSubjects() {
       return this.testSubjects.length === this.subjects.length;
@@ -402,23 +519,23 @@ export default {
     }
   },
   watch: {
-    selectedSubjects(val) {
+    selectedSubjects() {
       this.questions.forEach(element => {
         for (let i = 0; i < this.selectedSubjects.length; i++) {
-          if (element.subject == this.selectedSubjects[i]) {
+          if (element.subject === this.selectedSubjects[i]) {
             let aux = true;
 
             for (let k = 0; k < this.showedQuestions.length; k++) {
               if (element === this.showedQuestions[k]) aux = false;
             }
 
-            if (aux == true) this.showedQuestions.push(element);
+            if (aux === true) this.showedQuestions.push(element);
           }
         }
       });
     },
     search(text) {
-      if ((text == null || text.length === 0) && this.isSearching) {
+      if ((text === null || text.length === 0) && this.isSearching) {
         this.isSearching = false;
         this.searchPage = 1;
         this.$store.commit("resetFilteredQuestions");
@@ -475,20 +592,33 @@ export default {
       this.$emit("closeDialogNew");
     },
     setInitialData() {
-      (this.testType = "Selecionado"),
-        (this.randomQuestionsNumber = null),
-        (this.selectedSubjects = []),
-        (this.selectedRandom = []);
+      this.testType = "selected";
+      this.randomQuestionsNumber = null;
+      this.selectedSubjects = [];
+      this.selectedRandom = [];
       this.selectedRandomQuestions = [];
-      (this.selectedQuestions = []),
-        (this.testItems = []),
-        (this.testName = ""),
-        (this.purpose = ""),
-        (this.showedQuestions = []),
-        (this.search = "");
+      this.selectedQuestions = [];
+      this.testItems = [];
+      this.title = "";
+      this.instructions = "";
+      this.time = {
+        hours: 0,
+        minutes: 0,
+        seconds: 0
+      };
+      this.level = {
+        index: 0,
+        name: "beginner"
+      };
+      this.showedQuestions = [];
+      this.search = "";
     },
     async selectRandom() {
-      const amount = this.randomQuestionsNumber;
+      const amount =
+        this.randomQuestionsNumber > this.checkNumber
+          ? this.checkNumber
+          : this.randomQuestionsNumber;
+
       const subjects = this.testSubjects;
       const selected = [];
       const allQuestions = [];
@@ -526,36 +656,15 @@ export default {
       this.selectedRandom = [...this.selectedRandomQuestions];
       this.$store.commit("setLoading", false);
     },
-    removeSelections(i) {
-      let aux = this.showedQuestions.length;
-
-      for (let j = 0; j < aux; j++) {
-        if (this.showedQuestions[j].subject == this.selectedSubjects[i]) {
-          this.showedQuestions.splice(j, 1);
-          j--;
-          aux--;
-        }
-      }
-
-      this.selectedSubjects.splice(i, 1);
-    },
-    selections(i) {
-      let aux = false;
-      for (let j = 0; j < this.selectedSubjects.length; j++) {
-        if (this.subjects[i].name == this.selectedSubjects[j]) aux = true;
-      }
-
-      if (aux == false) this.selectedSubjects.push(this.subjects[i].name);
-    },
-    onCreateTest() {
+    createTest() {
       if (this.$refs.formRef.validate()) {
         this.$store.commit("setLoading", true);
 
-        this.$store.dispatch("testExists", this.testName).then(async exist => {
+        this.$store.dispatch("testExists", this.title).then(async exist => {
           if (exist > 0) {
             this.createErrorSnackBar = true;
           } else {
-            if (this.testType === "Aleatório") {
+            if (this.testType === "random") {
               this.selectedQuestions = [];
               const promises = this.selectedRandom.map(question => {
                 return this.$store
@@ -568,33 +677,74 @@ export default {
               await Promise.all(promises);
             }
 
-            if (this.testType == "Aleatório") {
-              this.testType = "random";
-            } else {
-              this.testType = "selected";
+            if (this.testType !== "auto") {
+              this.selectedQuestions.forEach(element => {
+                this.testItems.push(element);
+              });
             }
 
-            this.selectedQuestions.forEach(element => {
-              this.testItems.push(element);
-            });
-
             const testData = {
-              title: this.testName,
+              title: this.title,
+              instructions: this.instructions,
               questions: this.testItems,
+              questionsAmount:
+                this.testItems.length || this.randomQuestionsNumber,
               type: this.testType,
-              userId: this.$store.getters.user.id,
-              editedBy: null,
-              purpose: this.purpose
+              level: this.level,
+              unlimitedTime: this.unlimitedTime,
+              time: this.time,
+              userId: this.$store.getters.user.id
             };
 
-            this.$store.commit("setLoading", false);
+            if (!this.time.hours && !this.time.minutes) {
+              testData.unlimitedTime = true;
+            }
+
             this.$store.dispatch("createTest", {
               testData,
               userInfo: this.$store.getters.userInfo
             });
+
+            this.$store.commit("setLoading", false);
             this.close();
           }
         });
+      }
+    },
+    async editTest() {
+      if (this.$refs.formRef.validate()) {
+        const amount = await this.$store.dispatch("testExists", this.title);
+
+        console.log(amount);
+
+        if (
+          (this.test.title !== this.title && amount > 0) ||
+          (this.test.title === this.title && amount > 1)
+        ) {
+          this.createErrorSnackBar = true;
+          return;
+        }
+
+        this.selectedQuestions.forEach(element => {
+          this.testItems.push(element);
+        });
+
+        const testData = {
+          title: this.title,
+          instructions: this.instructions,
+          questions: this.testItems,
+          questionsAmount: this.testItems.length || this.randomQuestionsNumber,
+          type: this.testType,
+          level: this.level,
+          unlimitedTime: this.unlimitedTime,
+          time: this.time,
+          userId: this.test.userId,
+          created: this.test.created,
+          id: this.test.id
+        };
+
+        this.$emit("updateTest", testData);
+        this.close();
       }
     },
     itemRowStyle(item) {
@@ -610,12 +760,46 @@ export default {
         this.questions.length - this.disabledCount
       ) {
         this.selectedQuestions = [];
+
         props.items.forEach(item => {
           if (!item.toDelete) {
             this.selectedQuestions.push(item);
           }
         });
-      } else this.selectedQuestions = [];
+      } else {
+        this.selectedQuestions = [];
+      }
+    },
+    setTest() {
+      console.log(this.test);
+
+      if (!this.test) {
+        return;
+      }
+
+      this.title = this.test.title;
+      this.instructions = this.test.instructions;
+      this.testType = this.test.type;
+      this.level = this.test.level;
+      this.unlimitedTime = this.test.unlimitedTime;
+      this.time = this.test.time;
+
+      if (this.test.questions) {
+        this.test.questions.forEach(element => {
+          this.selectedQuestions.push(element);
+          this.selectedRandom.push(element);
+          this.selectedRandomQuestions.push(element);
+
+          if (
+            this.test.type !== "selected" &&
+            !this.testSubjects.includes(element.subject)
+          ) {
+            this.randomQuestionsNumber = this.test.questionsAmount;
+            this.testSubjects.push(element.subject);
+            this.selectedSubjects.push(element.subject);
+          }
+        });
+      }
     }
   },
   mounted() {
@@ -626,6 +810,7 @@ export default {
     });
 
     this.testSubjects = this.subjects.length > 0 ? [this.subjects[0].name] : [];
+    this.setTest();
   },
   beforeDestroy() {
     this.search = "";

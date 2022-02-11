@@ -1,15 +1,15 @@
 <template>
   <v-card width="100%" height="100%" class="tests-table">
     <v-data-table
+      hide-default-footer
       class="dashboard-tests-table"
+      height="100%"
+      loading-text="Carregando provas..."
+      no-data-text="Não há provas a serem mostradas"
+      style="height: calc(100% - 48px) !important;"
       :headers="headers"
       :items="tests"
       :loading="loading"
-      no-data-text="Não há provas a serem mostradas"
-      loading-text="Carregando provas..."
-      hide-default-footer
-      style="height: calc(100% - 48px) !important;"
-      height="100%"
       :item-class="itemRowStyle"
       @click:row="onRowClick"
     >
@@ -17,8 +17,10 @@
         <v-toolbar dense flat color="white">
           <h1 class="table-title">Provas recentes</h1>
         </v-toolbar>
+
         <div class="title-divider" />
       </template>
+
       <template v-slot:[`item.type`]="{ item }">
         <div class="type-container">
           <div
@@ -31,18 +33,45 @@
               :color="getItemIconColor(item)"
               >{{ mdiCheckboxMultipleMarked }}</v-icon
             >
-            <v-icon v-else size="20" :color="getItemIconColor(item)">{{
-              mdiShuffleVariant
-            }}</v-icon>
+
+            <v-icon
+              v-else-if="item.type === 'random'"
+              size="20"
+              :color="getItemIconColor(item)"
+            >
+              {{ mdiShuffleVariant }}
+            </v-icon>
+
+            <v-icon v-else size="20" :color="getItemIconColor(item)">
+              {{ mdiArrowDecisionAutoOutline }}
+            </v-icon>
           </div>
+
           <span class="type-text">
-            {{ item.type === "selected" ? "Selecionado" : "Aleatório" }}
+            {{
+              item.type === "selected"
+                ? "Selecionado"
+                : item.type === "random"
+                ? "Aleatório"
+                : "Automático"
+            }}
           </span>
         </div>
       </template>
-      <template v-slot:[`item.user`]="{ item }">
-        {{ item.user.name || item.user.email }}
+
+      <template v-slot:[`item.level`]="{ item }">
+        <span
+          class="font-weight-medium"
+          :class="getLevel(item).color + '--text'"
+        >
+          <v-icon size="20" class="mr-1" :color="getLevel(item).color">{{
+            mdiDumbbell
+          }}</v-icon>
+
+          {{ getLevel(item).label }}
+        </span>
       </template>
+
       <template v-slot:[`item.updated`]="{ item }">
         {{ formatDate(item.updated) }}
       </template>
@@ -51,31 +80,38 @@
 </template>
 
 <script>
-import { mdiCheckboxMultipleMarked, mdiShuffleVariant } from "@mdi/js";
+import {
+  mdiCheckboxMultipleMarked,
+  mdiShuffleVariant,
+  mdiArrowDecisionAutoOutline,
+  mdiDumbbell
+} from "@mdi/js";
 
 export default {
   name: "TestsTable",
   data() {
     return {
       headers: [
-        { text: "Nome", sortable: false, value: "title", align: "left" },
-        { text: "Tipo", sortable: false, value: "type", align: "left" },
+        { text: "Nome", sortable: false, value: "title", align: "center" },
+        { text: "Tipo", sortable: false, value: "type", align: "center" },
         {
-          text: "Questões",
+          text: "Nº de Questões",
           sortable: false,
-          value: "questions.length",
-          align: "left"
+          value: "questionsAmount",
+          align: "center"
         },
-        { text: "Usuário", sortable: false, value: "user", align: "left" },
+        { text: "Nível", sortable: false, value: "level", align: "center" },
         {
           text: "Última atualização",
           sortable: false,
           value: "updated",
-          align: "left"
+          align: "center"
         }
       ],
       mdiCheckboxMultipleMarked,
-      mdiShuffleVariant
+      mdiShuffleVariant,
+      mdiArrowDecisionAutoOutline,
+      mdiDumbbell
     };
   },
   computed: {
@@ -98,6 +134,32 @@ export default {
     }
   },
   methods: {
+    getLevel(item) {
+      const level = item.level.index;
+
+      switch (level) {
+        case 0:
+          return {
+            label: "Iniciante",
+            color: "green"
+          };
+        case 1:
+          return {
+            label: "Intermediário",
+            color: "blue"
+          };
+        case 2:
+          return {
+            label: "Avançado",
+            color: "orange"
+          };
+        case 3:
+          return {
+            label: "Experiente",
+            color: "red"
+          };
+      }
+    },
     getItemIconColor(item) {
       if (item.toDelete) {
         if (item.toDelete.status) {
