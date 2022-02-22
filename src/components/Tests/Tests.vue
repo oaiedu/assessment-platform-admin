@@ -153,20 +153,6 @@
       </v-dialog>
 
       <v-dialog
-        fullscreen
-        hide-overlay
-        transition="dialog-bottom-transition"
-        v-model="dialogExam"
-      >
-        <Exam
-          v-if="dialogExam"
-          :examName="generatedTest.name"
-          :questions="generatedTest.questions"
-          @closeDialog="dialogExam = false"
-        ></Exam>
-      </v-dialog>
-
-      <v-dialog
         v-model="dialogTestForm"
         fullscreen
         hide-overlay
@@ -223,7 +209,6 @@
 <script>
 import { mdiPlus, mdiTextBoxPlus } from "@mdi/js";
 import GenerateCard from "./GenerateCard";
-import Exam from "./Exam";
 import TestForm from "./TestForm";
 import Paginator from "../Paginator";
 import TestsTable from "./TestsTable";
@@ -235,7 +220,6 @@ export default {
   name: "Tests",
   components: {
     GenerateCard,
-    Exam,
     TestForm,
     Paginator,
     TestsTable,
@@ -250,7 +234,6 @@ export default {
       isSearching: false,
       deleteConfirmed: false,
       deleteTestSnackBar: false,
-      dialogExam: false,
       dialogTestForm: false,
       dialogEditTest: false,
       dialogGenerateTest: false,

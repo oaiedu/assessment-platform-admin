@@ -52,7 +52,7 @@ import "vue-markdown";
 import QuestionImage from "../Questions/QuestionImage.vue";
 
 export default {
-  name: "ExamReview",
+  name: "QuizReview",
   components: {
     QuestionImage,
     VueMarkdown
