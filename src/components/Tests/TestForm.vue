@@ -180,6 +180,18 @@
             </v-row>
 
             <v-row class="ma-0 pa-0">
+              <v-slider
+                v-model="approvalPercentage"
+                thumb-label
+                min="5"
+                max="100"
+                color="blue"
+                track-color="grey"
+                :step="5"
+              ></v-slider>
+            </v-row>
+
+            <v-row class="ma-0 pa-0">
               <v-checkbox
                 v-model="unlimitedTime"
                 label="Tempo de prova ilimitado"
@@ -389,6 +401,7 @@ export default {
       testItems: [],
       title: "",
       instructions: "",
+      approvalPercentage: 50,
       unlimitedTime: true,
       time: {
         hours: 0,
@@ -601,6 +614,7 @@ export default {
       this.testItems = [];
       this.title = "";
       this.instructions = "";
+      this.approvalPercentage = 50;
       this.time = {
         hours: 0,
         minutes: 0,
@@ -686,6 +700,7 @@ export default {
             const testData = {
               title: this.title,
               instructions: this.instructions,
+              approvalPercentage: this.approvalPercentage,
               questions: this.testItems,
               questionsAmount:
                 this.testItems.length || this.randomQuestionsNumber,
@@ -715,8 +730,6 @@ export default {
       if (this.$refs.formRef.validate()) {
         const amount = await this.$store.dispatch("testExists", this.title);
 
-        console.log(amount);
-
         if (
           (this.test.title !== this.title && amount > 0) ||
           (this.test.title === this.title && amount > 1)
@@ -732,6 +745,7 @@ export default {
         const testData = {
           title: this.title,
           instructions: this.instructions,
+          approvalPercentage: this.approvalPercentage,
           questions: this.testItems,
           questionsAmount: this.testItems.length || this.randomQuestionsNumber,
           type: this.testType,
@@ -771,14 +785,13 @@ export default {
       }
     },
     setTest() {
-      console.log(this.test);
-
       if (!this.test) {
         return;
       }
 
       this.title = this.test.title;
       this.instructions = this.test.instructions;
+      this.approvalPercentage = this.test.approvalPercentage;
       this.testType = this.test.type;
       this.level = this.test.level;
       this.unlimitedTime = this.test.unlimitedTime;

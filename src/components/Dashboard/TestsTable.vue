@@ -202,8 +202,8 @@ export default {
         return `${this.months[parseInt(month)].substr(0, 3)} ${day} ${year}`;
       }
     },
-    onRowClick() {
-      this.$router.push("/tests");
+    onRowClick(item) {
+      this.$router.push("/quizes/" + item.id);
     }
   },
   created() {

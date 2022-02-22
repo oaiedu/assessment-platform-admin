@@ -234,21 +234,7 @@ export default {
       this.$emit("restoreClick", item);
     },
     doExam(item) {
-      const questions = [...item.questions];
-      const randomQuestions = [];
-
-      let i = 0;
-
-      while (i < questions.length) {
-        const rand = Math.floor(Math.random() * questions.length);
-
-        if (!randomQuestions.find(q => q.name === questions[rand].name)) {
-          randomQuestions.push(questions[rand]);
-          i++;
-        }
-      }
-
-      this.$emit("doExam", { name: item.title, questions: randomQuestions });
+      this.$router.push("/quizes/" + item.id);
     }
   }
 };

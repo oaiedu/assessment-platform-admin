@@ -46,6 +46,7 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {string} title The test title.
  * @property {string} instructions The test instructions.
  * @property {number} questionsAmount Defines how many questions the test have.
+ * @property {number} approvalPercentage Defines how much of the test must be correct to approve the user.
  * @property {boolean} unlimitedTime Defines whether the test has unlimited time.
  * @property {Time} time Defines the test timer.
  * @property {Level} level Defines the test level.
@@ -753,6 +754,7 @@ const actions = {
           created: data.created,
           updated: data.updated,
           questionsAmount: data.questionsAmount,
+          approvalPercentage: data.approvalPercentage,
           time: data.time,
           unlimitedTime: data.unlimitedTime,
           level: data.level,
@@ -834,6 +836,7 @@ const actions = {
             created: data.created,
             updated: data.updated,
             questionsAmount: data.questionsAmount,
+            approvalPercentage: data.approvalPercentage,
             time: data.time,
             unlimitedTime: data.unlimitedTime,
             level: data.level,
@@ -1160,6 +1163,40 @@ const actions = {
           payload
         });
       });
+  },
+  /**
+   * Gets a test by its ID from the state or Firebase.
+   *
+   * @param {Store<TestsState>} store the vuex store.
+   * @param {string} payload the test id.
+   */
+  async getTestById({ commit, getters }, payload) {
+    commit("setLoading", true);
+
+    const stateTest = getters.findTestById(payload);
+
+    if (stateTest) {
+      return stateTest;
+    }
+
+    console.log(payload);
+
+    try {
+      const snapshot = await db
+        .collection("tests")
+        .where("id", "==", payload)
+        .get();
+
+      return snapshot.docs[0].data();
+    } catch (e) {
+      const errorModel = showErrorMessage("load", "Prova", error.message);
+      commit("setError", { message: errorModel });
+      createErrorLog("Load Test By ID", error.message, {
+        stateTest
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Resets the tests state to it's initial state.

@@ -74,7 +74,7 @@ export default {
       this.$router.push("/questions");
     },
     toTests() {
-      this.$router.push("/tests");
+      this.$router.push("/quizes");
     }
   }
 };

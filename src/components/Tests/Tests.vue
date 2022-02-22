@@ -147,10 +147,7 @@
 
       <v-dialog v-model="dialogGenerateTest" width="500px" persistent>
         <GenerateCard
-          @generated="
-            generatedTest = { name: '', questions: $event };
-            dialogExam = true;
-          "
+          @generated="generateExam($event)"
           @closeDialog="dialogGenerateTest = false"
         ></GenerateCard>
       </v-dialog>
@@ -325,8 +322,11 @@ export default {
     }
   },
   methods: {
-    printTest(item) {
-      this.$router.push("/tests/" + item);
+    generateExam(questions) {
+      this.$router.push({
+        name: "quiz.details",
+        params: { id: "generated", test: { name: "Prova gerada", questions } }
+      });
     },
     updateTest(testData) {
       this.$store.dispatch("updateTest", {
