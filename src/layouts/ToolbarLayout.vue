@@ -126,14 +126,14 @@ export default {
           },
           {
             icon: mdiFileQuestionOutline,
-            title: "Gerenciar Questões",
+            title: "Questões",
             link: "/questions",
             grantAccess: ["admin", "appraiser"]
           },
           {
             icon: mdiFileMultipleOutline,
-            title: "Gerenciar Provas",
-            link: "/tests",
+            title: "Questionários",
+            link: "/quizes",
             grantAccess: ["admin", "student"]
           },
           {

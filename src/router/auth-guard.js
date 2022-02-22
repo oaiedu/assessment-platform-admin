@@ -13,7 +13,7 @@ export default (to, from, next) => {
     ) {
       next("/");
     } else if (
-      to.path === "/tests" &&
+      to.path.includes("/quiz") &&
       !(claims && (claims.admin || claims.student))
     ) {
       next("/");
