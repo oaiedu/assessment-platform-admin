@@ -41,7 +41,7 @@
       "
     />
 
-    <ExamReview
+    <QuizReview
       v-if="showReview && !showResults"
       :questions="examQuestions"
       :answers="answers"
@@ -137,14 +137,14 @@ import { mdiArrowLeft, mdiArrowRight, mdiFileChart } from "@mdi/js";
 
 import QuestionImage from "../Questions/QuestionImage.vue";
 import Results from "./Results.vue";
-import ExamReview from "./ExamReview.vue";
+import QuizReview from "./QuizReview.vue";
 
 export default {
   name: "Exam",
   components: {
     VueMarkdown,
     QuestionImage,
-    ExamReview,
+    QuizReview,
     Results
   },
   data() {

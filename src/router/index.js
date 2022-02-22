@@ -4,8 +4,8 @@ import Auth from "@/views/Auth.vue";
 import Profile from "@/components/User/Profile.vue";
 import Questions from "@/components/Questions/Questions.vue";
 import Tests from "@/components/Tests/Tests.vue";
-import Exam from "@/components/Tests/Exam.vue";
-import ExamDetails from "@/components/Tests/ExamDetails.vue";
+import Quiz from "@/components/Tests/Quiz.vue";
+import QuizDetails from "@/components/Tests/QuizDetails.vue";
 import Inbox from "@/components/Requests/Inbox.vue";
 import Home from "@/views/Home.vue";
 import Management from "@/components/Admin/Management.vue";
@@ -51,13 +51,13 @@ const routes = [
   },
   {
     path: "/quizes/:id",
-    component: ExamDetails,
+    component: QuizDetails,
     name: "quiz.details",
     beforeEnter: AuthGuard
   },
   {
     path: "/quiz/:id",
-    component: Exam,
+    component: Quiz,
     name: "quiz.exam",
     beforeEnter: AuthGuard
   },

@@ -209,7 +209,7 @@ import VueMarkdown from "vue-markdown";
 import "vue-markdown";
 
 export default {
-  name: "ExamDetails",
+  name: "QuizDetails",
   components: {
     VueMarkdown
   },
