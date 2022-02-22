@@ -104,7 +104,7 @@
             height="40px"
             class="mt-3"
             color="blue"
-            @click="startQuiz()"
+            @click="startDialog = true"
           >
             Começar questionário
           </v-btn>
@@ -133,9 +133,65 @@
 
     <v-card flat class="mt-4" width="100%">
       <v-card-title>
-        <h3 class="exam__attempts">Tentativas anteriores</h3>
+        <h3 class="exam__attempts-title">Tentativas anteriores</h3>
       </v-card-title>
     </v-card>
+
+    <v-dialog v-model="startDialog" width="500px">
+      <v-card>
+        <v-card-title class="pa-4 ma-0">
+          <v-row class="pa-0 ma-0" justify="center" style="position: relative">
+            <h2 class="exam__start-title">
+              Antes de começar
+            </h2>
+
+            <v-btn icon class="exam__start-close" @click="startDialog = false">
+              <v-icon>{{ mdiClose }}</v-icon>
+            </v-btn>
+          </v-row>
+        </v-card-title>
+
+        <v-card-text v-if="test">
+          <v-row class="pa-0 ma-0" justify="center">
+            <p v-if="test.unlimitedTime" class="text-center exam__start-info">
+              O questionário não possui limite de tempo. O tempo será contado de
+              forma crescente a partir do momento de início.
+            </p>
+
+            <p v-else class="text-center exam__start-info">
+              O questionário possui um limite de tempo de
+              <strong style="display: inline-flex">
+                {{ test.time.hours }}h {{ test.time.minutes }}m
+                {{ test.time.seconds }}s</strong
+              >. O tempo será contado de forma decrescente a partir do momento
+              de início e o teste deverá ser concluído antes de expirar.
+            </p>
+          </v-row>
+        </v-card-text>
+
+        <v-row class="pa-0 ma-0" justify="center">
+          <div class="exam__start-practice">
+            <v-checkbox v-model="practice"></v-checkbox>
+
+            <span>Começar como treino</span>
+          </div>
+        </v-row>
+
+        <v-card-actions>
+          <v-row class="pa-0 ma-0" justify="center">
+            <v-btn
+              dark
+              rounded
+              class="mt-6 mb-2"
+              color="blue"
+              @click="startQuiz()"
+            >
+              Começar
+            </v-btn>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -143,6 +199,7 @@
 import {
   mdiBallot,
   mdiClockOutline,
+  mdiClose,
   mdiFileDocumentOutline,
   mdiHelp,
   mdiThumbUpOutline
@@ -160,15 +217,24 @@ export default {
     return {
       mdiBallot,
       mdiClockOutline,
+      mdiClose,
       mdiFileDocumentOutline,
       mdiHelp,
       mdiThumbUpOutline,
       test: null,
-      dialogExam: false,
+      startDialog: false,
+      practice: false,
       attempts: [
         {
-          score: 70,
+          score: 67,
           approved: false,
+          practice: true,
+          status: "completed",
+          answers: [
+            { name: "Q2", answer: 1 },
+            { name: "Q1", answer: 3 }
+          ],
+          timeTaken: "0h 4m 37s",
           date: new Date()
         }
       ]
@@ -223,10 +289,13 @@ export default {
       if (id === "generated") {
         this.$router.push({
           name: "quiz.exam",
-          params: { id: "generated", test: this.test }
+          params: { id: "generated", test: this.test, practice: this.practice }
         });
       } else {
-        this.$router.push("/quiz/" + id);
+        this.$router.push({
+          name: "quiz.exam",
+          params: { id, practice: this.practice }
+        });
       }
     }
   },
@@ -336,10 +405,33 @@ export default {
   height: 100%;
 }
 
-.exam__attempts {
+.exam__attempts-title,
+.exam__start-title {
   color: #3d3d3d;
   font-size: 1.2rem;
   font-weight: 500;
+}
+
+.exam__start-close {
+  position: absolute;
+  right: 0;
+}
+
+.exam__start-info {
+  width: 320px;
+}
+
+.exam__start-practice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+
+  width: 280px;
+  height: 60px;
+
+  border: 1px solid #cfcfcf;
+  border-radius: 0.6rem;
 }
 
 a,
