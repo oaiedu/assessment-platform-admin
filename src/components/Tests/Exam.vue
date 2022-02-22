@@ -7,8 +7,13 @@
         <span class="ml-2 blue--text">
           Liquid Galaxy -
           {{
-            examName ||
-              (showResults ? "Resultado" : showReview ? "Revisão" : "Prova")
+            test && test.name
+              ? test.name
+              : showResults
+              ? "Resultado"
+              : showReview
+              ? "Revisão"
+              : "Prova"
           }}
         </span>
       </v-card-title>
@@ -16,7 +21,7 @@
       <v-spacer></v-spacer>
 
       <span v-if="!showResults" class="current-question mr-2">
-        {{ current }} / {{ questions.length }}
+        {{ current }} / {{ examQuestions.length }}
       </span>
 
       <v-btn text color="grey" @click="close()">
@@ -28,7 +33,7 @@
 
     <Results
       v-if="showResults && !showReview"
-      :questions="questions"
+      :questions="examQuestions"
       :answers="answers"
       @review="
         showResults = false;
@@ -38,7 +43,7 @@
 
     <ExamReview
       v-if="showReview && !showResults"
-      :questions="questions"
+      :questions="examQuestions"
       :answers="answers"
       @viewResults="
         showReview = false;
@@ -47,32 +52,32 @@
     />
 
     <div
-      v-if="!showResults && !showReview"
+      v-if="!showResults && !showReview && examQuestions[current - 1]"
       class="question-container px-6 pb-12"
     >
-      <h3 class="name">{{ questions[current - 1].name }}</h3>
-      <h4 class="subject">{{ questions[current - 1].subject }}</h4>
+      <h3 class="name">{{ examQuestions[current - 1].name }}</h3>
+      <h4 class="subject">{{ examQuestions[current - 1].subject }}</h4>
       <span class="updated"
         >Última modificação em
-        {{ getDateSentence(questions[current - 1].updated) }}</span
+        {{ getDateSentence(examQuestions[current - 1].updated) }}</span
       >
 
       <vue-markdown
         class="mt-10"
-        :source="questions[current - 1].question"
+        :source="examQuestions[current - 1].question"
       ></vue-markdown>
 
       <QuestionImage
-        v-if="!!questions[current - 1].image"
-        :image="questions[current - 1].image"
-        :imageSize="questions[current - 1].imageSize"
+        v-if="!!examQuestions[current - 1].image"
+        :image="examQuestions[current - 1].image"
+        :imageSize="examQuestions[current - 1].imageSize"
       />
 
       <v-spacer class="mt-10"></v-spacer>
 
       <v-radio-group v-model="currentAnswer">
         <v-radio
-          v-for="answer in questions[current - 1].answers"
+          v-for="answer in examQuestions[current - 1].answers"
           class="my-5"
           :key="answer.ansId"
           :value="answer.ansId"
@@ -111,15 +116,15 @@
           color="blue darken-1"
           :dark="!!currentAnswer"
           :disabled="!currentAnswer"
-          @click="current >= questions.length ? viewResults() : next()"
+          @click="current >= examQuestions.length ? viewResults() : next()"
         >
           <v-icon>{{
-            current >= questions.length ? mdiFileChart : mdiArrowRight
+            current >= examQuestions.length ? mdiFileChart : mdiArrowRight
           }}</v-icon>
         </v-btn>
       </template>
       <span>{{
-        current >= questions.length ? "Conferir resultado" : "Próximo"
+        current >= examQuestions.length ? "Conferir resultado" : "Próximo"
       }}</span>
     </v-tooltip>
   </v-card>
@@ -142,18 +147,6 @@ export default {
     ExamReview,
     Results
   },
-  props: {
-    examName: {
-      type: String,
-      required: false,
-      default: ""
-    },
-    questions: {
-      type: Array,
-      required: false,
-      default: () => []
-    }
-  },
   data() {
     return {
       mdiArrowLeft,
@@ -161,6 +154,8 @@ export default {
       mdiFileChart,
       showResults: false,
       showReview: false,
+      test: null,
+      examQuestions: [],
       started: new Date(),
       current: 1,
       currentAnswer: null,
@@ -188,6 +183,23 @@ export default {
     viewResults() {
       this.showResults = true;
     },
+    randomizeQuestions() {
+      const questions = [...this.test.questions];
+      const randomQuestions = [];
+
+      let i = 0;
+
+      while (i < questions.length) {
+        const rand = Math.floor(Math.random() * questions.length);
+
+        if (!randomQuestions.find(q => q.name === questions[rand].name)) {
+          randomQuestions.push(questions[rand]);
+          i++;
+        }
+      }
+
+      this.examQuestions = randomQuestions;
+    },
     close() {
       this.current = 1;
       this.currentAnswer = null;
@@ -195,6 +207,18 @@ export default {
 
       this.$emit("closeDialog");
     }
+  },
+  async mounted() {
+    const id = this.$route.params.id;
+
+    if (id === "generated") {
+      this.test = this.$route.params.test;
+    } else {
+      this.test = await this.$store.dispatch("getTestById", id);
+    }
+    console.log(this.test);
+
+    this.randomizeQuestions();
   },
   watch: {
     currentAnswer(value) {
