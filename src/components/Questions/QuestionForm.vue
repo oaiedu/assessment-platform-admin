@@ -287,6 +287,7 @@ import {
 import Preview from "./Preview";
 
 export default {
+  name: "QuestionForm",
   components: {
     Preview,
     VueSimplemde
