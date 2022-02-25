@@ -6,7 +6,9 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @typedef {Object} Subject
  * @property {string} id The subject id.
  * @property {string} name The subject name.
- * @property {string[]} questions All questions ids from the current subject.
+ * @property {Object[]} questions All questions names and levels from the current subject.
+ * @property {string} questions.name The question name.
+ * @property {number} questions.level The question level index.
  */
 
 /**
@@ -58,6 +60,7 @@ const mutations = {
    * @param {Object} data
    * @param {string} data.subjectId The subject id.
    * @param {string} data.questionId The question id.
+   * @param {number} data.questionLevel The question level index.
    * @param {boolean} data.remove Whether the question will be removed.
    */
   addRemoveQuestion(state, data) {
@@ -69,16 +72,21 @@ const mutations = {
     }
 
     const index = subjects[subjectIndex].questions.findIndex(
-      qid => qid === data.questionId
+      q => q.name === data.questionId
     );
 
     if (data.remove && index !== -1) {
       subjects[subjectIndex].questions.splice(index, 1);
     } else if (index === -1) {
-      subjects[subjectIndex].questions.push(data.questionId);
+      subjects[subjectIndex].questions.push({
+        name: data.questionId,
+        level: data.questionLevel
+      });
     }
 
-    subjects[subjectIndex].questions.sort((q1, q2) => (q1 < q2 ? -1 : 1));
+    subjects[subjectIndex].questions.sort((q1, q2) =>
+      q1.name < q2.name ? -1 : 1
+    );
 
     state.subjects = subjects;
   },
@@ -244,6 +252,17 @@ const getters = {
   getSubjectQuestions: state => name => {
     const subject = state.subjects.find(subject => subject.name === name);
     return subject ? subject.questions : [];
+  },
+  /**
+   * Gets the amount of questions from a specific subject and
+   * according to the question level.
+   *
+   * @param {SubjectState} state The subject state.
+   * @returns {(name: string, level: number) => string[]} The amount of questions.
+   */
+  getNumberOfQuestionBySubjectAndLevel: state => (name, level) => {
+    const subject = state.subjects.find(subject => subject.name === name);
+    return subject ? subject.questions.filter(q => q.level <= level).length : 0;
   }
 };
 
