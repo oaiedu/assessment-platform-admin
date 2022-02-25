@@ -90,7 +90,10 @@
         transition="dialog-bottom-transition"
         v-model="dialogNewQuestion"
       >
-        <Stepper :page="page" @closeDialogNew="dialogNewQuestion = false" />
+        <QuestionForm
+          :page="page"
+          @closeDialogNew="dialogNewQuestion = false"
+        />
       </v-dialog>
 
       <v-dialog
@@ -186,7 +189,7 @@ import QuestionsTable from "./QuestionsTable";
 import DeleteWarning from "../Shared/DeleteWarning";
 import DeleteAlert from "./DeleteAlertQuestions";
 import SearchBox from "../Shared/SearchBox";
-import Stepper from "./Stepper";
+import QuestionForm from "./QuestionForm";
 import EditQuestion from "./EditQuestion";
 import Body from "./PrintQuestion";
 import { mdiPlus } from "@mdi/js";
@@ -199,7 +202,7 @@ export default {
     DeleteWarning,
     DeleteAlert,
     SearchBox,
-    Stepper,
+    QuestionForm,
     EditQuestion,
     Body
   },
