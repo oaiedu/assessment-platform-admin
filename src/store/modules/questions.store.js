@@ -9,56 +9,56 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  */
 
 /**
- * @typedef {Object} DeleteStatus
- * @property {boolean} toDelete.status - If true, the question can be restored. If false, it will be deleted.
- * @property {string|undefined} toDelete.userEmail - The user that marked the question to be deleted.
+ * @typedef {import('./tests.store.js').Level} Level
  */
 
 /**
- * @typedef {Object} AnswerText
- * @property {string} title - The text column title.
- * @property {string} answerDescription - The text column answer description.
+ * @typedef {Object} DeleteStatus
+ * @property {boolean} toDelete.status If true, the question can be restored. If false, it will be deleted.
+ * @property {string|undefined} toDelete.userEmail The user that marked the question to be deleted.
  */
 
 /**
  * @typedef {Object} Answer
- * @property {"radio-1"|"radio-2"|"radio-3"|"radio-4"} ansId - The answer id.
- * @property {AnswerText[]|string} text - The answer description.
- * @property {boolean} value - Whether the answer is correct or not.
+ * @property {"radio-1"|"radio-2"|"radio-3"|"radio-4"} ansId The answer id.
+ * @property {string} text The answer text.
+ * @property {string} description Defines the answer description, explaining why it's correct/incorrect.
+ * @property {boolean} value Whether the answer is correct or not.
  */
 
 /**
  * @typedef {Object} QuestionCreation
- * @property {string} name - The question name.
- * @property {string} subject - The question subject.
- * @property {string} question - The question description.
- * @property {string} image - The question image url.
- * @property {string} imageSize - The size of the image.
- * @property {Answer[]} answers - The question answers.
+ * @property {string} name The question name.
+ * @property {string} subject The question subject.
+ * @property {string} question The question description.
+ * @property {Level} level The question level.
+ * @property {string} image The question image url.
+ * @property {string} imageSize The size of the image.
+ * @property {Answer[]} answers The question answers.
  */
 
 /**
  * @typedef {Object} Question
- * @property {string} name - The question name.
- * @property {string} subject - The question subject.
- * @property {string} question - The question description.
- * @property {string} image - The question image url.
- * @property {string} imageSize - The size of the image.
- * @property {string|undefined} created - The question creation date.
- * @property {string|undefined} updated - The question edition date.
- * @property {Answer[]} answers - The question answers.
- * @property {Array} edited - The question edition history.
- * @property {DeleteStatus|undefined} toDelete - The question deletion status.
+ * @property {string} name The question name.
+ * @property {string} subject The question subject.
+ * @property {string} question The question description.
+ * @property {Level} level The question level.
+ * @property {string} image The question image url.
+ * @property {string} imageSize The size of the image.
+ * @property {string|undefined} created The question creation date.
+ * @property {string|undefined} updated The question edition date.
+ * @property {Answer[]} answers The question answers.
+ * @property {DeleteStatus|undefined} toDelete The question deletion status.
  */
 
 /**
  * @typedef {Object} QuestionsState
- * @property {Object.<string, Question[]>} questions - The pages with it's questions list.
- * @property {Question[]} filteredQuestions - An array of questions filtered by name.
- * @property {Question[]} currentQuestionsPage - An array of questions of the current page.
- * @property {string[]} subjects - An array of subjects.
- * @property {[string, string]|null} lastQuestionDocument - An array with the first and last question name from the last request.
- * @property {Question[]} deleteMarkQuestions - An array of questions that were marked to be deleted.
+ * @property {Object.<string, Question[]>} questions The pages with it's questions list.
+ * @property {Question[]} filteredQuestions An array of questions filtered by name.
+ * @property {Question[]} currentQuestionsPage An array of questions of the current page.
+ * @property {string[]} subjects An array of subjects.
+ * @property {[string, string]|null} lastQuestionDocument An array with the first and last question name from the last request.
+ * @property {Question[]} deleteMarkQuestions An array of questions that were marked to be deleted.
  */
 
 /**
@@ -690,10 +690,10 @@ const actions = {
             updated: data.updated || null,
             subject: data.subject,
             question: data.question,
+            level: data.level,
             answers: data.answers,
             image: data.image,
-            imageSize: data.imageSize || "1x",
-            edited: data.edited || []
+            imageSize: data.imageSize || "1x"
           };
         }
 
@@ -766,11 +766,11 @@ const actions = {
             created: data.created || null,
             updated: data.updated || null,
             subject: data.subject,
+            level: data.level,
             question: data.question,
             answers: data.answers,
             image: data.image,
-            imageSize: data.imageSize || "1x",
-            edited: data.edited || []
+            imageSize: data.imageSize || "1x"
           };
 
           if (questionsData[question.subject]) {
@@ -929,7 +929,9 @@ const actions = {
             .then(snap => {
               const document = snap.docs[0];
               const questions = document.data().questions;
-              const index = questions.indexOf(doc.data().name);
+              const index = questions.findIndex(
+                q => q.name === doc.data().name
+              );
 
               if (index !== -1) questions.splice(index, 1);
 
@@ -938,6 +940,7 @@ const actions = {
               commit("addRemoveQuestion", {
                 subjectId: document.id,
                 questionId: doc.data().name,
+                questionLevel: doc.data().level.index,
                 remove: true
               });
             })
@@ -1111,7 +1114,8 @@ const actions = {
 
               commit("addRemoveQuestion", {
                 subjectId: doc.id,
-                questionId: question.name
+                questionId: question.name,
+                questionLevel: question.level.index
               });
             })
             .catch(error => {
@@ -1131,6 +1135,7 @@ const actions = {
               commit("addRemoveQuestion", {
                 subjectId: doc.id,
                 questionId: question.name,
+                questionLevel: question.level.index,
                 remove: true
               });
             })
@@ -1199,10 +1204,10 @@ const actions = {
   /**
    * Creates a new question.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {QuestionCreation} payload.question - The question to be created.
-   * @param {boolean} payload.isRequest - Whether the question is a request or not.
+   * @param {Store} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {QuestionCreation} payload.question The question to be created.
+   * @param {boolean} payload.isRequest Whether the question is a request or not.
    */
   createQuestion({ commit }, payload) {
     commit("setLoading", true);
@@ -1274,13 +1279,17 @@ const actions = {
             const document = snap.docs[0];
 
             if (!document.data().questions.includes(question.name)) {
-              const questions = [...document.data().questions, question.name];
+              const questions = [
+                ...document.data().questions,
+                { name: question.name, level: question.level.index }
+              ];
               questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
               document.ref.update({ questions });
 
               commit("addRemoveQuestion", {
                 subjectId: document.id,
-                questionId: question.name
+                questionId: question.name,
+                questionLevel: question.level.index
               });
             }
           })
