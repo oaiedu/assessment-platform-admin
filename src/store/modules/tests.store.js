@@ -1093,8 +1093,8 @@ const actions = {
   /**
    * Gets all the questions names from a subject.
    *
-   * @param {Store} store - The vuex store.
-   * @param {string} payload - The subject name.
+   * @param {Store} store The vuex store.
+   * @param {string} payload The subject name.
    * @returns {Promise<string[]>} An array of names.
    */
   async getSubjectQuestions({ commit }, payload) {
@@ -1178,8 +1178,6 @@ const actions = {
     if (stateTest) {
       return stateTest;
     }
-
-    console.log(payload);
 
     try {
       const snapshot = await db
