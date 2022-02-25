@@ -20,11 +20,11 @@
         <v-icon x-large color="blue">{{ mdiFileDocumentOutline }}</v-icon>
 
         <span class="ml-3">
-          <div class="exam__level">
+          <div class="quiz-detail__level">
             Nível: {{ test ? getLevel(test).label : "indisponível" }}
           </div>
 
-          <div class="exam__title ma-0 mt-2 pa-0">
+          <div class="quiz-detail__title ma-0 mt-2 pa-0">
             {{ test ? test.title : "Questionário" }}
           </div>
         </span>
@@ -33,66 +33,78 @@
 
     <v-card flat class="mt-4" width="100%">
       <v-row class="pa-0 ma-0">
-        <div class="exam__detail-column">
-          <span class="exam__info-title">Detalhes</span>
+        <div class="quiz-detail__detail-column">
+          <span class="quiz-detail__info-title">Detalhes</span>
 
-          <div class="exam__info-container">
-            <div class="exam__info-column">
-              <div class="exam__info">
-                <div class="exam__info-icon" style="background: #9455FA33">
+          <div class="quiz-detail__info-container">
+            <div class="quiz-detail__info-column">
+              <div class="quiz-detail__info">
+                <div
+                  class="quiz-detail__info-icon"
+                  style="background: #9455FA33"
+                >
                   <v-icon size="26" color="#9455FA">{{ mdiHelp }}</v-icon>
                 </div>
 
-                <div class="exam__info-stats">
-                  <span class="exam__amount">{{
+                <div class="quiz-detail__info-stats">
+                  <span class="quiz-detail__amount">{{
                     test ? test.questionsAmount : 0
                   }}</span>
-                  <span class="exam__label">questões</span>
+                  <span class="quiz-detail__label">questões</span>
                 </div>
               </div>
 
-              <div class="exam__info">
-                <div class="exam__info-icon" style="background: #FF559933">
+              <div class="quiz-detail__info">
+                <div
+                  class="quiz-detail__info-icon"
+                  style="background: #FF559933"
+                >
                   <v-icon size="26" color="#FF5599">{{ mdiBallot }}</v-icon>
                 </div>
 
-                <div class="exam__info-stats">
-                  <span class="exam__amount">{{
+                <div class="quiz-detail__info-stats">
+                  <span class="quiz-detail__amount">{{
                     test ? getSubjectsAmount(test) : 0
                   }}</span>
-                  <span class="exam__label">disciplinas</span>
+                  <span class="quiz-detail__label">disciplinas</span>
                 </div>
               </div>
             </div>
 
-            <div class="exam__info-column">
-              <div class="exam__info">
-                <div class="exam__info-icon" style="background: #FFAD3333">
+            <div class="quiz-detail__info-column">
+              <div class="quiz-detail__info">
+                <div
+                  class="quiz-detail__info-icon"
+                  style="background: #FFAD3333"
+                >
                   <v-icon size="26" color="#FFAD33">{{
                     mdiClockOutline
                   }}</v-icon>
                 </div>
 
-                <div class="exam__info-stats">
-                  <span class="exam__amount">{{
+                <div class="quiz-detail__info-stats">
+                  <span class="quiz-detail__amount">{{
                     test ? getTime(test) : 0
                   }}</span>
-                  <span class="exam__label">tempo</span>
+                  <span class="quiz-detail__label">tempo</span>
                 </div>
               </div>
 
-              <div class="exam__info">
-                <div class="exam__info-icon" style="background: #81C49333">
+              <div class="quiz-detail__info">
+                <div
+                  class="quiz-detail__info-icon"
+                  style="background: #81C49333"
+                >
                   <v-icon size="26" color="#81C493">{{
                     mdiThumbUpOutline
                   }}</v-icon>
                 </div>
 
-                <div class="exam__info-stats">
-                  <span class="exam__amount"
+                <div class="quiz-detail__info-stats">
+                  <span class="quiz-detail__amount"
                     >{{ test ? test.approvalPercentage : 0 }}%</span
                   >
-                  <span class="exam__label">para aprovação</span>
+                  <span class="quiz-detail__label">para aprovação</span>
                 </div>
               </div>
             </div>
@@ -104,6 +116,7 @@
             height="40px"
             class="mt-3"
             color="blue"
+            elevation="0"
             @click="startDialog = true"
           >
             Começar questionário
@@ -112,18 +125,18 @@
 
         <v-divider vertical class="mx-0"></v-divider>
 
-        <div class="exam__detail-column instructions-column">
-          <span class="exam__info-title">Instruções</span>
+        <div class="quiz-detail__detail-column instructions-column">
+          <span class="quiz-detail__info-title">Instruções</span>
 
           <VueMarkdown
             v-if="test"
-            class="exam__instructions"
+            class="quiz-detail__instructions"
             :source="test.instructions"
           ></VueMarkdown>
 
           <span
             v-else-if="!!test && !test.instructions"
-            class="exam__instructions"
+            class="quiz-detail__instructions"
           >
             Este teste não possui instruções.
           </span>
@@ -133,7 +146,7 @@
 
     <v-card flat class="mt-4" width="100%">
       <v-card-title>
-        <h3 class="exam__attempts-title">Tentativas anteriores</h3>
+        <h3 class="quiz-detail__attempts-title">Tentativas anteriores</h3>
       </v-card-title>
     </v-card>
 
@@ -141,11 +154,15 @@
       <v-card>
         <v-card-title class="pa-4 ma-0">
           <v-row class="pa-0 ma-0" justify="center" style="position: relative">
-            <h2 class="exam__start-title">
+            <h2 class="quiz-detail__start-title">
               Antes de começar
             </h2>
 
-            <v-btn icon class="exam__start-close" @click="startDialog = false">
+            <v-btn
+              icon
+              class="quiz-detail__start-close"
+              @click="startDialog = false"
+            >
               <v-icon>{{ mdiClose }}</v-icon>
             </v-btn>
           </v-row>
@@ -153,12 +170,15 @@
 
         <v-card-text v-if="test">
           <v-row class="pa-0 ma-0" justify="center">
-            <p v-if="test.unlimitedTime" class="text-center exam__start-info">
+            <p
+              v-if="test.unlimitedTime"
+              class="text-center quiz-detail__start-info"
+            >
               O questionário não possui limite de tempo. O tempo será contado de
               forma crescente a partir do momento de início.
             </p>
 
-            <p v-else class="text-center exam__start-info">
+            <p v-else class="text-center quiz-detail__start-info">
               O questionário possui um limite de tempo de
               <strong style="display: inline-flex">
                 {{ test.time.hours }}h {{ test.time.minutes }}m
@@ -170,8 +190,11 @@
         </v-card-text>
 
         <v-row class="pa-0 ma-0" justify="center">
-          <div class="exam__start-practice">
-            <v-checkbox v-model="practice"></v-checkbox>
+          <div
+            class="quiz-detail__start-practice"
+            @click="practice = !practice"
+          >
+            <v-checkbox v-model="practice" @click.stop></v-checkbox>
 
             <span>Começar como treino</span>
           </div>
@@ -281,7 +304,7 @@ export default {
         }
       });
 
-      return subjects.length;
+      return subjects.length || item.subjects.length;
     },
     startQuiz() {
       const id = this.$route.params.id;
@@ -289,12 +312,16 @@ export default {
       if (id === "generated") {
         this.$router.push({
           name: "quiz.exam",
-          params: { id: "generated", test: this.test, practice: this.practice }
+          params: {
+            id: "generated",
+            test: this.test,
+            mode: this.practice ? "practice" : "normal"
+          }
         });
       } else {
         this.$router.push({
           name: "quiz.exam",
-          params: { id, practice: this.practice }
+          params: { id, mode: this.practice ? "practice" : "normal" }
         });
       }
     }
@@ -307,25 +334,24 @@ export default {
     } else {
       this.test = await this.$store.dispatch("getTestById", id);
     }
-    console.log(this.test);
   }
 };
 </script>
 
 <style scoped>
-.exam__level {
+.quiz-detail__level {
   color: #afafaf;
   font-size: 0.8rem;
   line-height: 0.8rem;
 }
 
-.exam__title {
+.quiz-detail__title {
   color: #4d4d4d;
   font-size: 1.2rem;
   line-height: 1.2rem;
 }
 
-.exam__detail-column {
+.quiz-detail__detail-column {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -333,17 +359,17 @@ export default {
   padding: 1rem 1.5rem;
 }
 
-.exam__detail-column .instructions-column {
+.quiz-detail__detail-column .instructions-column {
   width: calc(100% - 349px);
 }
 
-.exam__info-title {
+.quiz-detail__info-title {
   color: #5d5d5d;
   font-size: 0.95rem;
   font-weight: 500;
 }
 
-.exam__info-container {
+.quiz-detail__info-container {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
@@ -352,7 +378,7 @@ export default {
   height: 100%;
 }
 
-.exam__info-column {
+.quiz-detail__info-column {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -360,7 +386,7 @@ export default {
   gap: 0.6rem;
 }
 
-.exam__info {
+.quiz-detail__info {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -369,7 +395,7 @@ export default {
   padding: 0.7rem 0;
 }
 
-.exam__info .exam__info-icon {
+.quiz-detail__info .quiz-detail__info-icon {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -380,7 +406,7 @@ export default {
   border-radius: 50%;
 }
 
-.exam__info .exam__info-stats {
+.quiz-detail__info .quiz-detail__info-stats {
   display: flex;
   flex-direction: column;
   justify-items: center;
@@ -388,40 +414,40 @@ export default {
   gap: 0;
 }
 
-.exam__info .exam__amount {
+.quiz-detail__info .quiz-detail__amount {
   color: #4d4d4d;
   font-size: 1.2rem;
   line-height: 1.2rem;
   font-weight: 500;
 }
 
-.exam__info .exam__label {
+.quiz-detail__info .quiz-detail__label {
   color: #afafaf;
   font-size: 0.8rem;
 }
 
-.exam__instructions {
+.quiz-detail__instructions {
   width: 100%;
   height: 100%;
 }
 
-.exam__attempts-title,
-.exam__start-title {
+.quiz-detail__attempts-title,
+.quiz-detail__start-title {
   color: #3d3d3d;
   font-size: 1.2rem;
   font-weight: 500;
 }
 
-.exam__start-close {
+.quiz-detail__start-close {
   position: absolute;
   right: 0;
 }
 
-.exam__start-info {
+.quiz-detail__start-info {
   width: 320px;
 }
 
-.exam__start-practice {
+.quiz-detail__start-practice {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -432,6 +458,8 @@ export default {
 
   border: 1px solid #cfcfcf;
   border-radius: 0.6rem;
+
+  cursor: pointer;
 }
 
 a,

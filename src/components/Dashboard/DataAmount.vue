@@ -38,7 +38,7 @@
         </div>
         <div class="amount-info">
           <span class="amount">{{ dataSize.tests }}</span>
-          <span class="type">provas</span>
+          <span class="type">questionários</span>
         </div>
       </div>
     </div>

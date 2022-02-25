@@ -22,9 +22,10 @@
             :loading="loading"
             :disabled="
               !title ||
-                (testType !== 'auto' && testType === 'selected'
-                  ? !selectedQuestions.length
-                  : !selectedRandom.length)
+                (testType !== 'auto' &&
+                  (testType === 'selected'
+                    ? !selectedQuestions.length
+                    : !selectedRandom.length))
             "
             :dark="
               !!title &&
@@ -158,18 +159,16 @@
             >
               <v-btn
                 color="blue darken-1"
+                :loading="loading"
                 :dark="
                   !(
                     testSubjects.length === 0 ||
-                    randomQuestionsNumber > 50 ||
                     randomQuestionsNumber < 1 ||
                     randomQuestionsNumber > checkNumber
                   )
                 "
-                :loading="loading"
                 :disabled="
                   testSubjects.length === 0 ||
-                    randomQuestionsNumber > 50 ||
                     randomQuestionsNumber < 1 ||
                     randomQuestionsNumber > checkNumber
                 "
@@ -222,8 +221,8 @@
 
           <v-col v-if="testType === 'auto'" class="pt-10">
             <p class="orange--text text-center pt-10">
-              Provas automáticas selecionam suas questões apenas quando são
-              iniciadas, de acordo com as disciplinas escolhidas e número de
+              Questionários automáticos selecionam suas questões apenas quando
+              são iniciadas, de acordo com as disciplinas escolhidas e número de
               questões.
             </p>
           </v-col>
@@ -245,6 +244,9 @@
                 :loading="loading"
                 :page="randomizedPage"
               >
+                <template v-slot:[`item.level`]="{ item }">
+                  {{ levels[item.level].label }}
+                </template>
               </v-data-table>
             </v-container>
 
@@ -309,6 +311,10 @@
                     >
                     </v-simple-checkbox>
                   </template>
+
+                  <template v-slot:[`item.level`]="{ item }">
+                    {{ levels[item.level.index].label }}
+                  </template>
                 </v-data-table>
               </v-card>
             </v-container>
@@ -372,8 +378,9 @@ import {
   mdiMinusBox,
   mdiCheckboxBlankOutline
 } from "@mdi/js";
-import Paginator from "../Paginator";
 import Ripple from "vuetify/lib/directives/ripple";
+
+import Paginator from "../Paginator";
 
 export default {
   directives: { Ripple },
@@ -481,11 +488,10 @@ export default {
       ],
       textRule: [v => !!v || "Este campo é obrigatório"],
       rule: [
-        v => v <= 50 || "Máximo de 50 questões",
         v => v >= 1 || "Apenas números positivos",
         v =>
           v <= this.checkNumber ||
-          "Não há questões suficientes para o número escolhido"
+          "Não há questões suficientes para a disciplina e nível escolhidos"
       ]
     };
   },
@@ -510,7 +516,10 @@ export default {
       let amount = 0;
 
       subjects.forEach(sub => {
-        amount += this.$store.getters.getNumberOfQuestionBySubject(sub);
+        amount += this.$store.getters.getNumberOfQuestionBySubjectAndLevel(
+          sub,
+          this.level.index
+        );
       });
 
       return amount;
@@ -646,7 +655,13 @@ export default {
           .dispatch("getSubjectQuestions", subject)
           .then(questions => {
             questions.forEach(question => {
-              allQuestions.push({ name: question, subject });
+              if (question.level <= this.level.index) {
+                allQuestions.push({
+                  name: question.name,
+                  level: question.level,
+                  subject
+                });
+              }
             });
           });
       });
@@ -663,6 +678,7 @@ export default {
           selected.push(question.name);
           this.selectedRandomQuestions.push({
             name: question.name,
+            level: question.level,
             subject: question.subject
           });
         }
@@ -711,6 +727,10 @@ export default {
               userId: this.$store.getters.user.id
             };
 
+            if (this.testType === "auto") {
+              testData.subjects = [...this.testSubjects];
+            }
+
             if (!this.time.hours && !this.time.minutes) {
               testData.unlimitedTime = true;
             }
@@ -756,6 +776,10 @@ export default {
           created: this.test.created,
           id: this.test.id
         };
+
+        if (this.testType === "auto") {
+          testData.subjects = [...this.testSubjects];
+        }
 
         this.$emit("updateTest", testData);
         this.close();
