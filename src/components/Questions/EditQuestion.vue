@@ -93,98 +93,111 @@
                 <v-stepper-items>
                   <v-stepper-content step="1">
                     <v-container>
-                      <v-row>
-                        <v-select
-                          :items="subjectItems.map(s => s.name)"
-                          name="subject"
-                          id="subject"
-                          v-model="editedSubject"
-                          label="Disciplina"
-                          solo
-                        ></v-select>
+                      <v-row class="pa-0 ma-0">
+                        <v-col class="pa-0 ma-0">
+                          <v-select
+                            v-model="editedSubject"
+                            dense
+                            flat
+                            outlined
+                            rounded
+                            id="subject"
+                            name="subject"
+                            label="Disciplina"
+                            :items="subjectItems.map(s => s.name)"
+                          ></v-select>
+                        </v-col>
                       </v-row>
 
-                      <v-row>
-                        <VueSimplemde v-model="editedQuestionDescription" />
+                      <v-row class="pa-0 ma-0">
+                        <v-col class="pa-0 ma-0">
+                          <v-select
+                            v-model="editedLevel"
+                            dense
+                            flat
+                            outlined
+                            rounded
+                            label="Nível"
+                            item-value="value"
+                            item-text="label"
+                            :items="levels"
+                          ></v-select>
+                        </v-col>
                       </v-row>
 
-                      <v-row>
-                        <v-file-input
-                          chips
-                          clearable
-                          multiple
-                          label="Imagem"
-                          placeholder="Escolha uma imagem"
-                          v-model="images"
-                          @change="checkImageType"
-                          accept="image/png, image/jpeg, image/bmp"
-                        />
+                      <v-row class="pa-0 ma-0">
+                        <v-col cols="12" class="pa-0 ma-0">
+                          <VueSimplemde v-model="editedQuestionDescription" />
+                        </v-col>
                       </v-row>
 
-                      <v-main v-if="editedImages">
-                        <v-row justify="center">
-                          <v-radio-group v-model="editedImageSize" row>
-                            <v-radio label="1x" value="1x"></v-radio>
-                            <v-radio label="2x" value="2x"></v-radio>
-                            <v-radio label="3x" value="3x"></v-radio>
-                          </v-radio-group>
-                        </v-row>
-                      </v-main>
+                      <v-row class="pa-0 ma-0">
+                        <v-col class="pa-0 ma-0">
+                          <v-file-input
+                            v-model="image"
+                            clearable
+                            dense
+                            outlined
+                            rounded
+                            label="Imagem"
+                            placeholder="Escolha uma imagem"
+                            accept="image/*"
+                            @change="checkImageType"
+                          />
+                        </v-col>
+                      </v-row>
+
+                      <v-row
+                        v-if="image || editedImage"
+                        justify="center"
+                        class="pa-0 ma-0"
+                      >
+                        <v-radio-group
+                          v-model="editedImageSize"
+                          row
+                          class="pa-0 ma-0"
+                        >
+                          <v-radio label="1x" value="1x"></v-radio>
+                          <v-radio label="2x" value="2x"></v-radio>
+                          <v-radio label="3x" value="3x"></v-radio>
+                        </v-radio-group>
+                      </v-row>
                     </v-container>
                   </v-stepper-content>
 
-                  <v-stepper-content step="2">
-                    <v-container>
-                      <v-main v-if="confirmTitle">
-                        <v-row justify="end">
-                          <v-col cols="1"></v-col>
-                          <v-col v-for="i in number" :key="i">
-                            <v-text-field
-                              outlined
-                              v-model="auxTitle[i - 1]"
-                            ></v-text-field>
-                          </v-col>
-                        </v-row>
-                        <v-row
-                          v-for="(item, index) in editedAnswers"
-                          :key="index"
-                        >
-                          <v-col cols="12" md="1" sm="1" xs="1">
-                            <v-radio-group v-model="radios">
-                              <v-radio :value="item.ansId"></v-radio>
-                            </v-radio-group>
-                          </v-col>
-                          <v-col
-                            v-for="(answerItem, index) in item.text"
-                            :key="index"
-                          >
-                            <v-text-field
-                              v-if="answerItem"
-                              outlined
-                              v-model="answerItem.answerDescription"
-                            ></v-text-field>
-                          </v-col>
-                        </v-row>
-                      </v-main>
+                  <v-stepper-content step="2" class="pa-0 ma-0">
+                    <v-container class="pl-4 pr-9 py-8 ma-0">
+                      <v-row
+                        v-for="(item, index) in editedAnswers"
+                        :key="index"
+                        class="pa-0 ma-0"
+                        :class="{ 'pt-2': index > 0 }"
+                      >
+                        <v-radio-group v-model="radios" class="pa-0 pt-2 ma-0">
+                          <v-radio :value="item.ansId"></v-radio>
+                        </v-radio-group>
 
-                      <v-main v-else>
-                        <v-row
-                          v-for="(item, index) in editedAnswers"
-                          :key="index"
-                        >
-                          <v-col cols="12" md="1" sm="1" xs="1">
-                            <v-radio-group v-model="radios">
-                              <v-radio :value="item.ansId"></v-radio>
-                            </v-radio-group>
-                          </v-col>
-                          <v-col>
-                            <v-text-field
-                              outlined
-                              v-model="item.text"
-                            ></v-text-field>
-                          </v-col>
-                        </v-row>
-                      </v-main>
+                        <v-col class="pa-0 ma-0">
+                          <v-text-field
+                            v-model="item.text"
+                            dense
+                            outlined
+                            rounded
+                            class="pa-0 ma-0"
+                            :placeholder="letters[index]"
+                          ></v-text-field>
+
+                          <v-text-field
+                            v-model="item.description"
+                            dense
+                            outlined
+                            rounded
+                            class="pa-0 ma-0"
+                            style="margin-top: -12px !important"
+                            placeholder="Justificativa"
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -214,6 +227,7 @@ import { mdiClose, mdiArrowLeft, mdiArrowRight, mdiContentSave } from "@mdi/js";
 import Preview from "./Preview";
 
 export default {
+  name: "EditQuestion",
   components: {
     VueSimplemde,
     Preview
@@ -225,30 +239,59 @@ export default {
       mdiArrowLeft,
       mdiArrowRight,
       mdiContentSave,
+      dialogState: false,
       imagePreview: "",
       letters: ["A", "B", "C", "D"],
-      confirmTitle: false,
-      editedQuestionDescription: "",
       e1: 1,
       radios: null,
-      columns: this.number,
-      multipleAnswer: false,
-      auxTitle: [],
-      editedImages: null,
       chips: [],
       items: [],
-      images: [],
-      editedAnswers: [
-        { text: "", ansId: "radio-1", value: false },
-        { text: "", ansId: "radio-2", value: false },
-        { text: "", ansId: "radio-3", value: false },
-        { text: "", ansId: "radio-4", value: false }
-      ],
+      image: null,
+      editedQuestionDescription: "",
+      editedImage: null,
       editedName: null,
       editedSubject: null,
       editedImageSize: null,
-      number: 0,
-      dialogState: false
+      editedAnswers: [
+        { text: "", description: "", ansId: "radio-1", value: false },
+        { text: "", description: "", ansId: "radio-2", value: false },
+        { text: "", description: "", ansId: "radio-3", value: false },
+        { text: "", description: "", ansId: "radio-4", value: false }
+      ],
+      editedLevel: {
+        index: 0,
+        name: "beginner"
+      },
+      levels: [
+        {
+          value: {
+            index: 0,
+            name: "beginner"
+          },
+          label: "Iniciante"
+        },
+        {
+          value: {
+            index: 1,
+            name: "intermediary"
+          },
+          label: "Intermediário"
+        },
+        {
+          value: {
+            index: 2,
+            name: "advanced"
+          },
+          label: "Avançado"
+        },
+        {
+          value: {
+            index: 3,
+            name: "expert"
+          },
+          label: "Experiente"
+        }
+      ]
     };
   },
   computed: {
@@ -274,19 +317,9 @@ export default {
     editedName(value) {
       if (value) this.update();
     },
-    auxTitle(val) {
-      if (this.confirmTitle) {
-        this.editedAnswers.forEach(element => {
-          for (var i = 0; i < this.number; i++) {
-            element.text[i].title = val[i];
-          }
-        });
-      }
-    },
     radios(val) {
       this.editedAnswers.forEach(element => {
-        if (element.ansId === val) element.value = true;
-        else element.value = false;
+        element.value = element.ansId === val;
       });
     }
   },
@@ -295,29 +328,14 @@ export default {
       this.editedName = this.question.name;
       this.editedSubject = this.question.subject;
       this.editedImageSize = this.question.imageSize;
-      this.editedAnswers = JSON.parse(JSON.stringify(this.question.answers));
+      this.editedAnswers = [...this.question.answers];
       this.editedQuestionDescription = this.question.question;
+      this.editedLevel = { ...this.question.level };
 
-      if (
-        typeof this.question.image === "undefined" ||
-        this.question.image === ""
-      )
-        this.editedImages = "";
-      else this.editedImages = this.question.image;
+      if (!this.question.image) this.editedImage = "";
+      else this.editedImage = this.question.image;
 
-      this.imagePreview = this.editedImages || "";
-
-      if (typeof this.question.answers[0].text == "string") this.number = 1;
-      else this.number = this.question.answers[0].text.length;
-
-      if (this.number > 1) this.confirmTitle = true;
-      else this.confirmTitle = false;
-
-      if (this.number > 1) {
-        for (var i = 0; i < this.number; i++) {
-          this.auxTitle[i] = this.question.answers[0].text[i].title;
-        }
-      }
+      this.imagePreview = this.editedImage || "";
 
       this.editedAnswers.forEach(element => {
         if (element.value === true) this.radios = element.ansId;
@@ -327,20 +345,21 @@ export default {
       this.editedQuestionDescription = variable;
     },
     onEditQuestion() {
-      if (this.images[0]) {
+      if (this.image) {
         const imageToUpload = {
-          image: this.images[0],
+          image: this.image,
           name: this.question.name
         };
         const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
 
         URL.then(result => {
-          this.editedImages = result;
+          this.editedImage = result;
 
           const oldData = {
             name: this.question.name,
             created: this.question.created || null,
             subject: this.question.subject,
+            level: this.question.level,
             question: this.question.question,
             answers: this.question.answers,
             image: this.question.image,
@@ -353,8 +372,9 @@ export default {
             created: this.question.created || null,
             subject: this.editedSubject,
             question: this.editedQuestionDescription,
+            level: this.editedLevel,
             answers: this.editedAnswers,
-            image: this.editedImages,
+            image: this.editedImage,
             imageSize: this.editedImageSize
           };
 
@@ -392,6 +412,7 @@ export default {
           created: this.question.created || null,
           subject: this.question.subject,
           question: this.question.question,
+          level: this.question.level,
           answers: this.question.answers,
           image: this.question.image,
           edited: this.question.edited,
@@ -403,6 +424,7 @@ export default {
           created: this.question.created || null,
           subject: this.editedSubject,
           question: this.editedQuestionDescription,
+          level: this.editedLevel,
           answers: this.editedAnswers,
           imageSize: this.editedImageSize,
           image: this.question.image
@@ -438,23 +460,21 @@ export default {
       }
     },
     setInitialData() {
-      this.confirmTitle = false;
       this.editedQuestionDescription = "";
       this.e1 = 1;
       this.radios = null;
-      this.columns = this.number;
-      this.multipleAnswer = false;
-      this.auxTitle = [];
-      this.editedImages = null;
-      this.chips = [];
+      this.editedImage = null;
       this.items = [];
-      this.images = [];
+      this.image = null;
       this.imagePreview = "";
       this.editedAnswers = [];
       this.editedName = null;
       this.editedSubject = null;
       this.editedImageSize = null;
-      this.number = 0;
+      this.editedLevel = {
+        index: 0,
+        name: "beginner"
+      };
     },
     checkImageType(event) {
       if (event && event[0] && event[0].type) {
@@ -462,12 +482,12 @@ export default {
           this.$store.commit("setError", {
             message: "O arquivo inserido NÃO é uma imagem!"
           });
-          this.images = [];
+          this.image = null;
         } else if (event[0].size > 2000000) {
           this.$store.commit("setError", {
             message: "O tamanho da imagem deve ser no MÁXIMO 2 MB!"
           });
-          this.images = [];
+          this.image = null;
         } else {
           const file = event[0];
           const reader = new FileReader();
@@ -479,7 +499,7 @@ export default {
           reader.readAsDataURL(file);
         }
       } else if (this.imagePreview && this.imagePreview !== "") {
-        this.imagePreview = this.editedImages || "";
+        this.imagePreview = this.editedImage || "";
       }
     },
     close() {
