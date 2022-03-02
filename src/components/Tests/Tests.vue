@@ -308,7 +308,11 @@ export default {
     generateExam(questions) {
       this.$router.push({
         name: "quiz.details",
-        params: { id: "generated", test: { name: "Prova gerada", questions } }
+        params: {
+          id: "generated",
+          test: { name: "Prova gerada", questions },
+          mode: "practice"
+        }
       });
     },
     updateTest(testData) {
