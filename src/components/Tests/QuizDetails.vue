@@ -144,10 +144,69 @@
       </v-row>
     </v-card>
 
-    <v-card flat class="mt-4" width="100%">
+    <v-card flat class="my-4" width="100%">
       <v-card-title>
         <h3 class="quiz-detail__attempts-title">Tentativas anteriores</h3>
       </v-card-title>
+
+      <v-data-table
+        v-if="test && attempts"
+        hide-default-footer
+        class="quiz__attempts-table"
+        no-data-text="Não há tentativas no momento"
+        :headers="headersAttempts"
+        :items="attempts"
+      >
+        <template v-slot:[`item.index`]="{ item }">
+          {{ item.index + 1 }}
+        </template>
+
+        <template v-slot:[`item.date`]="{ item }">
+          {{ getDateSentence(item.date) }}
+        </template>
+
+        <template v-slot:[`item.answers`]="{ item }">
+          {{ item.answers.length }}/{{ test.questionsAmount }}
+        </template>
+
+        <template v-slot:[`item.score`]="{ item }">
+          <span
+            :class="{
+              'font-weight-medium': !item.score || item.score === 100,
+              'green--text': item.score === 100,
+              'red--text': !item.score
+            }"
+          >
+            {{ item.score.toFixed(2) }}%
+          </span>
+        </template>
+
+        <template v-slot:[`item.timeTaken`]="{ item }">
+          {{ getTimeFormatted(item.timeTaken) }}
+        </template>
+
+        <template v-slot:[`item.mode`]="{ item }">
+          {{ getModeSentence(item.mode) }}
+        </template>
+
+        <template v-slot:[`item.result`]="{ item }">
+          <span
+            class="font-weight-medium"
+            :class="{
+              'green--text': item.approved,
+              'red--text': !item.approved
+            }"
+          >
+            {{ item.approved ? "Passou" : "Falhou" }}
+          </span>
+        </template>
+
+        <template v-slot:[`item.review`]="{ item }">
+          <v-btn text small color="blue" @click="reviewAttempt(item)"
+            >Revisar</v-btn
+          >
+        </template>
+      </v-data-table>
     </v-card>
 
     <v-dialog v-model="startDialog" width="500px">
@@ -231,6 +290,8 @@ import {
 import VueMarkdown from "vue-markdown";
 import "vue-markdown";
 
+import { weekDays, months } from "../../utils/date";
+
 export default {
   name: "QuizDetails",
   components: {
@@ -247,27 +308,73 @@ export default {
       test: null,
       startDialog: false,
       practice: false,
-      attempts: [
+      headersAttempts: [
+        { text: "#", value: "index", sortable: false, align: "center" },
+        { text: "Data", value: "date", sortable: false, align: "center" },
         {
-          score: 67,
-          approved: false,
-          practice: true,
-          status: "completed",
-          answers: [
-            { name: "Q2", answer: 1 },
-            { name: "Q1", answer: 3 }
-          ],
-          timeTaken: "0h 4m 37s",
-          date: new Date()
-        }
-      ]
+          text: "Respostas",
+          value: "answers",
+          sortable: false,
+          align: "center"
+        },
+        {
+          text: "Pontuação",
+          value: "score",
+          sortable: false,
+          align: "center"
+        },
+        {
+          text: "Tempo Gasto",
+          value: "timeTaken",
+          sortable: false,
+          align: "center"
+        },
+        { text: "Modo", value: "mode", sortable: false, align: "center" },
+        {
+          text: "Resultado",
+          value: "result",
+          sortable: false,
+          align: "center"
+        },
+        { text: "Revisar", value: "review", sortable: false, align: "center" }
+      ],
+      attempts: []
     };
   },
+  computed: {
+    userInfo() {
+      return this.$store.getters.userInfo;
+    }
+  },
   methods: {
+    getDateSentence(iso) {
+      const date = new Date(iso);
+
+      return `${weekDays[date.getDay()].substring(
+        0,
+        3
+      )}, ${date.getDate()} ${months[date.getMonth()].substring(
+        0,
+        3
+      )} ${date.getFullYear()}`;
+    },
+    getModeSentence(mode) {
+      switch (mode) {
+        case "practice":
+          return "Treino";
+        case "exam":
+          return "Exame";
+        default:
+          return "Indefinido";
+      }
+    },
     getTime(item) {
       return item.unlimitedTime
         ? "Ilimitado"
-        : `${item.time.hours}h ${item.time.minutes}m ${item.time.seconds}s`;
+        : this.getTimeFormatted(item.time);
+    },
+    getTimeFormatted(time) {
+      return `${time.hours}h ${time.minutes}m ${time.seconds}s`;
     },
     getLevel(item) {
       const level = item.level.index;
@@ -315,15 +422,23 @@ export default {
           params: {
             id: "generated",
             test: this.test,
-            mode: this.practice ? "practice" : "normal"
+            mode: this.practice ? "practice" : "exam"
           }
         });
       } else {
         this.$router.push({
           name: "quiz.exam",
-          params: { id, mode: this.practice ? "practice" : "normal" }
+          params: { id, mode: this.practice ? "practice" : "exam" }
         });
       }
+    },
+    reviewAttempt(item) {
+      const id = this.$route.params.id;
+
+      this.$router.push({
+        name: "quiz.exam",
+        params: { id, mode: "practice", attempt: item, review: true }
+      });
     }
   },
   async mounted() {
@@ -333,6 +448,12 @@ export default {
       this.test = this.$route.params.test;
     } else {
       this.test = await this.$store.dispatch("getTestById", id);
+    }
+
+    if (this.userInfo && this.userInfo.attempts) {
+      this.attempts = this.userInfo.attempts
+        .filter(a => a.quizId === id)
+        .map((a, i) => ({ index: i, ...a }));
     }
   }
 };
@@ -460,6 +581,14 @@ export default {
   border-radius: 0.6rem;
 
   cursor: pointer;
+}
+
+.quiz__attempts-table /deep/ tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+.quiz__attempts-table /deep/ tbody tr:hover {
+  background-color: #f7f7f7 !important;
 }
 
 a,
