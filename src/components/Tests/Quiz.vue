@@ -4,15 +4,15 @@
     style="max-width: unset; min-height: 100%; background: #efefef"
   >
     <v-row class="pa-4 ma-0">
-      <a @click="$router.push('/')">Início</a>
+      <a @click="exitQuiz('/')">Início</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="$router.push('/quizes')">Questionários</a>
+      <a @click="exitQuiz('/quizes')">Questionários</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="$router.push('/quizes/' + $route.params.id)"
+      <a @click="exitQuiz('/quizes/' + test.id)"
         >Detalhes do questionário</a
       >
 
@@ -29,8 +29,20 @@
 
         <v-spacer></v-spacer>
 
-        <v-btn text color="error" @click="dialogEndQuiz = true"
-          >Sair do Questionário</v-btn
+        <Counter
+          class="mr-4"
+          :countdown="countdown"
+          :static="review"
+          :time="review ? attempt.timeTaken : test.time"
+          :paused="review || finished"
+          @timeUp="
+            timesUp = !review;
+            finished = true;
+          "
+        />
+
+        <v-btn text color="error" @click="exitQuiz(review ? '/quizes/' + test.id : '/quizes')"
+          >Sair {{ !review ? "do Questionário" : "" }}</v-btn
         >
       </v-toolbar>
 
@@ -55,10 +67,23 @@
             :imageSize="examQuestions[current - 1].imageSize"
           />
 
-          <v-radio-group v-model="currentAnswer" class="px-4">
+          <v-radio-group
+            v-model="currentAnswer"
+            class="px-4"
+            :disabled="finished"
+            :readonly="review"
+          >
             <v-radio
               v-for="(answer, i) in examQuestions[current - 1].answers"
-              class="my-5"
+              class="quiz__answer my-5"
+              :class="
+                getAnswerCustomData(answer, currentAnswer) &&
+                  getAnswerCustomData(answer, currentAnswer).class
+              "
+              :color="
+                getAnswerCustomData(answer, currentAnswer) &&
+                  getAnswerCustomData(answer, currentAnswer).color
+              "
               :key="answer.ansId"
               :value="answer.ansId"
             >
@@ -70,7 +95,7 @@
           </v-radio-group>
 
           <v-btn
-            v-if="practice"
+            v-if="!review && practice"
             elevation="0"
             width="220px"
             class="quiz__answer-button mx-4 mt-0 mb-8"
@@ -84,7 +109,7 @@
 
           <v-divider></v-divider>
 
-          <div v-if="practice && showAnswer">
+          <div v-if="review || (practice && showAnswer)">
             <h2 class="ma-4 mt-5 quiz__answer-description-title">Explicação</h2>
 
             <span class="mx-4 quiz__answer-description">
@@ -120,11 +145,12 @@
             justify="space-between"
           >
             <v-btn
-              dark
               rounded
               width="130px"
               color="blue"
               class="pl-2"
+              :dark="!loadingFinish"
+              :disabled="loadingFinish"
               :class="{ hidden: current <= 1 }"
               @click="current - 1 < 1 ? current : current--"
             >
@@ -133,7 +159,9 @@
             </v-btn>
 
             <v-checkbox
+              v-if="!review"
               label="Marcar para revisão"
+              :disabled="finished"
               :input-value="
                 markedForReview.includes(examQuestions[current - 1].name)
               "
@@ -153,7 +181,15 @@
               <v-icon>{{ mdiChevronRight }}</v-icon>
             </v-btn>
 
-            <v-btn v-else dark rounded width="120px" color="blue">
+            <v-btn
+              v-else-if="!review"
+              dark
+              rounded
+              width="120px"
+              color="blue"
+              :loading="loadingFinish"
+              @click="finishQuiz()"
+            >
               Enviar
             </v-btn>
           </v-row>
@@ -163,7 +199,21 @@
 
         <div class="quiz__question-control py-4">
           <span
-            v-if="answeredAmount < examQuestions.length"
+            v-if="timesUp"
+            class="quiz__missing-questions orange--text font-weight-medium"
+          >
+            TEMPO ESGOTADO
+          </span>
+
+          <span
+            v-else-if="review && answeredAmount < examQuestions.length"
+            class="quiz__missing-questions"
+          >
+            {{ answeredAmount }} questões respondidas
+          </span>
+
+          <span
+            v-else-if="answeredAmount < examQuestions.length"
             class="quiz__missing-questions"
           >
             Faltam {{ examQuestions.length - answeredAmount }} questões para
@@ -194,7 +244,11 @@
               :class="{
                 current: current === i + 1,
                 review: markedForReview.includes(q.name),
-                answered: !!getAnswerByQuestionName(q.name)
+                answered: !!getAnswerByQuestionName(q.name),
+                incorrect:
+                  review &&
+                  !!getAnswerByQuestionName(q.name) &&
+                  !getAnswerByQuestionName(q.name).correct
               }"
               @click="current = i + 1"
             >
@@ -209,10 +263,12 @@
       <v-card class="pa-4">
         <v-card-title class="pa-0 mb-2">Espera...</v-card-title>
 
-        <span>
+        <span v-if="!review">
           Ao sair do questionário, todo o seu progresso será perdido. Tem
           certeza de que deseja sair?
         </span>
+
+        <span v-else>Tem certeza de que deseja sair?</span>
 
         <v-card-actions class="pa-0 mt-4">
           <v-btn text color="grey darken-2" @click="dialogEndQuiz = false">
@@ -221,7 +277,7 @@
 
           <v-spacer></v-spacer>
 
-          <v-btn text color="red" @click="$router.push('/quizes')">Sair</v-btn>
+          <v-btn text color="red" @click="$router.push(exitTo)">Sair</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -240,16 +296,14 @@ import {
 } from "@mdi/js";
 
 import QuestionImage from "../Questions/QuestionImage.vue";
-import QuizResults from "./QuizResults.vue";
-import QuizReview from "./QuizReview.vue";
+import Counter from "../Shared/Counter.vue";
 
 export default {
   name: "Exam",
   components: {
     VueMarkdown,
-    QuestionImage
-    // QuizReview,
-    // QuizResults
+    QuestionImage,
+    Counter
   },
   data() {
     return {
@@ -262,37 +316,80 @@ export default {
       showResults: false,
       showReview: false,
       dialogEndQuiz: false,
+      exitTo: "/quizes",
       practice: false,
       test: null,
       examQuestions: [],
-      started: new Date(),
+      startedAt: new Date(),
+      finishedAt: null,
+      finished: false,
+      loadingFinish: false,
+      timesUp: false,
       current: 1,
       currentAnswer: null,
       answers: [],
       answersOptions: ["A", "B", "C", "D"],
-      markedForReview: []
+      markedForReview: [],
+      review: false,
+      attempt: null
     };
   },
   computed: {
+    userInfo() {
+      return this.$store.getters.userInfo;
+    },
     answeredAmount() {
+      if (this.review) {
+        return this.attempt.answers.length;
+      }
+
       return this.answers.reduce(
         (prev, curr) => (!!curr.value ? prev + 1 : prev),
         0
       );
+    },
+    countdown() {
+      return !this.practice && !this.test.unlimitedTime;
     },
     loading() {
       return this.$store.getters.loading;
     }
   },
   methods: {
+    getAnswerCustomData(answer) {
+      if (!this.review) {
+        return { class: "", color: "" };
+      }
+
+      return answer.value
+        ? { class: "correct", color: "#42d662" }
+        : !answer.value && answer.ansId == this.currentAnswer
+        ? { class: "incorrect", color: "#ff4141" }
+        : { class: "", color: "" };
+    },
     getDateSentence(isoString) {
       const date = new Date(isoString);
-
       return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     },
     getAnswerByQuestionName(questionName) {
+      if (this.review) {
+        return (
+          this.attempt.answers.find(a => a.questionName === questionName) ||
+          null
+        );
+      }
+
       const answer = this.answers.find(a => a.questionName === questionName);
       return answer ? answer.value : null;
+    },
+    checkAnswer(answer) {
+      const question = this.examQuestions.find(
+        q => q.name === answer.questionName
+      );
+
+      return question
+        ? question.answers.find(a => a.ansId === answer.value).value
+        : false;
     },
     toggleReview(question) {
       const index = this.markedForReview.indexOf(question.name);
@@ -302,6 +399,83 @@ export default {
       } else {
         this.markedForReview.splice(index, 1);
       }
+    },
+    async finishQuiz() {
+      this.finished = true;
+
+      this.loadingFinish = true;
+
+      if (!this.finishedAt) {
+        this.finishedAt = new Date();
+      }
+
+      const answers = [];
+
+      let correct = 0;
+      this.answers.forEach(a => {
+        if (this.checkAnswer(a)) {
+          correct++;
+        }
+
+        answers.push({
+          questionName: a.questionName,
+          answer: +a.value.split("-")[1],
+          correct: this.checkAnswer(a)
+        });
+      });
+
+      const score = (100 * correct) / this.test.questionsAmount;
+
+      const diff =
+        this.finishedAt.getTime() -
+        this.startedAt.getTime() -
+        (this.countdown ? 1000 : 0);
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor(diff / (1000 * 60));
+      const seconds = Math.floor(diff / 1000);
+
+      const attempt = {
+        approved: score >= this.test.approvalPercentage,
+        answers,
+        date: new Date(this.finishedAt).toISOString(),
+        mode: this.practice ? "practice" : "exam",
+        questions: this.examQuestions.map(q => q.name),
+        quizId: this.test.id,
+        score,
+        timeTaken: {
+          hours,
+          minutes: hours > 0 ? minutes - hours * 60 : minutes,
+          seconds: minutes > 0 ? seconds - minutes * 60 : seconds
+        },
+        userId: this.userInfo.id
+      };
+
+      if (!this.test.userAttempts) {
+        this.test.userAttempts = {};
+      }
+
+      const userAttempt = this.test.userAttempts[attempt.userId];
+
+      if (!userAttempt) {
+        this.test.userAttempts[attempt.userId] = 0;
+      }
+
+      this.test.userAttempts[attempt.userId] += 1;
+
+      await this.$store.dispatch("updateUser", {
+        attempts: [attempt, ...(this.userInfo.attempts || [])]
+      });
+
+      await this.$store.dispatch("updateTest", { testData: this.test });
+
+      this.loadingFinish = false;
+
+      this.$router.push("/quizes/" + this.test.id);
+    },
+    exitQuiz(to) {
+      this.exitTo = to;
+      this.dialogEndQuiz = true;
     },
     viewResults() {
       this.showResults = true;
@@ -328,17 +502,15 @@ export default {
         });
       }
 
-      let loops = 0;
+      let loop = 0;
 
       while (
         selected.length < this.test.questionsAmount &&
         selected.length < questions.length &&
-        loops < questions.length
+        loop < questions.length
       ) {
-        const index = Math.floor(Math.random() * questions.length);
-
-        if (!selected.includes(questions[index].name)) {
-          const question = questions[index];
+        if (!selected.includes(questions[loop].name)) {
+          const question = questions[loop];
           selected.push(question.name);
 
           const questionData = await this.$store.dispatch(
@@ -346,20 +518,45 @@ export default {
             question.name
           );
 
-          if (questions[index].level <= questionData.level.index) {
+          if (questions[loop].level <= questionData.level.index) {
             selectedData.push(questionData);
           }
         }
 
-        loops++;
+        loop++;
       }
 
-      this.examQuestions = selectedData;
+      this.randomizeQuestions(selectedData);
 
       this.$store.commit("setLoading", false);
     },
-    randomizeQuestions() {
-      const questions = [...this.test.questions];
+    async selectReviewQuestions() {
+      const questions = [];
+
+      for (const q of this.attempt.questions) {
+        const question = await this.$store.dispatch("getQuestionByName", q);
+        questions.push(question);
+      }
+
+      this.examQuestions = questions;
+
+      this.setCurrentAnswer();
+    },
+    setCurrentAnswer() {
+      const questionName = this.examQuestions[0].name;
+
+      const answer = this.attempt.answers.find(
+        a => a.questionName === questionName
+      );
+
+      if (!answer) {
+        this.currentAnswer = null;
+        return;
+      }
+
+      this.currentAnswer = "radio-" + answer.answer;
+    },
+    randomizeQuestions(questions) {
       const randomQuestions = [];
 
       let i = 0;
@@ -374,18 +571,18 @@ export default {
       }
 
       this.examQuestions = randomQuestions;
-    },
-    close() {
-      this.current = 1;
-      this.currentAnswer = null;
-      this.answers = [];
 
-      this.$emit("closeDialog");
+      if (this.review) {
+        this.setCurrentAnswer();
+      }
     }
   },
   async mounted() {
     const id = this.$route.params.id;
     const mode = this.$route.params.mode;
+
+    this.review = !!this.$route.params.review;
+    this.attempt = this.$route.params.attempt;
 
     if (!mode) {
       this.$router.push("/quizes/" + id);
@@ -398,7 +595,12 @@ export default {
     } else {
       this.test = await this.$store.dispatch("getTestById", id);
     }
-    console.log(this.test);
+
+    if (this.test.type === "auto" && this.review) {
+      await this.selectReviewQuestions();
+
+      return;
+    }
 
     if (this.test.type === "auto") {
       await this.selectQuestions();
@@ -406,11 +608,33 @@ export default {
       return;
     }
 
-    this.randomizeQuestions();
+    this.randomizeQuestions([...this.test.questions]);
   },
   watch: {
-    current() {
-      const questionName = this.examQuestions[this.current - 1].name;
+    finished(value) {
+      if (value) {
+        this.finishedAt = new Date();
+      }
+    },
+    current(value) {
+      const questionName = this.examQuestions[value - 1].name;
+
+      if (this.review && this.attempt) {
+        const answer = this.attempt.answers.find(
+          a => a.questionName === questionName
+        );
+
+        if (!answer) {
+          this.currentAnswer = null;
+
+          return;
+        }
+
+        this.currentAnswer = "radio-" + answer.answer;
+
+        return;
+      }
+
       const answer = this.answers.find(a => a.questionName === questionName);
 
       this.currentAnswer = answer ? answer.value : null;
@@ -528,6 +752,12 @@ export default {
   border-color: #0ab93f;
 }
 
+.quiz__question-number.incorrect {
+  background-color: #ff414144;
+
+  color: #ff4141 !important;
+}
+
 .quiz__question-number.current {
   border: 2px solid #1e88e5;
   background-color: #1e88e544;
@@ -550,6 +780,14 @@ export default {
 
 .quiz__answer-description strong.incorrect {
   color: #4d4d4d;
+}
+
+.quiz__answer.correct /deep/ label {
+  color: #42d662 !important;
+}
+
+.quiz__answer.incorrect /deep/ label {
+  color: #ff4141 !important;
 }
 
 a,
