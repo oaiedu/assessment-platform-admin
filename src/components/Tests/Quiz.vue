@@ -12,9 +12,7 @@
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="exitQuiz('/quizes/' + test.id)"
-        >Detalhes do questionário</a
-      >
+      <a @click="exitQuiz('/quizes/' + test.id)">Detalhes do questionário</a>
 
       <span class="mx-3 slash">/</span>
 
@@ -41,7 +39,10 @@
           "
         />
 
-        <v-btn text color="error" @click="exitQuiz(review ? '/quizes/' + test.id : '/quizes')"
+        <v-btn
+          text
+          color="error"
+          @click="exitQuiz(review ? '/quizes/' + test.id : '/quizes')"
           >Sair {{ !review ? "do Questionário" : "" }}</v-btn
         >
       </v-toolbar>
@@ -146,6 +147,7 @@
           >
             <v-btn
               rounded
+              elevation="0"
               width="130px"
               color="blue"
               class="pl-2"
@@ -172,6 +174,7 @@
               v-if="current < examQuestions.length"
               dark
               rounded
+              elevation="0"
               width="120px"
               color="blue"
               class="pr-2"
@@ -185,6 +188,7 @@
               v-else-if="!review"
               dark
               rounded
+              elevation="0"
               width="120px"
               color="blue"
               :loading="loadingFinish"
