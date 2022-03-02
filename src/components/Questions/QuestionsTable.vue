@@ -25,6 +25,10 @@
         :item-class="itemRowStyle"
         class="elevation-1"
       >
+        <template v-slot:[`item.level`]="{ item }">
+          {{ levels[item.level.index] }}
+        </template>
+
         <template v-slot:[`item.actions`]="{ item }" v-if="isActionsAvailable">
           <v-row justify="end" v-if="!item.toDelete">
             <v-tooltip top>
@@ -110,8 +114,10 @@ export default {
       deleteIcon: mdiDelete,
       headers: [
         { text: "Nome", align: "left", value: "name" },
-        { text: "Disciplina", value: "subject" }
-      ]
+        { text: "Disciplina", align: "left", value: "subject" },
+        { text: "Nível", value: "level" }
+      ],
+      levels: ["Iniciante", "Intermediário", "Avançado", "Experiente"]
     };
   },
   computed: {

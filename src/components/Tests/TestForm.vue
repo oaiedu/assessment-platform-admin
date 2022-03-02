@@ -245,7 +245,11 @@
                 :page="randomizedPage"
               >
                 <template v-slot:[`item.level`]="{ item }">
-                  {{ levels[item.level].label }}
+                  {{
+                    item.level.index || item.level.index === 0
+                      ? levels[item.level.index].label
+                      : levels[item.level].label
+                  }}
                 </template>
               </v-data-table>
             </v-container>
@@ -723,7 +727,11 @@ export default {
               type: this.testType,
               level: this.level,
               unlimitedTime: this.unlimitedTime,
-              time: this.time,
+              time: {
+                hours: +this.time.hours,
+                minutes: +this.time.minutes,
+                seconds: +this.time.seconds
+              },
               userId: this.$store.getters.user.id
             };
 
@@ -771,7 +779,11 @@ export default {
           type: this.testType,
           level: this.level,
           unlimitedTime: this.unlimitedTime,
-          time: this.time,
+          time: {
+            hours: +this.time.hours,
+            minutes: +this.time.minutes,
+            seconds: +this.time.seconds
+          },
           userId: this.test.userId,
           created: this.test.created,
           id: this.test.id

@@ -37,13 +37,19 @@
 
             <span
               class="font-weight-medium"
-              :class="(item.status ? 'green' : 'grey') + '--text'"
+              :class="(getUserAttempts(item) ? 'green' : 'grey') + '--text'"
             >
-              <v-icon :color="item.status ? 'green' : 'grey'">{{
-                item.status ? mdiCheckCircle : mdiCancel
+              <v-icon :color="getUserAttempts(item) ? 'green' : 'grey'">{{
+                getUserAttempts(item) ? mdiCheckCircle : mdiCancel
               }}</v-icon>
 
-              {{ item.status || "SEM TENTATIVAS" }}
+              {{
+                getUserAttempts(item)
+                  ? getUserAttempts(item) +
+                    " TENTATIVA" +
+                    (getUserAttempts(item) !== 1 ? "S" : "")
+                  : "SEM TENTATIVAS"
+              }}
             </span>
           </v-row>
         </template>
@@ -77,10 +83,10 @@
                   class="ml-2"
                   @click="doExam(item)"
                 >
-                  {{ mdiFileEdit }}
+                  {{ mdiFileCompare }}
                 </v-icon>
               </template>
-              <span>Realizar prova</span>
+              <span>Visualizar prova</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -159,7 +165,7 @@
 
 <script>
 import {
-  mdiFileEdit,
+  mdiFileCompare,
   mdiPencil,
   mdiDelete,
   mdiCheckCircle,
@@ -174,7 +180,7 @@ export default {
   props: ["items", "itemsPerPage", "page"],
   data() {
     return {
-      mdiFileEdit,
+      mdiFileCompare,
       mdiPencil,
       mdiDelete,
       mdiCheckCircle,
@@ -212,6 +218,19 @@ export default {
     }
   },
   methods: {
+    getUserAttempts(item) {
+      let attempts = 0;
+
+      if (this.userInfo && this.userInfo.attempts) {
+        this.userInfo.attempts.forEach(a => {
+          if (a.quizId === item.id) {
+            attempts++;
+          }
+        });
+      }
+
+      return attempts;
+    },
     getTime(item) {
       return item.unlimitedTime
         ? "Ilimitado"
