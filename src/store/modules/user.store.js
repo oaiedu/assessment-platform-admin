@@ -290,7 +290,7 @@ const actions = {
    * @param {string} payload.profileImages The user new avatar image.
    * @param {Attempt[]} payload.attempts The user quizes attempts.
    */
-  updateUser({ commit, state }, payload) {
+  async updateUser({ commit, state }, payload) {
     commit("setLoading", true);
 
     const userInfo = {
@@ -300,35 +300,38 @@ const actions = {
       updated: getNowISOString()
     };
 
-    db.collection("users")
-      .doc(state.user.id)
-      .update({
-        ...userInfo
-      })
-      .then(() => {
-        commit("setUserInfo", {
-          ...userInfo,
-          id: state.userInfo.id,
-          email: state.userInfo.email,
-          role: state.userInfo.role,
-          created: state.userInfo.created
+    try {
+      await db
+        .collection("users")
+        .doc(state.user.id)
+        .update({
+          ...userInfo
         });
-        commit("setLoading", false);
-        commit(
-          "setSuccess",
-          `'${userInfo.name || userInfo.email}' editado(a) com sucesso!`
-        );
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "default",
-          "",
-          "User update error - " + error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("User DB Update", error.message, { payload });
+
+      commit("setUserInfo", {
+        ...userInfo,
+        id: state.userInfo.id,
+        email: state.userInfo.email,
+        role: state.userInfo.role,
+        created: state.userInfo.created
       });
+
+      commit(
+        "setSuccess",
+        `'${userInfo.name || userInfo.email}' editado(a) com sucesso!`
+      );
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "default",
+        "",
+        "User update error - " + error.message
+      );
+
+      commit("setError", { message: errorModel });
+      createErrorLog("User DB Update", error.message, { payload });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Sign in the user using it's e-mail and password.
