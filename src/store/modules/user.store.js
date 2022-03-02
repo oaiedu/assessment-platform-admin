@@ -6,14 +6,19 @@ import { getNowISOString } from "../../utils/date";
 import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
+ * @typedef {import('./tests.store.js').Attempt} Attempt
+ */
+
+/**
  * @typedef {Object} UserInfo
- * @property {string} id - The user id.
- * @property {string} name - The user name.
- * @property {string} email - The user e-mail.
- * @property {string} role - The user role.
- * @property {string} profileImages - The user profile image.
- * @property {string} created - The iso string of the user creation date.
- * @property {string} updated - The iso string of the user last edition date.
+ * @property {string} id Represents the user Firestore id.
+ * @property {string} name Defines the user name.
+ * @property {string} email Defines the user e-mail.
+ * @property {'admin' | 'appraiser' | 'student'} role Defines the user role.
+ * @property {string} profileImages Defines an URL of the user profile image.
+ * @property {Attempt[]} attempts Defines an array that keeps all previous quizes attempts.
+ * @property {string} created Defines an iso string of the user creation date.
+ * @property {string} updated Defines an iso string of the user last edition date.
  */
 
 /**
@@ -22,11 +27,11 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
  * @typedef {Object} UserState
- * @property {{id: string}|null} user - The current user uid.
- * @property {UserInfo} userInfo - The current user info.
- * @property {UserClaims} userClaims - The current user claims.
- * @property {UserInfo[]} users - An array of users.
- * @property {UserInfo} lastUser - The most recent registered user.
+ * @property {{id: string}|null} user The current user uid.
+ * @property {UserInfo} userInfo The current user info.
+ * @property {UserClaims} userClaims The current user claims.
+ * @property {UserInfo[]} users An array of users.
+ * @property {UserInfo} lastUser The most recent registered user.
  */
 
 /**
@@ -203,6 +208,7 @@ const actions = {
           profileImages: "",
           email: payload.email,
           role: "student",
+          attempts: [],
           created: createdAt,
           updated: createdAt
         };
@@ -278,17 +284,19 @@ const actions = {
   /**
    * Updates an user name and avatar image.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.name - The user new name.
-   * @param {string} payload.profileImages - The user new avatar image.
+   * @param {Store} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.name The user new name.
+   * @param {string} payload.profileImages The user new avatar image.
+   * @param {Attempt[]} payload.attempts The user quizes attempts.
    */
   updateUser({ commit, state }, payload) {
     commit("setLoading", true);
 
     const userInfo = {
-      name: payload.name,
-      profileImages: payload.profileImages,
+      name: payload.name || state.userInfo.name,
+      profileImages: payload.profileImages || state.userInfo.profileImages,
+      attempts: payload.attempts || state.userInfo.attempts,
       updated: getNowISOString()
     };
 

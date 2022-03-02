@@ -10,6 +10,33 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  */
 
 /**
+ * @typedef {Object} Time
+ * @property {number} hours Defines how many hours.
+ * @property {number} minutes Defines how many minutes.
+ * @property {number} seconds Defines how many seconds.
+ */
+
+/**
+ * @typedef {Object} AttemptAnswers
+ * @property {number} answer Defines what answer was selected (1 - 4).
+ * @property {boolean} correct Defines whether the selected answer is correct.
+ * @property {string} questionName Defines the question name that contains the answer.
+ */
+
+/**
+ * @typedef {Object} Attempt
+ * @property {boolean} approved Defines whether the attempt was successful.
+ * @property {AttemptAnswers[]} answers Defines an array that contains all the quiz answers.
+ * @property {Date} date Defines when the attempt was finished.
+ * @property {string} mode Defines the attempt mode. Ex.: 'practice'.
+ * @property {string[]} questions Defines an array that contains all questions names from the quiz.
+ * @property {string} quizId Defines the quiz id.
+ * @property {number} score Defines the percentage (%) of correct answers.
+ * @property {Time} timeTaken Defines how many hours, minutes and seconds the attempt has taken.
+ * @property {string} userId Defines the id of the user that finished the attempt.
+ */
+
+/**
  * @typedef {Object} Level
  * @property {number} index Defines the level index.
  * @property {'beginner' | 'intermediary' | 'advanced' | 'expert'} name Defines the level name.
@@ -19,13 +46,6 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @typedef {Object} DeleteStatus
  * @property {boolean} toDelete.status If true, the question can be restored. If false, it will be deleted.
  * @property {string|undefined} toDelete.userEmail The user that marked the question to be deleted.
- */
-
-/**
- * @typedef {Object} Time
- * @property {number} hours Defines how many hours.
- * @property {number} minutes Defines how many minutes.
- * @property {number} seconds Defines how many seconds.
  */
 
 /**
@@ -52,6 +72,7 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {Level} level Defines the test level.
  * @property {"selected"|"random"|"auto"} type The test type.
  * @property {Question[]} questions The test questions.
+ * @property {Object<string, number>} userAttempts Defines an object containing all user attempts (id and number of attempts).
  * @property {DeleteStatus|undefined} toDelete The test deletion status.
  */
 
@@ -760,6 +781,7 @@ const actions = {
           level: data.level,
           type: data.type,
           userId: data.userId,
+          userAttempts: data.userAttempts,
           instructions: data.instructions
         };
 
@@ -842,6 +864,7 @@ const actions = {
             level: data.level,
             type: data.type,
             userId: data.userId,
+            userAttempts: data.userAttempts,
             instructions: data.instructions
           };
 
@@ -1065,6 +1088,7 @@ const actions = {
     const { testData, isSearching } = payload;
 
     const test = { ...testData, updated: getNowISOString() };
+
     db.collection("tests")
       .where("id", "==", test.id)
       .get()
