@@ -284,16 +284,18 @@ const mutations = {
    * @param {test} data - The test to be updated.
    */
   updateTest(state, data) {
-    const tests = state.tests;
+    const tests = { ...state.tests };
     for (let key in tests) {
       if (tests[key]) {
-        tests[key].forEach((item, index) => {
+        state.tests[key].forEach((item, index) => {
           if (item.id === data.id) {
-            state.tests[key][index] = data;
+            tests[key][index] = data;
           }
         });
       }
     }
+
+    state.tests = tests;
   },
   /**
    * Updates a test that's in the filtered tests array, according to the test's id.
@@ -1084,35 +1086,42 @@ const actions = {
    * @param {Test} payload.testData - The test to be updated.
    * @param {boolean} payload.isSearching - Whether the filtered tests is being used or not.
    */
-  updateTest({ commit, dispatch }, payload) {
+  async updateTest({ commit, dispatch }, payload) {
     const { testData, isSearching } = payload;
 
     const test = { ...testData, updated: getNowISOString() };
 
-    db.collection("tests")
-      .where("id", "==", test.id)
-      .get()
-      .then(async snapshot => {
-        snapshot.docs[0].ref.update(test);
+    delete test.user;
 
-        const user = await dispatch("getUserById", {
-          id: test.userId
-        });
-        test["user"] = user;
+    try {
+      const snapshot = await db
+        .collection("tests")
+        .where("id", "==", test.id)
+        .get();
 
-        commit("updateTest", test);
-        commit("updateCurrentTestsPage", test);
-        if (isSearching) commit("updateFilteredTest", test);
+      snapshot.docs[0].ref.update(test);
 
-        commit("setLoading", false);
-        commit("setSuccess", "Prova editada com sucesso!");
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("edition", "Prova", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Test DB Update", error.message, { payload });
+      const user = await dispatch("getUserById", {
+        id: test.userId
       });
+      test["user"] = user;
+
+      commit("updateTest", test);
+      commit("updateCurrentTestsPage", test);
+
+      if (isSearching) {
+        commit("updateFilteredTest", test);
+      }
+
+      commit("setSuccess", "Prova editada com sucesso!");
+    } catch (error) {
+      const errorModel = showErrorMessage("edition", "Prova", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Test DB Update", error.message, { payload });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Gets all the questions names from a subject.
