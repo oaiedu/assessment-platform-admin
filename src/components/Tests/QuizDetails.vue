@@ -166,7 +166,7 @@
         </template>
 
         <template v-slot:[`item.answers`]="{ item }">
-          {{ item.answers.length }}/{{ test.questionsAmount }}
+          {{ item.answers.length }}/{{ item.questions.length }}
         </template>
 
         <template v-slot:[`item.score`]="{ item }">
