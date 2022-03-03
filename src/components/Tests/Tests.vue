@@ -173,6 +173,7 @@
         <TestForm
           v-if="dialogEditTest"
           :test="selectedTest"
+          :searching="isSearching"
           @closeDialogNew="dialogEditTest = false"
           @updateTest="updateTest($event)"
         ></TestForm>
@@ -313,12 +314,6 @@ export default {
           test: { name: "Prova gerada", questions },
           mode: "practice"
         }
-      });
-    },
-    updateTest(testData) {
-      this.$store.dispatch("updateTest", {
-        testData,
-        isSearching: this.isSearching
       });
     },
     deleteTest(id) {
