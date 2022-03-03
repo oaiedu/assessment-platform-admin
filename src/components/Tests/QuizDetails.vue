@@ -8,7 +8,7 @@
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="$router.push('/quizes')">Questionários</a>
+      <a @click="$router.push('/quizzes')">Questionários</a>
 
       <span class="mx-3 slash">/</span>
 

@@ -723,7 +723,7 @@ const actions = {
         });
       }
 
-      await dispatch("addQuestionQuizesBySubject", {
+      await dispatch("addQuestionQuizzesBySubject", {
         subject: question.subject,
         question
       });
@@ -800,7 +800,7 @@ const actions = {
           commit("updateFilteredQuestion", question);
         }
 
-        return await dispatch("addQuestionQuizesBySubject", {
+        return await dispatch("addQuestionQuizzesBySubject", {
           subject: question.subject,
           question
         });
@@ -1155,7 +1155,7 @@ const actions = {
         name: question.name
       });
 
-      await dispatch("addQuestionQuizesBySubject", {
+      await dispatch("addQuestionQuizzesBySubject", {
         subject: question.subject,
         question
       });
@@ -1332,7 +1332,7 @@ const actions = {
         });
       }
 
-      await dispatch("addQuestionQuizesBySubject", {
+      await dispatch("addQuestionQuizzesBySubject", {
         subject: question.subject,
         question
       });

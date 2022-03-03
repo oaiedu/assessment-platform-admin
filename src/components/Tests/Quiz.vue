@@ -8,11 +8,11 @@
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="exitQuiz('/quizes')">Questionários</a>
+      <a @click="exitQuiz('/quizzes')">Questionários</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="exitQuiz('/quizes/' + test.id)">Detalhes do questionário</a>
+      <a @click="exitQuiz('/quizzes/' + test.id)">Detalhes do questionário</a>
 
       <span class="mx-3 slash">/</span>
 
@@ -42,7 +42,7 @@
         <v-btn
           text
           color="error"
-          @click="exitQuiz(review ? '/quizes/' + test.id : '/quizes')"
+          @click="exitQuiz(review ? '/quizzes/' + test.id : '/quizzes')"
           >Sair {{ !review ? "do Questionário" : "" }}</v-btn
         >
       </v-toolbar>
@@ -320,7 +320,7 @@ export default {
       showResults: false,
       showReview: false,
       dialogEndQuiz: false,
-      exitTo: "/quizes",
+      exitTo: "/quizzes",
       practice: false,
       test: null,
       examQuestions: [],
@@ -475,7 +475,7 @@ export default {
 
       this.loadingFinish = false;
 
-      this.$router.push("/quizes/" + this.test.id);
+      this.$router.push("/quizzes/" + this.test.id);
     },
     exitQuiz(to) {
       this.exitTo = to;
@@ -603,7 +603,7 @@ export default {
     this.attempt = this.$route.params.attempt;
 
     if (!mode) {
-      this.$router.push("/quizes/" + id);
+      this.$router.push("/quizzes/" + id);
     }
 
     this.practice = mode === "practice";

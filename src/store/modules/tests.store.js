@@ -79,13 +79,13 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
  * @typedef {Object} TestsState
- * @property {Object.<string, Test[]>} tests Defines the pages with it's quizes list.
- * @property {Test[]} filteredTests Defines an array of quizes filtered by id.
- * @property {Test[]} currentTestsPage Defines an array of quizes of the current page.
+ * @property {Object.<string, Test[]>} tests Defines the pages with it's quizzes list.
+ * @property {Test[]} filteredTests Defines an array of quizzes filtered by id.
+ * @property {Test[]} currentTestsPage Defines an array of quizzes of the current page.
  * @property {[string, string]|null} lastTestDocument Defines an array with the first and last quiz id from the last request.
  * @property {Question[]} testQuestions Defines an array of questions from a specific quiz.
- * @property {Test[]} deleteMarkTests Defines an array of quizes that were marked to be deleted.
- * @property {Test[]} lastTests Defines an array of the most recent quizes.
+ * @property {Test[]} deleteMarkTests Defines an array of quizzes that were marked to be deleted.
+ * @property {Test[]} lastTests Defines an array of the most recent quizzes.
  */
 
 /**
@@ -1191,7 +1191,7 @@ const actions = {
       });
   },
   /**
-   * Adds a question name to all automatic quizes according
+   * Adds a question name to all automatic quizzes according
    * to the given subject in case it does not contains the
    * given question name.
    *
@@ -1199,9 +1199,9 @@ const actions = {
    * @param {Object} payload the action payload.
    * @param {string} payload.subject the subject to be searched.
    * @param {Question} payload.question the question data to be checked.
-   * @returns {Test[]} an array that contains all quizes found.
+   * @returns {Test[]} an array that contains all quizzes found.
    */
-  async addQuestionQuizesBySubject({ commit }, payload) {
+  async addQuestionQuizzesBySubject({ commit }, payload) {
     commit("setLoading", true);
 
     try {
