@@ -488,7 +488,8 @@ export default {
       this.$store.commit("setLoading", true);
 
       const questions = [];
-      const selected = [];
+      const temp = [];
+
       const selectedData = [];
 
       for (const subject of this.test.subjects) {
@@ -498,6 +499,10 @@ export default {
         );
 
         subQuestions.forEach(q => {
+          if (!this.test.questionsNames.includes(q.name)) {
+            return;
+          }
+
           questions.push({
             name: q.name,
             level: q.level,
@@ -506,25 +511,34 @@ export default {
         });
       }
 
+      while (temp.length < questions.length) {
+        const index = Math.floor(Math.random() * questions.length);
+
+        if (!temp.includes(questions[index].name)) {
+          temp.push(questions[index].name);
+        }
+      }
+
+      const randomQuestions = temp.map(questionName =>
+        questions.find(q => q.name === questionName)
+      );
+
       let loop = 0;
 
       while (
-        selected.length < this.test.questionsAmount &&
-        selected.length < questions.length &&
-        loop < questions.length
+        selectedData.length < this.test.questionsAmount &&
+        selectedData.length < randomQuestions.length &&
+        loop < randomQuestions.length
       ) {
-        if (!selected.includes(questions[loop].name)) {
-          const question = questions[loop];
-          selected.push(question.name);
+        const question = randomQuestions[loop];
 
-          const questionData = await this.$store.dispatch(
-            "getQuestionByName",
-            question.name
-          );
+        const questionData = await this.$store.dispatch(
+          "getQuestionByName",
+          question.name
+        );
 
-          if (questions[loop].level <= questionData.level.index) {
-            selectedData.push(questionData);
-          }
+        if (randomQuestions[loop].level <= questionData.level.index) {
+          selectedData.push(questionData);
         }
 
         loop++;
