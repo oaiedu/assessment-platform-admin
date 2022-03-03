@@ -19,7 +19,21 @@
       <a>{{ test ? test.title : "Questionário" }}</a>
     </v-row>
 
-    <v-card v-if="examQuestions[current - 1]" flat class="mb-4" width="100%">
+    <v-progress-circular
+      v-if="loadingQuiz"
+      indeterminate
+      size="100"
+      width="7"
+      color="blue"
+      class="quiz__loading"
+    ></v-progress-circular>
+
+    <v-card
+      v-else-if="examQuestions[current - 1]"
+      flat
+      class="mb-4"
+      width="100%"
+    >
       <v-toolbar flat>
         <span class="quiz__current-question">
           Questão {{ current }} de {{ examQuestions.length }}
@@ -316,9 +330,8 @@ export default {
       mdiEyeOutline,
       mdiEyeOffOutline,
       mdiFileChart,
+      loadingQuiz: false,
       showAnswer: false,
-      showResults: false,
-      showReview: false,
       dialogEndQuiz: false,
       exitTo: "/quizzes",
       practice: false,
@@ -481,9 +494,6 @@ export default {
       this.exitTo = to;
       this.dialogEndQuiz = true;
     },
-    viewResults() {
-      this.showResults = true;
-    },
     async selectQuestions() {
       this.$store.commit("setLoading", true);
 
@@ -596,6 +606,8 @@ export default {
     }
   },
   async mounted() {
+    this.loadingQuiz = true;
+
     const id = this.$route.params.id;
     const mode = this.$route.params.mode;
 
@@ -617,16 +629,20 @@ export default {
     if (this.test.type === "auto" && this.review) {
       await this.selectReviewQuestions();
 
+      this.loadingQuiz = false;
       return;
     }
 
     if (this.test.type === "auto") {
       await this.selectQuestions();
 
+      this.loadingQuiz = false;
       return;
     }
 
     this.randomizeQuestions([...this.test.questions]);
+
+    this.loadingQuiz = false;
   },
   watch: {
     finished(value) {
@@ -806,6 +822,16 @@ export default {
 
 .quiz__answer.incorrect /deep/ label {
   color: #ff4141 !important;
+}
+
+.quiz__loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+
+  margin-top: 30px;
+
+  transform: translate(-50%, -50%);
 }
 
 a,
