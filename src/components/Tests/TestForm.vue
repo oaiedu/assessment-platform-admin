@@ -394,6 +394,11 @@ export default {
       type: Object,
       required: false,
       default: null
+    },
+    searching: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data() {
@@ -690,112 +695,138 @@ export default {
       this.selectedRandom = [...this.selectedRandomQuestions];
       this.$store.commit("setLoading", false);
     },
-    createTest() {
-      if (this.$refs.formRef.validate()) {
-        this.$store.commit("setLoading", true);
-
-        this.$store.dispatch("testExists", this.title).then(async exist => {
-          if (exist > 0) {
-            this.createErrorSnackBar = true;
-          } else {
-            if (this.testType === "random") {
-              this.selectedQuestions = [];
-              const promises = this.selectedRandom.map(question => {
-                return this.$store
-                  .dispatch("getQuestionByName", question.name)
-                  .then(q => {
-                    this.selectedQuestions.push(q);
-                  });
-              });
-
-              await Promise.all(promises);
-            }
-
-            if (this.testType !== "auto") {
-              this.selectedQuestions.forEach(element => {
-                this.testItems.push(element);
-              });
-            }
-
-            const testData = {
-              title: this.title,
-              instructions: this.instructions,
-              approvalPercentage: this.approvalPercentage,
-              questions: this.testItems,
-              questionsAmount:
-                this.testItems.length || this.randomQuestionsNumber,
-              type: this.testType,
-              level: this.level,
-              unlimitedTime: this.unlimitedTime,
-              time: {
-                hours: +this.time.hours,
-                minutes: +this.time.minutes,
-                seconds: +this.time.seconds
-              },
-              userId: this.$store.getters.user.id
-            };
-
-            if (this.testType === "auto") {
-              testData.subjects = [...this.testSubjects];
-            }
-
-            if (!this.time.hours && !this.time.minutes) {
-              testData.unlimitedTime = true;
-            }
-
-            this.$store.dispatch("createTest", {
-              testData,
-              userInfo: this.$store.getters.userInfo
-            });
-
-            this.$store.commit("setLoading", false);
-            this.close();
-          }
-        });
+    async createTest() {
+      if (!this.$refs.formRef.validate()) {
+        return;
       }
-    },
-    async editTest() {
-      if (this.$refs.formRef.validate()) {
-        const amount = await this.$store.dispatch("testExists", this.title);
 
-        if (
-          (this.test.title !== this.title && amount > 0) ||
-          (this.test.title === this.title && amount > 1)
-        ) {
-          this.createErrorSnackBar = true;
-          return;
-        }
+      this.$store.commit("setLoading", true);
 
+      const exist = await this.$store.dispatch("testExists", this.title);
+
+      if (exist > 0) {
+        this.createErrorSnackBar = true;
+        return;
+      }
+
+      if (this.testType === "random") {
+        this.selectedQuestions = [];
+
+        const promises = this.selectedRandom.map(question => {
+          return this.$store
+            .dispatch("getQuestionByName", question.name)
+            .then(q => {
+              this.selectedQuestions.push(q);
+            });
+        });
+
+        await Promise.all(promises);
+      }
+
+      if (this.testType !== "auto") {
         this.selectedQuestions.forEach(element => {
           this.testItems.push(element);
         });
-
-        const testData = {
-          title: this.title,
-          instructions: this.instructions,
-          approvalPercentage: this.approvalPercentage,
-          questions: this.testItems,
-          questionsAmount: this.testItems.length || this.randomQuestionsNumber,
-          type: this.testType,
-          level: this.level,
-          unlimitedTime: this.unlimitedTime,
-          time: {
-            hours: +this.time.hours,
-            minutes: +this.time.minutes,
-            seconds: +this.time.seconds
-          },
-          userId: this.test.userId,
-          created: this.test.created,
-          id: this.test.id
-        };
-
-        if (this.testType === "auto") {
-          testData.subjects = [...this.testSubjects];
-        }
-
-        this.$emit("updateTest", testData);
-        this.close();
       }
+
+      const testData = {
+        title: this.title,
+        instructions: this.instructions,
+        approvalPercentage: this.approvalPercentage,
+        questions: this.testItems,
+        questionsNames: this.testItems.map(q => q.name),
+        questionsAmount: this.testItems.length || +this.randomQuestionsNumber,
+        type: this.testType,
+        level: this.level,
+        unlimitedTime: this.unlimitedTime,
+        time: {
+          hours: +this.time.hours,
+          minutes: +this.time.minutes,
+          seconds: +this.time.seconds
+        },
+        userId: this.$store.getters.user.id
+      };
+
+      if (this.testType === "auto") {
+        testData.subjects = [...this.testSubjects];
+
+        testData.questionsNames = this.subjects
+          .filter(s => this.testSubjects.includes(s.name))
+          .map(s => s.questions)
+          .flat()
+          .filter(q => q.level <= this.level.index)
+          .map(q => q.name);
+      }
+
+      if (!this.time.hours && !this.time.minutes) {
+        testData.unlimitedTime = true;
+      }
+
+      await this.$store.dispatch("createTest", {
+        testData,
+        userInfo: this.$store.getters.userInfo
+      });
+
+      this.$store.commit("setLoading", false);
+
+      this.close();
+    },
+    async editTest() {
+      if (!this.$refs.formRef.validate()) {
+        return;
+      }
+
+      const amount = await this.$store.dispatch("testExists", this.title);
+
+      if (
+        (this.test.title !== this.title && amount > 0) ||
+        (this.test.title === this.title && amount > 1)
+      ) {
+        this.createErrorSnackBar = true;
+        return;
+      }
+
+      this.selectedQuestions.forEach(element => {
+        this.testItems.push(element);
+      });
+
+      const testData = {
+        title: this.title,
+        instructions: this.instructions,
+        approvalPercentage: this.approvalPercentage,
+        questions: this.testItems,
+        questionsNames: this.testItems.map(q => q.name),
+        questionsAmount: this.testItems.length || +this.randomQuestionsNumber,
+        type: this.testType,
+        level: this.level,
+        unlimitedTime: this.unlimitedTime,
+        time: {
+          hours: +this.time.hours,
+          minutes: +this.time.minutes,
+          seconds: 0
+        },
+        userId: this.test.userId,
+        created: this.test.created,
+        id: this.test.id
+      };
+
+      if (this.testType === "auto") {
+        testData.subjects = [...this.testSubjects];
+
+        testData.questionsNames = this.subjects
+          .filter(s => this.testSubjects.includes(s.name))
+          .map(s => s.questions)
+          .flat()
+          .filter(q => q.level <= this.level.index)
+          .map(q => q.name);
+      }
+
+      await this.$store.dispatch("updateTest", {
+        testData,
+        isSearching: this.searching
+      });
+
+      this.close();
     },
     itemRowStyle(item) {
       return item.toDelete
@@ -833,6 +864,10 @@ export default {
       this.unlimitedTime = this.test.unlimitedTime;
       this.time = this.test.time;
 
+      if (this.test.type !== "selected") {
+        this.randomQuestionsNumber = this.test.questionsAmount;
+      }
+
       if (this.test.questions) {
         this.test.questions.forEach(element => {
           this.selectedQuestions.push(element);
@@ -843,11 +878,15 @@ export default {
             this.test.type !== "selected" &&
             !this.testSubjects.includes(element.subject)
           ) {
-            this.randomQuestionsNumber = this.test.questionsAmount;
             this.testSubjects.push(element.subject);
             this.selectedSubjects.push(element.subject);
           }
         });
+      }
+
+      if (this.test.subjects) {
+        this.testSubjects = [...this.test.subjects];
+        this.selectedSubjects = [...this.test.subjects];
       }
     }
   },
