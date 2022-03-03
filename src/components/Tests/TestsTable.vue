@@ -253,7 +253,7 @@ export default {
       this.$emit("restoreClick", item);
     },
     doExam(item) {
-      this.$router.push("/quizes/" + item.id);
+      this.$router.push("/quizzes/" + item.id);
     }
   }
 };

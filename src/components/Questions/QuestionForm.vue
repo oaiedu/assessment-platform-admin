@@ -371,89 +371,51 @@ export default {
     updateData(variable) {
       this.questionDescription = variable;
     },
-    onCreateQuestion() {
-      this.$store.dispatch("questionExists", this.name).then(exist => {
-        if (exist) {
-          this.createErrorSnackBar = true;
-        } else {
-          if (this.image) {
-            const imageToUpload = { name: this.name, image: this.image };
-            const URL = this.$store.dispatch(
-              "uploadImageQuestion",
-              imageToUpload
-            );
+    async onCreateQuestion() {
+      const exist = await this.$store.dispatch("questionExists", this.name);
 
-            URL.then(result => {
-              this.imagesAsURL = result;
+      if (exist) {
+        this.createErrorSnackBar = true;
+        return;
+      }
 
-              const questionData = {
-                name: this.name.toUpperCase(),
-                subject: this.subject,
-                level: this.level,
-                question: this.questionDescription,
-                answers: this.answers,
-                image: this.imagesAsURL,
-                imageSize: this.imageSize
-              };
+      let url = "";
 
-              let aux = null;
+      if (this.image) {
+        const imageToUpload = { name: this.name, image: this.image };
+        url = await this.$store.dispatch("uploadImageQuestion", imageToUpload);
 
-              if (this.userClaims && this.userClaims["admin"]) {
-                aux = this.$store.dispatch("createQuestion", {
-                  question: questionData
-                });
-              } else {
-                aux = this.$store.dispatch("createQuestionRequest", {
-                  request: {
-                    ...questionData,
-                    userId: this.userInfo.id,
-                    status: "Pendente"
-                  },
-                  user: this.userInfo
-                });
-              }
+        this.imagesAsURL = url;
+      }
 
-              aux.then(() => {
-                this.setInitialData();
-                this.close();
-              });
-            });
-          } else {
-            const questionData = {
-              name: this.name.toUpperCase(),
-              subject: this.subject,
-              level: this.level,
-              question: this.questionDescription,
-              answers: this.answers,
-              image: "",
-              imageSize: this.imageSize
-            };
+      const questionData = {
+        name: this.name.toUpperCase(),
+        subject: this.subject,
+        level: this.level,
+        question: this.questionDescription,
+        answers: this.answers,
+        image: url,
+        imageSize: this.imageSize
+      };
 
-            let aux = null;
+      if (this.userClaims && this.userClaims["admin"]) {
+        await this.$store.dispatch("createQuestion", {
+          question: questionData,
+          page: this.page
+        });
+      } else {
+        await this.$store.dispatch("createQuestionRequest", {
+          request: {
+            ...questionData,
+            userId: this.userInfo.id,
+            status: "Pendente"
+          },
+          user: this.userInfo
+        });
+      }
 
-            if (this.userClaims && this.userClaims["admin"]) {
-              aux = this.$store.dispatch("createQuestion", {
-                question: questionData,
-                page: this.page
-              });
-            } else {
-              aux = this.$store.dispatch("createQuestionRequest", {
-                request: {
-                  ...questionData,
-                  userId: this.userInfo.id,
-                  status: "Pendente"
-                },
-                user: this.userInfo
-              });
-            }
-
-            aux.then(() => {
-              this.setInitialData();
-              this.close();
-            });
-          }
-        }
-      });
+      this.setInitialData();
+      this.close();
     },
     setInitialData() {
       this.confirmTitle = false;

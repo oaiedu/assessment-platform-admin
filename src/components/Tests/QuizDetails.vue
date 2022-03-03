@@ -8,7 +8,7 @@
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="$router.push('/quizes')">Questionários</a>
+      <a @click="$router.push('/quizzes')">Questionários</a>
 
       <span class="mx-3 slash">/</span>
 
@@ -166,7 +166,7 @@
         </template>
 
         <template v-slot:[`item.answers`]="{ item }">
-          {{ item.answers.length }}/{{ test.questionsAmount }}
+          {{ item.answers.length }}/{{ item.questions.length }}
         </template>
 
         <template v-slot:[`item.score`]="{ item }">

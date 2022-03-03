@@ -16,7 +16,7 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {string} email Defines the user e-mail.
  * @property {'admin' | 'appraiser' | 'student'} role Defines the user role.
  * @property {string} profileImages Defines an URL of the user profile image.
- * @property {Attempt[]} attempts Defines an array that keeps all previous quizes attempts.
+ * @property {Attempt[]} attempts Defines an array that keeps all previous quizzes attempts.
  * @property {string} created Defines an iso string of the user creation date.
  * @property {string} updated Defines an iso string of the user last edition date.
  */
@@ -288,7 +288,7 @@ const actions = {
    * @param {Object} payload The action payload.
    * @param {string} payload.name The user new name.
    * @param {string} payload.profileImages The user new avatar image.
-   * @param {Attempt[]} payload.attempts The user quizes attempts.
+   * @param {Attempt[]} payload.attempts The user quizzes attempts.
    */
   async updateUser({ commit, state }, payload) {
     commit("setLoading", true);

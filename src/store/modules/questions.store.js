@@ -536,28 +536,22 @@ const actions = {
   async checkQuestionInTests(_, payload) {
     const { name } = payload;
 
-    return new Promise((resolve, reject) => {
-      try {
-        const tests = [];
+    try {
+      const tests = [];
 
-        db.collection("tests")
-          .where("questions", "array-contains", name)
-          .get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              tests.push(doc.data());
-            });
-          })
-          .then(() => {
-            resolve(tests);
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      } catch (error) {
-        reject("Check Questions In Tests Error!");
-      }
-    });
+      const snapshot = await db
+        .collection("tests")
+        .where("questionsNames", "array-contains", name)
+        .get();
+
+      snapshot.forEach(doc => {
+        tests.push(doc.data());
+      });
+
+      return tests;
+    } catch (error) {
+      console.error(error);
+    }
   },
   /**
    * Loads all questions that are marked to be deleted.
@@ -664,79 +658,87 @@ const actions = {
    * @param {boolean} payload.isSearching Whether the application is using filtered questions or not.
    * @param {boolean} payload.isRequest Whether the question is a request or not.
    */
-  restoreMarkedQuestion({ commit }, payload) {
+  async restoreMarkedQuestion({ commit, dispatch }, payload) {
     commit("setLoading", true);
 
     const { name, isSearching, isRequest } = payload;
 
-    db.collection("questions")
-      .where("name", "==", name)
-      .get()
-      .then(snapshot => {
-        const doc = snapshot.docs[0];
-        const data = doc.data();
+    try {
+      const snapshot = await db
+        .collection("questions")
+        .where("name", "==", name)
+        .get();
 
-        /**
-         * @type {Question}
-         */
-        let question = {};
+      const doc = snapshot.docs[0];
+      const data = doc.data();
 
-        if (isRequest) {
-          question = { ...payload.data };
-        } else {
-          question = {
-            name: data.name,
-            created: data.created || null,
-            updated: data.updated || null,
-            subject: data.subject,
-            question: data.question,
-            level: data.level,
-            answers: data.answers,
-            image: data.image,
-            imageSize: data.imageSize || "1x"
-          };
-        }
+      /**
+       * @type {Question}
+       */
+      let question = {};
 
-        doc.ref.set(question);
-        commit("updateQuestion", question);
+      if (isRequest) {
+        question = { ...payload.data };
+      } else {
+        question = {
+          name: data.name,
+          created: data.created,
+          updated: data.updated,
+          subject: data.subject,
+          question: data.question,
+          level: data.level,
+          answers: data.answers,
+          image: data.image,
+          imageSize: data.imageSize
+        };
+      }
 
-        if (isSearching) {
-          commit("updateFilteredQuestion", question);
-        }
+      await doc.ref.set(question);
 
-        commit("removeDeleteMarkQuestion", name);
-        commit("updateCurrentQuestionsPage", question);
+      commit("updateQuestion", question);
 
-        db.collection("subjects")
-          .where("name", "==", question.subject)
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
+      if (isSearching) {
+        commit("updateFilteredQuestion", question);
+      }
 
-            if (!document.data().questions.includes(question.name)) {
-              const questions = [...document.data().questions, name];
-              questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
-              document.ref.update({ questions });
+      commit("removeDeleteMarkQuestion", name);
+      commit("updateCurrentQuestionsPage", question);
 
-              commit("addRemoveQuestion", {
-                subjectId: document.id,
-                questionId: name
-              });
-            }
-          })
-          .catch(error => {
-            console.error(error);
-          });
+      const subSnap = await db
+        .collection("subjects")
+        .where("name", "==", question.subject)
+        .get();
 
-        commit("setLoading", false);
-        if (!isRequest) commit("setSuccess", "Questão restaurada com sucesso!");
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Question Restore", error.message, { payload });
+      const document = subSnap.docs[0];
+
+      if (!document.data().questions.includes(question.name)) {
+        const questions = [...document.data().questions, name];
+        questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
+
+        await document.ref.update({ questions });
+
+        commit("addRemoveQuestion", {
+          subjectId: document.id,
+          questionId: name
+        });
+      }
+
+      await dispatch("addQuestionQuizzesBySubject", {
+        subject: question.subject,
+        question
       });
+
+      if (!isRequest) {
+        commit("setSuccess", "Questão restaurada com sucesso!");
+      }
+    } catch (error) {
+      const errorModel = showErrorMessage("connection", "", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Question Restore", error.message, { payload });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Restores all questions that are marked to be deleted.
@@ -745,92 +747,103 @@ const actions = {
    * @param {Object} payload - The action payload.
    * @param {boolean} payload.isSearching - Whether the application is using filtered questions or not.
    */
-  restoreAllMarkedQuestions({ commit, state }, payload) {
+  async restoreAllMarkedQuestions({ commit, dispatch, state }, payload) {
     commit("setLoading", true);
 
     const { isSearching } = payload;
     const questionsData = {};
 
-    db.collection("questions")
-      .where("toDelete.status", "==", true)
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          const data = doc.data();
+    try {
+      const snapshot = await db
+        .collection("questions")
+        .where("toDelete.status", "==", true)
+        .get();
 
-          /**
-           * @type {Question}
-           */
-          const question = {
-            name: data.name,
-            created: data.created || null,
-            updated: data.updated || null,
-            subject: data.subject,
-            level: data.level,
-            question: data.question,
-            answers: data.answers,
-            image: data.image,
-            imageSize: data.imageSize || "1x"
-          };
+      const promises = snapshot.docs.map(async doc => {
+        const data = doc.data();
 
-          if (questionsData[question.subject]) {
-            questionsData[question.subject] = [
-              ...questionsData[question.subject],
-              question.name
-            ];
-          } else {
-            questionsData[question.subject] = [question.name];
-          }
+        /**
+         * @type {Question}
+         */
+        const question = {
+          name: data.name,
+          created: data.created,
+          updated: data.updated,
+          subject: data.subject,
+          level: data.level,
+          question: data.question,
+          answers: data.answers,
+          image: data.image,
+          imageSize: data.imageSize
+        };
 
-          doc.ref.set(question);
-          const falseMarkedQuestions = state.deleteMarkQuestions.filter(
-            q => !q.toDelete.status
-          );
-          commit("setDeleteMarkQuestions", falseMarkedQuestions);
-          commit("updateQuestion", question);
-          commit("updateCurrentQuestionsPage", question);
-          if (isSearching) commit("updateFilteredQuestion", question);
-          commit("setSuccess", "Questões restauradas com sucesso!");
-        });
-      })
-      .then(() => {
-        for (let subject in questionsData) {
-          db.collection("subjects")
-            .where("name", "==", subject)
-            .get()
-            .then(snapshot => {
-              const doc = snapshot.docs[0];
-              const questions = [...doc.data().questions];
-
-              questionsData[subject].forEach(q => {
-                if (!questions.includes(q)) {
-                  questions.push(q);
-                }
-
-                commit("addRemoveQuestion", {
-                  subjectId: doc.id,
-                  questionId: q
-                });
-              });
-
-              questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
-              doc.ref.update({ questions });
-            })
-            .catch(error => {
-              console.error(error);
-            });
+        if (questionsData[question.subject]) {
+          questionsData[question.subject] = [
+            ...questionsData[question.subject],
+            question.name
+          ];
+        } else {
+          questionsData[question.subject] = [question.name];
         }
-      })
-      .then(() => commit("setLoading", false))
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Question Restore All", error.message, {
-          payload,
-          questionData
+
+        await doc.ref.set(question);
+
+        const falseMarkedQuestions = state.deleteMarkQuestions.filter(
+          q => !q.toDelete.status
+        );
+
+        commit("setDeleteMarkQuestions", falseMarkedQuestions);
+        commit("updateQuestion", question);
+        commit("updateCurrentQuestionsPage", question);
+
+        if (isSearching) {
+          commit("updateFilteredQuestion", question);
+        }
+
+        return await dispatch("addQuestionQuizzesBySubject", {
+          subject: question.subject,
+          question
         });
       });
+
+      await Promise.all(promises);
+
+      for (let subject in questionsData) {
+        const subSnap = await db
+          .collection("subjects")
+          .where("name", "==", subject)
+          .get();
+
+        const doc = subSnap.docs[0];
+        const questions = [...doc.data().questions];
+
+        questionsData[subject].forEach(q => {
+          if (!questions.includes(q)) {
+            questions.push(q);
+          }
+
+          commit("addRemoveQuestion", {
+            subjectId: doc.id,
+            questionId: q
+          });
+        });
+
+        questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
+        await doc.ref.update({ questions });
+      }
+
+      commit("setSuccess", "Questões restauradas com sucesso!");
+    } catch (error) {
+      const errorModel = showErrorMessage("connection", "", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Question Restore All", error.message, {
+        payload,
+        questionsData
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Changes a question's delete status to false (confirmed deletion).
@@ -992,45 +1005,37 @@ const actions = {
   /**
    * Uploads a question image.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {File} payload.image - The image to be uploaded.
-   * @param {string} payload.name - The question name.
-   * @returns {Promise<string>} The image url.
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the action payload.
+   * @param {File} payload.image the image to be uploaded.
+   * @param {string} payload.name the question name.
+   * @returns {Promise<string>} the image url.
    */
   async uploadImageQuestion({ commit }, payload) {
-    return new Promise((resolve, reject) => {
-      try {
-        const storageRef = storage.ref();
-        const file = payload.image;
-        const questionName = payload.name;
-        const type = file.type.split("/")[1];
-        const format = `questions/question-${questionName}.${type}`;
+    try {
+      const storageRef = storage.ref();
 
-        storageRef
-          .child(format)
-          .put(file)
-          .then(snapshot => {
-            snapshot.ref.getDownloadURL().then(downloadURL => {
-              resolve(downloadURL.toString());
-            });
-          })
-          .catch(error => {
-            const errorModel = showErrorMessage(
-              "connection",
-              "",
-              "Image upload error - " + error.message
-            );
-            commit("setError", { message: errorModel });
-            createErrorLog("Question Image Upload", error.message, {
-              payload,
-              format
-            });
-          });
-      } catch (error) {
-        reject();
-      }
-    });
+      const file = payload.image;
+      const questionName = payload.name;
+      const type = file.type.split("/")[1];
+      const format = `questions/question-${questionName}.${type}`;
+
+      const snapshot = await storageRef.child(format).put(file);
+      const downloadURL = await snapshot.ref.getDownloadURL();
+
+      return downloadURL.toString();
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "connection",
+        "",
+        "Image upload error - " + error.message
+      );
+      commit("setError", { message: errorModel });
+      createErrorLog("Question Image Upload", error.message, {
+        payload,
+        format
+      });
+    }
   },
   /**
    * Updates a question based on it's name.
@@ -1042,7 +1047,7 @@ const actions = {
    * @param {string} payload.user - The current user id.
    * @param {isSearching} payload.isSearching - Whether the application is using the filtered questions or not.
    */
-  editQuestion({ commit }, payload) {
+  async editQuestion({ commit, dispatch }, payload) {
     commit("setLoading", true);
 
     const question = {
@@ -1052,113 +1057,160 @@ const actions = {
 
     let oldSubject = null;
 
-    db.collection("questions")
-      .where("name", "==", question.name)
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          if (question.subject !== doc.data().subject) {
-            oldSubject = doc.data().subject;
+    try {
+      const snapshot = await db
+        .collection("questions")
+        .where("name", "==", question.name)
+        .get();
+
+      const promises = snapshot.docs.map(async doc => {
+        if (question.subject !== doc.data().subject) {
+          oldSubject = doc.data().subject;
+        }
+        return await doc.ref.update(question);
+      });
+
+      await Promise.all(promises);
+
+      commit("updateQuestion", question);
+      commit("updateCurrentQuestionsPage", question);
+
+      if (payload.isSearching) {
+        commit("updateFilteredQuestion", question);
+      }
+
+      if (oldSubject) {
+        const sizeSnap = await db.collection("data-size").get();
+
+        const document = sizeSnap.docs[0];
+        const general = document.data().questions.general;
+        const sub = question.subject;
+        const subSize = document.data().questions.subject[sub];
+        const oldSubSize = document.data().questions.subject[oldSubject];
+
+        const questions = {
+          general,
+          subject: {
+            ...document.data().questions.subject,
+            [sub]: subSize + 1,
+            [oldSubject]: oldSubSize - 1
           }
-          doc.ref.update(question);
+        };
+
+        await document.ref.update({ questions });
+
+        commit("addRemoveSize", {
+          key: "questions",
+          data: questions
         });
-      })
-      .then(() => {
-        commit("updateQuestion", question);
-        commit("updateCurrentQuestionsPage", question);
-        if (payload.isSearching) commit("updateFilteredQuestion", question);
 
-        if (oldSubject) {
-          db.collection("data-size")
-            .get()
-            .then(snap => {
-              const document = snap.docs[0];
-              const general = document.data().questions.general;
-              const sub = question.subject;
-              const subSize = document.data().questions.subject[sub];
-              const oldSubSize = document.data().questions.subject[oldSubject];
+        const newSubSnap = await db
+          .collection("subjects")
+          .where("name", "==", question.subject)
+          .get();
 
-              const questions = {
-                general,
-                subject: {
-                  ...document.data().questions.subject,
-                  [sub]: subSize + 1,
-                  [oldSubject]: oldSubSize - 1
-                }
-              };
+        const newSubDoc = newSubSnap.docs[0];
+        const nSubQuestions = [
+          ...newSubDoc.data().questions,
+          { level: question.level.index, name: question.name }
+        ];
 
-              document.ref
-                .update({ questions })
-                .then(() => {
-                  commit("addRemoveSize", {
-                    key: "questions",
-                    data: questions
-                  });
-                })
-                .catch(error => {
-                  console.error(error);
-                });
-            })
-            .catch(error => {
-              console.error(error);
-            });
+        nSubQuestions.sort((q1, q2) => (q1.name > q2.name ? 1 : -1));
 
-          db.collection("subjects")
-            .where("name", "==", question.subject)
-            .get()
-            .then(snapshot => {
-              const doc = snapshot.docs[0];
-              const questions = [...doc.data().questions, question.name];
-              questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
-              doc.ref.update({ questions });
+        await newSubDoc.ref.update({ questions: nSubQuestions });
 
-              commit("addRemoveQuestion", {
-                subjectId: doc.id,
-                questionId: question.name,
-                questionLevel: question.level.index
-              });
-            })
-            .catch(error => {
-              console.error(error);
-            });
+        commit("addRemoveQuestion", {
+          subjectId: newSubDoc.id,
+          questionId: question.name,
+          questionLevel: question.level.index
+        });
 
-          db.collection("subjects")
-            .where("name", "==", oldSubject)
-            .get()
-            .then(snapshot => {
-              const doc = snapshot.docs[0];
-              const index = doc.data().questions.indexOf(question.name);
-              const questions = doc.data().questions;
-              if (index !== -1) questions.splice(index, 1);
-              doc.ref.update({ questions });
+        const oldSubSnap = await db
+          .collection("subjects")
+          .where("name", "==", oldSubject)
+          .get();
 
-              commit("addRemoveQuestion", {
-                subjectId: doc.id,
-                questionId: question.name,
-                questionLevel: question.level.index,
-                remove: true
-              });
-            })
-            .catch(error => {
-              console.error(error);
-            });
+        const oldSubDoc = oldSubSnap.docs[0];
+        const oldSubQuestions = oldSubDoc.data().questions || [];
+        const index = oldSubQuestions.findIndex(q => q.name === question.name);
+
+        if (index !== -1) {
+          oldSubQuestions.splice(index, 1);
         }
 
-        commit("setLoading", false);
-        commit("setSuccess", "Questão editada com sucesso!");
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "edition",
-          "Questão",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Question DB Upload", error.message, {
-          payload
+        await oldSubDoc.ref.update({ questions: oldSubQuestions });
+
+        commit("addRemoveQuestion", {
+          subjectId: oldSubDoc.id,
+          questionId: question.name,
+          questionLevel: question.level.index,
+          remove: true
         });
+      }
+
+      /**
+       * @type {Test[]}
+       */
+      const tests = await dispatch("checkQuestionInTests", {
+        name: question.name
       });
+
+      await dispatch("addQuestionQuizzesBySubject", {
+        subject: question.subject,
+        question
+      });
+
+      const testPromises = tests.map(async t => {
+        if (t.type === "auto") {
+          const subject = question.subject;
+
+          if (
+            t.subjects &&
+            t.subjects.includes(subject) &&
+            question.level.index <= t.level.index
+          ) {
+            return;
+          }
+
+          const index = t.questionsNames.indexOf(question.name);
+
+          if (index === -1) {
+            return;
+          }
+
+          t.questionsNames.splice(index, 1);
+
+          if (t.questionsNames.length < t.questionsAmount) {
+            t.questionsAmount = t.questionsNames.length;
+          }
+        } else {
+          const index = t.questions.findIndex(q => q.name === question.name);
+
+          if (index === -1) {
+            return;
+          }
+
+          t.questions[index] = question;
+        }
+
+        await dispatch("updateTest", { testData: t });
+
+        return t;
+      });
+
+      await Promise.all(testPromises);
+
+      commit("setSuccess", "Questão editada com sucesso!");
+    } catch (error) {
+      const errorModel = showErrorMessage("edition", "Questão", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Question DB Upload", error.message, {
+        payload
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Checks if a question with the given name exists.
@@ -1167,7 +1219,7 @@ const actions = {
    * @param {string} payload - The question name.
    * @returns {Promise<boolean>} Whether the question exists or not.
    */
-  async questionExists(store, payload) {
+  async questionExists(_, payload) {
     return new Promise((resolve, reject) => {
       try {
         db.collection("questions")
@@ -1209,7 +1261,7 @@ const actions = {
    * @param {QuestionCreation} payload.question The question to be created.
    * @param {boolean} payload.isRequest Whether the question is a request or not.
    */
-  createQuestion({ commit }, payload) {
+  async createQuestion({ commit, dispatch }, payload) {
     commit("setLoading", true);
 
     const createdDate = getNowISOString();
@@ -1226,120 +1278,101 @@ const actions = {
     const pageAmount = Math.ceil(questionAmount / 8);
     const amount = questionAmount % 8;
 
-    db.collection("questions")
-      .add(question)
-      .then(() => {
-        commit("setLoading", false);
+    try {
+      await db.collection("questions").add(question);
 
-        commit("createQuestion", {
-          page: amount === 0 ? pageAmount + 1 : pageAmount,
-          data: question,
-          amount: questionAmount
-        });
-
-        if (!payload.isRequest)
-          commit("setSuccess", "Questão criada com sucesso!");
-
-        db.collection("data-size")
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
-            const general = document.data().questions.general;
-            const sub = question.subject;
-            const subSize = document.data().questions.subject[sub] || 0;
-
-            const questions = {
-              general: general + 1,
-              subject: {
-                ...document.data().questions.subject,
-                [sub]: subSize + 1
-              }
-            };
-
-            document.ref
-              .update({ questions })
-              .then(() => {
-                commit("addRemoveSize", {
-                  key: "questions",
-                  data: questions
-                });
-              })
-              .catch(error => {
-                console.error(error);
-              });
-          })
-          .catch(error => {
-            console.error(error);
-          });
-
-        db.collection("subjects")
-          .where("name", "==", question.subject)
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
-
-            if (!document.data().questions.includes(question.name)) {
-              const questions = [
-                ...document.data().questions,
-                { name: question.name, level: question.level.index }
-              ];
-              questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
-              document.ref.update({ questions });
-
-              commit("addRemoveQuestion", {
-                subjectId: document.id,
-                questionId: question.name,
-                questionLevel: question.level.index
-              });
-            }
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "creation",
-          "Questão",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Question DB Insert", error.message, {
-          payload
-        });
+      commit("createQuestion", {
+        page: amount === 0 ? pageAmount + 1 : pageAmount,
+        data: question,
+        amount: questionAmount
       });
+
+      const sizeSnap = await db.collection("data-size").get();
+
+      const document = sizeSnap.docs[0];
+      const general = document.data().questions.general;
+      const sub = question.subject;
+      const subSize = document.data().questions.subject[sub] || 0;
+
+      const questions = {
+        general: general + 1,
+        subject: {
+          ...document.data().questions.subject,
+          [sub]: subSize + 1
+        }
+      };
+
+      await document.ref.update({ questions });
+
+      commit("addRemoveSize", {
+        key: "questions",
+        data: questions
+      });
+
+      const subSnap = await db
+        .collection("subjects")
+        .where("name", "==", question.subject)
+        .get();
+
+      const doc = subSnap.docs[0];
+
+      if (!doc.data().questions.includes(question.name)) {
+        const questions = [
+          ...doc.data().questions,
+          { name: question.name, level: question.level.index }
+        ];
+        questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
+
+        await doc.ref.update({ questions });
+
+        commit("addRemoveQuestion", {
+          subjectId: doc.id,
+          questionId: question.name,
+          questionLevel: question.level.index
+        });
+      }
+
+      await dispatch("addQuestionQuizzesBySubject", {
+        subject: question.subject,
+        question
+      });
+
+      if (!payload.isRequest) {
+        commit("setSuccess", "Questão criada com sucesso!");
+      }
+    } catch (error) {
+      const errorModel = showErrorMessage("creation", "Questão", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Question DB Insert", error.message, {
+        payload
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Gets a question by it's name.
    *
-   * @param {string} payload - The question name.
+   * @param {string} payload the question name.
+   * @returns {Question} an object that represents the question data.
    */
   async getQuestionByName(_, payload) {
-    return new Promise((resolve, reject) => {
-      try {
-        db.collection("questions")
-          .where("name", "==", payload)
-          .get()
-          .then(snapshot => {
-            if (snapshot.docs.length > 0) resolve(snapshot.docs[0].data());
-            else resolve(null);
-          })
-          .catch(error => {
-            const errorModel = showErrorMessage(
-              "load",
-              "Questão",
-              error.message
-            );
-            commit("setError", { message: errorModel });
-            createErrorLog("Question Name Load", error.message, {
-              payload
-            });
-          });
-      } catch (error) {
-        reject();
-      }
-    });
+    try {
+      const snapshot = await db
+        .collection("questions")
+        .where("name", "==", payload)
+        .get();
+
+      return snapshot.docs.length ? snapshot.docs[0].data() : null;
+    } catch (error) {
+      const errorModel = showErrorMessage("load", "Questão", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Question Name Load", error.message, {
+        payload
+      });
+    }
   },
   /**
    * Resets the questions state to it's initial state.

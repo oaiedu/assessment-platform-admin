@@ -363,7 +363,7 @@ const actions = {
    * @param {RequestCreation} payload.request - The request to be created.
    * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
    */
-  createQuestionRequest({ commit }, payload) {
+  async createQuestionRequest({ commit }, payload) {
     commit("setLoading", true);
 
     const { user } = payload;
@@ -380,65 +380,58 @@ const actions = {
     const requestAmount = this.getters.getDataSize["question-requests"].users[
       user.id
     ];
+
     const pageAmount = Math.ceil(requestAmount / 8);
     const amount = requestAmount % 8;
 
-    db.collection("question-requests")
-      .add(request)
-      .then(() => {
-        commit("addRequest", {
-          page: amount === 0 ? pageAmount + 1 : pageAmount,
-          data: { ...request, user: user },
-          amount: requestAmount
-        });
-        commit("setLoading", false);
-        commit("setSuccess", "Solicitação criada com sucesso!");
+    try {
+      await db.collection("question-requests").add(request);
 
-        db.collection("data-size")
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
-            const general = document.data()["question-requests"].general;
-            const subSize =
-              document.data()["question-requests"].users[user.id] || 0;
-
-            const questionRequests = {
-              general: general + 1,
-              users: {
-                ...document.data()["question-requests"].users,
-                [user.id]: subSize + 1
-              }
-            };
-
-            document.ref
-              .update({ ["question-requests"]: questionRequests })
-              .then(() => {
-                commit("addRemoveSize", {
-                  key: "question-requests",
-                  data: questionRequests
-                });
-              })
-              .catch(error => {
-                console.error(error);
-              });
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "creation",
-          "Solicitação",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Request DB Insert", error.message, {
-          payload,
-          requestAmount
-        });
+      commit("addRequest", {
+        page: amount === 0 ? pageAmount + 1 : pageAmount,
+        data: { ...request, user: user },
+        amount: requestAmount
       });
+
+      commit("setLoading", false);
+
+      const sizeSnap = await db.collection("data-size").get();
+
+      const document = sizeSnap.docs[0];
+      const general = document.data()["question-requests"].general;
+      const subSize = document.data()["question-requests"].users[user.id] || 0;
+
+      const questionRequests = {
+        general: general + 1,
+        users: {
+          ...document.data()["question-requests"].users,
+          [user.id]: subSize + 1
+        }
+      };
+
+      await document.ref.update({ ["question-requests"]: questionRequests });
+
+      commit("addRemoveSize", {
+        key: "question-requests",
+        data: questionRequests
+      });
+
+      commit("setSuccess", "Solicitação criada com sucesso!");
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "creation",
+        "Solicitação",
+        error.message
+      );
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Request DB Insert", error.message, {
+        payload,
+        requestAmount
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Updates a request based on it's name.
@@ -450,7 +443,7 @@ const actions = {
    * @param {"reqUpdate"|"sttUpdate"} payload.mode - If reqUpdate, update all the request data. Otherwise, update only it's status.
    * @param {import('./user.store.js').UserInfo} payload.user - The request to be updated.
    */
-  updateQuestionRequest({ commit }, payload) {
+  async updateQuestionRequest({ commit }, payload) {
     commit("setLoading", true);
     const { mode, request, user, isSearching } = payload;
 
@@ -459,57 +452,51 @@ const actions = {
       updated: getNowISOString()
     };
 
-    db.collection("question-requests")
-      .where("name", "==", request.name)
-      .get()
-      .then(snapshot => {
-        if (mode === "sttUpdate") {
-          snapshot.docs[0].ref
-            .update({
-              status: payload.status,
-              updated: toUpdate.updated
-            })
-            .then(() => {
-              toUpdate.status = payload.status;
-              commit("updateRequest", { ...toUpdate, user });
-              commit("updateCurrentRequestsPage", {
-                ...toUpdate,
-                user
-              });
-              if (isSearching)
-                commit("updateFilteredRequest", {
-                  ...toUpdate,
-                  user
-                });
-              commit("setLoading", false);
-            });
-        } else {
-          snapshot.docs[0].ref.update(toUpdate).then(() => {
-            commit("updateRequest", { ...toUpdate, user });
-            commit("updateCurrentRequestsPage", {
-              ...toUpdate,
-              user
-            });
-            if (isSearching)
-              commit("updateFilteredRequest", {
-                ...toUpdate,
-                user
-              });
-            commit("setLoading", false);
-            commit("setSuccess", "Solicitação editada com sucesso!");
-          });
-        }
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "edition",
-          "Solicitação",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Request DB Update", error.message, { payload });
+    try {
+      const snapshot = await db
+        .collection("question-requests")
+        .where("name", "==", request.name)
+        .get();
+
+      if (mode === "sttUpdate") {
+        await snapshot.docs[0].ref.update({
+          status: payload.status,
+          updated: toUpdate.updated
+        });
+
+        toUpdate.status = payload.status;
+      } else {
+        await snapshot.docs[0].ref.update(toUpdate);
+      }
+
+      commit("updateRequest", { ...toUpdate, user });
+      commit("updateCurrentRequestsPage", {
+        ...toUpdate,
+        user
       });
+
+      if (isSearching) {
+        commit("updateFilteredRequest", {
+          ...toUpdate,
+          user
+        });
+      }
+
+      if (mode !== "sttUpdate") {
+        commit("setSuccess", "Solicitação editada com sucesso!");
+      }
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "edition",
+        "Solicitação",
+        error.message
+      );
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Request DB Update", error.message, { payload });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Loads a page of requests according to the payload data.

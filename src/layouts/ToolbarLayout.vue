@@ -133,7 +133,7 @@ export default {
           {
             icon: mdiFileMultipleOutline,
             title: "Questionários",
-            link: "/quizes",
+            link: "/quizzes",
             grantAccess: ["admin", "student"]
           },
           {

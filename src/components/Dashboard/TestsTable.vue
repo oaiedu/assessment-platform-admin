@@ -203,7 +203,7 @@ export default {
       }
     },
     onRowClick(item) {
-      this.$router.push("/quizes/" + item.id);
+      this.$router.push("/quizzes/" + item.id);
     }
   },
   created() {

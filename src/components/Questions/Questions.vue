@@ -152,6 +152,37 @@
       />
 
       <v-snackbar
+        v-model="deleteErrorAutoSnackBar"
+        light
+        color="red darken-2"
+        right
+        top
+        vertical
+        :timeout="15000"
+      >
+        <span style="color: white; font-size: 1rem">
+          Esta questão está sendo usada em alguns questionários com geração
+          automática:
+          <br />
+          {{ getQuestionTests }}
+          <br /><br />
+          Só será possível excluí-la quando os questionários forem excluídos ou
+          possuirem mais questões disponíveis para a geração.
+        </span>
+        <template v-slot:action="{ attrs }">
+          <v-btn
+            dark
+            color="white"
+            text
+            v-bind="attrs"
+            @click="deleteErrorAutoSnackBar = false"
+          >
+            Fechar
+          </v-btn>
+        </template>
+      </v-snackbar>
+
+      <v-snackbar
         v-model="deleteErrorSnackBar"
         light
         color="red darken-2"
@@ -161,11 +192,12 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Esta questão está sendo usada nas seguintes provas:
+          Esta questão está sendo usada nos seguintes questionários:
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          Só será possível excluí-la quando não se encontrar em nenhum teste.
+          Só será possível excluí-la quando não se encontrar em nenhum
+          questionário.
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -215,6 +247,7 @@ export default {
       questionTests: [],
       deleteConfirmed: false,
       deleteErrorSnackBar: false,
+      deleteErrorAutoSnackBar: false,
       deleteQuestionSnackBar: false,
       selected: [],
       dialogNewQuestion: false,
@@ -312,20 +345,63 @@ export default {
       this.selectedEdit = val;
       this.dialogPDF = true;
     },
-    deleteQuestion(name) {
+    async deleteQuestion(name) {
       this.deleteQuestionSnackBar = false;
-      this.$store.dispatch("checkQuestionInTests", { name }).then(result => {
-        this.questionTests = result;
-        if (result.length === 0) {
-          this.$store.dispatch("deleteMarkQuestion", {
-            name,
-            isSearching: this.isSearching,
-            userEmail: this.userInfo.email
-          });
-        } else {
-          this.deleteErrorSnackBar = true;
-        }
+      this.questionTests = [];
+
+      const tests = await this.$store.dispatch("checkQuestionInTests", {
+        name
       });
+
+      const allAuto = tests.reduce(
+        (prev, curr) => curr.type === "auto" && prev,
+        true
+      );
+
+      let error = false;
+
+      if (allAuto) {
+        for (const t of tests) {
+          const questionsNames = [...t.questionsNames];
+
+          const index = questionsNames.indexOf(name);
+
+          if (index === -1) {
+            return;
+          }
+
+          questionsNames.splice(index, 1);
+
+          if (questionsNames.length < t.questionsAmount) {
+            this.questionTests.push(t);
+            error = true;
+            continue;
+          }
+
+          await this.$store.dispatch("updateTest", {
+            testData: { ...t, questionsNames },
+            noMessage: true
+          });
+        }
+      }
+
+      if (error) {
+        this.deleteErrorAutoSnackBar = true;
+        return;
+      }
+
+      if (!tests.length || allAuto) {
+        this.$store.dispatch("deleteMarkQuestion", {
+          name,
+          isSearching: this.isSearching,
+          userEmail: this.userInfo.email
+        });
+
+        return;
+      }
+
+      this.questionTests = [...tests];
+      this.deleteErrorSnackBar = true;
     },
     deleteQuestions() {
       const questions = this.deleteMarkQuestions;

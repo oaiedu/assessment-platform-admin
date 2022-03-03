@@ -344,120 +344,67 @@ export default {
     updateData(variable) {
       this.editedQuestionDescription = variable;
     },
-    onEditQuestion() {
+    async onEditQuestion() {
+      let url = null;
+
       if (this.image) {
         const imageToUpload = {
           image: this.image,
           name: this.question.name
         };
-        const URL = this.$store.dispatch("uploadImageQuestion", imageToUpload);
 
-        URL.then(result => {
-          this.editedImage = result;
+        url = await this.$store.dispatch("uploadImageQuestion", imageToUpload);
+      }
 
-          const oldData = {
-            name: this.question.name,
-            created: this.question.created || null,
-            subject: this.question.subject,
-            level: this.question.level,
-            question: this.question.question,
-            answers: this.question.answers,
-            image: this.question.image,
-            edited: this.question.edited,
-            imageSize: this.question.imageSize || "1x"
-          };
+      this.editedImage = url || this.question.image;
 
-          const questionData = {
-            name: this.editedName,
-            created: this.question.created || null,
-            subject: this.editedSubject,
-            question: this.editedQuestionDescription,
-            level: this.editedLevel,
-            answers: this.editedAnswers,
-            image: this.editedImage,
-            imageSize: this.editedImageSize
-          };
+      const oldData = {
+        name: this.question.name,
+        created: this.question.created,
+        subject: this.question.subject,
+        level: this.question.level,
+        question: this.question.question,
+        answers: this.question.answers,
+        image: this.question.image,
+        imageSize: this.question.imageSize
+      };
 
-          let aux = null;
+      const questionData = {
+        name: this.editedName,
+        created: this.question.created,
+        subject: this.editedSubject,
+        question: this.editedQuestionDescription,
+        level: this.editedLevel,
+        answers: this.editedAnswers,
+        image: this.editedImage,
+        imageSize: this.editedImageSize
+      };
 
-          if (this.userClaims && this.userClaims["admin"]) {
-            const sendInfo = {
-              oldData,
-              questionData,
-              user: this.$store.getters.user.id,
-              isSearching: this.isSearching
-            };
+      if (this.userClaims && this.userClaims["admin"]) {
+        const sendInfo = {
+          oldData,
+          questionData,
+          user: this.$store.getters.user.id,
+          isSearching: this.isSearching
+        };
 
-            aux = this.$store.dispatch("editQuestion", sendInfo);
-          } else {
-            const request = {
-              ...questionData,
-              status: "Pendente",
-              userId: this.userInfo.id
-            };
-            aux = this.$store.dispatch("updateQuestionRequest", {
-              mode: "reqUpdate",
-              request,
-              user: this.userInfo,
-              isSearching: this.isSearching
-            });
-          }
-          aux.then(() => {
-            this.close();
-          });
-        });
+        await this.$store.dispatch("editQuestion", sendInfo);
       } else {
-        const oldData = {
-          name: this.question.name,
-          created: this.question.created || null,
-          subject: this.question.subject,
-          question: this.question.question,
-          level: this.question.level,
-          answers: this.question.answers,
-          image: this.question.image,
-          edited: this.question.edited,
-          imageSize: this.question.imageSize
+        const request = {
+          ...questionData,
+          status: "Pendente",
+          userId: this.userInfo.id
         };
 
-        const questionData = {
-          name: this.editedName,
-          created: this.question.created || null,
-          subject: this.editedSubject,
-          question: this.editedQuestionDescription,
-          level: this.editedLevel,
-          answers: this.editedAnswers,
-          imageSize: this.editedImageSize,
-          image: this.question.image
-        };
-
-        let aux = null;
-
-        if (this.userClaims && this.userClaims["admin"]) {
-          const sendInfo = {
-            oldData,
-            questionData,
-            user: this.$store.getters.user.id,
-            isSearching: this.isSearching
-          };
-
-          aux = this.$store.dispatch("editQuestion", sendInfo);
-        } else {
-          const request = {
-            ...questionData,
-            status: "Pendente",
-            userId: this.userInfo.id
-          };
-          aux = this.$store.dispatch("updateQuestionRequest", {
-            mode: "reqUpdate",
-            request,
-            user: this.userInfo,
-            isSearching: this.isSearching
-          });
-        }
-        aux.then(() => {
-          this.close();
+        await this.$store.dispatch("updateQuestionRequest", {
+          mode: "reqUpdate",
+          request,
+          user: this.userInfo,
+          isSearching: this.isSearching
         });
       }
+
+      this.close();
     },
     setInitialData() {
       this.editedQuestionDescription = "";
