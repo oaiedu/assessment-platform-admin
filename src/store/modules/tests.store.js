@@ -45,46 +45,47 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
 /**
  * @typedef {Object} DeleteStatus
  * @property {boolean} toDelete.status If true, the question can be restored. If false, it will be deleted.
- * @property {string|undefined} toDelete.userEmail The user that marked the question to be deleted.
+ * @property {string|undefined} toDelete.userEmail Define the user that marked the question to be deleted.
  */
 
 /**
  * @typedef {Object} TestCreation
- * @property {string} userId The user that created the test.
- * @property {string} title The test title.
- * @property {string} instructions The test instructions.
- * @property {"selected"|"random"} type The test type.
- * @property {Question[]} questions The test questions.
+ * @property {string} userId Defines the user that created the quiz.
+ * @property {string} title Defines the quiz title.
+ * @property {string} instructions Defines the quiz instructions.
+ * @property {"selected"|"random"} type Defines the quiz type.
+ * @property {Question[]} questions Defines the quiz questions.
  */
 
 /**
  * @typedef {Object} Test
- * @property {string} id The test id.
- * @property {string} created The test creation date.
- * @property {string} updated The test edition date.
- * @property {string} userId The user that created the test.
- * @property {string} title The test title.
- * @property {string} instructions The test instructions.
- * @property {number} questionsAmount Defines how many questions the test have.
- * @property {number} approvalPercentage Defines how much of the test must be correct to approve the user.
- * @property {boolean} unlimitedTime Defines whether the test has unlimited time.
- * @property {Time} time Defines the test timer.
- * @property {Level} level Defines the test level.
- * @property {"selected"|"random"|"auto"} type The test type.
- * @property {Question[]} questions The test questions.
+ * @property {string} id Defines the quiz id.
+ * @property {string} created Defines the quiz creation date.
+ * @property {string} updated Defines the quiz edition date.
+ * @property {string} userId Defines the user that created the quiz.
+ * @property {string} title Defines the quiz title.
+ * @property {string} instructions Defines the quiz instructions.
+ * @property {number} questionsAmount Defines how many questions the quiz have.
+ * @property {number} approvalPercentage Defines how much of the quiz must be correct to approve the user.
+ * @property {boolean} unlimitedTime Defines whether the quiz has unlimited time.
+ * @property {Time} time Defines the quiz timer.
+ * @property {Level} level Defines the quiz level.
+ * @property {"selected"|"random"|"auto"} type Defines the quiz type.
+ * @property {Question[]} questions Defines an array of questions.
+ * @property {string[]} questionsNames Defines an array that contains all questions names added to the quiz.
  * @property {Object<string, number>} userAttempts Defines an object containing all user attempts (id and number of attempts).
- * @property {DeleteStatus|undefined} toDelete The test deletion status.
+ * @property {DeleteStatus|undefined} toDelete Defines the quiz deletion status.
  */
 
 /**
  * @typedef {Object} TestsState
- * @property {Object.<string, Test[]>} tests The pages with it's tests list.
- * @property {Test[]} filteredTests An array of tests filtered by id.
- * @property {Test[]} currentTestsPage An array of tests of the current page.
- * @property {[string, string]|null} lastTestDocument An array with the first and last test id from the last request.
- * @property {Question[]} testQuestions An array of questions from a specific test.
- * @property {Test[]} deleteMarkTests An array of tests that were marked to be deleted.
- * @property {Test[]} lastTests An array of the most recent tests.
+ * @property {Object.<string, Test[]>} tests Defines the pages with it's quizes list.
+ * @property {Test[]} filteredTests Defines an array of quizes filtered by id.
+ * @property {Test[]} currentTestsPage Defines an array of quizes of the current page.
+ * @property {[string, string]|null} lastTestDocument Defines an array with the first and last quiz id from the last request.
+ * @property {Question[]} testQuestions Defines an array of questions from a specific quiz.
+ * @property {Test[]} deleteMarkTests Defines an array of quizes that were marked to be deleted.
+ * @property {Test[]} lastTests Defines an array of the most recent quizes.
  */
 
 /**
@@ -776,6 +777,8 @@ const actions = {
           title: data.title,
           created: data.created,
           updated: data.updated,
+          questions: data.questions,
+          questionsNames: data.questionsNames,
           questionsAmount: data.questionsAmount,
           approvalPercentage: data.approvalPercentage,
           time: data.time,
@@ -787,11 +790,7 @@ const actions = {
           instructions: data.instructions
         };
 
-        if (data.questions) {
-          test.questions = data.questions;
-        }
-
-        doc.ref.set(test);
+        await doc.ref.set(test);
 
         const user = await dispatch("getUserById", { id: test.userId });
         test["user"] = user;
@@ -859,6 +858,8 @@ const actions = {
             title: data.title,
             created: data.created,
             updated: data.updated,
+            questions: data.questions,
+            questionsNames: data.questionsNames,
             questionsAmount: data.questionsAmount,
             approvalPercentage: data.approvalPercentage,
             time: data.time,
@@ -870,11 +871,7 @@ const actions = {
             instructions: data.instructions
           };
 
-          if (data.questions) {
-            test.questions = data.questions;
-          }
-
-          doc.ref.set(test);
+          await doc.ref.set(test);
 
           const userData = await dispatch("getUserById", {
             id: test.userId
@@ -892,6 +889,7 @@ const actions = {
             );
             commit("setDeleteMarkTests", markedTests);
           }
+
           commit("updateTest", test);
           commit("updateCurrentTestsPage", test);
           if (isSearching) commit("updateFilteredTest", test);
@@ -1020,7 +1018,7 @@ const actions = {
    * @param {TestCreation} payload.testData - The test to be created.
    * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
    */
-  createTest({ commit, dispatch }, payload) {
+  async createTest({ commit, dispatch }, payload) {
     commit("setLoading", true);
 
     const createdDate = getNowISOString();
@@ -1037,54 +1035,47 @@ const actions = {
     const pageAmount = Math.ceil(testAmount / 10);
     const amount = testAmount % 10;
 
-    db.collection("tests")
-      .add(test)
-      .then(() => {
-        commit("setLoading", false);
-        commit("createTest", {
-          page: amount === 0 ? pageAmount + 1 : pageAmount,
-          data: { ...test, user: { ...userInfo } },
-          amount: testAmount
-        });
-        commit("setSuccess", "Prova criada com sucesso!");
+    try {
+      await db.collection("tests").add(test);
 
-        db.collection("data-size")
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
-            const size = document.data().tests;
-
-            document.ref
-              .update({ tests: size + 1 })
-              .then(() => {
-                commit("addRemoveSize", {
-                  key: "tests",
-                  data: size + 1
-                });
-                dispatch("addTestsByWeek");
-              })
-              .catch(error => {
-                console.error(error);
-              });
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("creation", "Prova", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Test DB Insert", error.message, { test });
+      commit("createTest", {
+        page: amount === 0 ? pageAmount + 1 : pageAmount,
+        data: { ...test, user: { ...userInfo } },
+        amount: testAmount
       });
+
+      const sizeSnap = await db.collection("data-size").get();
+
+      const document = sizeSnap.docs[0];
+      const size = document.data().tests;
+
+      await document.ref.update({ tests: size + 1 });
+
+      commit("addRemoveSize", {
+        key: "tests",
+        data: size + 1
+      });
+
+      dispatch("addTestsByWeek");
+
+      commit("setSuccess", "Prova criada com sucesso!");
+    } catch (error) {
+      const errorModel = showErrorMessage("creation", "Prova", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Test DB Insert", error.message, { test });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Updates a test based on it's id.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {Test} payload.testData - The test to be updated.
-   * @param {boolean} payload.isSearching - Whether the filtered tests is being used or not.
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the action payload.
+   * @param {Test} payload.testData the test to be updated.
+   * @param {boolean} payload.noMessage whether the success message will appear.
+   * @param {boolean} payload.isSearching whether the filtered tests is being used.
    */
   async updateTest({ commit, dispatch }, payload) {
     const { testData, isSearching } = payload;
@@ -1113,7 +1104,9 @@ const actions = {
         commit("updateFilteredTest", test);
       }
 
-      commit("setSuccess", "Prova editada com sucesso!");
+      if (!payload.noMessage) {
+        commit("setSuccess", "Prova editada com sucesso!");
+      }
     } catch (error) {
       const errorModel = showErrorMessage("edition", "Prova", error.message);
 
@@ -1198,10 +1191,62 @@ const actions = {
       });
   },
   /**
-   * Gets a test by its ID from the state or Firebase.
+   * Adds a question name to all automatic quizes according
+   * to the given subject in case it does not contains the
+   * given question name.
    *
    * @param {Store<TestsState>} store the vuex store.
-   * @param {string} payload the test id.
+   * @param {Object} payload the action payload.
+   * @param {string} payload.subject the subject to be searched.
+   * @param {Question} payload.question the question data to be checked.
+   * @returns {Test[]} an array that contains all quizes found.
+   */
+  async addQuestionQuizesBySubject({ commit }, payload) {
+    commit("setLoading", true);
+
+    try {
+      const snapshot = await db
+        .collection("tests")
+        .where("type", "==", "auto")
+        .where("subjects", "array-contains", payload.subject)
+        .get();
+
+      const promises = snapshot.docs.map(async doc => {
+        /**
+         * @type {Test}
+         */
+        const data = doc.data();
+
+        if (
+          data.questionsNames.includes(payload.question.name) ||
+          payload.question.level.index > data.level.index
+        ) {
+          return;
+        }
+
+        data.questionsNames.push(payload.question.name);
+
+        return await doc.ref.update({ questionsNames: data.questionsNames });
+      });
+
+      await Promise.all(promises);
+    } catch (error) {
+      const errorModel = showErrorMessage("edition", "Quiz", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Add Question Auto Quiz by Subject", error.message, {
+        payload
+      });
+    } finally {
+      commit("setLoading", false);
+    }
+  },
+  /**
+   * Gets a quiz by its ID from the state or Firebase.
+   *
+   * @param {Store<TestsState>} store the vuex store.
+   * @param {string} payload the quiz id.
+   * @returns {Test} an object that represents the quiz data.
    */
   async getTestById({ commit, getters }, payload) {
     commit("setLoading", true);
@@ -1220,7 +1265,8 @@ const actions = {
 
       return snapshot.docs[0].data();
     } catch (e) {
-      const errorModel = showErrorMessage("load", "Prova", error.message);
+      const errorModel = showErrorMessage("load", "Quiz", error.message);
+
       commit("setError", { message: errorModel });
       createErrorLog("Load Test By ID", error.message, {
         stateTest
