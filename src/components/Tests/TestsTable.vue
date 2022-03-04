@@ -37,19 +37,13 @@
 
             <span
               class="font-weight-medium"
-              :class="(getUserAttempts(item) ? 'green' : 'grey') + '--text'"
+              :class="getAttemptData(item).color + '--text'"
             >
-              <v-icon :color="getUserAttempts(item) ? 'green' : 'grey'">{{
-                getUserAttempts(item) ? mdiCheckCircle : mdiCancel
+              <v-icon :color="getAttemptData(item).color">{{
+                getAttemptData(item).icon
               }}</v-icon>
 
-              {{
-                getUserAttempts(item)
-                  ? getUserAttempts(item) +
-                    " TENTATIVA" +
-                    (getUserAttempts(item) !== 1 ? "S" : "")
-                  : "SEM TENTATIVAS"
-              }}
+              {{ getAttemptSentence(item) }}
             </span>
           </v-row>
         </template>
@@ -169,6 +163,7 @@ import {
   mdiPencil,
   mdiDelete,
   mdiCheckCircle,
+  mdiCloseCircle,
   mdiCancel,
   mdiClockOutline,
   mdiClipboardText,
@@ -184,6 +179,7 @@ export default {
       mdiPencil,
       mdiDelete,
       mdiCheckCircle,
+      mdiCloseCircle,
       mdiCancel,
       mdiClockOutline,
       mdiClipboardText,
@@ -218,6 +214,37 @@ export default {
     }
   },
   methods: {
+    getAttemptData(item) {
+      const attempts = this.getUserAttempts(item);
+
+      if (!attempts) {
+        return {
+          color: "grey",
+          icon: this.mdiCancel
+        };
+      }
+
+      if (this.hasApprovedAttempt(item)) {
+        return {
+          color: "green",
+          icon: this.mdiCheckCircle
+        };
+      }
+
+      return {
+        color: "red",
+        icon: this.mdiCloseCircle
+      };
+    },
+    getAttemptSentence(item) {
+      const attempts = this.getUserAttempts(item);
+
+      if (!attempts) {
+        return "SEM TENTATIVAS";
+      }
+
+      return attempts + " TENTATIVA" + (attempts !== 1 ? "S" : "");
+    },
     getUserAttempts(item) {
       let attempts = 0;
 
@@ -230,6 +257,22 @@ export default {
       }
 
       return attempts;
+    },
+    hasApprovedAttempt(item) {
+      let has = false;
+
+      if (!this.userInfo || !this.userInfo.attempts) {
+        return false;
+      }
+
+      for (const attempt of this.userInfo.attempts) {
+        if (attempt.quizId === item.id && attempt.approved) {
+          has = true;
+          break;
+        }
+      }
+
+      return has;
     },
     getTime(item) {
       return item.unlimitedTime

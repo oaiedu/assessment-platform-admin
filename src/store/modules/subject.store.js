@@ -82,6 +82,11 @@ const mutations = {
         name: data.questionId,
         level: data.questionLevel
       });
+    } else if (!data.remove && index !== -1) {
+      subjects[subjectIndex].questions[index] = {
+        name: data.questionId,
+        level: data.questionLevel
+      };
     }
 
     subjects[subjectIndex].questions.sort((q1, q2) =>

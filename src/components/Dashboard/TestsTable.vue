@@ -92,7 +92,7 @@ export default {
   data() {
     return {
       headers: [
-        { text: "Nome", sortable: false, value: "title", align: "center" },
+        { text: "Título", sortable: false, value: "title", align: "center" },
         { text: "Tipo", sortable: false, value: "type", align: "center" },
         {
           text: "Nº de Questões",

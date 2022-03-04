@@ -4,11 +4,15 @@
     <v-card-text>
       DISCIPLINA: {{ subject }}
       <br />
-      NOME: {{ name }}
+      ID: {{ name }}
       <br />
 
       <br />
-      <vue-markdown v-if="questionDesc" :source="questionDesc" />
+      <div
+        v-if="questionDesc"
+        v-html="questionDesc"
+        class="preview-description"
+      ></div>
       <br />
 
       <v-row justify="center" v-if="image && image !== ''">
@@ -28,14 +32,12 @@
 </template>
 
 <script>
-import VueMarkdown from "vue-markdown";
-import "vue-markdown";
 import Answers from "./Answers";
 
 export default {
   name: "PreviewQuestions",
   props: ["name", "subject", "questionDesc", "answers", "image"],
-  components: { "vue-markdown": VueMarkdown, Answers }
+  components: { Answers }
 };
 </script>
 

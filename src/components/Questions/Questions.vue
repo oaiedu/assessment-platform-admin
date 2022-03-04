@@ -1,18 +1,12 @@
 <template>
   <div>
     <v-container>
-      <v-container>
-        <h1 class="text-center blue--text">Gerenciar Questões</h1>
-      </v-container>
-
-      <v-container>
-        <v-container>
-          <SearchBox
-            label="Procurar por Nome"
-            @enter="searchQuery($event)"
-            @textChange="searchTextChange($event)"
-          />
-        </v-container>
+      <v-container class="mt-10 mb-5">
+        <SearchBox
+          label="Procurar por ID"
+          @enter="searchQuery($event)"
+          @textChange="searchTextChange($event)"
+        />
       </v-container>
 
       <v-container
@@ -258,12 +252,7 @@ export default {
       isSearching: false,
       page: 1,
       searchPage: 1,
-      itemsPerPage: 8,
-      headers: [
-        { text: "Nome", align: "left", value: "name" },
-        { text: "Disciplina", value: "subject" },
-        { text: "Ações", align: "right", value: "actions", sortable: false }
-      ]
+      itemsPerPage: 8
     };
   },
   computed: {

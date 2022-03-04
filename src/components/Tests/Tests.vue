@@ -3,7 +3,7 @@
     <v-container>
       <v-container class="mt-10 mb-5">
         <SearchBox
-          label="Procurar por Nome"
+          label="Procurar por título"
           @enter="searchQuery($event)"
           @textChange="searchTextChange($event)"
         />
@@ -242,13 +242,7 @@ export default {
       searchPage: 1,
       itemsPerPage: 10,
       selectedTest: null,
-      generatedTest: null,
-      headers: [
-        { text: "Nome", align: "start", value: "title" },
-        { text: "Questões", align: "left", value: "questions.length" },
-        { text: "Tipo", align: "left", value: "type" },
-        { text: "Ações", align: "right", value: "actions", sortable: false }
-      ]
+      generatedTest: null
     };
   },
   computed: {

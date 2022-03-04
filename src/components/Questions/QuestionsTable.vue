@@ -113,7 +113,7 @@ export default {
       pencilIcon: mdiPencil,
       deleteIcon: mdiDelete,
       headers: [
-        { text: "Nome", align: "left", value: "name" },
+        { text: "ID", align: "left", value: "name" },
         { text: "Disciplina", align: "left", value: "subject" },
         { text: "Nível", value: "level" }
       ],

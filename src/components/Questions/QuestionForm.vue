@@ -83,7 +83,7 @@
                     Detalhes
                   </v-stepper-step>
 
-                  <v-divider></v-divider>
+                  <v-divider class="mx-2" style="margin-top: 50px"></v-divider>
 
                   <v-stepper-step editable step="2">
                     Respostas
@@ -103,7 +103,7 @@
                             rounded
                             id="name"
                             name="name"
-                            label="Nome"
+                            label="ID"
                           ></v-text-field>
                         </v-col>
                       </v-row>
@@ -142,11 +142,18 @@
 
                       <v-row justify="center" class="pa-0 ma-0">
                         <v-col cols="12" class="pa-0 ma-0">
-                          <VueSimplemde v-model="questionDescription" />
+                          <VueTextEditor
+                            outlined
+                            placeholder="Descrição"
+                            :groups="['format', 'align', 'list', 'format2']"
+                            :value="questionDescription"
+                            :height="300"
+                            @textChange="questionDescription = $event"
+                          />
                         </v-col>
                       </v-row>
 
-                      <v-row justify="center" class="pa-0 ma-0 mt-2">
+                      <v-row justify="center" class="pa-0 ma-0 mt-6">
                         <v-col cols="12" class="pa-0 ma-0">
                           <v-file-input
                             v-model="image"
@@ -238,9 +245,9 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Uma questão com este Nome já foi criada!
+          Uma questão com este ID já foi criada!
           <br />
-          Por favor, mude o Nome.
+          Por favor, mude o ID.
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -259,8 +266,6 @@
 </template>
 
 <script>
-import "simplemde/dist/simplemde.min.css";
-import VueSimplemde from "vue-simplemde";
 import {
   mdiClose,
   mdiPlus,
@@ -271,12 +276,13 @@ import {
 } from "@mdi/js";
 
 import Preview from "./Preview";
+import VueTextEditor from "../Shared/VueTextEditor.vue";
 
 export default {
   name: "QuestionForm",
   components: {
     Preview,
-    VueSimplemde
+    VueTextEditor
   },
   props: ["questionRequest", "page"],
   data() {
@@ -431,10 +437,10 @@ export default {
       this.chips = [];
       this.items = [];
       this.answers = [
-        { text: [], ansId: "radio-1", value: false },
-        { text: [], ansId: "radio-2", value: false },
-        { text: [], ansId: "radio-3", value: false },
-        { text: [], ansId: "radio-4", value: false }
+        { text: "", ansId: "radio-1", value: false },
+        { text: "", ansId: "radio-2", value: false },
+        { text: "", ansId: "radio-3", value: false },
+        { text: "", ansId: "radio-4", value: false }
       ];
       this.name = "";
       this.subject = "";
@@ -485,5 +491,9 @@ export default {
 
 .v-stepper__header {
   box-shadow: 0 1px 0 0 #cfcfcf !important;
+}
+
+.v-text-editor__container {
+  border-radius: 28px;
 }
 </style>

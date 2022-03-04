@@ -6,20 +6,18 @@
     <br />
 
     <br />
-    <vue-markdown :source="question.question" />
+    <div
+      v-if="question.question"
+      v-html="question.question"
+      class="definition-description"
+    ></div>
     <br />
   </div>
 </template>
 
 <script>
-import VueMarkdown from "vue-markdown";
-import "vue-markdown";
-
 export default {
   name: "Definition",
-  props: ["question"],
-  components: {
-    "vue-markdown": VueMarkdown
-  }
+  props: ["question"]
 };
 </script>
