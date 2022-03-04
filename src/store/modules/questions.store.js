@@ -623,14 +623,18 @@ const actions = {
           .then(snap => {
             const document = snap.docs[0];
             const questions = document.data().questions;
-            const index = questions.indexOf(name);
+            const index = questions.findIndex(q => q.name === name);
 
-            if (index !== -1) questions.splice(index, 1);
+            if (index !== -1) {
+              questions.splice(index, 1);
+            }
+
             document.ref.update({ questions });
 
             commit("addRemoveQuestion", {
               subjectId: document.id,
               questionId: name,
+              questionLevel: doc.data().level.index,
               remove: true
             });
           })
@@ -711,15 +715,19 @@ const actions = {
 
       const document = subSnap.docs[0];
 
-      if (!document.data().questions.includes(question.name)) {
-        const questions = [...document.data().questions, name];
+      if (!document.data().questions.find(q => q.name === question.name)) {
+        const questions = [
+          ...document.data().questions,
+          { level: question.level.index, name }
+        ];
         questions.sort((q1, q2) => (q1 > q2 ? 1 : -1));
 
         await document.ref.update({ questions });
 
         commit("addRemoveQuestion", {
           subjectId: document.id,
-          questionId: name
+          questionId: name,
+          questionLevel: question.level.index
         });
       }
 
@@ -780,10 +788,12 @@ const actions = {
         if (questionsData[question.subject]) {
           questionsData[question.subject] = [
             ...questionsData[question.subject],
-            question.name
+            { level: question.level.index, name: question.name }
           ];
         } else {
-          questionsData[question.subject] = [question.name];
+          questionsData[question.subject] = [
+            { level: question.level.index, name: question.name }
+          ];
         }
 
         await doc.ref.set(question);
@@ -818,13 +828,14 @@ const actions = {
         const questions = [...doc.data().questions];
 
         questionsData[subject].forEach(q => {
-          if (!questions.includes(q)) {
+          if (!questions.find(sq => sq.name === q.name)) {
             questions.push(q);
           }
 
           commit("addRemoveQuestion", {
             subjectId: doc.id,
-            questionId: q
+            questionId: q.name,
+            questionLevel: q.level
           });
         });
 
@@ -946,7 +957,9 @@ const actions = {
                 q => q.name === doc.data().name
               );
 
-              if (index !== -1) questions.splice(index, 1);
+              if (index !== -1) {
+                questions.splice(index, 1);
+              }
 
               document.ref.update({ questions });
 
@@ -1040,12 +1053,12 @@ const actions = {
   /**
    * Updates a question based on it's name.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {Question} payload.questionData - The question to be updated.
-   * @param {Question} payload.oldData - The question to be kept in the history.
-   * @param {string} payload.user - The current user id.
-   * @param {isSearching} payload.isSearching - Whether the application is using the filtered questions or not.
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the action payload.
+   * @param {Question} payload.questionData the question to be updated.
+   * @param {Question} payload.oldData the question to be kept in the history.
+   * @param {string} payload.user the current user id.
+   * @param {isSearching} payload.isSearching whether the application is using the filtered questions or not.
    */
   async editQuestion({ commit, dispatch }, payload) {
     commit("setLoading", true);
@@ -1145,6 +1158,34 @@ const actions = {
           questionId: question.name,
           questionLevel: question.level.index,
           remove: true
+        });
+      }
+
+      if (payload.oldData.level.index !== question.level.index) {
+        const levelSubSnap = await db
+          .collection("subjects")
+          .where("name", "==", question.subject)
+          .get();
+
+        const levelSubDoc = levelSubSnap.docs[0];
+        const levelSubQuestions = levelSubDoc.data().questions || [];
+        const index = levelSubQuestions.findIndex(
+          q => q.name === question.name
+        );
+
+        if (index !== -1) {
+          levelSubQuestions[index] = {
+            name: question.name,
+            level: question.level.index
+          };
+        }
+
+        await levelSubDoc.ref.update({ questions: levelSubQuestions });
+
+        commit("addRemoveQuestion", {
+          subjectId: levelSubDoc.id,
+          questionId: question.name,
+          questionLevel: question.level.index
         });
       }
 
@@ -1316,7 +1357,7 @@ const actions = {
 
       const doc = subSnap.docs[0];
 
-      if (!doc.data().questions.includes(question.name)) {
+      if (!doc.data().questions.find(q => q.name === question.name)) {
         const questions = [
           ...doc.data().questions,
           { name: question.name, level: question.level.index }
