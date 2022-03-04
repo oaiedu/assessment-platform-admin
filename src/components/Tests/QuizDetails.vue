@@ -32,8 +32,8 @@
     </v-card>
 
     <v-card flat class="mt-4" width="100%">
-      <v-row class="pa-0 ma-0">
-        <div class="quiz-detail__detail-column">
+      <v-row class="pa-0 ma-0" style="flex-wrap: nowrap; position: relative">
+        <div class="quiz-detail__detail-column info-column">
           <span class="quiz-detail__info-title">Detalhes</span>
 
           <div class="quiz-detail__info-container">
@@ -128,11 +128,11 @@
         <div class="quiz-detail__detail-column instructions-column">
           <span class="quiz-detail__info-title">Instruções</span>
 
-          <VueMarkdown
+          <div
             v-if="test"
+            v-html="test.instructions"
             class="quiz-detail__instructions"
-            :source="test.instructions"
-          ></VueMarkdown>
+          ></div>
 
           <span
             v-else-if="!!test && !test.instructions"
@@ -287,16 +287,10 @@ import {
   mdiThumbUpOutline
 } from "@mdi/js";
 
-import VueMarkdown from "vue-markdown";
-import "vue-markdown";
-
 import { weekDays, months } from "../../utils/date";
 
 export default {
   name: "QuizDetails",
-  components: {
-    VueMarkdown
-  },
   data() {
     return {
       mdiBallot,
@@ -477,11 +471,19 @@ export default {
   flex-direction: column;
   gap: 0.6rem;
 
+  height: 260px;
+
   padding: 1rem 1.5rem;
 }
 
-.quiz-detail__detail-column .instructions-column {
-  width: calc(100% - 349px);
+.quiz-detail__detail-column.info-column {
+  position: sticky;
+  top: 0;
+}
+
+.quiz-detail__detail-column.instructions-column {
+  width: 100%;
+  height: auto;
 }
 
 .quiz-detail__info-title {
