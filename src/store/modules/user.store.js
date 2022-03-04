@@ -289,6 +289,7 @@ const actions = {
    * @param {string} payload.name The user new name.
    * @param {string} payload.profileImages The user new avatar image.
    * @param {Attempt[]} payload.attempts The user quizzes attempts.
+   * @param {boolean} payload.noMessage Whether the success message will be shown.
    */
   async updateUser({ commit, state }, payload) {
     commit("setLoading", true);
@@ -316,10 +317,12 @@ const actions = {
         created: state.userInfo.created
       });
 
-      commit(
-        "setSuccess",
-        `'${userInfo.name || userInfo.email}' editado(a) com sucesso!`
-      );
+      if (!payload.noMessage) {
+        commit(
+          "setSuccess",
+          `'${userInfo.name || userInfo.email}' editado(a) com sucesso!`
+        );
+      }
     } catch (error) {
       const errorModel = showErrorMessage(
         "default",

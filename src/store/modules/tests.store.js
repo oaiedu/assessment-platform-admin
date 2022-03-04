@@ -1136,10 +1136,7 @@ const actions = {
             resolve(questions);
           })
           .catch(error => {
-            const errorModel = showErrorMessage(
-              "load",
-              "Nomes" + error.message
-            );
+            const errorModel = showErrorMessage("load", "IDs" + error.message);
             commit("setError", { message: errorModel });
             createErrorLog("Test Subject Names", error.message, {
               payload
