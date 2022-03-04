@@ -70,10 +70,10 @@
             {{ examQuestions[current - 1].subject }}
           </span>
 
-          <vue-markdown
-            class="pa-0 px-4 ma-0 mt-4"
-            :source="examQuestions[current - 1].question"
-          ></vue-markdown>
+          <div
+            v-html="examQuestions[current - 1].question"
+            class="quiz__question-description pa-0 px-4 ma-0 mt-4"
+          ></div>
 
           <QuestionImage
             v-if="!!examQuestions[current - 1].image"
@@ -303,8 +303,6 @@
 </template>
 
 <script>
-import VueMarkdown from "vue-markdown";
-import "vue-markdown";
 import {
   mdiChevronLeft,
   mdiChevronRight,
@@ -319,7 +317,6 @@ import Counter from "../Shared/Counter.vue";
 export default {
   name: "Exam",
   components: {
-    VueMarkdown,
     QuestionImage,
     Counter
   },
@@ -481,10 +478,14 @@ export default {
       this.test.userAttempts[attempt.userId] += 1;
 
       await this.$store.dispatch("updateUser", {
-        attempts: [attempt, ...(this.userInfo.attempts || [])]
+        attempts: [attempt, ...(this.userInfo.attempts || [])],
+        noMessage: true
       });
 
-      await this.$store.dispatch("updateTest", { testData: this.test });
+      await this.$store.dispatch("updateTest", {
+        testData: this.test,
+        noMessage: true
+      });
 
       this.loadingFinish = false;
 
@@ -797,6 +798,11 @@ export default {
   background-color: #1e88e544;
 
   color: #1278d1 !important;
+}
+
+
+.quiz__question-number.current.review {
+  border-color: #ec9512;
 }
 
 .quiz__answer-description-title {
