@@ -2,8 +2,9 @@
   <v-container>
     <v-row justify="end" class="mr-2">
       <v-btn
+        :dark="false"
+        disabled
         color="green"
-        dark
         class="mt-2"
         :loading="loading"
         @click="backup()"
