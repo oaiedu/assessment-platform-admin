@@ -216,6 +216,7 @@ import TestsTable from "./TestsTable";
 import DeleteWarning from "../Shared/DeleteWarning";
 import DeleteAlert from "./DeleteAlertTests";
 import SearchBox from "../Shared/SearchBox";
+import { getNowISOString } from "../../utils/date";
 
 export default {
   name: "Tests",
@@ -300,12 +301,31 @@ export default {
     }
   },
   methods: {
-    generateExam(questions) {
+    generateExam(data) {
+      const test = {
+        id: "generated",
+        title: "Quiz de treino",
+        type: "auto",
+        level: data.level,
+        instructions:
+          "Esse quiz é apenas para <b>treino</b> e <b>não</b> ficará em seu histórico de tentativas.",
+        questions: data.questions,
+        questionsAmount: data.questions.length,
+        questionsNames: data.questions.map(q => q.name),
+        created: getNowISOString(),
+        updated: getNowISOString(),
+        approvalPercentage: 50,
+        unlimitedTime: data.unlimitedTime,
+        time: data.time,
+        userId: this.userInfo.id,
+        userAttempts: []
+      };
+
       this.$router.push({
         name: "quiz.details",
         params: {
           id: "generated",
-          test: { name: "Prova gerada", questions },
+          test,
           mode: "practice"
         }
       });
