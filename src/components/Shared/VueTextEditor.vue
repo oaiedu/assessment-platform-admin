@@ -1411,8 +1411,6 @@ export default {
       const base = invert ? selection.focusOffset : selection.baseOffset;
       const focus = invert ? selection.baseOffset : selection.focusOffset;
 
-      console.log(selection);
-
       this.currentSelection = [base, focus, selection.anchorNode];
     },
 

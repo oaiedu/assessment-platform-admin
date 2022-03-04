@@ -363,7 +363,10 @@ export default {
       );
     },
     countdown() {
-      return !this.practice && !this.test.unlimitedTime;
+      return (
+        (!this.practice || this.$route.params.id === "generated") &&
+        !this.test.unlimitedTime
+      );
     },
     loading() {
       return this.$store.getters.loading;
@@ -449,6 +452,30 @@ export default {
       const minutes = Math.floor(diff / (1000 * 60));
       const seconds = Math.floor(diff / 1000);
 
+      const timeTaken = {
+        hours,
+        minutes: hours > 0 ? minutes - hours * 60 : minutes,
+        seconds: minutes > 0 ? seconds - minutes * 60 : seconds
+      };
+
+      if (this.$route.params.id === "generated") {
+        this.$router.push({
+          name: "quiz.details",
+          params: {
+            id: "generated",
+            results: {
+              timeTaken,
+              score,
+              questionsAmount: this.test.questionsAmount,
+              correctAnswers: correct
+            },
+            test: this.test
+          }
+        });
+
+        return;
+      }
+
       const attempt = {
         approved: score >= this.test.approvalPercentage,
         answers,
@@ -457,11 +484,7 @@ export default {
         questions: this.examQuestions.map(q => q.name),
         quizId: this.test.id,
         score,
-        timeTaken: {
-          hours,
-          minutes: hours > 0 ? minutes - hours * 60 : minutes,
-          seconds: minutes > 0 ? seconds - minutes * 60 : seconds
-        },
+        timeTaken,
         userId: this.userInfo.id
       };
 
@@ -627,14 +650,14 @@ export default {
       this.test = await this.$store.dispatch("getTestById", id);
     }
 
-    if (this.test.type === "auto" && this.review) {
+    if (id !== "generated" && this.test.type === "auto" && this.review) {
       await this.selectReviewQuestions();
 
       this.loadingQuiz = false;
       return;
     }
 
-    if (this.test.type === "auto") {
+    if (id !== "generated" && this.test.type === "auto") {
       await this.selectQuestions();
 
       this.loadingQuiz = false;
@@ -799,7 +822,6 @@ export default {
 
   color: #1278d1 !important;
 }
-
 
 .quiz__question-number.current.review {
   border-color: #ec9512;

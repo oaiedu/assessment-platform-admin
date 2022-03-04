@@ -33,9 +33,10 @@
               randomQuestionsNumber > 0 &&
                 randomQuestionsNumber <= checkNumber &&
                 !!title &&
-                (testType !== 'auto' && testType === 'selected'
-                  ? !!selectedQuestions.length
-                  : !!selectedRandom.length)
+                testType !== 'auto' &&
+                  (testType === 'selected'
+                    ? !!selectedQuestions.length
+                    : !!selectedRandom.length)
             "
             @click="!test ? createTest() : editTest()"
           >
@@ -227,8 +228,8 @@
           <v-col v-if="testType === 'auto'" class="pt-10">
             <p class="orange--text text-center pt-10">
               Questionários automáticos selecionam suas questões apenas quando
-              são iniciadas, de acordo com as disciplinas escolhidas e número de
-              questões.
+              são iniciadas, de acordo com as disciplinas escolhidas, nível e
+              número de questões.
             </p>
           </v-col>
 

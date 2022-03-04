@@ -12,7 +12,7 @@
       </v-btn>
     </v-toolbar>
 
-    <v-container>
+    <v-container class="px-4">
       <v-row class="ma-0 pa-0">
         <v-col class="ma-0 pa-0">
           <v-text-field
@@ -73,6 +73,48 @@
           </v-select>
         </v-col>
       </v-row>
+
+      <v-row class="ma-0 pa-0">
+        <v-select
+          v-model="level"
+          rounded
+          flat
+          outlined
+          dense
+          label="Nível"
+          item-value="value"
+          item-text="label"
+          :items="levels"
+        ></v-select>
+      </v-row>
+
+      <v-row class="ma-0 pa-0">
+        <v-checkbox
+          v-model="unlimitedTime"
+          label="Tempo de prova ilimitado"
+        ></v-checkbox>
+      </v-row>
+
+      <v-row class="ma-0 pa-0">
+        <v-text-field
+          v-model="time.hours"
+          class="mr-3"
+          label="Horas"
+          type="number"
+          style="width: 100px; flex: none"
+          :rules="[v => v >= 0 || 'Valor inválido']"
+          :disabled="unlimitedTime"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="time.minutes"
+          label="Minutos"
+          type="number"
+          style="width: 100px; flex: none"
+          :rules="[v => (v >= 0 && v < 60) || 'Valor inválido']"
+          :disabled="unlimitedTime"
+        ></v-text-field>
+      </v-row>
     </v-container>
 
     <v-card-actions class="mt-0 pb-4 pt-0">
@@ -83,19 +125,17 @@
         :dark="
           !(
             testSubjects.length === 0 ||
-            questionsNumber > 50 ||
             questionsNumber < 1 ||
             questionsNumber > checkNumber
           )
         "
         :loading="loading"
         :disabled="
-          testSubjects.length === 0 ||
-            questionsNumber > 50 ||
-            questionsNumber < 1 ||
-            questionsNumber > checkNumber
+          questionsNumber < 1 ||
+            questionsNumber > checkNumber ||
+            testSubjects.length === 0
         "
-        @click="selectRandom()"
+        @click="selectQuestions()"
       >
         Começar
       </v-btn>
@@ -119,12 +159,51 @@ export default {
       selectedSubjects: [],
       selectedQuestions: [],
       testSubjects: [],
+      unlimitedTime: true,
+      time: {
+        hours: 0,
+        minutes: 0,
+        seconds: 0
+      },
+      level: {
+        index: 0,
+        name: "beginner"
+      },
+      levels: [
+        {
+          value: {
+            index: 0,
+            name: "beginner"
+          },
+          label: "Iniciante"
+        },
+        {
+          value: {
+            index: 1,
+            name: "intermediary"
+          },
+          label: "Intermediário"
+        },
+        {
+          value: {
+            index: 2,
+            name: "advanced"
+          },
+          label: "Avançado"
+        },
+        {
+          value: {
+            index: 3,
+            name: "expert"
+          },
+          label: "Experiente"
+        }
+      ],
       rule: [
-        v => v <= 50 || "Máximo de 50 questões",
         v => v >= 1 || "Apenas números positivos",
         v =>
           v <= this.checkNumber ||
-          "Não há questões suficientes para o número escolhido"
+          "Não há questões suficientes para a disciplina e nível escolhidos"
       ]
     };
   },
@@ -140,7 +219,10 @@ export default {
       let amount = 0;
 
       subjects.forEach(sub => {
-        amount += this.$store.getters.getNumberOfQuestionBySubject(sub);
+        amount += this.$store.getters.getNumberOfQuestionBySubjectAndLevel(
+          sub,
+          this.level.index
+        );
       });
 
       return amount;
@@ -158,49 +240,78 @@ export default {
     }
   },
   methods: {
-    async selectRandom() {
-      const amount = this.questionsNumber;
-      const subjects = this.testSubjects;
-      const selected = [];
-      const allQuestions = [];
-
-      this.selectedQuestions = [];
-
+    async selectQuestions() {
       this.$store.commit("setLoading", true);
 
-      const promises = subjects.map(async subject => {
-        const questions = await this.$store.dispatch(
+      const questions = [];
+      const temp = [];
+
+      const selectedData = [];
+
+      for (const subject of this.testSubjects) {
+        const subQuestions = await this.$store.dispatch(
           "getSubjectQuestions",
           subject
         );
-        questions.forEach(question =>
-          allQuestions.push({ name: question, subject })
-        );
 
-        return questions;
-      });
+        subQuestions.forEach(q => {
+          questions.push({
+            name: q.name,
+            level: q.level,
+            subject
+          });
+        });
+      }
 
-      await Promise.all(promises);
+      while (temp.length < questions.length) {
+        const index = Math.floor(Math.random() * questions.length);
 
-      while (
-        selected.length < amount &&
-        selected.length < allQuestions.length
-      ) {
-        const index = Math.floor(Math.random() * allQuestions.length);
-        if (!selected.includes(allQuestions[index].name)) {
-          const question = await this.$store.dispatch(
-            "getQuestionByName",
-            allQuestions[index].name
-          );
-
-          selected.push(allQuestions[index].name);
-          this.selectedQuestions.push(question);
+        if (!temp.includes(questions[index].name)) {
+          temp.push(questions[index].name);
         }
       }
 
+      const randomQuestions = temp.map(questionName =>
+        questions.find(q => q.name === questionName)
+      );
+
+      let loop = 0;
+
+      while (
+        selectedData.length < this.questionsNumber &&
+        selectedData.length < randomQuestions.length &&
+        loop < randomQuestions.length
+      ) {
+        const question = randomQuestions[loop];
+
+        const questionData = await this.$store.dispatch(
+          "getQuestionByName",
+          question.name
+        );
+
+        if (randomQuestions[loop].level <= questionData.level.index) {
+          selectedData.push(questionData);
+        }
+
+        loop++;
+      }
+
+      this.selectedQuestions = selectedData;
+
       this.$store.commit("setLoading", false);
 
-      this.$emit("generated", this.selectedQuestions);
+      this.$emit("generated", {
+        questions: this.selectedQuestions,
+        level: this.level,
+        unlimitedTime:
+          this.unlimitedTime ||
+          (+this.time.hours === 0 && +this.time.minutes === 0),
+        time: {
+          hours: +this.time.hours,
+          minutes: +this.time.minutes,
+          seconds: 0
+        }
+      });
       this.close();
     },
     toggle() {
@@ -215,6 +326,17 @@ export default {
     close() {
       this.selectedQuestions = [];
       this.selectedSubjects = [];
+      this.testSubjects = [];
+      (this.level = {
+        index: 0,
+        name: "beginner"
+      }),
+        (this.time = {
+          hours: 0,
+          minutes: 0,
+          seconds: 0
+        });
+      this.unlimitedTime = true;
       this.questionsNumber = 1;
 
       this.$emit("closeDialog");

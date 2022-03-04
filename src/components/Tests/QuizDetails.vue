@@ -144,7 +144,12 @@
       </v-row>
     </v-card>
 
-    <v-card flat class="my-4" width="100%">
+    <v-card
+      v-if="$route.params.id !== 'generated'"
+      flat
+      class="my-4"
+      width="100%"
+    >
       <v-card-title>
         <h3 class="quiz-detail__attempts-title">Tentativas anteriores</h3>
       </v-card-title>
@@ -152,7 +157,7 @@
       <v-data-table
         v-if="test && attempts"
         hide-default-footer
-        class="quiz__attempts-table"
+        class="quiz-detail__attempts-table"
         no-data-text="Não há tentativas no momento"
         :headers="headersAttempts"
         :items="attempts"
@@ -209,6 +214,76 @@
       </v-data-table>
     </v-card>
 
+    <v-dialog v-model="resultsDialog" width="500px">
+      <v-card v-if="resultsDialog" class="pa-4">
+        <v-card-title class="pa-0 mt-0 mb-4">
+          <v-row class="pa-0 ma-0" justify="center" style="position: relative">
+            <h2 class="quiz-detail__results-title">
+              Seus resultados
+            </h2>
+
+            <v-btn
+              icon
+              class="quiz-detail__results-close"
+              @click="resultsDialog = false"
+            >
+              <v-icon>{{ mdiClose }}</v-icon>
+            </v-btn>
+          </v-row>
+        </v-card-title>
+
+        <v-row align="center" class="pa-0 px-4 ma-0">
+          <div class="quiz-detail__score-container">
+            <div
+              class="quiz-detail__donut"
+              :style="{
+                background: `conic-gradient(
+                    from 0deg at 50% 50%,
+                    ${color(results.score)} 0%,
+                    ${color(results.score)} ${results.score}%,
+                    ${color(results.score)}20 ${results.score}%,
+                    ${color(results.score)}20 100%
+                  )`
+              }"
+            >
+              <span class="quiz-detail__score">
+                <span class="quiz-detail__percentage"
+                  >{{ results.score.toFixed(2) }}%</span
+                >
+
+                <span class="quiz-detail__amount">
+                  {{ results.correctAnswers }} / {{ results.questionsAmount }}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div class="quiz-detail__time-taken">
+            <span class="quiz-detail__time-taken-title">Tempo gasto</span>
+
+            <span class="quiz-detail__time">
+              {{ results.timeTaken.hours }}h {{ results.timeTaken.minutes }}m
+              {{ results.timeTaken.seconds }}s
+            </span>
+          </div>
+        </v-row>
+
+        <v-card-actions>
+          <v-row class="pa-0 ma-0" justify="center">
+            <v-btn
+              dark
+              rounded
+              class="mt-6 mb-0"
+              color="blue"
+              @click="resultsDialog = false"
+            >
+              OK
+            </v-btn>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-model="startDialog" width="500px">
       <v-card>
         <v-card-title class="pa-4 ma-0">
@@ -227,7 +302,10 @@
           </v-row>
         </v-card-title>
 
-        <v-card-text v-if="test">
+        <v-card-text
+          v-if="test"
+          :class="{ 'pa-0': $route.params.id === 'generated' }"
+        >
           <v-row class="pa-0 ma-0" justify="center">
             <p
               v-if="test.unlimitedTime"
@@ -248,7 +326,11 @@
           </v-row>
         </v-card-text>
 
-        <v-row class="pa-0 ma-0" justify="center">
+        <v-row
+          v-if="$route.params.id !== 'generated'"
+          class="pa-0 ma-0 mb-6"
+          justify="center"
+        >
           <div
             class="quiz-detail__start-practice"
             @click="practice = !practice"
@@ -264,7 +346,7 @@
             <v-btn
               dark
               rounded
-              class="mt-6 mb-2"
+              class="mt-0 mb-2"
               color="blue"
               @click="startQuiz()"
             >
@@ -299,8 +381,10 @@ export default {
       mdiFileDocumentOutline,
       mdiHelp,
       mdiThumbUpOutline,
+      results: null,
       test: null,
       startDialog: false,
+      resultsDialog: false,
       practice: false,
       headersAttempts: [
         { text: "#", value: "index", sortable: false, align: "center" },
@@ -341,6 +425,15 @@ export default {
     }
   },
   methods: {
+    color(score) {
+      return score >= 100
+        ? "#42D662"
+        : score >= 80
+        ? "#1e88e5"
+        : score >= 50
+        ? "#edab00"
+        : "#ff4141";
+    },
     getDateSentence(iso) {
       const date = new Date(iso);
 
@@ -416,7 +509,7 @@ export default {
           params: {
             id: "generated",
             test: this.test,
-            mode: this.practice ? "practice" : "exam"
+            mode: "practice"
           }
         });
       } else {
@@ -440,8 +533,13 @@ export default {
 
     if (id === "generated") {
       this.test = this.$route.params.test;
+      this.results = this.$route.params.results;
     } else {
       this.test = await this.$store.dispatch("getTestById", id);
+    }
+
+    if (this.results) {
+      this.resultsDialog = true;
     }
 
     if (this.userInfo && this.userInfo.attempts) {
@@ -555,13 +653,15 @@ export default {
 }
 
 .quiz-detail__attempts-title,
-.quiz-detail__start-title {
+.quiz-detail__start-title,
+.quiz-detail__results-title {
   color: #3d3d3d;
   font-size: 1.2rem;
   font-weight: 500;
 }
 
-.quiz-detail__start-close {
+.quiz-detail__start-close,
+.quiz-detail__results-close {
   position: absolute;
   right: 0;
 }
@@ -585,12 +685,92 @@ export default {
   cursor: pointer;
 }
 
-.quiz__attempts-table /deep/ tbody tr {
+.quiz-detail__attempts-table /deep/ tbody tr {
   transition: background-color 0.1s ease;
 }
 
-.quiz__attempts-table /deep/ tbody tr:hover {
+.quiz-detail__attempts-table /deep/ tbody tr:hover {
   background-color: #f7f7f7 !important;
+}
+
+.quiz-detail__score-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  flex: 1;
+
+  width: 100%;
+}
+
+.quiz-detail__donut {
+  position: relative;
+
+  width: 160px;
+  height: 160px;
+
+  border-radius: 50%;
+
+  transition: background-color 1s ease;
+}
+
+.quiz-detail__donut::before {
+  content: "";
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  width: 80%;
+  height: 80%;
+
+  border-radius: 50%;
+  background-color: #fff;
+
+  transform: translate(-50%, -50%);
+}
+
+.quiz-detail__score {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  position: absolute;
+  top: 53%;
+  left: 50%;
+
+  width: 80%;
+
+  text-align: center;
+  font-weight: medium;
+  font-size: 1.6rem;
+  color: #5d5d5d;
+
+  transform: translate(-50%, -50%);
+}
+
+.quiz-detail__time-taken {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  flex: 1;
+
+  width: 100%;
+}
+
+.quiz-detail__time-taken-title {
+  font-weight: medium;
+  font-size: 1.2rem;
+  color: #5d5d5d;
+}
+
+.quiz-detail__time {
+  font-weight: medium;
+  font-size: 1.4rem;
+  color: #3d3d3d;
 }
 
 a,
