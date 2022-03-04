@@ -127,11 +127,19 @@
 
                       <v-row class="pa-0 ma-0">
                         <v-col cols="12" class="pa-0 ma-0">
-                          <VueSimplemde v-model="editedQuestionDescription" />
+                          <VueTextEditor
+                            v-if="ready"
+                            outlined
+                            placeholder="Descrição"
+                            :groups="['format', 'align', 'list', 'format2']"
+                            :value="editedQuestionDescription"
+                            :height="300"
+                            @textChange="editedQuestionDescription = $event"
+                          />
                         </v-col>
                       </v-row>
 
-                      <v-row class="pa-0 ma-0">
+                      <v-row class="pa-0 ma-0 mt-6">
                         <v-col class="pa-0 ma-0">
                           <v-file-input
                             v-model="image"
@@ -221,16 +229,16 @@
 </template>
 
 <script>
-import "simplemde/dist/simplemde.min.css";
-import VueSimplemde from "vue-simplemde";
 import { mdiClose, mdiArrowLeft, mdiArrowRight, mdiContentSave } from "@mdi/js";
+
 import Preview from "./Preview";
+import VueTextEditor from "../Shared/VueTextEditor.vue";
 
 export default {
   name: "EditQuestion",
   components: {
-    VueSimplemde,
-    Preview
+    Preview,
+    VueTextEditor
   },
   props: ["question", "userClaims", "userInfo", "isSearching"],
   data() {
@@ -239,6 +247,7 @@ export default {
       mdiArrowLeft,
       mdiArrowRight,
       mdiContentSave,
+      ready: false,
       dialogState: false,
       imagePreview: "",
       letters: ["A", "B", "C", "D"],
@@ -340,6 +349,8 @@ export default {
       this.editedAnswers.forEach(element => {
         if (element.value === true) this.radios = element.ansId;
       });
+
+      this.ready = true;
     },
     updateData(variable) {
       this.editedQuestionDescription = variable;
@@ -418,6 +429,7 @@ export default {
       this.editedName = null;
       this.editedSubject = null;
       this.editedImageSize = null;
+      this.ready = false;
       this.editedLevel = {
         index: 0,
         name: "beginner"
@@ -464,5 +476,9 @@ export default {
 
 .answer-block .col {
   padding: 0 10px 0 10px !important;
+}
+
+.v-text-editor__container {
+  border-radius: 28px;
 }
 </style>

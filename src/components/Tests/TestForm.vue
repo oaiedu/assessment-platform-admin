@@ -21,14 +21,18 @@
             class="mr-4"
             :loading="loading"
             :disabled="
-              !title ||
+              randomQuestionsNumber < 1 ||
+                randomQuestionsNumber > checkNumber ||
+                !title ||
                 (testType !== 'auto' &&
                   (testType === 'selected'
                     ? !selectedQuestions.length
                     : !selectedRandom.length))
             "
             :dark="
-              !!title &&
+              randomQuestionsNumber > 0 &&
+                randomQuestionsNumber <= checkNumber &&
+                !!title &&
                 (testType !== 'auto' && testType === 'selected'
                   ? !!selectedQuestions.length
                   : !!selectedRandom.length)
@@ -58,17 +62,18 @@
             </v-row>
 
             <v-row class="ma-0 pa-0">
-              <v-textarea
+              <VueTextEditor
+                v-if="ready"
                 outlined
-                rounded
-                required
-                no-resize
-                v-model="instructions"
-                label="Instruções (Opcional)"
-              ></v-textarea>
+                placeholder="Instruções (Opcional)"
+                :groups="['format', 'align', 'list', 'format2']"
+                :value="instructions"
+                :height="240"
+                @textChange="instructions = $event"
+              />
             </v-row>
 
-            <v-row class="pa-0 ma-0">
+            <v-row class="pa-0 ma-0 mt-8">
               <v-col class="pa-0 ma-0">
                 <v-select
                   v-model="testType"
@@ -276,7 +281,7 @@
                 single-line
                 outlined
                 hide-details
-                label="Procurar por Nome"
+                label="Procurar por ID"
                 :append-icon="mdiMagnify"
                 @keydown="searchQuery($event)"
               ></v-text-field>
@@ -385,10 +390,11 @@ import {
 import Ripple from "vuetify/lib/directives/ripple";
 
 import Paginator from "../Paginator";
+import VueTextEditor from "../Shared/VueTextEditor.vue";
 
 export default {
   directives: { Ripple },
-  components: { Paginator },
+  components: { Paginator, VueTextEditor },
   props: {
     test: {
       type: Object,
@@ -406,6 +412,7 @@ export default {
       mdiClose,
       mdiContentSave,
       mdiMagnify,
+      ready: false,
       testType: "selected",
       randomizedPage: 1,
       randomQuestionsNumber: 1,
@@ -481,7 +488,7 @@ export default {
       pageCount: 15,
       itemsPerPage: 8,
       headers: [
-        { text: "Nome", align: "left", sortable: false, value: "name" },
+        { text: "ID", align: "left", sortable: false, value: "name" },
         {
           text: "Disciplina",
           align: "center",
@@ -491,7 +498,7 @@ export default {
         { text: "Nível", align: "center", value: "level" }
       ],
       randomHeaders: [
-        { text: "Nome", align: "center", value: "name" },
+        { text: "ID", align: "center", value: "name" },
         { text: "Disciplina", align: "center", value: "subject" },
         { text: "Nível", align: "center", value: "level" }
       ],
@@ -623,6 +630,7 @@ export default {
       this.$emit("closeDialogNew");
     },
     setInitialData() {
+      this.ready = false;
       this.testType = "selected";
       this.randomQuestionsNumber = null;
       this.selectedSubjects = [];
@@ -899,6 +907,8 @@ export default {
 
     this.testSubjects = this.subjects.length > 0 ? [this.subjects[0].name] : [];
     this.setTest();
+
+    this.ready = true;
   },
   beforeDestroy() {
     this.search = "";
