@@ -162,7 +162,7 @@ export default {
     headers() {
       return this.userClaims && this.userClaims["admin"]
         ? [
-            { text: "Nome", sortable: true, value: "name", align: "left" },
+            { text: "ID", sortable: true, value: "name", align: "left" },
             {
               text: "Usuário",
               value: "user.name",
@@ -190,7 +190,7 @@ export default {
             { text: "Ações", value: "actions", sortable: false, align: "right" }
           ]
         : [
-            { text: "Nome", sortable: true, value: "name", align: "left" },
+            { text: "ID", sortable: true, value: "name", align: "left" },
             {
               text: "Disciplina",
               value: "subject",

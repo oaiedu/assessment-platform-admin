@@ -8,7 +8,7 @@
       <v-container>
         <v-container>
           <SearchBox
-            label="Procurar por Nome"
+            label="Procurar por ID"
             @enter="searchQuery($event)"
             @textChange="searchTextChange($event)"
           />
@@ -196,53 +196,6 @@ export default {
     };
   },
   computed: {
-    headers() {
-      return this.userClaims && this.userClaims["admin"]
-        ? [
-            { text: "Nome", sortable: true, value: "name", align: "left" },
-            {
-              text: "Usuário",
-              value: "user.name",
-              sortable: true,
-              align: "center"
-            },
-            {
-              text: "E-mail",
-              value: "user.email",
-              sortable: true,
-              align: "center"
-            },
-            {
-              text: "Disciplina",
-              value: "subject",
-              sortable: true,
-              align: "center"
-            },
-            {
-              text: "Status",
-              value: "status",
-              sortable: true,
-              align: "center"
-            },
-            { text: "Ações", value: "actions", sortable: false, align: "right" }
-          ]
-        : [
-            { text: "Nome", sortable: true, value: "name", align: "left" },
-            {
-              text: "Disciplina",
-              value: "subject",
-              sortable: true,
-              align: "center"
-            },
-            {
-              text: "Status",
-              value: "status",
-              sortable: true,
-              align: "center"
-            },
-            { text: "Ações", value: "actions", sortable: false, align: "right" }
-          ];
-    },
     loading() {
       return this.$store.getters.loading;
     },
