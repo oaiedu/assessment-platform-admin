@@ -1,12 +1,8 @@
 <template>
-  <v-container>
-    <v-container>
-      <h1 class="text-center blue--text">Perfil</h1>
-    </v-container>
-
-    <v-row justify="center">
-      <v-col cols="12" sm="10" md="8" lg="6">
-        <v-card ref="form">
+  <v-container class="ma-0 pa-0" fluid>
+    <v-row justify="center" class="ma-0 pa-0">
+      <v-col cols="12" sm="10" md="8" lg="6" class="ma-0 pa-0">
+        <v-card ref="form" class="mt-8">
           <v-card-text>
             <div class="text-center">
               <v-row>

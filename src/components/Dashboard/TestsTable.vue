@@ -271,7 +271,8 @@ export default {
   background-color: white !important;
 }
 
-.dashboard-tests-table .item-active.admin {
+.dashboard-tests-table .item-active.admin,
+.dashboard-tests-table .item-active.student {
   cursor: pointer !important;
 }
 </style>
