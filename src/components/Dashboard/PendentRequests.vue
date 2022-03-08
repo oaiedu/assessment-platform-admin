@@ -144,7 +144,7 @@ export default {
   left: 230px;
   top: 25px;
 
-  color: #555;
+  color: #888888;
   font-size: 0.8rem;
 
   cursor: pointer;
@@ -153,7 +153,7 @@ export default {
 }
 
 .see-all:hover {
-  color: #2196f3;
+  color: #1e88e5;
 }
 
 .requests {
