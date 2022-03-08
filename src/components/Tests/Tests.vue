@@ -22,7 +22,7 @@
         <DeleteAlert
           :confirmCondition="deleteConfirmed"
           :itemsCondition="hasTrueMarkStatus"
-          itemsText="As seguintes provas foram marcadas para exclusão:"
+          itemsText="Os seguintes questionários foram marcados para exclusão:"
           :items="markedTestsByUser"
           :isAdmin="userClaims && userClaims['admin']"
           :adminItems="markedTestsAdmin"
@@ -141,7 +141,9 @@
           </v-btn>
         </template>
         <span>{{
-          userClaims && !userClaims["student"] ? "Criar Prova" : "Gerar Prova"
+          userClaims && !userClaims["student"]
+            ? "Criar Questionário"
+            : "Gerar Questionário"
         }}</span>
       </v-tooltip>
 
@@ -195,7 +197,7 @@
       </div>
 
       <DeleteWarning
-        label="Tem certeza de que deseja excluir esta prova?"
+        label="Tem certeza de que deseja excluir este questionário?"
         :state="deleteTestSnackBar"
         @confirm="
           deleteTest(deleteSelect.id);
@@ -304,11 +306,11 @@ export default {
     generateExam(data) {
       const test = {
         id: "generated",
-        title: "Quiz de treino",
+        title: "Questionário de treino",
         type: "auto",
         level: data.level,
         instructions:
-          "Esse quiz é apenas para <b>treino</b> e <b>não</b> ficará em seu histórico de tentativas.",
+          "Esse questionário é apenas para <b>treino</b> e <b>não</b> ficará em seu histórico de tentativas.",
         questions: data.questions,
         questionsAmount: data.questions.length,
         questionsNames: data.questions.map(q => q.name),

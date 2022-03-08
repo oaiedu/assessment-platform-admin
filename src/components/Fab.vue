@@ -45,7 +45,7 @@
           <v-icon>{{ fileMultipleIcon }}</v-icon>
         </v-btn>
       </template>
-      <span>Criar nova prova</span>
+      <span>Criar novo questionário</span>
     </v-tooltip>
   </v-speed-dial>
 </template>

@@ -5,7 +5,7 @@
         <v-btn icon dark class="mr-2" @click="close()">
           <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
-        <h2>{{ !test ? "Criar nova" : "Editar" }} prova</h2>
+        <h2>{{ !test ? "Criar novo" : "Editar" }} questionário</h2>
         <v-spacer></v-spacer>
       </v-toolbar>
 
@@ -34,9 +34,9 @@
                 randomQuestionsNumber <= checkNumber &&
                 !!title &&
                 testType !== 'auto' &&
-                  (testType === 'selected'
-                    ? !!selectedQuestions.length
-                    : !!selectedRandom.length)
+                (testType === 'selected'
+                  ? !!selectedQuestions.length
+                  : !!selectedRandom.length)
             "
             @click="!test ? createTest() : editTest()"
           >
@@ -85,7 +85,7 @@
                   item-value="value"
                   item-text="label"
                   :items="types"
-                  label="Tipo de prova"
+                  label="Tipo de questionário"
                 >
                 </v-select>
               </v-col>
@@ -199,7 +199,7 @@
             <v-row class="ma-0 pa-0">
               <v-checkbox
                 v-model="unlimitedTime"
-                label="Tempo de prova ilimitado"
+                label="Tempo de questionário ilimitado"
               ></v-checkbox>
             </v-row>
 
@@ -360,7 +360,7 @@
       :timeout="15000"
     >
       <span style="color: white; font-size: 1rem">
-        Uma prova com este Título já foi criada!
+        Um questionário com este Título já foi criado!
         <br />
         Por favor, mude o Título.
       </span>

@@ -135,11 +135,12 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Esta questão está sendo usada nas seguintes provas:
+          Esta questão está sendo usada nos seguintes questionários:
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          Só será possível rejeitá-la quando não se encontrar em nenhum teste.
+          Só será possível rejeitá-la quando não se encontrar em nenhum
+          questionário.
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn

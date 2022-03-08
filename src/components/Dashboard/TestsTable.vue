@@ -4,8 +4,8 @@
       hide-default-footer
       class="dashboard-tests-table"
       height="100%"
-      loading-text="Carregando provas..."
-      no-data-text="Não há provas a serem mostradas"
+      loading-text="Carregando questionários..."
+      no-data-text="Não há questionários a serem mostrados"
       style="height: calc(100% - 48px) !important;"
       :headers="headers"
       :items="tests"
@@ -15,7 +15,7 @@
     >
       <template v-slot:top>
         <v-toolbar dense flat color="white">
-          <h1 class="table-title">Provas recentes</h1>
+          <h1 class="table-title">Questionários recentes</h1>
         </v-toolbar>
 
         <div class="title-divider" />

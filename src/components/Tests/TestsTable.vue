@@ -4,8 +4,8 @@
       <v-data-table
         hide-default-footer
         class="elevation-1"
-        no-data-text="Não há provas a serem mostradas"
-        loading-text="Carregando provas..."
+        no-data-text="Não há questionários a serem mostrados"
+        loading-text="Carregando questionários..."
         :headers="headers"
         :items="items"
         :page="page"
@@ -80,7 +80,7 @@
                   {{ mdiFileCompare }}
                 </v-icon>
               </template>
-              <span>Visualizar prova</span>
+              <span>Visualizar questionário</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">

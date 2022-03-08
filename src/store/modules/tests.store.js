@@ -444,7 +444,11 @@ const actions = {
         })
         .catch(error => {
           commit("setLoading", false);
-          const errorModel = showErrorMessage("load", "Provas", error.message);
+          const errorModel = showErrorMessage(
+            "load",
+            "Questionários",
+            error.message
+          );
           commit("setError", { message: errorModel });
           createErrorLog("Test Page Load", error.message, {
             payload,
@@ -521,7 +525,11 @@ const actions = {
         })
         .catch(error => {
           commit("setLoading", false);
-          const errorModel = showErrorMessage("load", "Provas", error.message);
+          const errorModel = showErrorMessage(
+            "load",
+            "Questionários",
+            error.message
+          );
           commit("setError", { message: errorModel });
           createErrorLog("Test FOL Page Load", error.message, {
             payload,
@@ -644,7 +652,7 @@ const actions = {
         commit("setLoading", false);
         const errorModel = showErrorMessage(
           "load",
-          "Provas",
+          "Questionários",
           "Searching error - " + error.message
         );
         commit("setError", { message: errorModel });
@@ -804,7 +812,7 @@ const actions = {
         commit("removeDeleteMarkTest", id);
         commit("updateCurrentTestsPage", test);
         commit("setLoading", false);
-        commit("setSuccess", "Prova restaurada com sucesso!");
+        commit("setSuccess", "Questionário restaurado com sucesso!");
       })
       .catch(error => {
         commit("setLoading", false);
@@ -893,7 +901,7 @@ const actions = {
           commit("updateTest", test);
           commit("updateCurrentTestsPage", test);
           if (isSearching) commit("updateFilteredTest", test);
-          commit("setSuccess", "Provas restauradas com sucesso!");
+          commit("setSuccess", "Questionários restaurados com sucesso!");
         });
       })
       .then(() => commit("setLoading", false))
@@ -953,12 +961,12 @@ const actions = {
           });
 
         commit("setLoading", false);
-        commit("setSuccess", "Provas excluídas com sucesso!");
+        commit("setSuccess", "Questionários excluídos com sucesso!");
       })
       .catch(error => {
         const errorModel = showErrorMessage(
           "exclusion",
-          "Provas",
+          "Questionários",
           error.message
         );
         commit("setError", { message: errorModel });
@@ -1058,9 +1066,13 @@ const actions = {
 
       dispatch("addTestsByWeek");
 
-      commit("setSuccess", "Prova criada com sucesso!");
+      commit("setSuccess", "Questionário criado com sucesso!");
     } catch (error) {
-      const errorModel = showErrorMessage("creation", "Prova", error.message);
+      const errorModel = showErrorMessage(
+        "creation",
+        "Questionário",
+        error.message
+      );
 
       commit("setError", { message: errorModel });
       createErrorLog("Test DB Insert", error.message, { test });
@@ -1105,10 +1117,14 @@ const actions = {
       }
 
       if (!payload.noMessage) {
-        commit("setSuccess", "Prova editada com sucesso!");
+        commit("setSuccess", "Questionário editado com sucesso!");
       }
     } catch (error) {
-      const errorModel = showErrorMessage("edition", "Prova", error.message);
+      const errorModel = showErrorMessage(
+        "edition",
+        "Questionário",
+        error.message
+      );
 
       commit("setError", { message: errorModel });
       createErrorLog("Test DB Update", error.message, { payload });
@@ -1180,7 +1196,11 @@ const actions = {
       })
       .catch(error => {
         commit("setLoading", false);
-        const errorModel = showErrorMessage("load", "Provas", error.message);
+        const errorModel = showErrorMessage(
+          "load",
+          "Questionários",
+          error.message
+        );
         commit("setError", { message: errorModel });
         createErrorLog("Last Tests Loading", error.message, {
           payload
@@ -1228,7 +1248,11 @@ const actions = {
 
       await Promise.all(promises);
     } catch (error) {
-      const errorModel = showErrorMessage("edition", "Quiz", error.message);
+      const errorModel = showErrorMessage(
+        "edition",
+        "Questionário",
+        error.message
+      );
 
       commit("setError", { message: errorModel });
       createErrorLog("Add Question Auto Quiz by Subject", error.message, {

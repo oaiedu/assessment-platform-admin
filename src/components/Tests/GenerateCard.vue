@@ -1,7 +1,9 @@
 <template>
   <v-card>
     <v-toolbar class="pt-2 mb-4" dense flat>
-      <v-card-title class="ma-0 pa-0 blue--text">Gerar prova</v-card-title>
+      <v-card-title class="ma-0 pa-0 blue--text"
+        >Gerar questionário</v-card-title
+      >
 
       <v-spacer></v-spacer>
 
@@ -91,7 +93,7 @@
       <v-row class="ma-0 pa-0">
         <v-checkbox
           v-model="unlimitedTime"
-          label="Tempo de prova ilimitado"
+          label="Tempo de questionário ilimitado"
         ></v-checkbox>
       </v-row>
 
