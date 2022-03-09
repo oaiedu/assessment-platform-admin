@@ -1,6 +1,7 @@
 <template>
   <v-container
-    class="pa-0 px-4 ma-0"
+    class="pa-0 ma-0"
+    :class="{ 'px-2': windowWidth <= 390, 'px-4': windowWidth > 390 }"
     style="max-width: unset; min-height: 100%; background: #efefef"
   >
     <v-row class="pa-4 ma-0">
@@ -32,7 +33,10 @@
     </v-card>
 
     <v-card flat class="mt-4" width="100%">
-      <v-row class="pa-0 ma-0" style="flex-wrap: nowrap; position: relative">
+      <v-row
+        class="pa-0 ma-0 quiz-detail__detail-row"
+        style="flex-wrap: nowrap"
+      >
         <div class="quiz-detail__detail-column info-column">
           <span class="quiz-detail__info-title">Detalhes</span>
 
@@ -119,11 +123,11 @@
             elevation="0"
             @click="startDialog = true"
           >
-            Começar questionário
+            Começar {{ windowWidth > 320 ? "questionário" : "" }}
           </v-btn>
         </div>
 
-        <v-divider vertical class="mx-0"></v-divider>
+        <v-divider class="mx-0" :vertical="windowWidth > 700"></v-divider>
 
         <div class="quiz-detail__detail-column instructions-column">
           <span class="quiz-detail__info-title">Instruções</span>
@@ -287,7 +291,11 @@
     <v-dialog v-model="startDialog" width="500px">
       <v-card>
         <v-card-title class="pa-4 ma-0">
-          <v-row class="pa-0 ma-0" justify="center" style="position: relative">
+          <v-row
+            class="pa-0 ma-0"
+            style="position: relative"
+            :justify="windowWidth > 340 ? 'center' : 'start'"
+          >
             <h2 class="quiz-detail__start-title">
               Antes de começar
             </h2>
@@ -304,18 +312,27 @@
 
         <v-card-text
           v-if="test"
+          class="px-4"
           :class="{ 'pa-0': $route.params.id === 'generated' }"
         >
-          <v-row class="pa-0 ma-0" justify="center">
+          <v-row
+            class="pa-0 ma-0"
+            :justify="windowWidth > 340 ? 'center' : 'start'"
+          >
             <p
               v-if="test.unlimitedTime"
-              class="text-center quiz-detail__start-info"
+              class="quiz-detail__start-info"
+              :class="{ 'text-center': windowWidth > 340 }"
             >
               O questionário não possui limite de tempo. O tempo será contado de
               forma crescente a partir do momento de início.
             </p>
 
-            <p v-else class="text-center quiz-detail__start-info">
+            <p
+              v-else
+              class="quiz-detail__start-info"
+              :class="{ 'text-center': windowWidth > 340 }"
+            >
               O questionário possui um limite de tempo de
               <strong style="display: inline-flex">
                 {{ test.time.hours }}h {{ test.time.minutes }}m
@@ -386,6 +403,7 @@ export default {
       startDialog: false,
       resultsDialog: false,
       practice: false,
+      windowWidth: 701,
       headersAttempts: [
         { text: "#", value: "index", sortable: false, align: "center" },
         { text: "Data", value: "date", sortable: false, align: "center" },
@@ -425,6 +443,9 @@ export default {
     }
   },
   methods: {
+    onResize() {
+      this.windowWidth = window.innerWidth;
+    },
     color(score) {
       return score >= 100
         ? "#42D662"
@@ -529,6 +550,9 @@ export default {
     }
   },
   async mounted() {
+    this.onResize();
+    window.addEventListener("resize", this.onResize, { passive: true });
+
     const id = this.$route.params.id;
 
     if (id === "generated") {
@@ -547,6 +571,13 @@ export default {
         .filter(a => a.quizId === id)
         .map((a, i) => ({ index: i, ...a }));
     }
+  },
+  beforeDestroy() {
+    if (!window) {
+      return;
+    }
+
+    window.removeEventListener("resize", this.onResize, { passive: true });
   }
 };
 </script>
@@ -783,5 +814,61 @@ a,
 a:hover {
   color: #888 !important;
   text-decoration-line: underline;
+}
+
+@media (max-width: 700px) {
+  .quiz-detail__detail-row {
+    flex-direction: column !important;
+  }
+
+  .quiz-detail__info-container {
+    justify-content: space-evenly;
+
+    width: 100%;
+  }
+
+  .quiz-detail__detail-column {
+    width: 100%;
+  }
+
+  .quiz-detail__detail-column.info-column {
+    align-items: center;
+    position: static;
+  }
+
+  .quiz-detail__detail-column.info-column .quiz-detail__info-title {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 450px) {
+  .quiz-detail__info-container {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 390px) {
+  .quiz-detail__info-container {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .quiz-detail__detail-column.info-column {
+    height: auto;
+  }
+}
+
+@media (max-width: 340px) {
+  .quiz-detail__start-info {
+    width: 100%;
+  }
+
+  .quiz-detail__start-practice {
+    width: 100%;
+
+    margin: 0 1rem;
+  }
 }
 </style>

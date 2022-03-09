@@ -1,6 +1,7 @@
 <template>
   <v-container
-    class="pa-0 px-4 ma-0"
+    class="pa-0 ma-0"
+    :class="{ 'px-2': windowWidth <= 360, 'px-4': windowWidth > 360 }"
     style="max-width: unset; min-height: 100%; background: #efefef"
   >
     <v-row class="pa-4 ma-0">
@@ -34,7 +35,7 @@
       class="mb-4"
       width="100%"
     >
-      <v-toolbar flat>
+      <v-toolbar flat class="">
         <span class="quiz__current-question">
           Questão {{ current }} de {{ examQuestions.length }}
         </span>
@@ -42,6 +43,7 @@
         <v-spacer></v-spacer>
 
         <Counter
+          v-if="windowWidth > 400"
           class="mr-4"
           :countdown="countdown"
           :static="review"
@@ -57,7 +59,8 @@
           text
           color="error"
           @click="exitQuiz(review ? '/quizzes/' + test.id : '/quizzes')"
-          >Sair {{ !review ? "do Questionário" : "" }}</v-btn
+          >Sair
+          {{ !review && windowWidth > 540 ? "do Questionário" : "" }}</v-btn
         >
       </v-toolbar>
 
@@ -65,6 +68,19 @@
 
       <div class="quiz__interaction-container">
         <div class="quiz__question-container py-4">
+          <Counter
+            v-if="windowWidth <= 400"
+            class="mx-4"
+            :countdown="countdown"
+            :static="review"
+            :time="review ? attempt.timeTaken : test.time"
+            :paused="review || finished"
+            @timeUp="
+              timesUp = !review;
+              finished = true;
+            "
+          />
+
           <span class="quiz__subject px-4">
             <strong>Disciplina:</strong>
             {{ examQuestions[current - 1].subject }}
@@ -112,7 +128,7 @@
           <v-btn
             v-if="!review && practice"
             elevation="0"
-            width="220px"
+            width="216px"
             class="quiz__answer-button mx-4 mt-0 mb-8"
             @click="showAnswer = !showAnswer"
           >
@@ -154,12 +170,25 @@
             <v-divider class="mt-5"></v-divider>
           </div>
 
+          <v-row v-if="!review && windowWidth <= 830" class="pa-0 px-4 ma-0">
+            <v-checkbox
+              label="Marcar para revisão"
+              :disabled="finished"
+              :input-value="
+                markedForReview.includes(examQuestions[current - 1].name)
+              "
+              @click="toggleReview(examQuestions[current - 1])"
+            ></v-checkbox>
+          </v-row>
+
           <v-row
-            class="pa-0 px-4 ma-0 mt-4"
             align="center"
             justify="space-between"
+            class="pa-0 px-4 ma-0 quiz__actions-row"
+            :class="{ 'mt-4': windowWidth > 830 || review }"
           >
             <v-btn
+              v-if="windowWidth > 340 || current > 1"
               rounded
               elevation="0"
               width="130px"
@@ -175,7 +204,7 @@
             </v-btn>
 
             <v-checkbox
-              v-if="!review"
+              v-if="!review && windowWidth > 830"
               label="Marcar para revisão"
               :disabled="finished"
               :input-value="
@@ -213,7 +242,10 @@
           </v-row>
         </div>
 
-        <v-divider vertical class="mr-4"></v-divider>
+        <v-divider
+          class="mr-4 quiz__column-divider"
+          :vertical="windowWidth > 700"
+        ></v-divider>
 
         <div class="quiz__question-control py-4">
           <span
@@ -249,7 +281,12 @@
             Todas as questões foram respondidas
           </span>
 
-          <div class="quiz__question-matrix">
+          <div
+            class="quiz__question-matrix"
+            :style="{
+              'grid-template-columns': `repeat(${matrixColumns}, 1fr)`
+            }"
+          >
             <v-btn
               v-for="(q, i) in examQuestions"
               :key="q.name"
@@ -327,6 +364,7 @@ export default {
       mdiEyeOutline,
       mdiEyeOffOutline,
       mdiFileChart,
+      windowWidth: 831,
       loadingQuiz: false,
       showAnswer: false,
       dialogEndQuiz: false,
@@ -368,11 +406,32 @@ export default {
         !this.test.unlimitedTime
       );
     },
+    matrixColumns() {
+      const w = this.windowWidth;
+      const full = w <= 700;
+
+      if (!full) {
+        return 7;
+      }
+
+      if (w > 580) {
+        return 10;
+      } else if (w > 480) {
+        return 8;
+      } else if (w > 360) {
+        return 7;
+      }
+
+      return 5;
+    },
     loading() {
       return this.$store.getters.loading;
     }
   },
   methods: {
+    onResize() {
+      this.windowWidth = window.innerWidth;
+    },
     getAnswerCustomData(answer) {
       if (!this.review) {
         return { class: "", color: "" };
@@ -630,6 +689,9 @@ export default {
     }
   },
   async mounted() {
+    this.onResize();
+    window.addEventListener("resize", this.onResize, { passive: true });
+
     this.loadingQuiz = true;
 
     const id = this.$route.params.id;
@@ -719,6 +781,13 @@ export default {
         };
       }
     }
+  },
+  beforeDestroy() {
+    if (!window) {
+      return;
+    }
+
+    window.removeEventListener("resize", this.onResize, { passive: true });
   }
 };
 </script>
@@ -771,7 +840,6 @@ export default {
 
 .quiz__question-matrix {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
   row-gap: 1rem;
 
   width: 100%;
@@ -862,6 +930,10 @@ export default {
   transform: translate(-50%, -50%);
 }
 
+.quiz__actions-row .v-btn {
+  width: 130px !important;
+}
+
 a,
 .slash {
   color: #9a9a9a !important;
@@ -877,5 +949,32 @@ a:hover {
 .hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .quiz__interaction-container {
+    flex-direction: column;
+  }
+
+  .quiz__column-divider {
+    width: 100%;
+  }
+
+  .quiz__question-control {
+    width: 100%;
+  }
+}
+
+@media (max-width: 340px) {
+  .quiz__actions-row {
+    flex-direction: column !important;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .quiz__missing-questions {
+    padding: 0 1rem;
+    text-align: center;
+  }
 }
 </style>

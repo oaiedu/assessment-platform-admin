@@ -74,7 +74,7 @@
 
     <v-container fluid>
       <v-row>
-        <v-col>
+        <v-col :cols="$vuetify.breakpoint.width <= 794 ? 12 : void 0">
           <v-card>
             <form @submit.prevent="onCreateQuestion">
               <v-stepper alt-labels v-model="e1">
@@ -224,7 +224,7 @@
           </v-card>
         </v-col>
 
-        <v-col>
+        <v-col :cols="$vuetify.breakpoint.width <= 600 ? 12 : void 0">
           <Preview
             :name="name"
             :subject="subject"
