@@ -1,0 +1,46 @@
+image: node:latest
+
+before_script:
+  - npm i -g firebase-tools
+
+stages:
+  - build
+  - deploy
+
+build-production:
+  stage: build
+  script:
+    - npm install --progress=false
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+  only:
+    - master
+
+build-develop:
+  stage: build
+  script:
+    - npm install --progress=false
+    - npm run build:dev
+  artifacts:
+    paths:
+      - dist/
+  only:
+    - develop
+
+deploy-production:
+  stage: deploy
+  script:
+    - firebase use default
+    - firebase deploy -m "Pipeline $CI_PIPELINE_ID | Build $CI_BUILD_ID" --non-interactive --only hosting --token $FIREBASE_TOKEN
+  only:
+    - master
+
+deploy-develop:
+  stage: deploy
+  script:
+    - firebase use develop
+    - firebase deploy -m "Pipeline $CI_PIPELINE_ID | Build $CI_BUILD_ID" --non-interactive --only hosting --token $FIREBASE_TOKEN
+  only:
+    - develop
