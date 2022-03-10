@@ -1,4 +1,4 @@
-image: node:14.5.4
+image: node:latest
 
 before_script:
   - npm i -g firebase-tools
@@ -11,6 +11,7 @@ build-production:
   stage: build
   script:
     - npm install --progress=false
+    - export NODE_OPTIONS=--openssl-legacy-provider
     - npm run build
   artifacts:
     paths:
@@ -22,6 +23,7 @@ build-develop:
   stage: build
   script:
     - npm install --progress=false
+    - export NODE_OPTIONS=--openssl-legacy-provider
     - npm run build:dev
   artifacts:
     paths:
