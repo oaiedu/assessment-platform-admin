@@ -24,7 +24,7 @@ build-develop:
   script:
     - npm install --progress=false
     - export NODE_OPTIONS=--openssl-legacy-provider
-    - npm run build:dev
+    - npm run build
   artifacts:
     paths:
       - dist/
