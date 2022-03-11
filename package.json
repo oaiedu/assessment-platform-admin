@@ -5,8 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "serve:prod": "vue-cli-service serve --mode production",
-    "build": "vue-cli-service build",
-    "build:dev": "vue-cli-service build --mode development",
+    "build": "cross-env NODE_ENV=production vue-cli-service build",
+    "build:dev": "cross-env NODE_ENV=development vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -35,6 +35,7 @@
     "@vue/cli-service": "^4.4.6",
     "@vue/eslint-config-standard": "^6.0.0",
     "babel-eslint": "^10.1.0",
+    "cross-env": "^7.0.3",
     "eslint": "^7.23.0",
     "eslint-plugin-vue": "^7.8.0",
     "sass": "^1.26.9",
