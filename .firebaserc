@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "develop-lg-quiz-generator",
+    "default": "cloud-quiz-generator",
     "develop": "develop-lg-quiz-generator"
   }
 }
