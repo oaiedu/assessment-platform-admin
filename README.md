@@ -1,4 +1,4 @@
-# LG Quiz Generator
+# Cloud Quiz Generator
 
 ## Project setup
 
