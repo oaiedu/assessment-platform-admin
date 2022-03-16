@@ -1,151 +1,177 @@
 <template>
-  <v-container fluid class="sign__card fill-height">
+  <v-container fluid class="sign__card">
     <div class="sign__pwr">
+      <img src="../../assets/LGlogo.svg" alt="Logo" />
+
       <h2>Cloud Quiz Generator</h2>
     </div>
+
     <div class="sign__title">
       <h2>
         {{ showSignIn ? "Entrar em minha conta" : "Criar uma conta" }}
       </h2>
     </div>
-    <v-row
-      class="sign__options"
-      justify="center"
-      align="center"
-      style="padding: 0; margin: 0;"
-    >
-      <v-col cols="10" style="padding: 0; margin: 0;">
-        <v-form @submit.prevent="onSignin" v-if="showSignIn">
-          <v-row justify="center">
-            <v-text-field
-              name="email"
-              label="E-mail"
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              :rules="required"
-            >
-            </v-text-field>
-          </v-row>
-          <v-row justify="center">
-            <v-text-field
-              name="password"
-              label="Senha"
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              :rules="required"
-            >
-            </v-text-field>
-          </v-row>
-          <v-row justify="center">
-            <v-btn text color="blue" @click="forgotPassword()"
-              >Esqueceu a senha?</v-btn
-            >
-          </v-row>
-          <div class="confirm-button-container">
-            <v-btn
-              color="blue"
-              :dark="!loading"
-              type="submit"
-              :disabled="loading"
-              :loading="loading"
-            >
-              Entrar
-              <span class="custom-loader">
-                <v-icon light></v-icon>
-              </span>
-            </v-btn>
-          </div>
-        </v-form>
 
-        <v-form @submit.prevent="onSignup" v-else>
-          <v-row justify="center">
-            <v-text-field
-              name="name"
-              label="Nome"
-              id="name"
-              v-model="name"
-              type="text"
-              :rules="required"
-              required
-            >
-            </v-text-field>
-          </v-row>
-          <v-row justify="center">
-            <v-text-field
-              name="email"
-              label="E-mail"
-              id="email"
-              v-model="email"
-              type="email"
-              :rules="required"
-              required
-            >
-            </v-text-field>
-          </v-row>
-          <v-row justify="center">
-            <v-text-field
-              name="password"
-              label="Senha"
-              id="password"
-              v-model="password"
-              type="password"
-              :rules="required"
-              required
-            >
-            </v-text-field>
-          </v-row>
-          <v-row justify="center">
-            <v-text-field
-              name="confirmPassword"
-              label="Confirmar senha"
-              id="confirmPassword"
-              v-model="confirmPassword"
-              type="password"
-              :rules="[...required, comparePassword]"
-            >
-            </v-text-field>
-          </v-row>
-          <div class="confirm-button-container">
-            <v-btn
-              color="blue"
-              :dark="!loading"
-              type="submit"
-              :disabled="loading"
-              :loading="loading"
-            >
-              Registrar
-              <span class="custom-loader">
-                <v-icon light></v-icon>
-              </span>
-            </v-btn>
-          </div>
-        </v-form>
-      </v-col>
+    <v-form v-if="showSignIn" class="sign__options" @submit.prevent="onSignin">
+      <v-row class="pa-0 ma-0">
+        <v-text-field
+          v-model="email"
+          id="email"
+          name="email"
+          label="E-mail"
+          type="email"
+          required
+          :rules="required"
+        ></v-text-field>
+      </v-row>
+
+      <v-row class="pa-0 ma-0">
+        <v-text-field
+          v-model="password"
+          required
+          id="password"
+          name="password"
+          label="Senha"
+          :rules="required"
+          :type="showPassword ? 'text' : 'password'"
+          :append-icon="showPassword ? mdiEyeOff : mdiEye"
+          @click:append="showPassword = !showPassword"
+        ></v-text-field>
+      </v-row>
+
+      <v-row class="sign__forgot-pw pa-0 ma-0 my-4">
+        <v-btn text color="#56b3ec" @click="forgotPassword()">
+          Esqueceu a senha?
+        </v-btn>
+      </v-row>
+
+      <v-btn
+        rounded
+        class="font-weight-bold"
+        color="#56b3ec"
+        type="submit"
+        height="50px"
+        width="100%"
+        :dark="!!(email && password)"
+        :disabled="!(email && password)"
+        :loading="loading"
+      >
+        Entrar
+        <span class="custom-loader">
+          <v-icon light></v-icon>
+        </span>
+      </v-btn>
+    </v-form>
+
+    <v-form v-else class="sign__options" @submit.prevent="onSignup">
+      <v-row class="pa-0 ma-0">
+        <v-text-field
+          v-model="name"
+          required
+          id="name"
+          name="name"
+          label="Nome"
+          type="text"
+          :rules="required"
+        ></v-text-field>
+      </v-row>
+
+      <v-row class="pa-0 ma-0">
+        <v-text-field
+          v-model="email"
+          required
+          id="email"
+          name="email"
+          label="E-mail"
+          type="email"
+          :rules="required"
+        ></v-text-field>
+      </v-row>
+
+      <v-row class="pa-0 ma-0">
+        <v-text-field
+          v-model="password"
+          required
+          id="password"
+          name="password"
+          label="Senha"
+          :rules="required"
+          :type="showPassword ? 'text' : 'password'"
+          :append-icon="showPassword ? mdiEyeOff : mdiEye"
+          @click:append="showPassword = !showPassword"
+        ></v-text-field>
+      </v-row>
+
+      <v-row class="pa-0 ma-0 mb-4">
+        <v-text-field
+          v-model="confirmPassword"
+          id="confirmPassword"
+          name="confirmPassword"
+          label="Confirmar senha"
+          :rules="[...required, comparePassword]"
+          :type="showPasswordConfirm ? 'text' : 'password'"
+          :append-icon="showPasswordConfirm ? mdiEyeOff : mdiEye"
+          @click:append="showPasswordConfirm = !showPasswordConfirm"
+        ></v-text-field>
+      </v-row>
+
+      <v-btn
+        rounded
+        class="font-weight-bold"
+        color="#56b3ec"
+        type="submit"
+        height="50px"
+        width="100%"
+        :dark="!!(name && email && password && confirmPassword)"
+        :disabled="!(name && email && password && confirmPassword)"
+        :loading="loading"
+      >
+        Criar conta
+        <span class="custom-loader">
+          <v-icon light></v-icon>
+        </span>
+      </v-btn>
+    </v-form>
+
+    <v-row class="pa-0 ma-0 grey--text" style="flex: 0">
+      <span class="sign__or">or</span>
+    </v-row>
+
+    <v-row class="pa-0 ma-0" style="flex: 0">
+      <v-btn
+        fab
+        dark
+        elevation="0"
+        color="#f65314"
+        :loading="loading"
+        @click="googleSign()"
+      >
+        <v-icon>{{ mdiGoogle }}</v-icon>
+      </v-btn>
     </v-row>
 
     <div class="sign__footer">
-      <v-row class="to-sign__in" v-if="showSignUp">
+      <v-row class="to-sign__in pa-0 ma-0" v-if="showSignUp">
         <span>Já possui uma conta?</span>
+
         <v-btn
           style="padding: 0;"
           text
-          color="blue"
+          color="#56b3ec"
           @click="signIn"
           :ripple="false"
         >
           <strong>Entrar</strong>
         </v-btn>
       </v-row>
-      <v-row class="to-sign__up" v-else>
+
+      <v-row class="to-sign__up pa-0 ma-0" v-else>
         <span>Não possui uma conta?</span>
+
         <v-btn
           style="padding: 0;"
           text
-          color="blue"
+          color="#56b3ec"
           @click="signUp"
           :ripple="false"
         >
@@ -157,14 +183,22 @@
 </template>
 
 <script>
+import { mdiGoogle, mdiEye, mdiEyeOff } from "@mdi/js";
+
 export default {
+  name: "SignUser",
   data: () => ({
+    mdiGoogle,
+    mdiEye,
+    mdiEyeOff,
     showSignIn: true,
     showSignUp: false,
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    showPassword: false,
+    showPasswordConfirm: false,
     required: [
       value => (value && value.length > 0) || "Este campo é obrigatório!"
     ]
@@ -183,6 +217,9 @@ export default {
     }
   },
   methods: {
+    googleSign() {
+      this.$emit("googleSign");
+    },
     signUp() {
       this.password = "";
       this.showSignUp = true;
@@ -221,55 +258,53 @@ export default {
 
 <style>
 .sign__card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
   position: relative;
 
   height: 100%;
+
   margin: 0;
+  padding: 2rem 6rem;
 
   border-radius: 50px 0 0 0;
 
   background-color: #fff;
 }
 
-.confirm-button-container {
-  position: absolute;
-  left: 50%;
-  bottom: 120px;
-
-  transform: translateX(-50%);
-}
-
 .sign__pwr {
   display: none;
+  align-items: center;
+  gap: 6px;
 
-  position: absolute;
-  left: 50%;
-  top: 100px;
-
+  height: 24px;
   width: 100%;
 
-  text-align: center;
+  /* margin-bottom: 0.5rem; */
+}
 
-  transform: translateX(-50%);
+.sign__pwr img {
+  height: 100%;
 }
 
 .sign__pwr h2 {
-  color: #2196f3;
+  color: #56b3ec;
   font-weight: normal;
   font-size: 1.1rem;
 }
 
 .sign__title {
-  position: absolute;
-  left: 50%;
-  top: 80px;
-
-  transform: translateX(-50%);
+  width: 100%;
 }
 
 .sign__title h2 {
   font-weight: 500;
-  color: #2d2d2d;
+  font-size: 1.2rem;
+  color: #1d1d1d;
 }
 
 .sign__options {
@@ -277,15 +312,14 @@ export default {
 }
 
 .sign__footer {
-  position: absolute;
-  left: 50%;
-  bottom: 50px;
-
   width: 100%;
-
-  transform: translateX(-50%);
 }
 
+.sign__forgot-pw > .v-btn {
+  padding: 0 !important;
+}
+
+.sign__forgot-pw,
 .to-sign__in,
 .to-sign__up {
   font-size: 0.9rem;
@@ -295,11 +329,17 @@ export default {
   align-items: center;
 }
 
+.sign__forgot-pw {
+  justify-content: flex-start;
+}
+
+.sign__forgot-pw > span,
 .to-sign__in > span,
 .to-sign__up > span {
   margin-right: 10px;
 }
 
+.sign__forgot-pw > .v-btn::before,
 .to-sign__in > .v-btn::before,
 .to-sign__up > .v-btn::before {
   background-color: transparent;
@@ -307,7 +347,7 @@ export default {
 
 @media (max-width: 830px) {
   .sign__pwr {
-    display: block;
+    display: flex;
   }
 
   .sign__title {
@@ -315,13 +355,21 @@ export default {
   }
 }
 
+@media (max-width: 460px) {
+  .sign__card {
+    padding: 2rem 1rem;
+  }
+}
+
 @media (max-width: 330px) {
+  .sign__forgot-pw,
   .to-sign__in,
   .to-sign__up {
     display: flex;
     flex-direction: column;
   }
 
+  .sign__forgot-pw > span,
   .to-sign__in > span,
   .to-sign__up > span {
     margin: 0;

@@ -334,8 +334,8 @@ export function drawMultiClouds(_settings) {
       count: 3,
       turbulence: turb,
       seed: 0,
-      offset: 20,
-      step: 40,
+      offset: 50,
+      step: 50,
       width: 0
     },
     _settings

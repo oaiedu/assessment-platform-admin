@@ -14,6 +14,8 @@ Vue.config.productionTip = false;
 
 firebase.initializeApp(getConfig());
 
+export const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 export const auth = firebase.auth();
 export const db = firebase.firestore();
 export const storage = firebase.storage();

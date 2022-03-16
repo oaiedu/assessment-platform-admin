@@ -28,7 +28,10 @@
 
       <div v-if="clouds" class="sign__clouds-fill"></div>
 
-      <SignUser @forgotPassword="isResetUserPwdModalVisible = true" />
+      <SignUser
+        @forgotPassword="isResetUserPwdModalVisible = true"
+        @googleSign="googleSign()"
+      />
     </div>
     <v-dialog
       persistent
@@ -123,6 +126,9 @@ export default {
     }
   },
   methods: {
+    googleSign() {
+      this.$store.dispatch("signWithGoogle");
+    },
     forgotPassword() {
       this.isResetUserPwdModalVisible = false;
       this.$store.dispatch("resetPassword", { email: this.email });
@@ -148,7 +154,7 @@ export default {
 .sign__clouds {
   position: absolute;
   left: 0;
-  bottom: 200px;
+  bottom: 140px;
 
   width: 100%;
   /* height: 110px; */
@@ -162,7 +168,7 @@ export default {
   bottom: 0;
 
   width: 100%;
-  height: 220px;
+  height: 160px;
 
   background: linear-gradient(white, #f5f5f5);
 }
@@ -198,7 +204,7 @@ export default {
 }
 
 .sign__info-subtitle {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   color: #f5f5f5;
 
   margin-top: 1rem;
@@ -224,6 +230,16 @@ export default {
 
 .sign__card {
   width: 530px;
+}
+
+@media (max-width: 1000px) {
+  .sign__clouds {
+    bottom: 100px;
+  }
+
+  .sign__clouds-fill {
+    height: 120px;
+  }
 }
 
 @media (max-width: 830px) {
