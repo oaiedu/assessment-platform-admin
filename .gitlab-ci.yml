@@ -1,78 +1,48 @@
-# image: node:12.13.0-alpine
+image: node:latest
 
-# before_script:
-#     - npm i -g firebase-tools
+before_script:
+  - npm i -g firebase-tools
 
-# deploy-functions:
-#     stage: deploy
-#     script:
-#         - cd functions
-#         - npm install
-#         - cd ..
-#         - firebase use default
-#         - firebase deploy --only functions --token $FIREBASE_TOKEN
-#     only:
-#         refs:
-#             - master
-#         changes:
-#             - functions/**/*
+stages:
+  - build
+  - deploy
 
-# deploy-firestore:
-#     stage: deploy
-#     script:
-#         - firebase use default
-#         - firebase deploy --only firestore --token $FIREBASE_TOKEN
-#     only:
-#         refs:
-#             - master
-#         changes:
-#             - firestore.rules
-#             - firestore.indexes.json
+build-production:
+  stage: build
+  script:
+    - npm install --progress=false
+    - export NODE_OPTIONS=--openssl-legacy-provider
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+  only:
+    - master
 
-# prod-hosting:
-#     stage: deploy
-#     script:
-#         - npm install
-#         - npm run build
-#         - firebase use default
-#         - firebase deploy --only hosting --token $FIREBASE_TOKEN
-#     only:
-#         refs:
-#             - master
+build-develop:
+  stage: build
+  script:
+    - npm install --progress=false
+    - export NODE_OPTIONS=--openssl-legacy-provider
+    - npm run build:dev
+  artifacts:
+    paths:
+      - dist/
+  only:
+    - develop
 
-# dev-hosting:
-#     stage: deploy
-#     script:
-#         - npm install
-#         - npm run build
-#         - firebase use develop
-#         - firebase deploy --only hosting --token $FIREBASE_TOKEN
-#     only:
-#         refs:
-#             - develop
+deploy-production:
+  stage: deploy
+  script:
+    - firebase use default
+    - firebase deploy -m "Pipeline $CI_PIPELINE_ID | Build $CI_BUILD_ID" --non-interactive --only hosting --token $FIREBASE_TOKEN
+  only:
+    - master
 
-# dev-deploy-functions:
-#     stage: deploy
-#     script:
-#         - cd functions
-#         - npm install
-#         - cd ..
-#         - firebase use develop
-#         - firebase deploy --only functions --token $FIREBASE_TOKEN
-#     only:
-#         refs:
-#             - develop
-#         changes:
-#             - functions/**/*
-
-# dev-deploy-firestore:
-#     stage: deploy
-#     script:
-#         - firebase use develop
-#         - firebase deploy --only firestore --token $FIREBASE_TOKEN
-#     only:
-#         refs:
-#             - develop
-#         changes:
-#             - firestore.rules
-#             - firestore.indexes.json
+deploy-develop:
+  stage: deploy
+  script:
+    - firebase use develop
+    - firebase deploy -m "Pipeline $CI_PIPELINE_ID | Build $CI_BUILD_ID" --non-interactive --only hosting --token $FIREBASE_TOKEN
+  only:
+    - develop

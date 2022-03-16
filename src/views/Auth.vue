@@ -1,19 +1,37 @@
 <template>
-  <div class="sign-page">
-    <div class="sign-container">
-      <div class="sign-info-container">
-        <img
-          width="440"
-          height="303.19"
-          src="../assets/LGlogo.png"
-          alt="Liquid Galaxy Logo"
-        />
-        <div class="sign-info">
-          <h1 class="app-name">LG Quiz Generator</h1>
-          <p class="app-subtitle">Gerador de questionários</p>
+  <div class="sign__page">
+    <div class="sign__container">
+      <div class="sign__info-container">
+        <div class="sign__info-title">
+          <img src="../assets/LGlogo.svg" alt="Logo" />
+
+          <h3 class="app-name">Cloud Quiz Generator</h3>
         </div>
+
+        <p class="sign__info-subtitle">
+          Se está procurando por um lugar para aprender Cloud... você encontrou!
+          Nossos questionários são totalmente gratuitos e te levarão ao seu
+          limite, fortificando seus conhecimentos.
+
+          <br /><br />
+
+          Comece agora mesmo, não há tempo a perder!
+        </p>
       </div>
-      <SignUser @forgotPassword="isResetUserPwdModalVisible = true" />
+
+      <svg
+        v-if="clouds"
+        class="sign__clouds"
+        v-html="clouds.html"
+        :style="{ height: clouds.height }"
+      ></svg>
+
+      <div v-if="clouds" class="sign__clouds-fill"></div>
+
+      <SignUser
+        @forgotPassword="isResetUserPwdModalVisible = true"
+        @googleSign="googleSign()"
+      />
     </div>
     <v-dialog
       persistent
@@ -62,6 +80,8 @@
 
 <script>
 import { mdiEmail } from "@mdi/js";
+
+import { drawMultiClouds } from "../utils/cloud-generator";
 import SignUser from "../components/User/SignUser";
 
 export default {
@@ -72,6 +92,7 @@ export default {
   data() {
     return {
       mdiEmail,
+      clouds: null,
       isResetUserPwdModalVisible: false,
       email: "",
       required: [
@@ -82,12 +103,15 @@ export default {
   computed: {
     statistics() {
       let statisticsObj = [];
-      const subjects = this.$store.getters.getSubjects;
+      const subjects = this.$store.getters.Subject.subjects;
       subjects.forEach(element => {
         const numberOfQuestions = this.$store.getters.getNumberOfQuestionBySubject(
-          element
+          element.name
         );
-        statisticsObj.push({ name: element, questions: numberOfQuestions });
+        statisticsObj.push({
+          name: element.name,
+          questions: numberOfQuestions
+        });
       });
       return statisticsObj;
     },
@@ -102,6 +126,9 @@ export default {
     }
   },
   methods: {
+    googleSign() {
+      this.$store.dispatch("signWithGoogle");
+    },
     forgotPassword() {
       this.isResetUserPwdModalVisible = false;
       this.$store.dispatch("resetPassword", { email: this.email });
@@ -110,109 +137,131 @@ export default {
   },
   watch: {
     userInfo() {
-      if (this.userInfo) this.$router.push("/");
+      if (this.userInfo) this.$router.push(this.$route.params.to || "/");
     }
   },
   mounted() {
+    this.clouds = drawMultiClouds({ width: window.innerWidth });
+
     if (this.user) {
-      this.$router.push("/");
+      this.$router.push(this.$route.params.to || "/");
     }
   }
 };
 </script>
 
 <style scoped>
-.sign-page {
+.sign__clouds {
+  position: absolute;
+  left: 0;
+  bottom: 140px;
+
+  width: 100%;
+  /* height: 110px; */
+
+  overflow: visible;
+}
+
+.sign__clouds-fill {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 160px;
+
+  background: linear-gradient(white, #f5f5f5);
+}
+
+.sign__page {
   height: 100vh;
   width: 100vw;
 
-  background-color: #ededed;
+  background: linear-gradient(to bottom, #6be, rgb(58, 117, 235));
 }
 
-.sign-info-container {
+.sign__info-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
   flex: 1;
-  height: 100%;
 
-  margin: 0 20px;
+  height: 50%;
+
+  margin: 100px 40px;
 }
 
-.sign-info-container img {
-  object-fit: cover;
-}
-
-.sign-info {
+.sign__info-title {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  gap: 6px;
+
+  height: 40px;
+  width: 100%;
 }
 
-.sign-info > .app-subtitle {
-  font-size: 1.5rem;
-  color: #333;
+.sign__info-container img {
+  height: 100%;
 }
 
-.sign-info > .app-name {
-  color: #2196f3;
+.sign__info-subtitle {
+  font-size: 1.1rem;
+  color: #f5f5f5;
+
+  margin-top: 1rem;
+
+  max-width: 600px;
+}
+
+.sign__info-title > .app-name {
+  color: white;
   line-height: 2rem;
-  font-size: 2.4rem;
+  font-size: 1.6rem;
 }
 
-.sign-container {
+.sign__container {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   flex-wrap: nowrap;
-  align-items: center;
 
   width: 100%;
   height: 100%;
 }
 
-.sign-card {
-  width: 360px;
-  height: 86%;
-
-  margin-right: 30px;
+.sign__card {
+  width: 530px;
 }
 
-@media (max-height: 800px) {
-  .sign-card {
-    width: 360px;
-    height: 92%;
+@media (max-width: 1000px) {
+  .sign__clouds {
+    bottom: 100px;
+  }
 
-    margin-right: 30px;
+  .sign__clouds-fill {
+    height: 120px;
   }
 }
 
-@media (max-width: 1100px) {
-  .sign-info {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-}
-
-@media (max-width: 735px) {
-  .sign-info-container {
+@media (max-width: 830px) {
+  .sign__info-container {
     display: none;
   }
 
-  .sign-container {
+  .sign__container {
     justify-content: center;
   }
 
-  .sign-card {
+  .sign__card {
+    width: 100%;
+
     margin-right: 0;
+
+    border-radius: 0;
   }
 }
 
 @media (max-width: 430px) {
-  .sign-card {
+  .sign__card {
     width: 100%;
     height: 100%;
 

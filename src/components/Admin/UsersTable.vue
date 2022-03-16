@@ -1,18 +1,13 @@
 <template>
   <v-container>
     <v-data-table
+      v-if="currentUser"
       class="elevation-1 mt-2"
       loading-text="Carregando usuários..."
       :items="users"
       :headers="headers"
       :loading="loading"
     >
-      <template v-slot:top>
-        <v-toolbar flat color="blue">
-          <v-toolbar-title class="white--text">Usuários</v-toolbar-title>
-        </v-toolbar>
-      </template>
-
       <template v-slot:[`item.role`]="{ item }">
         <span :class="item.email === currentUser.email && 'highlight'">{{
           getRoleName(item.role)
@@ -132,8 +127,7 @@ export default {
       roles: [
         { text: "Administrador", value: "admin" },
         { text: "Aluno", value: "student" },
-        { text: "Avaliador", value: "appraiser" },
-        { text: "Professor", value: "teacher" }
+        { text: "Avaliador", value: "appraiser" }
       ],
       headers: [
         {
@@ -178,7 +172,6 @@ export default {
     getRoleName(role) {
       if (role === "admin") return "Administrador";
       else if (role === "appraiser") return "Avaliador";
-      else if (role === "teacher") return "Professor";
       else return "Aluno";
     },
     sendEmail(email) {

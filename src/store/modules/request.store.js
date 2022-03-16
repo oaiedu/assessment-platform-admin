@@ -13,13 +13,10 @@ import { getNowISOString } from "../../utils/date";
 
 /**
  * @typedef {Object} RequestCreation
- * @property {string} iq - The request IQ.
+ * @property {string} name - The request name.
  * @property {string} userId - The user that created the request.
  * @property {string} subject - The request subject.
  * @property {string} question - The request description.
- * @property {string} knowledge - The request knowledge.
- * @property {string} knowledgeBWR - The request knowledge (BWR).
- * @property {string} knowledgePWR - The request knowledge (PWR).
  * @property {string} image - The request image url.
  * @property {string} imageSize - The size of the image.
  * @property {Answer[]} answers - The request answers.
@@ -28,13 +25,10 @@ import { getNowISOString } from "../../utils/date";
 
 /**
  * @typedef {Object} Request
- * @property {string} iq - The request IQ.
+ * @property {string} name - The request name.
  * @property {string} userId - The user that created the request.
  * @property {string} subject - The request subject.
  * @property {string} question - The request description.
- * @property {string} knowledge - The request knowledge.
- * @property {string} knowledgeBWR - The request knowledge (BWR).
- * @property {string} knowledgePWR - The request knowledge (PWR).
  * @property {string} image - The request image url.
  * @property {string} imageSize - The size of the image.
  * @property {string|undefined} created - The request creation date.
@@ -48,9 +42,9 @@ import { getNowISOString } from "../../utils/date";
 /**
  * @typedef {Object} RequestState
  * @property {Object.<string, Request[]} requests - The pages with it's requests list.
- * @property {Request[]} filteredRequests - An array of requests filtered by IQ.
+ * @property {Request[]} filteredRequests - An array of requests filtered by name.
  * @property {Request[]} currentRequestsPage - An array of requests of the current page.
- * @property {[string, string]|null} lastRequestDocument - An array with the first and last test IQ from the last request.
+ * @property {[string, string]|null} lastRequestDocument - An array with the first and last test name from the last request.
  * @property {Request[]} deleteMarkRequests - An array of requests that were marked to be deleted.
  * @property {Request[]} lastPendentTests - An array of the most recent pending tests.
  * @property {Request[]} currentUserRequests - An array of the current user last pending requests.
@@ -166,7 +160,7 @@ const mutations = {
   updateDeleteMarkRequest(state, data) {
     const requests = [...state.deleteMarkRequests];
     requests.forEach((item, index) => {
-      if (item.iq === data.iq) {
+      if (item.name === data.name) {
         requests[index] = data;
       }
     });
@@ -176,12 +170,12 @@ const mutations = {
    * Removes a request from the array of requests marked to be deleted.
    *
    * @param {RequestState} state - The request state.
-   * @param {string} data - The IQ of the request to be removed.
+   * @param {string} data - The name of the request to be removed.
    */
   removeDeleteMarkRequest(state, data) {
     const requests = [...state.deleteMarkRequests];
     requests.forEach((item, index) => {
-      if (item.iq === data) {
+      if (item.name === data) {
         state.deleteMarkRequests.splice(index, 1);
       }
     });
@@ -199,8 +193,8 @@ const mutations = {
    * Sets a request as marked to be deleted.
    *
    * @param {RequestState} state - The request state.
-   * @param {Object} data - The data containing the request IQ and it's deletion status.
-   * @param {string} data.iq - The request IQ.
+   * @param {Object} data - The data containing the request name and it's deletion status.
+   * @param {string} data.name - The request name.
    * @param {DeleteStatus} data.toDelete - The request deletion status.
    */
   setDeleteMarkRequest(state, data) {
@@ -208,7 +202,7 @@ const mutations = {
     for (let key in requests) {
       if (requests[key]) {
         requests[key].forEach((item, index) => {
-          if (item.iq === data.iq) {
+          if (item.name === data.name) {
             state.requests[key][index] = {
               ...item,
               toDelete: data.toDelete
@@ -222,14 +216,14 @@ const mutations = {
    * Sets a filtered request as marked to be deleted.
    *
    * @param {RequestState} state - The request state.
-   * @param {Object} data - The data containing the request IQ and it's deletion status.
-   * @param {string} data.iq - The request IQ.
+   * @param {Object} data - The data containing the request name and it's deletion status.
+   * @param {string} data.name - The request name.
    * @param {DeleteStatus} data.toDelete - The request deletion status.
    */
   setDeleteMarkFilteredRequest(state, data) {
     const requests = [...state.filteredRequests];
     requests.forEach((item, index) => {
-      if (item.iq === data.iq) {
+      if (item.name === data.name) {
         requests[index] = { ...item, toDelete: data.toDelete };
       }
     });
@@ -268,7 +262,7 @@ const mutations = {
     for (let key in requests) {
       if (requests[key]) {
         requests[key].forEach((item, index) => {
-          if (item.iq === data.iq) {
+          if (item.name === data.name) {
             requests[key][index] = { ...data, user: item.user };
           }
         });
@@ -285,7 +279,7 @@ const mutations = {
   updateFilteredRequest(state, data) {
     const requests = [...state.filteredRequests];
     requests.forEach((item, index) => {
-      if (item.iq === data.iq) {
+      if (item.name === data.name) {
         requests[index] = data;
       }
     });
@@ -300,7 +294,7 @@ const mutations = {
   updateCurrentRequestsPage(state, data) {
     const requests = [...state.currentRequestsPage];
     requests.forEach((item, index) => {
-      if (item.iq === data.iq) {
+      if (item.name === data.name) {
         requests[index] = data;
       }
     });
@@ -310,14 +304,14 @@ const mutations = {
    * Removes a request from the requests object.
    *
    * @param {RequestState} state - The request state.
-   * @param {string} data - The IQ of the request to be removed.
+   * @param {string} data - The name of the request to be removed.
    */
   removeRequest(state, data) {
     const requests = state.requests;
     for (let key in requests) {
       if (requests[key]) {
         requests[key].forEach((item, index) => {
-          if (item.iq === data) {
+          if (item.name === data) {
             state.requests[key].splice(index, 1);
           }
         });
@@ -328,12 +322,12 @@ const mutations = {
    * Removes a request from the filtered requests array.
    *
    * @param {RequestState} state - The request state.
-   * @param {string} data The IQ of the request to be removed.
+   * @param {string} data The name of the request to be removed.
    */
   removeFilteredRequest(state, data) {
     const request = state.filteredRequests;
     request.forEach((item, index) => {
-      if (item.iq === data) {
+      if (item.name === data) {
         state.filteredRequests.splice(index, 1);
       }
     });
@@ -342,7 +336,7 @@ const mutations = {
    * Sets the last requests request ids.
    *
    * @param {RequestState} state - The request state.
-   * @param {[string, string]} data An array of strings containing the first and last IQs from the last request.
+   * @param {[string, string]} data An array of strings containing the first and last names from the last request.
    */
   setLastRequestDocument(state, data) {
     state.lastRequestDocument = data;
@@ -369,7 +363,7 @@ const actions = {
    * @param {RequestCreation} payload.request - The request to be created.
    * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
    */
-  createQuestionRequest({ commit }, payload) {
+  async createQuestionRequest({ commit }, payload) {
     commit("setLoading", true);
 
     const { user } = payload;
@@ -386,68 +380,61 @@ const actions = {
     const requestAmount = this.getters.getDataSize["question-requests"].users[
       user.id
     ];
+
     const pageAmount = Math.ceil(requestAmount / 8);
     const amount = requestAmount % 8;
 
-    db.collection("question-requests")
-      .add(request)
-      .then(() => {
-        commit("addRequest", {
-          page: amount === 0 ? pageAmount + 1 : pageAmount,
-          data: { ...request, user: user },
-          amount: requestAmount
-        });
-        commit("setLoading", false);
-        commit("setSuccess", "Solicitação criada com sucesso!");
+    try {
+      await db.collection("question-requests").add(request);
 
-        db.collection("data-size")
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
-            const general = document.data()["question-requests"].general;
-            const subSize =
-              document.data()["question-requests"].users[user.id] || 0;
-
-            const questionRequests = {
-              general: general + 1,
-              users: {
-                ...document.data()["question-requests"].users,
-                [user.id]: subSize + 1
-              }
-            };
-
-            document.ref
-              .update({ ["question-requests"]: questionRequests })
-              .then(() => {
-                commit("addRemoveSize", {
-                  key: "question-requests",
-                  data: questionRequests
-                });
-              })
-              .catch(error => {
-                console.error(error);
-              });
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "creation",
-          "Solicitação",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Request DB Insert", error.message, {
-          payload,
-          requestAmount
-        });
+      commit("addRequest", {
+        page: amount === 0 ? pageAmount + 1 : pageAmount,
+        data: { ...request, user: user },
+        amount: requestAmount
       });
+
+      commit("setLoading", false);
+
+      const sizeSnap = await db.collection("data-size").get();
+
+      const document = sizeSnap.docs[0];
+      const general = document.data()["question-requests"].general;
+      const subSize = document.data()["question-requests"].users[user.id] || 0;
+
+      const questionRequests = {
+        general: general + 1,
+        users: {
+          ...document.data()["question-requests"].users,
+          [user.id]: subSize + 1
+        }
+      };
+
+      await document.ref.update({ ["question-requests"]: questionRequests });
+
+      commit("addRemoveSize", {
+        key: "question-requests",
+        data: questionRequests
+      });
+
+      commit("setSuccess", "Solicitação criada com sucesso!");
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "creation",
+        "Solicitação",
+        error.message
+      );
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Request DB Insert", error.message, {
+        payload,
+        requestAmount
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
-   * Updates a request based on it's IQ.
+   * Updates a request based on it's name.
    *
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
@@ -456,7 +443,7 @@ const actions = {
    * @param {"reqUpdate"|"sttUpdate"} payload.mode - If reqUpdate, update all the request data. Otherwise, update only it's status.
    * @param {import('./user.store.js').UserInfo} payload.user - The request to be updated.
    */
-  updateQuestionRequest({ commit }, payload) {
+  async updateQuestionRequest({ commit }, payload) {
     commit("setLoading", true);
     const { mode, request, user, isSearching } = payload;
 
@@ -465,57 +452,51 @@ const actions = {
       updated: getNowISOString()
     };
 
-    db.collection("question-requests")
-      .where("iq", "==", request.iq)
-      .get()
-      .then(snapshot => {
-        if (mode === "sttUpdate") {
-          snapshot.docs[0].ref
-            .update({
-              status: payload.status,
-              updated: toUpdate.updated
-            })
-            .then(() => {
-              toUpdate.status = payload.status;
-              commit("updateRequest", { ...toUpdate, user });
-              commit("updateCurrentRequestsPage", {
-                ...toUpdate,
-                user
-              });
-              if (isSearching)
-                commit("updateFilteredRequest", {
-                  ...toUpdate,
-                  user
-                });
-              commit("setLoading", false);
-            });
-        } else {
-          snapshot.docs[0].ref.update(toUpdate).then(() => {
-            commit("updateRequest", { ...toUpdate, user });
-            commit("updateCurrentRequestsPage", {
-              ...toUpdate,
-              user
-            });
-            if (isSearching)
-              commit("updateFilteredRequest", {
-                ...toUpdate,
-                user
-              });
-            commit("setLoading", false);
-            commit("setSuccess", "Solicitação editada com sucesso!");
-          });
-        }
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "edition",
-          "Solicitação",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Request DB Update", error.message, { payload });
+    try {
+      const snapshot = await db
+        .collection("question-requests")
+        .where("name", "==", request.name)
+        .get();
+
+      if (mode === "sttUpdate") {
+        await snapshot.docs[0].ref.update({
+          status: payload.status,
+          updated: toUpdate.updated
+        });
+
+        toUpdate.status = payload.status;
+      } else {
+        await snapshot.docs[0].ref.update(toUpdate);
+      }
+
+      commit("updateRequest", { ...toUpdate, user });
+      commit("updateCurrentRequestsPage", {
+        ...toUpdate,
+        user
       });
+
+      if (isSearching) {
+        commit("updateFilteredRequest", {
+          ...toUpdate,
+          user
+        });
+      }
+
+      if (mode !== "sttUpdate") {
+        commit("setSuccess", "Solicitação editada com sucesso!");
+      }
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "edition",
+        "Solicitação",
+        error.message
+      );
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Request DB Update", error.message, { payload });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Loads a page of requests according to the payload data.
@@ -540,11 +521,11 @@ const actions = {
       let ref = null;
 
       if (claims && claims["admin"]) {
-        ref = db.collection("question-requests").orderBy("iq");
+        ref = db.collection("question-requests").orderBy("name");
       } else {
         ref = db
           .collection("question-requests")
-          .orderBy("iq")
+          .orderBy("name")
           .where("userId", "==", userInfo.id);
       }
 
@@ -566,8 +547,8 @@ const actions = {
       request
         .then(async snapshot => {
           if (snapshot.docs.length > 0) {
-            first = snapshot.docs[0].data().iq;
-            last = snapshot.docs[snapshot.docs.length - 1].data().iq;
+            first = snapshot.docs[0].data().name;
+            last = snapshot.docs[snapshot.docs.length - 1].data().name;
 
             const promises = snapshot.docs.map(async doc => {
               const userData = await dispatch("getUserById", {
@@ -601,8 +582,8 @@ const actions = {
         });
     } else {
       const pageContent = state.request["p" + page];
-      const first = pageContent[0].iq;
-      const last = pageContent[pageContent.length - 1].iq;
+      const first = pageContent[0].name;
+      const last = pageContent[pageContent.length - 1].name;
 
       commit("setCurrentRequestsPage", pageContent);
       commit("setLastRequestDocument", [first, last]);
@@ -637,11 +618,11 @@ const actions = {
       let ref = null;
 
       if (claims && claims["admin"]) {
-        ref = db.collection("question-requests").orderBy("iq");
+        ref = db.collection("question-requests").orderBy("name");
       } else {
         ref = db
           .collection("question-requests")
-          .orderBy("iq")
+          .orderBy("name")
           .where("userId", "==", userInfo.id);
       }
 
@@ -657,10 +638,11 @@ const actions = {
       request
         .then(async snapshot => {
           if (snapshot.docs.length > 0) {
-            first = snapshot.docs.length > 0 ? snapshot.docs[0].data().iq : "";
+            first =
+              snapshot.docs.length > 0 ? snapshot.docs[0].data().name : "";
             last =
               snapshot.docs.length > 0
-                ? snapshot.docs[snapshot.docs.length - 1].data().iq
+                ? snapshot.docs[snapshot.docs.length - 1].data().name
                 : "";
 
             const promises = snapshot.docs.map(async doc => {
@@ -697,8 +679,8 @@ const actions = {
       const pageContent = state.requests["p" + page];
 
       if (pageContent && pageContent[0]) {
-        const first = pageContent[0].iq;
-        const last = pageContent[pageContent.length - 1].iq;
+        const first = pageContent[0].name;
+        const last = pageContent[pageContent.length - 1].name;
         commit("setCurrentRequestsPage", pageContent);
         commit("setLastRequestDocument", [first, last]);
       }
@@ -707,7 +689,7 @@ const actions = {
     }
   },
   /**
-   * Searches for requests based on their IQ.
+   * Searches for requests based on their name.
    *
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
@@ -723,9 +705,9 @@ const actions = {
 
     let req = db
       .collection("question-requests")
-      .orderBy("iq")
-      .where("iq", ">=", key.toUpperCase())
-      .where("iq", "<=", key.toUpperCase() + "~");
+      .orderBy("name")
+      .where("name", ">=", key.toUpperCase())
+      .where("name", "<=", key.toUpperCase() + "~");
 
     if (claims && !claims["admin"]) {
       req = req.where("userId", "==", userInfo.id);
@@ -798,17 +780,17 @@ const actions = {
    *
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
-   * @param {string} payload.iq - The request IQ.
+   * @param {string} payload.name - The request name.
    * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
    * @param {string} payload.userId - The current user id.
    */
   deleteMarkRequest({ commit, dispatch }, payload) {
     commit("setLoading", true);
 
-    const { iq, isSearching, userId } = payload;
+    const { name, isSearching, userId } = payload;
 
     db.collection("question-requests")
-      .where("iq", "==", iq)
+      .where("name", "==", name)
       .get()
       .then(async snapshot => {
         const doc = snapshot.docs[0];
@@ -824,11 +806,11 @@ const actions = {
           id: doc.data().userId
         });
 
-        commit("setDeleteMarkRequest", { iq, toDelete, user });
+        commit("setDeleteMarkRequest", { name, toDelete, user });
 
         if (isSearching) {
           commit("setDeleteMarkFilteredRequest", {
-            iq,
+            name,
             toDelete,
             user
           });
@@ -860,17 +842,17 @@ const actions = {
    *
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
-   * @param {string} payload.iq - The request IQ.
+   * @param {string} payload.name - The request name.
    * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
    */
   restoreMarkedRequest({ commit, dispatch }, payload) {
     commit("setLoading", true);
 
-    const { iq, isSearching } = payload;
+    const { name, isSearching } = payload;
     let docData = null;
 
     db.collection("question-requests")
-      .where("iq", "==", iq)
+      .where("name", "==", name)
       .get()
       .then(async snapshot => {
         const doc = snapshot.docs[0];
@@ -881,10 +863,7 @@ const actions = {
           created: data.created,
           image: data.image,
           imageSize: data.imageSize,
-          iq: data.iq,
-          knowledge: data.knowledge,
-          knowledgeBWR: data.knowledgeBWR,
-          knowledgePWR: data.knowledgePWR,
+          name: data.name,
           question: data.question,
           status: data.status,
           subject: data.subject,
@@ -904,7 +883,7 @@ const actions = {
           commit("updateFilteredRequest", { ...request, user });
         }
 
-        commit("removeDeleteMarkRequest", iq);
+        commit("removeDeleteMarkRequest", name);
         commit("updateCurrentRequestsPage", { ...request, user });
         commit("setLoading", false);
         commit("setSuccess", "Solicitação restaurada com sucesso!");
@@ -946,16 +925,12 @@ const actions = {
             created: data.created,
             image: data.image,
             imageSize: data.imageSize,
-            iq: data.iq,
-            knowledge: data.knowledge,
-            knowledgeBWR: data.knowledgeBWR,
-            knowledgePWR: data.knowledgePWR,
+            name: data.name,
             question: data.question,
             status: data.status,
             subject: data.subject,
             updated: data.updated,
-            userId: data.userId,
-            edited: data.edited || []
+            userId: data.userId
           };
 
           doc.ref.set(request);
@@ -986,15 +961,15 @@ const actions = {
    *
    * @param {Store} store - The vuex store.
    * @param {Object} payload - The action payload.
-   * @param {string} payload.iq - The request IQ.
+   * @param {string} payload.name - The request name.
    * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
    */
   changeDeleteStatusRequests({ commit, dispatch }, payload) {
     commit("setLoading", true);
-    const { iq, isSearching } = payload;
+    const { name, isSearching } = payload;
 
     db.collection("question-requests")
-      .where("iq", "==", iq)
+      .where("name", "==", name)
       .get()
       .then(async snapshot => {
         const doc = snapshot.docs[0];
@@ -1128,7 +1103,7 @@ const actions = {
       .then(snapshot => {
         snapshot.forEach(doc => {
           doc.ref.delete();
-          commit("removeRequest", doc.data().iq);
+          commit("removeRequest", doc.data().name);
         });
 
         db.collection("data-size")

@@ -1,12 +1,12 @@
 {
-  "name": "lg-quiz-generator",
-  "version": "0.1.0",
+  "name": "cloud-quiz-generator",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "serve:prod": "vue-cli-service serve --mode production",
-    "build": "vue-cli-service build",
-    "build:dev": "vue-cli-service build --mode development",
+    "build": "cross-env NODE_ENV=production vue-cli-service build",
+    "build:dev": "cross-env NODE_ENV=development vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -27,7 +27,7 @@
     "vuex": "^3.4.0"
   },
   "devDependencies": {
-    "@mdi/js": "^5.9.55",
+    "@mdi/js": "^6.5.95",
     "@vue/cli-plugin-babel": "^4.4.6",
     "@vue/cli-plugin-eslint": "^4.4.6",
     "@vue/cli-plugin-router": "^4.4.6",
@@ -35,6 +35,7 @@
     "@vue/cli-service": "^4.4.6",
     "@vue/eslint-config-standard": "^6.0.0",
     "babel-eslint": "^10.1.0",
+    "cross-env": "^7.0.3",
     "eslint": "^7.23.0",
     "eslint-plugin-vue": "^7.8.0",
     "sass": "^1.26.9",

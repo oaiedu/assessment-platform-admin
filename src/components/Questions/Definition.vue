@@ -1,27 +1,23 @@
 <template>
-    <div>
-        DISCIPLINA: {{ question.subject }}
-        <br />
-        CONHECIMENTO: {{ question.knowledge }} [ {{ question.knowledgePWR }} / {{ question.knowledgeBWR }} ]
-        <br />
-        IQ: {{ question.iq }}
-        <br />
+  <div>
+    <strong>{{ question.name }}</strong>
+    <br />
+    {{ question.subject }}
+    <br />
 
-        <br />
-        <vue-markdown :source="question.question" />
-        <br />
-    </div>
+    <br />
+    <div
+      v-if="question.question"
+      v-html="question.question"
+      class="definition-description"
+    ></div>
+    <br />
+  </div>
 </template>
 
 <script>
-    import VueMarkdown from "vue-markdown";
-    import "vue-markdown";
-
-    export default {
-        name: 'Definition',
-        props: ['question'],
-        components: {
-            'vue-markdown': VueMarkdown
-        }
-    }
+export default {
+  name: "Definition",
+  props: ["question"]
+};
 </script>
