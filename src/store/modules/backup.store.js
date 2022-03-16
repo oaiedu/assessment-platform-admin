@@ -120,11 +120,9 @@ const actions = {
     const { now } = payload;
     let url = "";
 
-    if (
-      process.env.VUE_APP_FIREBASE_PROJECT_ID === "develop-lg-quiz-generator"
-    ) {
+    if (process.env.NODE_ENV === "production") {
       url =
-        "http://localhost:5001/develop-lg-quiz-generator/us-central1/backup-backupFirestoreAuth?now=" +
+        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=" +
         now.replace(/:/g, "-");
     }
 
@@ -257,11 +255,9 @@ const actions = {
 
     let url = "";
 
-    if (
-      process.env.VUE_APP_FIREBASE_PROJECT_ID === "develop-lg-quiz-generator"
-    ) {
+    if (process.env.NODE_ENV === "production") {
       url =
-        "http://localhost:5001/develop-lg-quiz-generator/us-central1/backup-downloadBackup?id=" +
+        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-downloadBackup?id=" +
         payload.cloudId;
     }
 
@@ -314,11 +310,9 @@ const actions = {
     commit("setLoading", true);
 
     let url = "";
-    if (
-      process.env.VUE_APP_FIREBASE_PROJECT_ID === "develop-lg-quiz-generator"
-    ) {
+    if (process.env.NODE_ENV === "production") {
       url =
-        "http://localhost:5001/develop-lg-quiz-generator/us-central1/backup-deleteBackup?id=" +
+        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-deleteBackup?id=" +
         payload.id;
     }
 
