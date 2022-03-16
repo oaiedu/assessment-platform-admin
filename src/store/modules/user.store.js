@@ -1,7 +1,7 @@
 import { Store } from "vuex";
 import axios from "axios";
 
-import { auth, db, storage } from "../../main";
+import { auth, db, googleProvider, storage } from "../../main";
 import { getNowISOString } from "../../utils/date";
 import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
@@ -136,6 +136,39 @@ const mutations = {
 
 const actions = {
   /**
+   * Signs an user in using its Google account.
+   *
+   * @param {Store<UserState>} store the vuex store.
+   */
+  async signWithGoogle({ commit }) {
+    commit("setLoading", true);
+
+    try {
+      const user = await auth.signInWithPopup(googleProvider);
+
+      await db
+        .collection("users")
+        .doc(user.user.uid)
+        .update({ provider: "google" });
+    } catch (error) {
+      if (error.code === "auth/popup-closed-by-user") {
+        return;
+      }
+
+      const errorModel = showErrorMessage(
+        "default",
+        "",
+        "Google sign error - " + error.message
+      );
+
+      commit("setError", { message: errorModel });
+
+      if (error.code === "") createErrorLog("Google Sign", error.message);
+    } finally {
+      commit("setLoading", false);
+    }
+  },
+  /**
    * Uploads a new avatar image to the current user.
    *
    * @param {Store} store - The vuex store.
@@ -143,143 +176,116 @@ const actions = {
    * @param {File} payload.images - The image to be uploaded.
    * @returns {string} The image url.
    */
-  uploadAvatar({ commit }, payload) {
-    const request = new Promise((resolve, reject) => {
-      try {
-        const storageRef = storage.ref();
-        const file = payload.images;
-        const name = "avatar";
-        const subfolder = auth.currentUser.uid;
-        const type = file.type.split("/")[1];
-        const format = `users/${subfolder}/${name}.${type}`;
-        storageRef
-          .child(format)
-          .put(file)
-          .then(snapshot => {
-            snapshot.ref.getDownloadURL().then(function(downloadURL) {
-              resolve(downloadURL.toString());
-            });
-          })
-          .catch(error => {
-            const errorModel = showErrorMessage(
-              "connection",
-              "",
-              "Avatar upload error - " + error.message
-            );
-            commit("setError", { message: errorModel });
-            createErrorLog("Avatar Upload", error.message, {
-              payload,
-              format,
-              subfolder
-            });
-          });
-      } catch (error) {
-        reject();
-      }
-    });
-    return request;
+  async uploadAvatar({ commit }, payload) {
+    try {
+      const storageRef = storage.ref();
+      const file = payload.images;
+      const name = "avatar";
+      const subfolder = auth.currentUser.uid;
+      const type = file.type.split("/")[1];
+      const format = `users/${subfolder}/${name}.${type}`;
+
+      const snapshot = await storageRef.child(format).put(file);
+
+      const downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl.toString();
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "connection",
+        "",
+        "Avatar upload error - " + error.message
+      );
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Avatar Upload", error.message, {
+        payload
+      });
+    }
   },
   /**
    * Creates a new user account in Firebase Authentication.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.name - The new user name.
-   * @param {string} payload.email - The new user email.
-   * @param {string} payload.password - The new user password.
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the action payload.
+   * @param {string} payload.name the new user name.
+   * @param {string} payload.email the new user email.
+   * @param {string} payload.image the new user image url.
+   * @param {string} payload.password the new user password.
+   * @param {string} payload.userUid whether the user was created using a Google account.
    */
-  signUserUp({ commit, dispatch, state }, payload) {
+  async signUserUp({ commit, dispatch }, payload) {
     commit("setLoading", true);
     commit("clearError");
 
-    auth
-      .createUserWithEmailAndPassword(payload.email, payload.password)
-      .then(async user => {
-        commit("setLoading", false);
+    try {
+      let user = null;
 
-        const newUser = {
-          id: user.user.uid
-        };
-
-        const createdAt = getNowISOString();
-
-        const userInfo = {
-          name: payload.name,
-          profileImages: "",
-          email: payload.email,
-          role: "student",
-          attempts: [],
-          created: createdAt,
-          updated: createdAt
-        };
-
-        let url = "";
-
-        if (
-          process.env.VUE_APP_FIREBASE_PROJECT_ID ===
-          "develop-lg-quiz-generator"
-        ) {
-          url =
-            "http://localhost:5001/develop-lg-quiz-generator/us-central1/authentication-userDefaultRole";
-        }
-
-        db.collection("users")
-          .doc(newUser.id)
-          .set(userInfo)
-          .then(async () => {
-            axios.get(url, { headers: { uid: newUser.id } }).catch(error => {
-              console.error(error);
-            });
-
-            db.collection("data-size")
-              .get()
-              .then(snap => {
-                const document = snap.docs[0];
-                const size = document.data().users;
-
-                document.ref
-                  .update({ users: size + 1 })
-                  .then(() => {
-                    commit("addRemoveSize", {
-                      key: "users",
-                      data: size + 1
-                    });
-                  })
-                  .catch(error => {
-                    console.error(error);
-                  });
-              })
-              .catch(error => {
-                console.error(error);
-              });
-          })
-          .catch(error => {
-            commit("setLoading", false);
-            commit("setError", error);
-            createErrorLog("Sign Up DB Insert", error.message, {
-              payload,
-              newUser,
-              userInfo: { ...userInfo, id: newUser.id },
-              url
-            });
-          });
-
-        await dispatch("loadUserClaims", true);
-        commit("setUserInfo", { ...userInfo, id: newUser.id });
-        commit("setUser", newUser);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "default",
-          "",
-          "Sign up error - " + error.message
+      if (!payload.userUid) {
+        user = await auth.createUserWithEmailAndPassword(
+          payload.email,
+          payload.password
         );
-        commit("setError", { message: errorModel });
-        createErrorLog("Sign Up", error.message, {
-          email: payload.email
-        });
+      }
+
+      const newUser = {
+        id: payload.userUid || user.user.uid
+      };
+
+      const createdAt = getNowISOString();
+
+      const userInfo = {
+        name: payload.name,
+        email: payload.email,
+        profileImages: payload.image || "",
+        role: "student",
+        attempts: [],
+        provider: payload.userUid ? "google" : "password",
+        created: createdAt,
+        updated: createdAt
+      };
+
+      let url = "";
+
+      if (process.env.NODE_ENV === "production") {
+        url =
+          "https://us-central1-cloud-quiz-generator.cloudfunctions.net/authentication-userDefaultRole";
+
+        await axios.get(url, { headers: { uid: newUser.id } });
+      }
+
+      await db
+        .collection("users")
+        .doc(newUser.id)
+        .set(userInfo);
+
+      const snap = await db.collection("data-size").get();
+      const document = snap.docs[0];
+      const size = +document.data().users;
+
+      await document.ref.update({ users: size + 1 });
+
+      commit("addRemoveSize", {
+        key: "users",
+        data: size + 1
       });
+
+      await dispatch("loadUserClaims", true);
+      commit("setUserInfo", { ...userInfo, id: newUser.id });
+      commit("setUser", newUser);
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "default",
+        "",
+        "Sign up error - " + error.message
+      );
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Sign Up", error.message, {
+        email: payload.email
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Updates an user name and avatar image.
@@ -339,10 +345,10 @@ const actions = {
   /**
    * Sign in the user using it's e-mail and password.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.email - The user e-mail.
-   * @param {string} payload.password - The user password.
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the action payload.
+   * @param {string} payload.email the user e-mail.
+   * @param {string} payload.password the user password.
    */
   async signUserIn({ commit, dispatch }, payload) {
     commit("setLoading", true);
@@ -355,166 +361,234 @@ const actions = {
     dispatch("resetRequests");
     dispatch("resetTests");
 
-    auth
-      .signInWithEmailAndPassword(payload.email, payload.password)
-      .then(user => {
-        commit("setLoading", false);
-        commit("setUser", { id: user.user.uid });
-        dispatch("loadUserInfo", { id: user.user.uid });
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "default",
-          "",
-          "Login error - " + error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Login", error.message, {
-          email: payload.email
-        });
+    try {
+      const userData = await dispatch("getUserByEmail", {
+        email: payload.email
       });
+
+      let user = null;
+
+      const googleSign = userData && userData.provider === "google";
+
+      if (googleSign) {
+        user = await auth.signInWithPopup(googleProvider);
+      } else {
+        user = await auth.signInWithEmailAndPassword(
+          payload.email,
+          payload.password
+        );
+      }
+
+      commit("setUser", { id: user.user.uid });
+
+      if (googleSign) {
+        return;
+      }
+
+      commit("setUserInfo", { ...userData, id: user.user.id });
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "default",
+        "",
+        "Login error - " + error.message
+      );
+
+      commit("setError", { message: errorModel });
+
+      if (
+        error.code === "auth/wrong-password" ||
+        error.code === "auth/user-not-found"
+      ) {
+        return;
+      }
+
+      createErrorLog("Login", error.message, {
+        email: payload.email
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Loads the current user info base on it's uid.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.id - The user uid.
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the action payload.
+   * @param {string} payload.id The user uid.
    */
-  loadUserInfo({ commit }, payload) {
+  async loadUserInfo({ commit }, payload) {
     commit("setLoading", true);
 
-    db.collection("users")
+    const doc = await db
+      .collection("users")
       .doc(payload.id)
-      .get()
-      .then(doc => {
-        commit("setUserInfo", { ...doc.data(), id: payload.id });
-        commit("setLoading", false);
-      });
+      .get();
+
+    commit("setUserInfo", { ...doc.data(), id: payload.id });
+    commit("setLoading", false);
   },
   /**
    * Loads the current user claims.
    *
-   * @param {Store} store - The vuex store.
-   * @param {boolean} payload - Whether is to apply the default role or not.
-   * @returns {Promise<Object>} The user claims.
+   * @param {Store} store the vuex store.
+   * @param {boolean} payload whether is to apply the default role or not.
+   * @returns {Promise<Object>} the user claims.
    */
   async loadUserClaims({ commit, state }, payload) {
-    return new Promise(async res => {
-      try {
-        if (auth.currentUser && !state.userClaims) {
-          const doc = await db
-            .collection("users")
-            .doc(auth.currentUser.uid)
-            .get();
+    try {
+      if (auth.currentUser && !state.userClaims) {
+        const doc = await db
+          .collection("users")
+          .doc(auth.currentUser.uid)
+          .get();
 
-          const claims = {
-            admin: false,
-            appraiser: false,
-            student: false
-          };
+        const claims = {
+          admin: false,
+          appraiser: false,
+          student: false
+        };
 
-          claims[payload ? "student" : doc.data().role] = true;
+        claims[payload ? "student" : doc.data().role] = true;
 
-          commit("setUserClaims", claims);
-          res(claims);
-        }
-
-        res(null);
-      } catch (error) {
-        const errorModel = showErrorMessage(
-          "load",
-          "User Claims",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("User Claims Load", error.message, {
-          currentUser: auth.currentUser
-        });
+        commit("setUserClaims", claims);
+        return claims;
       }
-    });
+
+      return null;
+    } catch (error) {
+      const errorModel = showErrorMessage("load", "User Claims", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("User Claims Load", error.message, {
+        currentUser: auth.currentUser
+      });
+    }
   },
   /**
    * Loads all the application users.
    *
    * @param {Store} store - The vuex store.
    */
-  loadUsers({ commit }) {
+  async loadUsers({ commit }) {
+    commit("setLoading", true);
+
     const users = [];
 
-    db.collection("users")
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          users.push({ ...doc.data(), id: doc.id });
-        });
-      })
-      .then(() => {
-        commit("setUsers", users);
-      })
-      .catch(error => {
-        const errorModel = showErrorMessage("load", "Usuários", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Users Load", error.message, { users });
+    try {
+      const snapshot = await db.collection("users").get();
+
+      snapshot.forEach(doc => {
+        users.push({ ...doc.data(), id: doc.id });
       });
+
+      commit("setUsers", users);
+    } catch (error) {
+      const errorModel = showErrorMessage("load", "Usuários", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Users Load", error.message, { users });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Loads the most recent registered user.
    *
    * @param {Store} store - The vuex store.
    */
-  loadLastUser({ commit }) {
+  async loadLastUser({ commit }) {
     commit("setLoading", true);
 
-    db.collection("users")
-      .orderBy("created", "desc")
-      .limit(1)
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          commit("setLastUser", { ...doc.data(), id: doc.id });
-          commit("setLoading", false);
-        });
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("load", "Usuário", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Last User Loading", error.message, { users });
+    try {
+      const snapshot = await db
+        .collection("users")
+        .orderBy("created", "desc")
+        .limit(1)
+        .get();
+
+      snapshot.forEach(doc => {
+        commit("setLastUser", { ...doc.data(), id: doc.id });
       });
+    } catch (error) {
+      const errorModel = showErrorMessage("load", "Usuário", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("Last User Loading", error.message, { users });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
-   * Gets an user by it's uid.
+   * Gets an user by its uid.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.id - The user uid.
-   * @returns {Promise<UserInfo>} An user.
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the action payload.
+   * @param {string} payload.id the user uid.
+   * @returns {Promise<UserInfo>} an user data.
    */
   async getUserById({ commit }, payload) {
     commit("setLoading", true);
 
     const { id } = payload;
 
-    return new Promise((resolve, reject) => {
-      try {
-        db.collection("users")
-          .doc(id)
-          .get()
-          .then(doc => {
-            resolve({ ...doc.data(), id });
-            commit("setLoading", false);
-          });
-      } catch (error) {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("load", "Usuário", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("User By Id Loading", error.message, {
-          payload
-        });
+    try {
+      const doc = await db
+        .collection("users")
+        .doc(id)
+        .get();
+
+      if (!doc.exists) {
+        return null;
       }
-    });
+
+      return { ...doc.data(), id };
+    } catch (error) {
+      const errorModel = showErrorMessage("load", "Usuário", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("User By Id Loading", error.message, {
+        payload
+      });
+    } finally {
+      commit("setLoading", false);
+    }
+  },
+  /**
+   * Gets an user by its e-mail.
+   *
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the action payload.
+   * @param {string} payload.email The user e-mail.
+   * @returns {Promise<UserInfo>} an user data.
+   */
+  async getUserByEmail({ commit }, payload) {
+    commit("setLoading", true);
+
+    const { email } = payload;
+
+    try {
+      const snapshot = await db
+        .collection("users")
+        .where("email", "==", email)
+        .get();
+
+      const doc = snapshot.docs[0];
+
+      if (!doc) {
+        return null;
+      }
+
+      return { ...doc.data(), id: doc.id };
+    } catch (error) {
+      const errorModel = showErrorMessage("load", "Usuário", error.message);
+
+      commit("setError", { message: errorModel });
+      createErrorLog("User By E-mail Loading", error.message, {
+        payload
+      });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Sets to an user a new role.
@@ -524,69 +598,66 @@ const actions = {
    * @param {string} payload.email - The user e-email.
    * @param {string} payload.role - The user new role.
    */
-  setUserRole({ commit }, payload) {
+  async setUserRole({ commit }, payload) {
     commit("setLoading", true);
 
     const { email, role } = payload;
 
     let url = "";
 
-    if (
-      process.env.VUE_APP_FIREBASE_PROJECT_ID === "develop-lg-quiz-generator"
-    ) {
+    if (process.env.NODE_ENV === "production") {
       url =
-        "http://localhost:5001/develop-lg-quiz-generator/us-central1/authentication-setRole";
+        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/authentication-setRole";
     }
 
-    db.collection("users")
-      .where("email", "==", email)
-      .get()
-      .then(snapshot => {
-        const doc = snapshot.docs[0];
-        const updated = getNowISOString();
+    try {
+      const snapshot = await db
+        .collection("users")
+        .where("email", "==", email)
+        .get();
+      const doc = snapshot.docs[0];
+      const updated = getNowISOString();
 
-        doc.ref.update({ role, updated });
+      await doc.ref.update({ role, updated });
 
-        commit("setUserRole", { email, role, updated });
-        commit("setLoading", false);
-        commit(
-          "setSuccess",
-          `'${doc.data().name || email}' editado(a) com sucesso!`
-        );
+      commit("setUserRole", { email, role, updated });
 
-        axios
-          .post(url, {
-            data: {
-              email,
-              role
-            }
-          })
-          .catch(error => {
-            commit("setError", error);
-          });
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "edition",
-          "Cargo de Usuário",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("User Role Update", error.message, {
-          payload,
-          url,
-          updated
+      if (process.env.NODE_ENV === "production") {
+        await axios.post(url, {
+          data: {
+            email,
+            role
+          }
         });
+      }
+
+      commit(
+        "setSuccess",
+        `'${doc.data().name || email}' editado(a) com sucesso!`
+      );
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "edition",
+        "Cargo de Usuário",
+        error.message
+      );
+      commit("setError", { message: errorModel });
+      createErrorLog("User Role Update", error.message, {
+        payload,
+        url,
+        updated
       });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Logs out the current user.
    *
    * @param {Store} store - The vuex store.
    */
-  logout({ commit }) {
-    auth.signOut();
+  async logout({ commit }) {
+    await auth.signOut();
     commit("setUser", null);
     commit("setUserInfo", null);
     commit("setUserClaims", null);
@@ -594,11 +665,23 @@ const actions = {
   /**
    * Auto sign in an user if it's id is already into the browser local storage.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.uid - The user uid.
+   * @param {Store} store the vuex store.
+   * @param {Object} payload the user payload.
    */
   async autoSignIn({ commit, dispatch }, payload) {
+    const user = await dispatch("getUserById", { id: payload.uid });
+
+    if (!user) {
+      await dispatch("signUserUp", {
+        name: payload.displayName,
+        email: payload.email,
+        image: payload.photoURL,
+        userUid: payload.uid
+      });
+
+      return;
+    }
+
     await dispatch("loadUserClaims");
     dispatch("loadUserInfo", { id: payload.uid });
     commit("setUser", { id: payload.uid });
