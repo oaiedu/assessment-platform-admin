@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <v-data-table
+      v-if="currentUser"
       class="elevation-1 mt-2"
       loading-text="Carregando usuários..."
       :items="users"
