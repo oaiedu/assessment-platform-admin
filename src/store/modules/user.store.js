@@ -244,14 +244,14 @@ const actions = {
         updated: createdAt
       };
 
-      let url = "";
+      // let url = "";
 
-      if (process.env.NODE_ENV === "production") {
-        url =
-          "https://us-central1-cloud-quiz-generator.cloudfunctions.net/authentication-userDefaultRole";
+      // if (process.env.NODE_ENV === "production") {
+      //   url =
+      //     "https://us-central1-cloud-quiz-generator.cloudfunctions.net/authentication-userDefaultRole";
 
-        await axios.get(url, { headers: { uid: newUser.id } });
-      }
+      //   await axios.get(url, { headers: { uid: newUser.id } });
+      // }
 
       await db
         .collection("users")
@@ -603,18 +603,19 @@ const actions = {
 
     const { email, role } = payload;
 
-    let url = "";
+    // let url = "";
 
-    if (process.env.NODE_ENV === "production") {
-      url =
-        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/authentication-setRole";
-    }
+    // if (process.env.NODE_ENV === "production") {
+    //   url =
+    //     "https://us-central1-cloud-quiz-generator.cloudfunctions.net/authentication-setRole";
+    // }
 
     try {
       const snapshot = await db
         .collection("users")
         .where("email", "==", email)
         .get();
+
       const doc = snapshot.docs[0];
       const updated = getNowISOString();
 
@@ -622,14 +623,14 @@ const actions = {
 
       commit("setUserRole", { email, role, updated });
 
-      if (process.env.NODE_ENV === "production") {
-        await axios.post(url, {
-          data: {
-            email,
-            role
-          }
-        });
-      }
+      // if (process.env.NODE_ENV === "production") {
+      //   await axios.post(url, {
+      //     data: {
+      //       email,
+      //       role
+      //     }
+      //   });
+      // }
 
       commit(
         "setSuccess",
@@ -641,6 +642,7 @@ const actions = {
         "Cargo de Usuário",
         error.message
       );
+
       commit("setError", { message: errorModel });
       createErrorLog("User Role Update", error.message, {
         payload,
