@@ -1,6 +1,6 @@
 import { Store } from "vuex";
 
-import { db, storage } from "../../main";
+import { analytics, db, storage } from "../../main";
 import { createErrorLog, showErrorMessage } from "../../utils/errors";
 import { getNowISOString } from "../../utils/date";
 
@@ -386,6 +386,12 @@ const actions = {
 
     try {
       await db.collection("question-requests").add(request);
+
+      analytics.logEvent("create_request", {
+        subject: request.subject,
+        level: request.level.index,
+        user: request.userId
+      });
 
       commit("addRequest", {
         page: amount === 0 ? pageAmount + 1 : pageAmount,
