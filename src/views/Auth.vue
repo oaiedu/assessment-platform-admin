@@ -20,13 +20,70 @@
       </div>
 
       <svg
-        v-if="clouds"
-        class="sign__clouds"
-        v-html="clouds.html"
-        :style="{ height: clouds.height }"
+        v-if="cloudsL3 && windowWidth > 830"
+        class="sign__clouds l3"
+        v-html="cloudsL3.html"
+        :style="{ height: cloudsL3.height }"
+      ></svg>
+      <svg
+        v-if="cloudsL2 && windowWidth > 830"
+        class="sign__clouds l2"
+        v-html="cloudsL2.html"
+        :style="{ height: cloudsL2.height }"
+      ></svg>
+      <svg
+        v-if="cloudsL1 && windowWidth > 830"
+        class="sign__clouds l1"
+        v-html="cloudsL1.html"
+        :style="{ height: cloudsL1.height }"
       ></svg>
 
-      <div v-if="clouds" class="sign__clouds-fill"></div>
+      <svg
+        v-if="cloudsL3 && windowWidth > 830"
+        class="sign__clouds extended l3"
+        v-html="cloudsL3.html"
+        :style="{ height: cloudsL3.height }"
+      ></svg>
+
+      <svg
+        v-if="cloudsL2 && windowWidth > 830"
+        class="sign__clouds extended l2"
+        v-html="cloudsL2.html"
+        :style="{ height: cloudsL2.height }"
+      ></svg>
+
+      <svg
+        v-if="cloudsL1 && windowWidth > 830"
+        class="sign__clouds extended l1"
+        v-html="cloudsL1.html"
+        :style="{ height: cloudsL1.height }"
+      ></svg>
+
+      <svg
+        v-if="cloudsL3 && windowWidth > 830"
+        class="sign__clouds extended-plus l3"
+        v-html="cloudsL3.html"
+        :style="{ height: cloudsL3.height }"
+      ></svg>
+
+      <svg
+        v-if="cloudsL2 && windowWidth > 830"
+        class="sign__clouds extended-plus l2"
+        v-html="cloudsL2.html"
+        :style="{ height: cloudsL2.height }"
+      ></svg>
+
+      <svg
+        v-if="cloudsL1 && windowWidth > 830"
+        class="sign__clouds extended-plus l1"
+        v-html="cloudsL1.html"
+        :style="{ height: cloudsL1.height }"
+      ></svg>
+
+      <div
+        v-if="(cloudsL1 || cloudsL2 || cloudsL3) && windowWidth > 830"
+        class="sign__clouds-fill"
+      ></div>
 
       <SignUser
         @forgotPassword="isResetUserPwdModalVisible = true"
@@ -92,7 +149,10 @@ export default {
   data() {
     return {
       mdiEmail,
-      clouds: null,
+      cloudsL1: null,
+      cloudsL2: null,
+      cloudsL3: null,
+      windowWidth: 0,
       isResetUserPwdModalVisible: false,
       email: "",
       required: [
@@ -141,7 +201,25 @@ export default {
     }
   },
   mounted() {
-    this.clouds = drawMultiClouds({ width: window.innerWidth });
+    this.windowWidth = window.innerWidth;
+
+    this.cloudsL1 = drawMultiClouds({
+      count: 1,
+      current: 1,
+      width: this.windowWidth
+    });
+
+    this.cloudsL2 = drawMultiClouds({
+      count: 1,
+      current: 2,
+      width: this.windowWidth
+    });
+
+    this.cloudsL3 = drawMultiClouds({
+      count: 1,
+      current: 3,
+      width: this.windowWidth
+    });
 
     if (this.user) {
       this.$router.push(this.$route.params.to || "/");
@@ -157,9 +235,58 @@ export default {
   bottom: 140px;
 
   width: 100%;
-  /* height: 110px; */
 
-  overflow: visible;
+  overflow: hidden;
+
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.sign__clouds.l1 {
+  z-index: 2;
+
+  animation-name: clouds-animation-right;
+  animation-duration: 30s;
+}
+
+.sign__clouds.l2 {
+  z-index: 1;
+
+  animation-name: clouds-animation-left;
+  animation-duration: 35s;
+}
+
+.sign__clouds.l3 {
+  z-index: 0;
+
+  animation-name: clouds-animation-right;
+  animation-duration: 40s;
+}
+
+.sign__clouds.l2 /deep/ path {
+  fill: #f2f2f2;
+}
+
+.sign__clouds.l3 /deep/ path {
+  fill: #e1e1e1;
+}
+
+.sign__clouds.extended.l2 {
+  transform: translateX(100%) scaleX(-1);
+}
+
+.sign__clouds.extended.l1,
+.sign__clouds.extended.l3 {
+  transform: translateX(-100%) scaleX(-1);
+}
+
+.sign__clouds.extended-plus.l2 {
+  transform: translateX(200%);
+}
+
+.sign__clouds.extended-plus.l1,
+.sign__clouds.extended-plus.l3 {
+  transform: translateX(-200%);
 }
 
 .sign__clouds-fill {
@@ -169,6 +296,8 @@ export default {
 
   width: 100%;
   height: 160px;
+
+  z-index: 2;
 
   background: linear-gradient(white, #f5f5f5);
 }
@@ -230,6 +359,26 @@ export default {
 
 .sign__card {
   width: 530px;
+
+  z-index: 10;
+}
+
+@keyframes clouds-animation-left {
+  from {
+    left: 0;
+  }
+  to {
+    left: -200%;
+  }
+}
+
+@keyframes clouds-animation-right {
+  from {
+    left: 0;
+  }
+  to {
+    left: 200%;
+  }
 }
 
 @media (max-width: 1000px) {
@@ -243,6 +392,10 @@ export default {
 }
 
 @media (max-width: 830px) {
+  .sign__clouds {
+    animation-name: none;
+  }
+
   .sign__info-container {
     display: none;
   }
