@@ -285,8 +285,8 @@ function drawClouds(
     )
   );
 
-  const svgHeight = svg.getAttribute("height");
-  const svgWidth = svg.getAttribute("width");
+  const svgHeight = +svg.getAttribute("height");
+  const svgWidth = +svg.getAttribute("width");
 
   // svg
   let svgPath = `M 0 ${svgHeight} L ${points[0].x} ${points[0].y}`;
@@ -336,12 +336,13 @@ export function drawMultiClouds(_settings) {
       seed: 0,
       offset: 50,
       step: 50,
-      width: 0
+      width: 0,
+      current: 1
     },
     _settings
   );
 
-  const { count, turbulence, seed, offset, step } = settings;
+  const { count, turbulence, seed, offset, step, current } = settings;
   const noise = new ValueNoise(seed, 100, 1, 1000, 1000);
 
   if (!svg) {
@@ -350,7 +351,8 @@ export function drawMultiClouds(_settings) {
 
   svg.innerHTML = "";
   // resize canvas to max height of the clouds
-  const svgHeight = offset * (count - 1) + turbulence + step * 0.75;
+  const svgHeight =
+    offset * (count === 1 ? current - 1 : count - 1) + turbulence + step * 0.75;
   const svgWidth = settings.width;
 
   svg.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
@@ -360,13 +362,18 @@ export function drawMultiClouds(_settings) {
   for (let i = 0; i < count; i++) {
     drawClouds({
       fill: `rgb(${Array(3).fill(
-        255 - count * 10 + (count * 10 * i) / (count - 1)
+        count === 1
+          ? 255
+          : 255 - count * 10 + (count * 10 * i) / (count - 1 || 1)
       )})`, //`rgba(${hexToRgb('#e14').join(',')},${(i+1)/count})`,
       gradient: { from: "", to: "" },
-      offset: ((offset * (1 + i / count)) / 2) * i,
+      offset:
+        ((offset * (1 + i / ((count === 1 ? current - 1 : count - 1) || 1))) /
+          2) *
+        i,
       turbulence,
       noise,
-      stepSize: step * (1 + i / count)
+      stepSize: step * (1 + i / ((count === 1 ? current - 1 : count - 1) || 1))
     });
   }
 
