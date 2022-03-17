@@ -219,6 +219,7 @@ import DeleteWarning from "../Shared/DeleteWarning";
 import DeleteAlert from "./DeleteAlertTests";
 import SearchBox from "../Shared/SearchBox";
 import { getNowISOString } from "../../utils/date";
+import { analytics } from "../../main";
 
 export default {
   name: "Tests",
@@ -388,6 +389,10 @@ export default {
       if (text && text.length > 0) {
         this.isSearching = true;
         this.$store.dispatch("searchTests", text);
+
+        analytics.logEvent("search", {
+          search_term: text
+        });
       } else {
         this.isSearching = false;
       }

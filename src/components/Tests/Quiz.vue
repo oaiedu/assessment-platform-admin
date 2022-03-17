@@ -350,6 +350,7 @@ import {
 
 import QuestionImage from "../Questions/QuestionImage.vue";
 import Counter from "../Shared/Counter.vue";
+import { analytics } from "../../main";
 
 export default {
   name: "Exam",
@@ -516,6 +517,12 @@ export default {
         minutes: hours > 0 ? minutes - hours * 60 : minutes,
         seconds: minutes > 0 ? seconds - minutes * 60 : seconds
       };
+
+      analytics.logEvent("quiz_complete", {
+        timeTaken: `${timeTaken.hours}h ${timeTaken.minutes}m ${timeTaken.seconds}s`,
+        score,
+        correct
+      });
 
       if (this.$route.params.id === "generated") {
         this.$router.push({

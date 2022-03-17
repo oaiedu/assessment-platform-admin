@@ -386,6 +386,8 @@ import {
   mdiThumbUpOutline
 } from "@mdi/js";
 
+import { analytics } from "../../main";
+
 import { weekDays, months } from "../../utils/date";
 
 export default {
@@ -523,6 +525,11 @@ export default {
     },
     startQuiz() {
       const id = this.$route.params.id;
+
+      analytics.logEvent("start_quiz", {
+        id,
+        mode: id === "generated" || this.practice ? "practice" : "exam"
+      });
 
       if (id === "generated") {
         this.$router.push({
