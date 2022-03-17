@@ -8,7 +8,7 @@
         <v-hover v-slot="{ hover }">
             <v-btn 
               text
-              to="/quiz"
+              to="/quizzes"
               class="see-more-button pa-0 ma-0 ml-2"
               :color="hover ? '#1e88e5' : '#888888'"
             >See More
@@ -311,6 +311,14 @@ export default {
   position: absolute;
   right: -23px;
   top: 2px;
+}
+
+.see-more-button {
+  font-size: 0.75rem;
+}
+
+.see-more-button::before {
+  background: transparent;
 }
 
 @media (max-width: 960px) {
