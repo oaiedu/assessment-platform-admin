@@ -288,6 +288,14 @@ export default {
   display: none;
 }
 
+.see-more-button {
+  font-size: 0.75rem;
+}
+
+.see-more-button::before {
+  background: transparent;
+}
+
 @media (max-width: 1000px) {
   .chart-title {
     position: static;

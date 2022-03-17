@@ -249,6 +249,14 @@
         font-size: 0.95rem;
     }
 
+    .see-more-button {
+        font-size: 0.75rem;
+    }
+
+    .see-more-button::before {
+        background: transparent;
+    }
+
     @media(max-width: 960px) {
         .creation-date {
             display: none;
