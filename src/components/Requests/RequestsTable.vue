@@ -2,16 +2,16 @@
   <v-container>
     <v-card>
       <v-data-table
+        hide-default-footer
+        loading-text="Carregando solicitações..."
+        no-data-text="Não há solicitações"
+        class="elevation-1"
         :headers="headers"
         :items="items"
         :page="page"
         :items-per-page="itemsPerPage"
-        :loading="loading"
-        loading-text="Carregando solicitações..."
-        no-data-text="Não há solicitações"
-        hide-default-footer
+        :loading="loading || rejectLoading"
         :item-class="itemRowStyle"
-        class="elevation-1"
       >
         <template
           v-slot:[`item.status`]="{ item }"
@@ -61,7 +61,9 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
-                  :disabled="item.status === 'Aprovado'"
+                  :disabled="
+                    item.status === 'Aprovado' || loading || rejectLoading
+                  "
                   @click="onCheckClick(item)"
                 >
                   {{ mdiCheckBold }}
@@ -76,7 +78,9 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
-                  :disabled="item.status === 'Aprovado'"
+                  :disabled="
+                    item.status === 'Aprovado' || loading || rejectLoading
+                  "
                   @click="onEditClick(item)"
                 >
                   {{ mdiPencil }}
@@ -92,9 +96,11 @@
                   v-bind="attrs"
                   class="ml-3"
                   :disabled="
-                    userClaims && userClaims['admin']
-                      ? item.status === 'Rejeitado'
-                      : item.status === 'Aprovado'
+                    loading ||
+                      rejectLoading ||
+                      (userClaims && userClaims['admin']
+                        ? item.status === 'Rejeitado'
+                        : item.status === 'Aprovado')
                   "
                   @click="
                     userClaims && userClaims['admin']
@@ -157,7 +163,7 @@ import {
 
 export default {
   name: "RequestsTable",
-  props: ["items", "page", "itemsPerPage"],
+  props: ["items", "page", "itemsPerPage", "rejectLoading"],
   computed: {
     headers() {
       return this.userClaims && this.userClaims["admin"]
