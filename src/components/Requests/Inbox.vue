@@ -167,6 +167,7 @@ import Paginator from "../Paginator";
 import DeleteWarning from "../Shared/DeleteWarning";
 import DeleteAlert from "./DeleteAlertRequests";
 import SearchBox from "../Shared/SearchBox";
+import { analytics } from "../../main";
 
 export default {
   components: {
@@ -428,6 +429,10 @@ export default {
           key: text,
           claims: this.userClaims,
           userInfo: this.userInfo
+        });
+
+        analytics.logEvent("search", {
+          search_term: text
         });
       } else {
         this.isSearching = false;

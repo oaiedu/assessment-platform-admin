@@ -65,7 +65,7 @@
               color="indigo lighten-2"
               @click="doExam(item)"
             >
-              COMEÇAR
+              Visualizar
             </v-btn>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -169,6 +169,8 @@ import {
   mdiClipboardText,
   mdiDumbbell
 } from "@mdi/js";
+
+import { analytics } from "../../main";
 
 export default {
   name: "TestsTable",
@@ -296,6 +298,12 @@ export default {
       this.$emit("restoreClick", item);
     },
     doExam(item) {
+      analytics.logEvent("select_item", {
+        item_list_name: item.title,
+        item_list_id: item.id,
+        items: [item]
+      });
+
       this.$router.push("/quizzes/" + item.id);
     }
   }

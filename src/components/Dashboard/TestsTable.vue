@@ -87,6 +87,8 @@ import {
   mdiDumbbell
 } from "@mdi/js";
 
+import { analytics } from "../../main";
+
 export default {
   name: "TestsTable",
   data() {
@@ -203,6 +205,12 @@ export default {
       }
     },
     onRowClick(item) {
+      analytics.logEvent("select_item", {
+        item_list_name: item.title,
+        item_list_id: item.id,
+        items: [item]
+      });
+
       this.$router.push("/quizzes/" + item.id);
     }
   },
