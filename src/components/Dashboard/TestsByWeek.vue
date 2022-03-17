@@ -4,16 +4,23 @@
       class="tests-by-week-container"
       v-if="testsByWeek && testsByWeekInterval"
     >
-      <h2 class="chart-title">Questionários por semana
-        <v-hover v-slot="{ hover }">
-            <v-btn 
-              text
-              to="/quizzes"
-              class="see-more-button pa-0 ma-0 ml-2"
-              :color="hover ? '#1e88e5' : '#888888'"
-            >See More
-            </v-btn>
-          </v-hover>
+      <h2 class="chart-title">
+        Questionários por semana
+
+        <v-hover
+          v-if="userClaims && !userClaims['appraiser']"
+          v-slot="{ hover }"
+        >
+          <v-btn
+            text
+            to="/quizzes"
+            class="see-more-button pa-0 ma-0 ml-2"
+            :ripple="false"
+            :color="hover ? '#1e88e5' : '#888888'"
+          >
+            See More
+          </v-btn>
+        </v-hover>
       </h2>
       <span class="number-of-tests">
         Total:
@@ -111,6 +118,9 @@ export default {
     };
   },
   computed: {
+    userClaims() {
+      return this.$store.getters.getUserClaims;
+    },
     testsByWeek() {
       return this.$store.getters.getTestsByWeek;
     },
@@ -318,7 +328,7 @@ export default {
 }
 
 .see-more-button::before {
-  background: transparent;
+  background-color: transparent !important;
 }
 
 @media (max-width: 960px) {
