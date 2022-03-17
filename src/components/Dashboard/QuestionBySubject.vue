@@ -1,7 +1,17 @@
 <template>
   <v-card width="100%" height="100%" class="question-by-subject">
     <div class="question-by-subject-container">
-      <h2 class="chart-title">Questões por matéria</h2>
+      <h2 class="chart-title">Questões por matéria
+          <v-hover v-slot="{ hover }">
+            <v-btn 
+              text
+              to="/questions"
+              class="see-more-button pa-0 ma-0 ml-2"
+              :color="hover ? '#1e88e5' : '#888888'"
+            >See More
+            </v-btn>
+          </v-hover>
+      </h2>
       <div class="subject-list">
         <span
           v-if="!chartData || chartData.length === 0"
@@ -36,9 +46,6 @@
         class="chart"
         :option="option"
       />
-      <MoreButton 
-        link="/admin"
-      />
     </div>
   </v-card>
 </template>
@@ -49,8 +56,6 @@ import { PieChart } from "echarts/charts";
 import { CanvasRenderer } from "echarts/renderers";
 import { TooltipComponent } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
-
-import MoreButton from './MoreButton.vue';
 
 use([PieChart, TooltipComponent, CanvasRenderer]);
 
