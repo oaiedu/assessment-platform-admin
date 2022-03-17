@@ -58,11 +58,12 @@
           color="blue darken-1"
           class="mr-4"
           v-on="on"
-          dark
           fab
           fixed
           bottom
           right
+          :dark="formIsValid"
+          :disabled="!formIsValid"
           :loading="loading"
           @click="onEditQuestion()"
         >
