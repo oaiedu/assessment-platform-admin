@@ -55,12 +55,16 @@
                     <div class="creation-date" v-if="lastUser">{{ formatDate(lastUser.created) }}</div>
                 </div>
             </div>
+        <MoreButton 
+        link="/admin"
+        />
         </div>
     </v-card>
 </template>
 
 <script>
     import { mdiAccount, mdiCloud, mdiFileAlertOutline } from '@mdi/js';
+    import MoreButton from '../MoreButton.vue';
 
     export default {
         name: 'LastData',
