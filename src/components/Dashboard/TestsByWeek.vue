@@ -43,6 +43,9 @@
       <div class="chart-container">
         <v-chart class="chart" :option="option" autoresize />
       </div>
+      <MoreButton 
+        link="/quiz"
+    />
     </div>
   </v-card>
 </template>
@@ -58,6 +61,8 @@ import {
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 import { mdiStarCircle } from "@mdi/js";
+
+import MoreButton from './MoreButton.vue';
 
 use([
   LineChart,

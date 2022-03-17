@@ -36,6 +36,9 @@
         class="chart"
         :option="option"
       />
+      <MoreButton 
+        link="/admin"
+      />
     </div>
   </v-card>
 </template>
@@ -46,6 +49,8 @@ import { PieChart } from "echarts/charts";
 import { CanvasRenderer } from "echarts/renderers";
 import { TooltipComponent } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
+
+import MoreButton from './MoreButton.vue';
 
 use([PieChart, TooltipComponent, CanvasRenderer]);
 
