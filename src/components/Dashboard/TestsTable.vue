@@ -205,6 +205,10 @@ export default {
       }
     },
     onRowClick(item) {
+      if (this.userClaims["appraiser"]) {
+        return;
+      }
+
       analytics.logEvent("select_item", {
         item_list_name: item.title,
         item_list_id: item.id,
