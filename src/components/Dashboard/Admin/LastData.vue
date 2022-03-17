@@ -1,7 +1,17 @@
 <template>
     <v-card width="100%" height="100%" class="last-data">
         <div class="last-data-container">
-            <h1 class="last-data-title">Últimos registros</h1>
+            <h1 class="last-data-title">Últimos registros
+                <v-hover v-slot="{ hover }">
+                    <v-btn 
+                         text
+                        to="/admin"
+                        class="see-more-button pa-0 ma-0 ml-2"
+                        :color="hover ? '#1e88e5' : '#888888'"
+                    >See More
+                    </v-btn>
+                </v-hover>
+            </h1>
             <div class="last-data-sub-container">
                 <div
                     class="last-backup info-row"
@@ -55,16 +65,12 @@
                     <div class="creation-date" v-if="lastUser">{{ formatDate(lastUser.created) }}</div>
                 </div>
             </div>
-        <MoreButton 
-        link="/admin"
-        />
         </div>
     </v-card>
 </template>
 
 <script>
     import { mdiAccount, mdiCloud, mdiFileAlertOutline } from '@mdi/js';
-    import MoreButton from '../MoreButton.vue';
 
     export default {
         name: 'LastData',

@@ -4,7 +4,17 @@
       class="tests-by-week-container"
       v-if="testsByWeek && testsByWeekInterval"
     >
-      <h2 class="chart-title">Questionários por semana</h2>
+      <h2 class="chart-title">Questionários por semana
+        <v-hover v-slot="{ hover }">
+            <v-btn 
+              text
+              to="/quiz"
+              class="see-more-button pa-0 ma-0 ml-2"
+              :color="hover ? '#1e88e5' : '#888888'"
+            >See More
+            </v-btn>
+          </v-hover>
+      </h2>
       <span class="number-of-tests">
         Total:
         <span :style="{ color: colorPaleteList[colorPalete] }" class="amount">
@@ -43,9 +53,6 @@
       <div class="chart-container">
         <v-chart class="chart" :option="option" autoresize />
       </div>
-      <MoreButton 
-        link="/quiz"
-    />
     </div>
   </v-card>
 </template>
@@ -61,8 +68,6 @@ import {
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 import { mdiStarCircle } from "@mdi/js";
-
-import MoreButton from './MoreButton.vue';
 
 use([
   LineChart,
