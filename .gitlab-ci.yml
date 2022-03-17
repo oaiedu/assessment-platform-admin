@@ -31,6 +31,19 @@ build-develop:
   only:
     - develop
 
+build-branch:
+  stage: build
+  script:
+    - npm install --progress=false
+    - export NODE_OPTIONS=--openssl-legacy-provider
+    - npm run build:dev
+  artifacts:
+    paths:
+      - dist/
+  except:
+    - develop
+    - master
+
 deploy-production:
   stage: deploy
   script:
@@ -46,3 +59,11 @@ deploy-develop:
     - firebase deploy -m "Pipeline $CI_PIPELINE_ID | Build $CI_BUILD_ID" --non-interactive --only hosting --token $FIREBASE_TOKEN
   only:
     - develop
+
+deploy-branch:
+  stage: deploy
+  script:
+    - echo "Deploy not available for this branch."
+  except:
+    - develop
+    - master
