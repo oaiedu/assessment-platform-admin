@@ -153,8 +153,19 @@
             </span>
 
             <div
+              v-if="examQuestions[current - 1].answerJustification"
+              v-html="examQuestions[current - 1].answerJustification"
+              class="quiz__answer-justification ma-4 mb-6"
+            ></div>
+
+            <div
               v-for="(answer, i) in examQuestions[current - 1].answers"
               class="mx-4 mt-1 mb-3 quiz__answer-description"
+              :class="{
+                'mb-6':
+                  i === examQuestions[current - 1].answers.length - 1 &&
+                  !!examQuestions[current - 1].answerJustificationSource
+              }"
               :key="answer.ansId + '-desc'"
             >
               <strong
@@ -166,6 +177,28 @@
 
               <span>{{ answer.description }}</span>
             </div>
+
+            <span
+              v-if="examQuestions[current - 1].answerJustificationSource"
+              class="quiz__answer-source mx-4"
+            >
+              Link:
+              <a
+                target="blank"
+                :href="
+                  justificationSourceUrl(
+                    examQuestions[current - 1].answerJustificationSource
+                  )
+                "
+                :class="{
+                  link: checkUrl(
+                    examQuestions[current - 1].answerJustificationSource
+                  )
+                }"
+              >
+                {{ examQuestions[current - 1].answerJustificationSource }}
+              </a>
+            </span>
 
             <v-divider class="mt-5"></v-divider>
           </div>
@@ -432,6 +465,18 @@ export default {
   methods: {
     onResize() {
       this.windowWidth = window.innerWidth;
+    },
+    checkUrl(url) {
+      const noHttp = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+
+      return noHttp.test(url);
+    },
+    justificationSourceUrl(url) {
+      if (!url.startsWith("http")) {
+        return `https://${url}`;
+      }
+
+      return url;
     },
     getAnswerCustomData(answer) {
       if (!this.review) {
@@ -951,6 +996,20 @@ a,
 a:hover {
   color: #888 !important;
   text-decoration-line: underline;
+}
+
+.quiz__answer-source a {
+  text-decoration: none;
+  color: #0009 !important;
+
+  pointer-events: none;
+}
+
+.quiz__answer-source a.link {
+  text-decoration: underline;
+  color: rgb(26, 174, 219) !important;
+
+  pointer-events: all;
 }
 
 .hidden {

@@ -35,6 +35,8 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {string} image The question image url.
  * @property {string} imageSize The size of the image.
  * @property {Answer[]} answers The question answers.
+ * @property {string} answerJustification The question answer general justification.
+ * @property {string} answerJustificationSource The question answer justifications sources.
  */
 
 /**
@@ -48,6 +50,8 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {string|undefined} created The question creation date.
  * @property {string|undefined} updated The question edition date.
  * @property {Answer[]} answers The question answers.
+ * @property {string} answerJustification The question answer general justification.
+ * @property {string} answerJustificationSource The question answer justifications sources.
  * @property {DeleteStatus|undefined} toDelete The question deletion status.
  */
 
@@ -692,6 +696,8 @@ const actions = {
           question: data.question,
           level: data.level,
           answers: data.answers,
+          answerJustification: data.answerJustification,
+          answerJustificationSource: data.answerJustificationSource,
           image: data.image,
           imageSize: data.imageSize
         };
@@ -781,6 +787,8 @@ const actions = {
           level: data.level,
           question: data.question,
           answers: data.answers,
+          answerJustification: data.answerJustification,
+          answerJustificationSource: data.answerJustificationSource,
           image: data.image,
           imageSize: data.imageSize
         };

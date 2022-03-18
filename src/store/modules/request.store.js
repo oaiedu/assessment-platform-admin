@@ -21,6 +21,8 @@ import { getNowISOString } from "../../utils/date";
  * @property {string} image The request image url.
  * @property {string} imageSize The size of the image.
  * @property {Answer[]} answers The request answers.
+ * @property {string} answerJustification The request answer general justification.
+ * @property {string} answerJustificationSource The request answer justifications sources.
  * @property {RequestStatus} status The request status.
  */
 
@@ -36,6 +38,8 @@ import { getNowISOString } from "../../utils/date";
  * @property {string|undefined} created The request creation date.
  * @property {string|undefined} updated The request edition date.
  * @property {Answer[]} answers The request answers.
+ * @property {string} answerJustification The request answer general justification.
+ * @property {string} answerJustificationSource The request answer justifications sources.
  * @property {RequestStatus} status The request status.
  * @property {DeleteStatus|undefined} toDelete The request deletion status.
  */
@@ -866,6 +870,9 @@ const actions = {
         const data = doc.data();
         docData = data;
 
+        /**
+         * @type {Request}
+         */
         const request = {
           created: data.created,
           image: data.image,
@@ -873,6 +880,9 @@ const actions = {
           name: data.name,
           question: data.question,
           level: data.level,
+          answers: data.answers,
+          answerJustification: data.answerJustification,
+          answerJustificationSource: data.answerJustificationSource,
           status: data.status,
           subject: data.subject,
           updated: data.updated,
@@ -928,6 +938,9 @@ const actions = {
           const data = doc.data();
           docData = data;
 
+          /**
+           * @type {Request}
+           */
           const request = {
             created: data.created,
             image: data.image,
@@ -935,6 +948,9 @@ const actions = {
             name: data.name,
             question: data.question,
             level: data.level,
+            answers: data.answers,
+            answerJustification: data.answerJustification,
+            answerJustificationSource: data.answerJustificationSource,
             status: data.status,
             subject: data.subject,
             updated: data.updated,

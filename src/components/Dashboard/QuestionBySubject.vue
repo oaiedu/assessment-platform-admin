@@ -264,15 +264,34 @@ export default {
   position: absolute;
   top: 30%;
   left: 35px;
+
+  width: 50%;
 }
 
 .subject-item {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+
   position: relative;
+
+  width: 100%;
 
   color: #555;
   font-size: 0.85rem;
   font-weight: 400;
   line-height: 1.6rem;
+}
+
+.subject-item .subject-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+
+  max-width: 100%;
+
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .list-circle-dot {
@@ -290,6 +309,8 @@ export default {
 
 .item-percentage {
   display: none;
+
+  margin-left: 4px;
 }
 
 .see-more-button {
@@ -325,12 +346,20 @@ export default {
     display: flex;
   }
 
+  .subject-item .subject-name {
+    max-width: 60%;
+  }
+
   .item-percentage {
     display: inline;
   }
 }
 
 @media (max-width: 550px) {
+  .subject-item .subject-name {
+    max-width: 100%;
+  }
+
   .item-percentage {
     display: none;
   }
@@ -353,6 +382,8 @@ export default {
     position: static;
 
     margin-left: 16px;
+
+    width: 100%;
   }
 }
 </style>
