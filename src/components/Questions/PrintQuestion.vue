@@ -18,7 +18,11 @@
 
             <br />
 
-            <Answers :answers="question.answers" />
+            <Answers
+              :answers="question.answers"
+              :answerJustification="question.answerJustification"
+              :answerJustificationSource="question.answerJustificationSource"
+            />
 
             <v-tooltip left>
               <template v-slot:activator="{ on, attrs }">
