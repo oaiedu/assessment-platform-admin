@@ -1,29 +1,24 @@
 # Cloud Quiz Generator
 
-## Project setup
+### Getting started
 
 ```
-npm install
+$ git clone https://gitlab.com/lg-facens/lg-quiz-generator.git
+$ cd lg-quiz-generator
+
+$ npm install
+$ npm run serve
 ```
 
-### Compiles and hot-reloads for development
+### Contributing
 
 ```
-npm run serve
+$ git checkout develop
+$ git checkout -b feature/[branch-name]
+
+# Implement changes and commit them
+
+$ git push -u origin feature/[branch-name]
 ```
 
-### Compiles and minifies for production
-
-```
-npm run build
-```
-
-### Lints and fixes files
-
-```
-npm run lint
-```
-
-### Customize configuration
-
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### _Don't push neither to master or develop, otherwise the GitLab CI/CD will deploy your changes without a confirmation!!_

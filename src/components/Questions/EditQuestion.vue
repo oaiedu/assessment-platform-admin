@@ -175,7 +175,7 @@
                   </v-stepper-content>
 
                   <v-stepper-content step="2" class="pa-0 ma-0">
-                    <v-container class="pl-4 pr-9 py-8 ma-0">
+                    <v-container class="pl-2 pr-8 py-8 ma-0">
                       <v-row
                         v-for="(item, index) in editedAnswers"
                         :key="index"
@@ -207,6 +207,30 @@
                           ></v-text-field>
                         </v-col>
                       </v-row>
+
+                      <v-row
+                        class="question-form__answer-justification pa-0 ma-0 mt-2 ml-6"
+                      >
+                        <VueTextEditor
+                          outlined
+                          placeholder="Justificativa geral"
+                          :height="300"
+                          :value="editedAnswerJustification"
+                          :groups="['format', 'list', 'format2']"
+                          @textChange="editedAnswerJustification = $event"
+                        />
+                      </v-row>
+
+                      <v-row class="pa-0 ma-0 mt-8 ml-6">
+                        <v-text-field
+                          v-model="editedAnswerJustificationSource"
+                          dense
+                          outlined
+                          rounded
+                          class="pa-0 ma-0"
+                          label="Fonte da justificativa (URL)"
+                        ></v-text-field>
+                      </v-row>
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -221,6 +245,8 @@
             :subject="editedSubject"
             :questionDesc="editedQuestionDescription"
             :answers="editedAnswers"
+            :answerJustification="editedAnswerJustification"
+            :answerJustificationSource="editedAnswerJustificationSource"
             :image="imagePreview"
           />
         </v-col>
@@ -268,6 +294,8 @@ export default {
         { text: "", description: "", ansId: "radio-3", value: false },
         { text: "", description: "", ansId: "radio-4", value: false }
       ],
+      editedAnswerJustification: "",
+      editedAnswerJustificationSource: "",
       editedLevel: {
         index: 0,
         name: "beginner"
@@ -339,6 +367,8 @@ export default {
       this.editedSubject = this.question.subject;
       this.editedImageSize = this.question.imageSize;
       this.editedAnswers = [...this.question.answers];
+      this.editedAnswerJustification = this.question.answerJustification;
+      this.editedAnswerJustificationSource = this.question.answerJustificationSource;
       this.editedQuestionDescription = this.question.question;
       this.editedLevel = { ...this.question.level };
 
@@ -377,6 +407,8 @@ export default {
         level: this.question.level,
         question: this.question.question,
         answers: this.question.answers,
+        answerJustification: this.question.answerJustification,
+        answerJustificationSource: this.question.answerJustificationSource,
         image: this.question.image,
         imageSize: this.question.imageSize
       };
@@ -388,6 +420,8 @@ export default {
         question: this.editedQuestionDescription,
         level: this.editedLevel,
         answers: this.editedAnswers,
+        answerJustification: this.editedAnswerJustification,
+        answerJustificationSource: this.editedAnswerJustificationSource,
         image: this.editedImage,
         imageSize: this.editedImageSize
       };
@@ -427,6 +461,8 @@ export default {
       this.image = null;
       this.imagePreview = "";
       this.editedAnswers = [];
+      this.editedAnswerJustification = "";
+      this.editedAnswerJustificationSource = "";
       this.editedName = null;
       this.editedSubject = null;
       this.editedImageSize = null;

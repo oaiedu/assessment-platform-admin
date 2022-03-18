@@ -25,6 +25,8 @@
 
       <Answers
         :answers="answers"
+        :answerJustification="answerJustification"
+        :answerJustificationSource="answerJustificationSource"
         :style="{ marginTop: (image ? 30 : 0) + 'px' }"
       />
     </v-card-text>
@@ -36,7 +38,23 @@ import Answers from "./Answers";
 
 export default {
   name: "PreviewQuestions",
-  props: ["name", "subject", "questionDesc", "answers", "image"],
+  props: {
+    name: String,
+    subject: String,
+    questionDesc: String,
+    answers: Array,
+    image: String,
+    answerJustification: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    answerJustificationSource: {
+      type: String,
+      required: false,
+      default: ""
+    }
+  },
   components: { Answers }
 };
 </script>
