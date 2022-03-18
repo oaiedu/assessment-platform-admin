@@ -1,5 +1,5 @@
 import { Store } from "vuex";
-import { db } from "../../main";
+import { analytics, db } from "../../main";
 import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
 /**
