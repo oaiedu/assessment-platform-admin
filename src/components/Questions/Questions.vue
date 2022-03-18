@@ -219,6 +219,7 @@ import QuestionForm from "./QuestionForm";
 import EditQuestion from "./EditQuestion";
 import Body from "./PrintQuestion";
 import { mdiPlus } from "@mdi/js";
+import { analytics } from "../../main";
 
 export default {
   name: "Questions",
@@ -438,6 +439,10 @@ export default {
       if (text && text.length > 0) {
         this.isSearching = true;
         this.$store.dispatch("searchQuestions", text);
+
+        analytics.logEvent("search", {
+          search_term: text
+        });
       } else {
         this.isSearching = false;
       }

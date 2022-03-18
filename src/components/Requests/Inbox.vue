@@ -62,6 +62,7 @@
         :items="isSearching ? filteredRequests : requests"
         :page="isSearching ? searchPage : page"
         :itemsPerPage="itemsPerPage"
+        :rejectLoading="rejectLoading"
         @emailClick="sendEmail($event)"
         @pdfClick="printRequest($event)"
         @checkClick="checkRequest($event)"
@@ -167,6 +168,7 @@ import Paginator from "../Paginator";
 import DeleteWarning from "../Shared/DeleteWarning";
 import DeleteAlert from "./DeleteAlertRequests";
 import SearchBox from "../Shared/SearchBox";
+import { analytics } from "../../main";
 
 export default {
   components: {
@@ -181,6 +183,7 @@ export default {
   data() {
     return {
       mdiAlert,
+      rejectLoading: false,
       page: 1,
       pageCount: 15,
       dialogPDF: false,
@@ -299,10 +302,10 @@ export default {
         name: request.name,
         question: request.question,
         subject: request.subject,
+        level: request.level,
         answers: request.answers,
         image: request.image,
-        imageSize: request.imageSize,
-        edited: []
+        imageSize: request.imageSize
       };
       this.$store
         .dispatch("getQuestionByName", request.name)
@@ -358,34 +361,77 @@ export default {
       this.deleteRequestSnackBar = true;
       this.deleteItem = request;
     },
-    rejectRequest(request) {
-      this.$store
-        .dispatch("checkQuestionInTests", { name: request.name })
-        .then(result => {
-          this.questionTests = result;
-          if (result.length === 0) {
-            this.$store
-              .dispatch("changeDeleteStatusQuestions", {
-                name: request.name,
-                isSearching: false
-              })
-              .then(async () => {
-                await this.$store.dispatch("updateQuestionRequest", {
-                  mode: "sttUpdate",
-                  status: "Rejeitado",
-                  request,
-                  user: request.user,
-                  isSearching: this.isSearching
-                });
-                this.$store.commit(
-                  "setSuccess",
-                  "Solicitação rejeitada com sucesso!"
-                );
-              });
-          } else {
-            this.rejectErrorSnackBar = true;
+    async rejectRequest(request) {
+      this.rejectLoading = true;
+
+      this.questionTests = [];
+
+      const tests = await this.$store.dispatch("checkQuestionInTests", {
+        name: request.name
+      });
+
+      const allAuto = tests.reduce(
+        (prev, curr) => curr.type === "auto" && prev,
+        true
+      );
+
+      let error = false;
+
+      if (allAuto) {
+        for (const t of tests) {
+          const questionsNames = [...t.questionsNames];
+
+          const index = questionsNames.indexOf(request.name);
+
+          if (index === -1) {
+            this.rejectLoading = false;
+            return;
           }
+
+          questionsNames.splice(index, 1);
+
+          if (questionsNames.length < t.questionsAmount) {
+            this.questionTests.push(t);
+            error = true;
+            continue;
+          }
+
+          await this.$store.dispatch("updateTest", {
+            testData: { ...t, questionsNames },
+            noMessage: true
+          });
+        }
+      }
+
+      if (error) {
+        this.rejectErrorSnackBar = true;
+        this.rejectLoading = false;
+        return;
+      }
+
+      if (!tests.length || allAuto) {
+        await this.$store.dispatch("changeDeleteStatusQuestions", {
+          name: request.name,
+          isSearching: false
         });
+
+        await this.$store.dispatch("updateQuestionRequest", {
+          mode: "sttUpdate",
+          status: "Rejeitado",
+          request,
+          user: request.user,
+          isSearching: this.isSearching
+        });
+
+        this.rejectLoading = false;
+        this.$store.commit("setSuccess", "Solicitação rejeitada com sucesso!");
+
+        return;
+      }
+
+      this.rejectLoading = false;
+      this.questionTests = [...tests];
+      this.rejectErrorSnackBar = true;
     },
     onPageChange(event) {
       const payload = {
@@ -428,6 +474,10 @@ export default {
           key: text,
           claims: this.userClaims,
           userInfo: this.userInfo
+        });
+
+        analytics.logEvent("search", {
+          search_term: text
         });
       } else {
         this.isSearching = false;

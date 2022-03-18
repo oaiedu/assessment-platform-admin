@@ -1,6 +1,6 @@
 import { Store } from "vuex";
 
-import { db, storage } from "../../main";
+import { analytics, db, storage } from "../../main";
 import { createErrorLog, showErrorMessage } from "../../utils/errors";
 import { getNowISOString } from "../../utils/date";
 
@@ -13,30 +13,31 @@ import { getNowISOString } from "../../utils/date";
 
 /**
  * @typedef {Object} RequestCreation
- * @property {string} name - The request name.
- * @property {string} userId - The user that created the request.
- * @property {string} subject - The request subject.
- * @property {string} question - The request description.
- * @property {string} image - The request image url.
- * @property {string} imageSize - The size of the image.
- * @property {Answer[]} answers - The request answers.
- * @property {RequestStatus} status - The request status.
+ * @property {string} name The request name.
+ * @property {string} userId The user that created the request.
+ * @property {string} subject The request subject.
+ * @property {string} question The request description.
+ * @property {Level} level The request level.
+ * @property {string} image The request image url.
+ * @property {string} imageSize The size of the image.
+ * @property {Answer[]} answers The request answers.
+ * @property {RequestStatus} status The request status.
  */
 
 /**
  * @typedef {Object} Request
- * @property {string} name - The request name.
- * @property {string} userId - The user that created the request.
- * @property {string} subject - The request subject.
- * @property {string} question - The request description.
- * @property {string} image - The request image url.
- * @property {string} imageSize - The size of the image.
- * @property {string|undefined} created - The request creation date.
- * @property {string|undefined} updated - The request edition date.
- * @property {Answer[]} answers - The request answers.
- * @property {RequestStatus} status - The request status.
- * @property {Array} edited - The request edition history.
- * @property {DeleteStatus|undefined} toDelete - The request deletion status.
+ * @property {string} name The request name.
+ * @property {string} userId The user that created the request.
+ * @property {string} subject The request subject.
+ * @property {string} question The request description.
+ * @property {Level} level The request level.
+ * @property {string} image The request image url.
+ * @property {string} imageSize The size of the image.
+ * @property {string|undefined} created The request creation date.
+ * @property {string|undefined} updated The request edition date.
+ * @property {Answer[]} answers The request answers.
+ * @property {RequestStatus} status The request status.
+ * @property {DeleteStatus|undefined} toDelete The request deletion status.
  */
 
 /**
@@ -386,6 +387,12 @@ const actions = {
 
     try {
       await db.collection("question-requests").add(request);
+
+      analytics.logEvent("create_request", {
+        subject: request.subject,
+        level: request.level.index,
+        user: request.userId
+      });
 
       commit("addRequest", {
         page: amount === 0 ? pageAmount + 1 : pageAmount,
@@ -865,11 +872,11 @@ const actions = {
           imageSize: data.imageSize,
           name: data.name,
           question: data.question,
+          level: data.level,
           status: data.status,
           subject: data.subject,
           updated: data.updated,
-          userId: data.userId,
-          edited: data.edited || []
+          userId: data.userId
         };
 
         const user = await dispatch("getUserById", {
@@ -927,6 +934,7 @@ const actions = {
             imageSize: data.imageSize,
             name: data.name,
             question: data.question,
+            level: data.level,
             status: data.status,
             subject: data.subject,
             updated: data.updated,

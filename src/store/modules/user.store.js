@@ -1,7 +1,7 @@
 import { Store } from "vuex";
 import axios from "axios";
 
-import { auth, db, googleProvider, storage } from "../../main";
+import { analytics, auth, db, googleProvider, storage } from "../../main";
 import { getNowISOString } from "../../utils/date";
 import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
@@ -146,10 +146,14 @@ const actions = {
     try {
       const user = await auth.signInWithPopup(googleProvider);
 
-      await db
-        .collection("users")
-        .doc(user.user.uid)
-        .update({ provider: "google" });
+      if (!user.additionalUserInfo.isNewUser) {
+        analytics.logEvent("login");
+
+        await db
+          .collection("users")
+          .doc(user.user.uid)
+          .update({ provider: "google" });
+      }
     } catch (error) {
       if (error.code === "auth/popup-closed-by-user") {
         return;
@@ -257,6 +261,8 @@ const actions = {
         .collection("users")
         .doc(newUser.id)
         .set(userInfo);
+
+      analytics.logEvent("sign_up");
 
       const snap = await db.collection("data-size").get();
       const document = snap.docs[0];
@@ -366,26 +372,15 @@ const actions = {
         email: payload.email
       });
 
-      let user = null;
-
       const googleSign = userData && userData.provider === "google";
 
       if (googleSign) {
-        user = await auth.signInWithPopup(googleProvider);
+        await auth.signInWithPopup(googleProvider);
       } else {
-        user = await auth.signInWithEmailAndPassword(
-          payload.email,
-          payload.password
-        );
+        await auth.signInWithEmailAndPassword(payload.email, payload.password);
       }
 
-      commit("setUser", { id: user.user.uid });
-
-      if (googleSign) {
-        return;
-      }
-
-      commit("setUserInfo", { ...userData, id: user.user.id });
+      analytics.logEvent("login");
     } catch (error) {
       const errorModel = showErrorMessage(
         "default",
@@ -672,6 +667,8 @@ const actions = {
    */
   async autoSignIn({ commit, dispatch }, payload) {
     const user = await dispatch("getUserById", { id: payload.uid });
+
+    analytics.setUserId(payload.uid);
 
     if (!user) {
       await dispatch("signUserUp", {

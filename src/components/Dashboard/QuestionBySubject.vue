@@ -1,7 +1,21 @@
 <template>
   <v-card width="100%" height="100%" class="question-by-subject">
     <div class="question-by-subject-container">
-      <h2 class="chart-title">Questões por matéria</h2>
+      <h2 class="chart-title">
+        Questões por matéria
+
+        <v-hover v-slot="{ hover }">
+          <v-btn
+            text
+            to="/questions"
+            class="see-more-button pa-0 ma-0 ml-2"
+            :ripple="false"
+            :color="hover ? '#1e88e5' : '#888888'"
+          >
+            See More
+          </v-btn>
+        </v-hover>
+      </h2>
       <div class="subject-list">
         <span
           v-if="!chartData || chartData.length === 0"
@@ -276,6 +290,14 @@ export default {
 
 .item-percentage {
   display: none;
+}
+
+.see-more-button {
+  font-size: 0.75rem;
+}
+
+.see-more-button::before {
+  background: transparent;
 }
 
 @media (max-width: 1000px) {

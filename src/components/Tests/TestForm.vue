@@ -392,6 +392,7 @@ import Ripple from "vuetify/lib/directives/ripple";
 
 import Paginator from "../Paginator";
 import VueTextEditor from "../Shared/VueTextEditor.vue";
+import { analytics } from "../../main";
 
 export default {
   directives: { Ripple },
@@ -621,6 +622,10 @@ export default {
         if (this.search.length > 0) {
           this.isSearching = true;
           this.$store.dispatch("searchQuestions", this.search);
+
+          analytics.logEvent("search", {
+            search_term: text
+          });
         } else {
           this.isSearching = false;
         }

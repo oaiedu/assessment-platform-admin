@@ -10,6 +10,7 @@ import Inbox from "@/components/Requests/Inbox.vue";
 import Home from "@/views/Home.vue";
 import Management from "@/components/Admin/Management.vue";
 import AuthGuard from "./auth-guard";
+import { analytics } from "../main";
 
 Vue.use(VueRouter);
 
@@ -73,6 +74,21 @@ const router = new VueRouter({
   mode: "history",
   routes,
   base: "/"
+});
+
+router.afterEach((to, from) => {
+  const authNeededTo = to.params.to;
+
+  analytics.setCurrentScreen(to.name);
+  analytics.logEvent("screen_view", {
+    firebase_screen_name: to.name
+  });
+
+  analytics.logEvent("navigation", {
+    page_name: to.name,
+    access_denied: authNeededTo,
+    from: from.name
+  });
 });
 
 export default router;

@@ -1,7 +1,7 @@
 import { Store } from "vuex";
 import uuid from "uuid-random";
 
-import { db } from "../../main";
+import { analytics, db } from "../../main";
 import { getNowISOString } from "../../utils/date";
 import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
@@ -1032,6 +1032,9 @@ const actions = {
     const createdDate = getNowISOString();
     const { testData, userInfo } = payload;
 
+    /**
+     * @type {Test}
+     */
     const test = {
       id: uuid(),
       ...testData,
@@ -1045,6 +1048,12 @@ const actions = {
 
     try {
       await db.collection("tests").add(test);
+
+      analytics.logEvent("create_quiz", {
+        type: test.type,
+        questions: test.questionsAmount,
+        level: test.level.index
+      });
 
       commit("createTest", {
         page: amount === 0 ? pageAmount + 1 : pageAmount,

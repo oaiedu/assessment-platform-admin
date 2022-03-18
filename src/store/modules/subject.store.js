@@ -170,6 +170,11 @@ const actions = {
       };
 
       const doc = await db.collection("subjects").add(subject);
+
+      analytics.logEvent("create_subject", {
+        name: subject.name
+      });
+
       commit("addSubject", { ...subject, id: doc.id });
       commit("setSuccess", "Disciplina criado com sucesso!");
     } catch (error) {
