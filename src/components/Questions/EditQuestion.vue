@@ -245,6 +245,8 @@
             :subject="editedSubject"
             :questionDesc="editedQuestionDescription"
             :answers="editedAnswers"
+            :answerJustification="editedAnswerJustification"
+            :answerJustificationSource="editedAnswerJustificationSource"
             :image="imagePreview"
           />
         </v-col>
