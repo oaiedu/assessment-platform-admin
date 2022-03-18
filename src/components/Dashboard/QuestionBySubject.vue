@@ -12,7 +12,7 @@
             :ripple="false"
             :color="hover ? '#1e88e5' : '#888888'"
           >
-            See More
+            Ver mais
           </v-btn>
         </v-hover>
       </h2>

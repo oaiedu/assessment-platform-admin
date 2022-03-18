@@ -1,11 +1,7 @@
 <template>
   <v-container>
-    <div class="text-center mt-5 mb-5">
-      <h1 class="blue--text">Administração</h1>
-    </div>
-
     <template>
-      <v-tabs v-model="tab" background-color="white">
+      <v-tabs v-model="tab" class="mt-10" background-color="white">
         <v-tab>
           <v-icon left>
             {{ mdiDatabase }}
