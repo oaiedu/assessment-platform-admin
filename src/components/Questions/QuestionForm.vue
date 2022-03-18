@@ -352,7 +352,7 @@ export default {
   },
   computed: {
     formIsValid() {
-      return this.name !== "" && this.subject !== "";
+      return !!this.name && !!this.subject && !!this.radios;
     },
     userClaims() {
       return this.$store.getters.getUserClaims;
