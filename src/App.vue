@@ -25,6 +25,10 @@ export default {
 </script>
 
 <style>
+* {
+  font-family: Poppins;
+}
+
 @font-face {
   font-family: "Poppins";
   src: url("~@/assets/fonts/poppins/Poppins-Light.ttf") format("truetype");
@@ -35,7 +39,7 @@ export default {
 @font-face {
   font-family: "Poppins";
   src: url("~@/assets/fonts/poppins/Poppins-Regular.ttf") format("truetype");
-  font-weight: 400;
+  font-weight: normal;
   font-display: swap;
 }
 
@@ -56,7 +60,7 @@ export default {
 @font-face {
   font-family: "Poppins";
   src: url("~@/assets/fonts/poppins/Poppins-Bold.ttf") format("truetype");
-  font-weight: 700;
+  font-weight: bold;
   font-display: swap;
 }
 </style>

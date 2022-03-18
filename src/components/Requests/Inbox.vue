@@ -1,18 +1,12 @@
 <template>
   <div>
     <v-container>
-      <v-container>
-        <h1 class="text-center blue--text">Solicitações</h1>
-      </v-container>
-
-      <v-container>
-        <v-container>
-          <SearchBox
-            label="Procurar por ID"
-            @enter="searchQuery($event)"
-            @textChange="searchTextChange($event)"
-          />
-        </v-container>
+      <v-container class="mt-10 mb-5">
+        <SearchBox
+          label="Procurar por ID"
+          @enter="searchQuery($event)"
+          @textChange="searchTextChange($event)"
+        />
       </v-container>
 
       <v-container

@@ -6,6 +6,12 @@
     >
       <h2 class="chart-title">
         Questionários por semana
+      </h2>
+      <span class="number-of-tests">
+        Total:
+        <span :style="{ color: colorPaleteList[colorPalete] }" class="amount">
+          {{ Object.values(testsByWeek).reduce((a, b) => a + b, 0) }}
+        </span>
 
         <v-hover
           v-if="userClaims && !userClaims['appraiser']"
@@ -18,15 +24,9 @@
             :ripple="false"
             :color="hover ? '#1e88e5' : '#888888'"
           >
-            See More
+            Ver mais
           </v-btn>
         </v-hover>
-      </h2>
-      <span class="number-of-tests">
-        Total:
-        <span :style="{ color: colorPaleteList[colorPalete] }" class="amount">
-          {{ Object.values(testsByWeek).reduce((a, b) => a + b, 0) }}
-        </span>
       </span>
       <div class="details-container">
         <span
@@ -325,6 +325,8 @@ export default {
 
 .see-more-button {
   font-size: 0.75rem;
+
+  z-index: 5;
 }
 
 .see-more-button::before {
