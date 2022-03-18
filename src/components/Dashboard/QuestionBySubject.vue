@@ -192,7 +192,7 @@ export default {
       data.push(...this.questionsBySubject.slice(0, 4));
 
       const others = this.questionsBySubject
-        .slice(5)
+        .slice(4)
         .map(subject => subject.value)
         .reduce((a, b) => a + b, 0);
 
