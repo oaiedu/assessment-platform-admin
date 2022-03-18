@@ -64,7 +64,7 @@
           right
           :dark="formIsValid"
           :disabled="!formIsValid"
-          :loading="loading"
+          :loading="loading || createLoading"
           @click="onCreateQuestion()"
         >
           <v-icon color="white">{{ mdiContentSave }}</v-icon>
@@ -185,7 +185,7 @@
                   </v-stepper-content>
 
                   <v-stepper-content step="2" class="pa-0 ma-0">
-                    <v-container class="pl-4 pr-9 py-8 ma-0">
+                    <v-container class="pl-2 pr-8 py-8 ma-0">
                       <v-row
                         v-for="(item, index) in answers"
                         :key="index"
@@ -217,6 +217,30 @@
                           ></v-text-field>
                         </v-col>
                       </v-row>
+
+                      <v-row
+                        class="question-form__answer-justification pa-0 ma-0 mt-2 ml-6"
+                      >
+                        <VueTextEditor
+                          outlined
+                          placeholder="Justificativa geral"
+                          :height="300"
+                          :value="answerJustification"
+                          :groups="['format', 'list', 'format2']"
+                          @textChange="answerJustification = $event"
+                        />
+                      </v-row>
+
+                      <v-row class="pa-0 ma-0 mt-8 ml-6">
+                        <v-text-field
+                          v-model="answerJustificationSource"
+                          dense
+                          outlined
+                          rounded
+                          class="pa-0 ma-0"
+                          label="Fonte da justificativa (URL)"
+                        ></v-text-field>
+                      </v-row>
                     </v-container>
                   </v-stepper-content>
                 </v-stepper-items>
@@ -231,6 +255,8 @@
             :subject="subject"
             :questionDesc="questionDescription"
             :answers="answers"
+            :answerJustification="answerJustification"
+            :answerJustificationSource="answerJustificationSource"
             :image="imagePreview"
           />
         </v-col>
@@ -294,12 +320,13 @@ export default {
       mdiArrowLeft,
       mdiArrowRight,
       mdiContentSave,
+      createErrorSnackBar: false,
+      createLoading: false,
       imagePreview: "",
       image: null,
       imagesAsURL: "",
       imageSize: "1x",
       questionDescription: "",
-      createErrorSnackBar: false,
       e1: 1,
       test: null,
       radios: "",
@@ -312,6 +339,8 @@ export default {
         { text: "", description: "", ansId: "radio-3", value: false },
         { text: "", description: "", ansId: "radio-4", value: false }
       ],
+      answerJustification: "",
+      answerJustificationSource: "",
       name: "",
       subject: "",
       level: {
@@ -379,9 +408,12 @@ export default {
       this.questionDescription = variable;
     },
     async onCreateQuestion() {
+      this.createLoading = true;
+
       const exist = await this.$store.dispatch("questionExists", this.name);
 
       if (exist) {
+        this.createLoading = false;
         this.createErrorSnackBar = true;
         return;
       }
@@ -401,6 +433,8 @@ export default {
         level: this.level,
         question: this.questionDescription,
         answers: this.answers,
+        answerJustification: this.answerJustification,
+        answerJustificationSource: this.answerJustificationSource,
         image: url,
         imageSize: this.imageSize
       };
@@ -420,6 +454,8 @@ export default {
           user: this.userInfo
         });
       }
+
+      this.createLoading = false;
 
       this.setInitialData();
       this.close();
@@ -443,6 +479,8 @@ export default {
         { text: "", ansId: "radio-3", value: false },
         { text: "", ansId: "radio-4", value: false }
       ];
+      this.answerJustification = "";
+      this.answerJustificationSource = "";
       this.name = "";
       this.subject = "";
       this.image = null;
@@ -496,5 +534,9 @@ export default {
 
 .v-text-editor__container {
   border-radius: 28px;
+}
+
+.question-form__answer-justification .v-text-editor {
+  width: 100%;
 }
 </style>
