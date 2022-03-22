@@ -593,7 +593,7 @@ const actions = {
           });
         });
     } else {
-      const pageContent = state.request["p" + page];
+      const pageContent = state.requests["p" + page];
       const first = pageContent[0].name;
       const last = pageContent[pageContent.length - 1].name;
 
