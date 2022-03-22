@@ -11,7 +11,7 @@
             <Definition :question="question" />
 
             <QuestionImage
-              v-if="confirmImage(question.image)"
+              v-if="question.image"
               :image="question.image"
               :imageSize="question.imageSize"
             />
@@ -22,6 +22,7 @@
               :answers="question.answers"
               :answerJustification="question.answerJustification"
               :answerJustificationSource="question.answerJustificationSource"
+              :justifications="showJustifications"
             />
 
             <v-tooltip left>
@@ -54,7 +55,7 @@
                   bottom
                   left
                   class="buttonIsHidden"
-                  @click="back()"
+                  @click="close()"
                 >
                   <v-icon>{{ mdiArrowLeft }}</v-icon>
                 </v-btn>
@@ -75,29 +76,24 @@ import Definition from "./Definition";
 import QuestionImage from "./QuestionImage";
 
 export default {
-  props: ["question"],
+  props: {
+    question: Object,
+    showJustifications: Boolean
+  },
   components: {
     Answers,
     Definition,
-    QuestionImage: QuestionImage
+    QuestionImage
   },
   data() {
     return {
       mdiArrowLeft,
-      mdiFileOutline,
-      letters: ["A", "B", "C", "D"]
+      mdiFileOutline
     };
   },
   methods: {
-    back() {
-      this.$emit("closeDialogPrint");
-    },
     toPrint() {
       window.print();
-    },
-    confirmImage(val) {
-      if (typeof val == "undefined" || val == "") return false;
-      else return true;
     },
     close() {
       this.$emit("closeDialogPrint");
