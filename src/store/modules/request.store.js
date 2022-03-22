@@ -20,6 +20,7 @@ import { getNowISOString } from "../../utils/date";
  * @property {Level} level The request level.
  * @property {string} image The request image url.
  * @property {string} imageSize The size of the image.
+ * @property {boolean} multipleAnswers Whether the request has multiple correct answers.
  * @property {Answer[]} answers The request answers.
  * @property {string} answerJustification The request answer general justification.
  * @property {string} answerJustificationSource The request answer justifications sources.
@@ -37,6 +38,7 @@ import { getNowISOString } from "../../utils/date";
  * @property {string} imageSize The size of the image.
  * @property {string|undefined} created The request creation date.
  * @property {string|undefined} updated The request edition date.
+ * @property {boolean} multipleAnswers Whether the request has multiple correct answers.
  * @property {Answer[]} answers The request answers.
  * @property {string} answerJustification The request answer general justification.
  * @property {string} answerJustificationSource The request answer justifications sources.
@@ -378,8 +380,7 @@ const actions = {
     const request = {
       ...payload.request,
       created: createdDate,
-      updated: createdDate,
-      edited: []
+      updated: createdDate
     };
 
     const requestAmount = this.getters.getDataSize["question-requests"].users[
@@ -880,6 +881,7 @@ const actions = {
           name: data.name,
           question: data.question,
           level: data.level,
+          multipleAnswers: data.multipleAnswers,
           answers: data.answers,
           answerJustification: data.answerJustification,
           answerJustificationSource: data.answerJustificationSource,
@@ -948,6 +950,7 @@ const actions = {
             name: data.name,
             question: data.question,
             level: data.level,
+            multipleAnswers: data.multipleAnswers,
             answers: data.answers,
             answerJustification: data.answerJustification,
             answerJustificationSource: data.answerJustificationSource,

@@ -34,6 +34,7 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {Level} level The question level.
  * @property {string} image The question image url.
  * @property {string} imageSize The size of the image.
+ * @property {boolean} multipleAnswers Whether the question has multiple correct answers.
  * @property {Answer[]} answers The question answers.
  * @property {string} answerJustification The question answer general justification.
  * @property {string} answerJustificationSource The question answer justifications sources.
@@ -49,6 +50,7 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {string} imageSize The size of the image.
  * @property {string|undefined} created The question creation date.
  * @property {string|undefined} updated The question edition date.
+ * @property {boolean} multipleAnswers Whether the question has multiple correct answers.
  * @property {Answer[]} answers The question answers.
  * @property {string} answerJustification The question answer general justification.
  * @property {string} answerJustificationSource The question answer justifications sources.
@@ -695,6 +697,7 @@ const actions = {
           subject: data.subject,
           question: data.question,
           level: data.level,
+          multipleAnswers: data.multipleAnswers,
           answers: data.answers,
           answerJustification: data.answerJustification,
           answerJustificationSource: data.answerJustificationSource,
@@ -786,6 +789,7 @@ const actions = {
           subject: data.subject,
           level: data.level,
           question: data.question,
+          multipleAnswers: data.multipleAnswers,
           answers: data.answers,
           answerJustification: data.answerJustification,
           answerJustificationSource: data.answerJustificationSource,
