@@ -85,6 +85,7 @@
         v-model="dialogNewQuestion"
       >
         <QuestionForm
+          v-if="dialogNewQuestion"
           :page="page"
           @closeDialogNew="dialogNewQuestion = false"
         />
@@ -97,6 +98,7 @@
         v-model="dialogEditQuestion"
       >
         <EditQuestion
+          v-if="dialogEditQuestion"
           :question="selectedEdit"
           :userClaims="userClaims"
           :userInfo="userInfo"
@@ -114,10 +116,11 @@
         transition="dialog-bottom-transition"
         v-model="dialogPDF"
       >
-        <Body
+        <PrintQuestion
           :question="selectedEdit"
+          :showJustifications="userClaims && !userClaims['student']"
           @closeDialogPrint="dialogPDF = false"
-        ></Body>
+        ></PrintQuestion>
       </v-dialog>
 
       <div class="text-center pt-2">
@@ -217,7 +220,7 @@ import DeleteAlert from "./DeleteAlertQuestions";
 import SearchBox from "../Shared/SearchBox";
 import QuestionForm from "./QuestionForm";
 import EditQuestion from "./EditQuestion";
-import Body from "./PrintQuestion";
+import PrintQuestion from "./PrintQuestion";
 import { mdiPlus } from "@mdi/js";
 import { analytics } from "../../main";
 
@@ -231,7 +234,7 @@ export default {
     SearchBox,
     QuestionForm,
     EditQuestion,
-    Body
+    PrintQuestion
   },
   data() {
     return {
