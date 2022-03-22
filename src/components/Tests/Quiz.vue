@@ -98,32 +98,59 @@
             :imageSize="examQuestions[current - 1].imageSize"
           />
 
-          <v-radio-group
-            v-model="currentAnswer"
-            class="px-4"
-            :disabled="finished"
-            :readonly="review"
+          <v-row
+            v-for="(answer, i) in examQuestions[current - 1].answers"
+            class="pa-0 px-4 ma-0"
+            :class="{
+              'mt-5': i === 0,
+              'mb-5': i === examQuestions[current - 1].answers.length - 1
+            }"
+            :key="answer.ansId"
           >
-            <v-radio
-              v-for="(answer, i) in examQuestions[current - 1].answers"
-              class="quiz__answer my-5"
+            <v-checkbox
+              v-if="examQuestions[current - 1].multipleAnswers"
+              v-model="currentMultiAnswer"
+              class="quiz__answer"
               :class="
-                getAnswerCustomData(answer, currentAnswer) &&
-                  getAnswerCustomData(answer, currentAnswer).class
+                getAnswerCustomData(answer) && getAnswerCustomData(answer).class
               "
               :color="
-                getAnswerCustomData(answer, currentAnswer) &&
-                  getAnswerCustomData(answer, currentAnswer).color
+                getAnswerCustomData(answer) && getAnswerCustomData(answer).color
               "
-              :key="answer.ansId"
               :value="answer.ansId"
             >
               <template v-slot:label>
-                <strong class="mr-1">{{ answersOptions[i] }}.</strong>
+                <strong class="mr-1">{{ answersOptions[i] }}</strong>
                 <span>{{ answer.text }}</span>
               </template>
-            </v-radio>
-          </v-radio-group>
+            </v-checkbox>
+
+            <v-radio-group
+              v-else
+              v-model="currentAnswer"
+              class="px-4"
+              :disabled="finished"
+              :readonly="review"
+            >
+              <v-radio
+                class="quiz__answer"
+                :class="
+                  getAnswerCustomData(answer) &&
+                    getAnswerCustomData(answer).class
+                "
+                :color="
+                  getAnswerCustomData(answer) &&
+                    getAnswerCustomData(answer).color
+                "
+                :value="answer.ansId"
+              >
+                <template v-slot:label>
+                  <strong class="mr-1">{{ answersOptions[i] }}.</strong>
+                  <span>{{ answer.text }}</span>
+                </template>
+              </v-radio>
+            </v-radio-group>
+          </v-row>
 
           <v-btn
             v-if="!review && practice"
@@ -145,11 +172,7 @@
 
             <span class="mx-4 quiz__answer-description">
               Resposta correta:
-              {{
-                answersOptions[
-                  examQuestions[current - 1].answers.findIndex(a => a.value)
-                ]
-              }}
+              {{ correctAnswerOption }}
             </span>
 
             <div
@@ -332,11 +355,20 @@
               :class="{
                 current: current === i + 1,
                 review: markedForReview.includes(q.name),
-                answered: !!getAnswerByQuestionName(q.name),
+                answered: !review && !!getAnswerByQuestionName(q.name),
+                correct:
+                  review &&
+                  !!getAnswerByQuestionName(q.name) &&
+                  getAnswerByQuestionName(q.name).correct === 1,
                 incorrect:
                   review &&
                   !!getAnswerByQuestionName(q.name) &&
-                  !getAnswerByQuestionName(q.name).correct
+                  !getAnswerByQuestionName(q.name).correct,
+                partial:
+                  review &&
+                  !!getAnswerByQuestionName(q.name) &&
+                  getAnswerByQuestionName(q.name).correct > 0 &&
+                  getAnswerByQuestionName(q.name).correct < 1
               }"
               @click="current = i + 1"
             >
@@ -413,6 +445,7 @@ export default {
       timesUp: false,
       current: 1,
       currentAnswer: null,
+      currentMultiAnswer: [],
       answers: [],
       answersOptions: ["A", "B", "C", "D"],
       markedForReview: [],
@@ -423,6 +456,19 @@ export default {
   computed: {
     userInfo() {
       return this.$store.getters.userInfo;
+    },
+    correctAnswerOption() {
+      const correctOptions = [];
+
+      for (const index in this.examQuestions[this.current - 1].answers) {
+        const answer = this.examQuestions[this.current - 1].answers[index];
+
+        if (answer.value) {
+          correctOptions.push(this.answersOptions[index]);
+        }
+      }
+
+      return correctOptions.join(" - ");
     },
     answeredAmount() {
       if (this.review) {
@@ -485,7 +531,10 @@ export default {
 
       return answer.value
         ? { class: "correct", color: "#42d662" }
-        : !answer.value && answer.ansId == this.currentAnswer
+        : !answer.value &&
+          (this.examQuestions[this.current - 1].multipleAnswers
+            ? this.currentMultiAnswer.includes(answer.ansId)
+            : answer.ansId === this.currentAnswer)
         ? { class: "incorrect", color: "#ff4141" }
         : { class: "", color: "" };
     },
@@ -495,13 +544,15 @@ export default {
     },
     getAnswerByQuestionName(questionName) {
       if (this.review) {
-        return (
-          this.attempt.answers.find(a => a.questionName === questionName) ||
-          null
+        const answer = this.attempt.answers.find(
+          a => a.questionName === questionName
         );
+
+        return answer;
       }
 
       const answer = this.answers.find(a => a.questionName === questionName);
+
       return answer ? answer.value : null;
     },
     checkAnswer(answer) {
@@ -509,9 +560,32 @@ export default {
         q => q.name === answer.questionName
       );
 
-      return question
-        ? question.answers.find(a => a.ansId === answer.value).value
-        : false;
+      if (!question) {
+        return { correctAnswered: 0, wrongAnswered: 0, totalCorrectAnswers: 0 };
+      }
+
+      if (question.multipleAnswers) {
+        const answered = question.answers.filter(a =>
+          answer.value.includes(a.ansId)
+        );
+
+        const wrongAnswered = answered.filter(a => !a.value).length;
+        const correctAnswered = answered.length - wrongAnswered;
+
+        return {
+          correctAnswered,
+          wrongAnswered,
+          totalCorrectAnswers: question.answers.filter(a => a.value).length
+        };
+      }
+
+      const answered = question.answers.find(a => a.ansId === answer.value);
+
+      return {
+        correctAnswered: answered && answered.value ? 1 : 0,
+        wrongAnswered: answered && !answered.value ? 1 : 0,
+        totalCorrectAnswers: 1
+      };
     },
     toggleReview(question) {
       const index = this.markedForReview.indexOf(question.name);
@@ -535,14 +609,21 @@ export default {
 
       let correct = 0;
       this.answers.forEach(a => {
-        if (this.checkAnswer(a)) {
-          correct++;
-        }
+        const answerRelation = this.checkAnswer(a);
+
+        const result =
+          answerRelation.correctAnswered /
+          (answerRelation.wrongAnswered + answerRelation.totalCorrectAnswers);
+
+        correct += result;
 
         answers.push({
           questionName: a.questionName,
-          answer: +a.value.split("-")[1],
-          correct: this.checkAnswer(a)
+          answer:
+            typeof a.value === "object"
+              ? a.value.map(a => +a.split("-")[1])
+              : +a.value.split("-")[1],
+          correct: result
         });
       });
 
@@ -576,9 +657,7 @@ export default {
             id: "generated",
             results: {
               timeTaken,
-              score,
-              questionsAmount: this.test.questionsAmount,
-              correctAnswers: correct
+              score
             },
             test: this.test
           }
@@ -713,11 +792,21 @@ export default {
       );
 
       if (!answer) {
+        this.currentMultiAnswer = [];
         this.currentAnswer = null;
+
+        return;
+      }
+
+      if (this.examQuestions[this.current - 1].multipleAnswers) {
+        this.currentMultiAnswer = answer.answer.map(a => `radio-${a}`);
+        this.currentAnswer = null;
+
         return;
       }
 
       this.currentAnswer = "radio-" + answer.answer;
+      this.currentMultiAnswer = [];
     },
     randomizeQuestions(questions) {
       const randomQuestions = [];
@@ -737,6 +826,24 @@ export default {
 
       if (this.review) {
         this.setCurrentAnswer();
+      }
+    },
+    setCurrentAnswerVar(value) {
+      const questionName = this.examQuestions[this.current - 1].name;
+      const index = this.answers.findIndex(
+        a => a.questionName === questionName
+      );
+
+      if (index === -1) {
+        this.answers.push({
+          questionName: this.examQuestions[this.current - 1].name,
+          value
+        });
+      } else {
+        this.answers[index] = {
+          questionName: this.examQuestions[this.current - 1].name,
+          value
+        };
       }
     }
   },
@@ -764,7 +871,7 @@ export default {
       this.test = await this.$store.dispatch("getTestById", id);
     }
 
-    if (id !== "generated" && this.test.type === "auto" && this.review) {
+    if (id !== "generated" && this.review) {
       await this.selectReviewQuestions();
 
       this.loadingQuiz = false;
@@ -797,11 +904,20 @@ export default {
         );
 
         if (!answer) {
+          this.currentMultiAnswer = [];
           this.currentAnswer = null;
 
           return;
         }
 
+        if (this.examQuestions[this.current - 1].multipleAnswers) {
+          this.currentMultiAnswer = answer.answer.map(a => `radio-${a}`);
+          this.currentAnswer = null;
+
+          return;
+        }
+
+        this.currentMultiAnswer = [];
         this.currentAnswer = "radio-" + answer.answer;
 
         return;
@@ -816,22 +932,14 @@ export default {
         return;
       }
 
-      const questionName = this.examQuestions[this.current - 1].name;
-      const index = this.answers.findIndex(
-        a => a.questionName === questionName
-      );
-
-      if (index === -1) {
-        this.answers.push({
-          questionName: this.examQuestions[this.current - 1].name,
-          value
-        });
-      } else {
-        this.answers[index] = {
-          questionName: this.examQuestions[this.current - 1].name,
-          value
-        };
+      this.setCurrentAnswerVar(value);
+    },
+    currentMultiAnswer(value) {
+      if (!value || !value.length) {
+        return;
       }
+
+      this.setCurrentAnswerVar(value);
     }
   },
   beforeDestroy() {
@@ -930,17 +1038,29 @@ export default {
   border-color: #0ab93f;
 }
 
+.quiz__question-number.current {
+  border: 2px solid #1e88e5;
+  background-color: #1e88e544;
+
+  color: #1278d1 !important;
+}
+
+.quiz__question-number.correct {
+  background-color: #1ee55a44;
+
+  color: #0ab93f !important;
+}
+
 .quiz__question-number.incorrect {
   background-color: #ff414144;
 
   color: #ff4141 !important;
 }
 
-.quiz__question-number.current {
-  border: 2px solid #1e88e5;
-  background-color: #1e88e544;
+.quiz__question-number.partial {
+  background-color: #eca01244;
 
-  color: #1278d1 !important;
+  color: #ec9512 !important;
 }
 
 .quiz__question-number.current.review {

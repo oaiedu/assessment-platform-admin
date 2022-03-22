@@ -103,8 +103,11 @@
         transition="dialog-bottom-transition"
         v-model="dialogPDF"
       >
-        <Body :question="editItem" @closeDialogPrint="dialogPDF = false">
-        </Body>
+        <PrintQuestion
+          :question="editItem"
+          :showJustifications="true"
+          @closeDialogPrint="dialogPDF = false"
+        ></PrintQuestion>
       </v-dialog>
 
       <DeleteWarning
@@ -155,7 +158,7 @@
 
 <script>
 import { mdiAlert } from "@mdi/js";
-import Body from "../Questions/PrintQuestion";
+import PrintQuestion from "../Questions/PrintQuestion";
 import EditQuestion from "../Questions/EditQuestion";
 import RequestsTable from "./RequestsTable";
 import Paginator from "../Paginator";
@@ -166,7 +169,7 @@ import { analytics } from "../../main";
 
 export default {
   components: {
-    Body,
+    PrintQuestion,
     EditQuestion,
     Paginator,
     RequestsTable,
@@ -292,15 +295,15 @@ export default {
       });
     },
     checkRequest(request) {
-      const toCreate = {
-        name: request.name,
-        question: request.question,
-        subject: request.subject,
-        level: request.level,
-        answers: request.answers,
-        image: request.image,
-        imageSize: request.imageSize
-      };
+      const toCreate = { ...request };
+
+      delete toCreate.userId;
+      delete toCreate.user;
+      delete toCreate.created;
+      delete toCreate.updated;
+      delete toCreate.status;
+      delete toCreate.toDelete;
+
       this.$store
         .dispatch("getQuestionByName", request.name)
         .then(fQuestion => {

@@ -4,7 +4,7 @@
       <h2 class="chart-title">
         Questões por matéria
 
-        <v-hover v-slot="{ hover }">
+        <v-hover v-if="userClaims && !userClaims['student']" v-slot="{ hover }">
           <v-btn
             text
             to="/questions"
@@ -93,6 +93,9 @@ export default {
   computed: {
     sortedChartData() {
       return [...this.chartData].sort((a, b) => (a.value - b.value) * -1);
+    },
+    userClaims() {
+      return this.$store.getters.getUserClaims;
     },
     option() {
       return {

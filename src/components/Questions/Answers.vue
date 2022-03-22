@@ -13,10 +13,15 @@
 
     <h4 v-if="justifications" class="pa-0 ma-0 mt-6 mb-2">Justificativas</h4>
 
+    <span v-if="justifications">
+      Resposta correta:
+      {{ correctAnswerOption }}
+    </span>
+
     <div
       v-if="justifications && answerJustification"
       v-html="answerJustification"
-      class="answers__justification"
+      class="answers__justification mt-2"
     ></div>
 
     <v-row
@@ -71,6 +76,21 @@ export default {
     return {
       letters: ["A. ", "B. ", "C. ", "D. "]
     };
+  },
+  computed: {
+    correctAnswerOption() {
+      const correctOptions = [];
+
+      for (const index in this.answers) {
+        const answer = this.answers[index];
+
+        if (answer.value) {
+          correctOptions.push(this.letters[index].split(".")[0]);
+        }
+      }
+
+      return correctOptions.join(" - ");
+    }
   },
   methods: {
     checkUrl(url) {
