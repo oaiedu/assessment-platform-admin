@@ -144,6 +144,7 @@
                       <v-row justify="center" class="pa-0 ma-0">
                         <v-col cols="12" class="pa-0 ma-0">
                           <VueTextEditor
+                            v-if="+e1 === 1"
                             outlined
                             placeholder="Descrição"
                             :groups="['format', 'align', 'list', 'format2']"
@@ -185,14 +186,32 @@
                   </v-stepper-content>
 
                   <v-stepper-content step="2" class="pa-0 ma-0">
-                    <v-container class="pl-2 pr-8 py-8 ma-0">
+                    <v-container class="px-8 pb-8 pt-4 ma-0">
+                      <v-row class="pa-0 ma-0 mb-2">
+                        <v-checkbox
+                          v-model="multipleAnswers"
+                          label="Múltiplas respostas"
+                        ></v-checkbox>
+                      </v-row>
+
                       <v-row
                         v-for="(item, index) in answers"
                         :key="index"
                         class="pa-0 ma-0"
                         :class="{ 'pt-2': index > 0 }"
                       >
-                        <v-radio-group v-model="radios" class="pa-0 pt-2 ma-0">
+                        <v-checkbox
+                          v-if="multipleAnswers"
+                          v-model="selectedAnswers"
+                          class="pa-0 pt-2 ma-0"
+                          :value="item.ansId"
+                        ></v-checkbox>
+
+                        <v-radio-group
+                          v-else
+                          v-model="radios"
+                          class="pa-0 pt-2 ma-0"
+                        >
                           <v-radio :value="item.ansId"></v-radio>
                         </v-radio-group>
 
@@ -219,9 +238,10 @@
                       </v-row>
 
                       <v-row
-                        class="question-form__answer-justification pa-0 ma-0 mt-2 ml-6"
+                        class="question-form__answer-justification pa-0 ma-0 mt-2"
                       >
                         <VueTextEditor
+                          v-if="+e1 === 2"
                           outlined
                           placeholder="Justificativa geral"
                           :height="300"
@@ -231,7 +251,7 @@
                         />
                       </v-row>
 
-                      <v-row class="pa-0 ma-0 mt-8 ml-6">
+                      <v-row class="pa-0 ma-0 mt-8">
                         <v-text-field
                           v-model="answerJustificationSource"
                           dense
@@ -333,6 +353,8 @@ export default {
       chips: [],
       items: [],
       letters: ["A", "B", "C", "D"],
+      selectedAnswers: [],
+      multipleAnswers: false,
       answers: [
         { text: "", description: "", ansId: "radio-1", value: false },
         { text: "", description: "", ansId: "radio-2", value: false },
@@ -381,7 +403,11 @@ export default {
   },
   computed: {
     formIsValid() {
-      return !!this.name && !!this.subject && !!this.radios;
+      return (
+        !!this.name &&
+        !!this.subject &&
+        (this.multipleAnswers ? !!this.selectedAnswers.length : !!this.radios)
+      );
     },
     userClaims() {
       return this.$store.getters.getUserClaims;
@@ -397,15 +423,34 @@ export default {
     }
   },
   watch: {
-    radios(val) {
-      this.answers.forEach(element => {
-        element.value = element.ansId === val;
-      });
+    radios() {
+      this.setSingleAnswer();
+    },
+    selectedAnswers() {
+      this.setMultipleAnswers();
+    },
+    multipleAnswers(value) {
+      if (value) {
+        this.setMultipleAnswers();
+        return;
+      }
+
+      this.setSingleAnswer();
     }
   },
   methods: {
     updateData(variable) {
       this.questionDescription = variable;
+    },
+    setMultipleAnswers() {
+      this.answers.forEach(element => {
+        element.value = this.selectedAnswers.includes(element.ansId);
+      });
+    },
+    setSingleAnswer() {
+      this.answers.forEach(element => {
+        element.value = element.ansId === this.radios;
+      });
     },
     async onCreateQuestion() {
       this.createLoading = true;
@@ -432,6 +477,7 @@ export default {
         subject: this.subject,
         level: this.level,
         question: this.questionDescription,
+        multipleAnswers: this.multipleAnswers,
         answers: this.answers,
         answerJustification: this.answerJustification,
         answerJustificationSource: this.answerJustificationSource,
@@ -473,6 +519,8 @@ export default {
       this.radios = "";
       this.chips = [];
       this.items = [];
+      this.selectedAnswers = [];
+      this.multipleAnswers = false;
       this.answers = [
         { text: "", ansId: "radio-1", value: false },
         { text: "", ansId: "radio-2", value: false },

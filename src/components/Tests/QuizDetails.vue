@@ -133,15 +133,12 @@
           <span class="quiz-detail__info-title">Instruções</span>
 
           <div
-            v-if="test"
+            v-if="test && test.instructions.trim().length"
             v-html="test.instructions"
             class="quiz-detail__instructions"
           ></div>
 
-          <span
-            v-else-if="!!test && !test.instructions"
-            class="quiz-detail__instructions"
-          >
+          <span v-else-if="test" class="quiz-detail__instructions">
             Este teste não possui instruções.
           </span>
         </div>
@@ -250,15 +247,9 @@
                   )`
               }"
             >
-              <span class="quiz-detail__score">
-                <span class="quiz-detail__percentage"
-                  >{{ results.score.toFixed(2) }}%</span
-                >
-
-                <span class="quiz-detail__amount">
-                  {{ results.correctAnswers }} / {{ results.questionsAmount }}
-                </span>
-              </span>
+              <span class="quiz-detail__score"
+                >{{ results.score.toFixed(2) }}%</span
+              >
             </div>
           </div>
 
@@ -688,6 +679,8 @@ export default {
 .quiz-detail__instructions {
   width: 100%;
   height: 100%;
+
+  font-size: 0.9rem;
 }
 
 .quiz-detail__attempts-title,
@@ -775,7 +768,7 @@ export default {
   align-items: center;
 
   position: absolute;
-  top: 53%;
+  top: 50%;
   left: 50%;
 
   width: 80%;

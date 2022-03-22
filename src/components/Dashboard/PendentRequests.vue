@@ -1,19 +1,22 @@
 <template>
   <v-card width="100%" height="100%" class="pendent-requests">
     <div class="pendent-requests-container">
-      <h2 class="card-title">{{ cardTitle }}</h2>
-      <span
-        class="see-all"
-        v-if="
-          userClaims &&
-            userClaims['admin'] &&
-            requests &&
-            requests.length >= limit
-        "
-        @click="pushUrl"
-      >
-        Ver todas
-      </span>
+      <h2 class="card-title">
+        {{ cardTitle }}
+
+        <v-hover v-if="userClaims && userClaims['admin']" v-slot="{ hover }">
+          <v-btn
+            text
+            to="/inbox"
+            class="see-more-button pa-0 ma-0 ml-2"
+            :ripple="false"
+            :color="hover ? '#1e88e5' : '#888888'"
+          >
+            Ver mais
+          </v-btn>
+        </v-hover>
+      </h2>
+
       <div
         v-if="requests && requests.length > 0"
         class="requests"
@@ -23,6 +26,7 @@
           <div class="name-container">{{ item.name }}</div>
           <div class="details-container">
             <div class="request-subject">{{ item.subject }}</div>
+
             <div class="request-user">
               {{ item.user.name || item.user.email }}
             </div>
@@ -90,11 +94,6 @@ export default {
       }
     }
   },
-  methods: {
-    pushUrl() {
-      this.$router.push("/inbox");
-    }
-  },
   created() {
     if (this.userClaims && this.userClaims["appraiser"]) {
       this.$store.dispatch("loadUserRequests", {
@@ -139,21 +138,12 @@ export default {
   margin-bottom: 20px;
 }
 
-.see-all {
-  position: absolute;
-  left: 230px;
-  top: 25px;
-
-  color: #888888;
-  font-size: 0.8rem;
-
-  cursor: pointer;
-
-  transition: all 0.2s;
+.see-more-button {
+  font-size: 0.75rem;
 }
 
-.see-all:hover {
-  color: #1e88e5;
+.see-more-button::before {
+  background: transparent;
 }
 
 .requests {
@@ -251,12 +241,6 @@ export default {
 
     white-space: nowrap;
     overflow: hidden;
-  }
-}
-
-@media (max-width: 330px) {
-  .see-all {
-    display: none;
   }
 }
 </style>

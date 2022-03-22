@@ -129,7 +129,7 @@
                       <v-row class="pa-0 ma-0">
                         <v-col cols="12" class="pa-0 ma-0">
                           <VueTextEditor
-                            v-if="ready"
+                            v-if="ready && +e1 === 1"
                             outlined
                             placeholder="Descrição"
                             :groups="['format', 'align', 'list', 'format2']"
@@ -175,14 +175,32 @@
                   </v-stepper-content>
 
                   <v-stepper-content step="2" class="pa-0 ma-0">
-                    <v-container class="pl-2 pr-8 py-8 ma-0">
+                    <v-container class="px-8 py-8 ma-0">
+                      <v-row class="pa-0 ma-0 mb-2">
+                        <v-checkbox
+                          v-model="editedMultipleAnswers"
+                          label="Múltiplas respostas"
+                        ></v-checkbox>
+                      </v-row>
+
                       <v-row
                         v-for="(item, index) in editedAnswers"
                         :key="index"
                         class="pa-0 ma-0"
                         :class="{ 'pt-2': index > 0 }"
                       >
-                        <v-radio-group v-model="radios" class="pa-0 pt-2 ma-0">
+                        <v-checkbox
+                          v-if="editedMultipleAnswers"
+                          v-model="selectedAnswers"
+                          class="pa-0 pt-2 ma-0"
+                          :value="item.ansId"
+                        ></v-checkbox>
+
+                        <v-radio-group
+                          v-else
+                          v-model="radios"
+                          class="pa-0 pt-2 ma-0"
+                        >
                           <v-radio :value="item.ansId"></v-radio>
                         </v-radio-group>
 
@@ -209,9 +227,10 @@
                       </v-row>
 
                       <v-row
-                        class="question-form__answer-justification pa-0 ma-0 mt-2 ml-6"
+                        class="question-form__answer-justification pa-0 ma-0 mt-2"
                       >
                         <VueTextEditor
+                          v-if="ready && +e1 === 2"
                           outlined
                           placeholder="Justificativa geral"
                           :height="300"
@@ -221,7 +240,7 @@
                         />
                       </v-row>
 
-                      <v-row class="pa-0 ma-0 mt-8 ml-6">
+                      <v-row class="pa-0 ma-0 mt-8">
                         <v-text-field
                           v-model="editedAnswerJustificationSource"
                           dense
@@ -288,6 +307,8 @@ export default {
       editedName: null,
       editedSubject: null,
       editedImageSize: null,
+      selectedAnswers: [],
+      editedMultipleAnswers: [],
       editedAnswers: [
         { text: "", description: "", ansId: "radio-1", value: false },
         { text: "", description: "", ansId: "radio-2", value: false },
@@ -337,7 +358,13 @@ export default {
       return !!this.question.image;
     },
     formIsValid() {
-      return this.editedName !== "" && this.editedSubject !== "";
+      return (
+        !!this.editedName &&
+        !!this.editedSubject &&
+        (this.editedMultipleAnswers
+          ? !!this.selectedAnswers.length
+          : !!this.radios)
+      );
     },
     name() {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -355,10 +382,19 @@ export default {
     editedName(value) {
       if (value) this.update();
     },
-    radios(val) {
-      this.editedAnswers.forEach(element => {
-        element.value = element.ansId === val;
-      });
+    radios() {
+      this.setSingleAnswer();
+    },
+    selectedAnswers() {
+      this.setMultipleAnswers();
+    },
+    multipleAnswers(value) {
+      if (value) {
+        this.setMultipleAnswers();
+        return;
+      }
+
+      this.setSingleAnswer();
     }
   },
   methods: {
@@ -366,6 +402,7 @@ export default {
       this.editedName = this.question.name;
       this.editedSubject = this.question.subject;
       this.editedImageSize = this.question.imageSize;
+      this.editedMultipleAnswers = this.question.multipleAnswers;
       this.editedAnswers = [...this.question.answers];
       this.editedAnswerJustification = this.question.answerJustification;
       this.editedAnswerJustificationSource = this.question.answerJustificationSource;
@@ -378,13 +415,31 @@ export default {
       this.imagePreview = this.editedImage || "";
 
       this.editedAnswers.forEach(element => {
-        if (element.value === true) this.radios = element.ansId;
+        if (!element.value) {
+          return;
+        }
+
+        if (this.editedMultipleAnswers) {
+          this.selectedAnswers.push(element.ansId);
+        } else {
+          this.radios = element.ansId;
+        }
       });
 
       this.ready = true;
     },
     updateData(variable) {
       this.editedQuestionDescription = variable;
+    },
+    setMultipleAnswers() {
+      this.editedAnswers.forEach(element => {
+        element.value = this.selectedAnswers.includes(element.ansId);
+      });
+    },
+    setSingleAnswer() {
+      this.editedAnswers.forEach(element => {
+        element.value = element.ansId === this.radios;
+      });
     },
     async onEditQuestion() {
       let url = null;
@@ -406,6 +461,7 @@ export default {
         subject: this.question.subject,
         level: this.question.level,
         question: this.question.question,
+        multipleAnswers: this.question.multipleAnswers,
         answers: this.question.answers,
         answerJustification: this.question.answerJustification,
         answerJustificationSource: this.question.answerJustificationSource,
@@ -419,6 +475,7 @@ export default {
         subject: this.editedSubject,
         question: this.editedQuestionDescription,
         level: this.editedLevel,
+        multipleAnswers: this.editedMultipleAnswers,
         answers: this.editedAnswers,
         answerJustification: this.editedAnswerJustification,
         answerJustificationSource: this.editedAnswerJustificationSource,
@@ -460,6 +517,8 @@ export default {
       this.items = [];
       this.image = null;
       this.imagePreview = "";
+      this.selectedAnswers = [];
+      this.editedMultipleAnswers = false;
       this.editedAnswers = [];
       this.editedAnswerJustification = "";
       this.editedAnswerJustificationSource = "";
