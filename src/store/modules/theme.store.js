@@ -1,13 +1,16 @@
 
-const initialState = () => ({
-  theme: 'light'
+  const initialState = () => ({
+    theme: 'light'
   });
 
   const state = initialState();
 
   const mutations = {
-    toggleTheme(state, data) {
-      if (state.theme == 'light'){
+    setTheme(state, data){
+      state.theme = data
+    },
+    toggleTheme(state) {
+      if (state.theme === 'light'){
         state.theme = 'dark'
       }else{
         state.theme = 'light'
