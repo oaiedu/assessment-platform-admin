@@ -2,6 +2,7 @@
 
 module.exports = {
   assetsDir: "assets/",
+
   // configureWebpack: {
   //     plugins: [
   //         new BundleAnalyzerPlugin()
@@ -23,6 +24,17 @@ module.exports = {
       }
     ]);
   },
+
   transpileDependencies: ["vuetify"],
-  lintOnSave: false
+  lintOnSave: false,
+
+  pluginOptions: {
+    i18n: {
+      locale: 'en',
+      fallbackLocale: 'en',
+      localeDir: 'locales',
+      enableInSFC: false,
+      enableBridge: false
+    }
+  }
 };
