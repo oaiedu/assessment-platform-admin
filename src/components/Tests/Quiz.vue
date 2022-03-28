@@ -644,6 +644,25 @@ export default {
         seconds: minutes > 0 ? seconds - minutes * 60 : seconds
       };
 
+      const subjects = [];
+
+      for (const question of this.examQuestions) {
+        const subIndex = subjects.findIndex(
+          s => s.subject === question.subject
+        );
+
+        if (subIndex === -1) {
+          subjects.push({
+            subject: question.subject,
+            questions: [question.name]
+          });
+
+          continue;
+        }
+
+        subjects[subIndex].questions.push(question.name);
+      }
+
       analytics.logEvent("quiz_complete", {
         timeTaken: `${timeTaken.hours}h ${timeTaken.minutes}m ${timeTaken.seconds}s`,
         score,
@@ -672,6 +691,7 @@ export default {
         date: new Date(this.finishedAt).toISOString(),
         mode: this.practice ? "practice" : "exam",
         questions: this.examQuestions.map(q => q.name),
+        subjects,
         quizId: this.test.id,
         score,
         timeTaken,
@@ -925,6 +945,14 @@ export default {
 
       const answer = this.answers.find(a => a.questionName === questionName);
 
+      if (this.examQuestions[this.current - 1].multipleAnswers) {
+        this.currentMultiAnswer = answer ? answer.value : [];
+        this.currentAnswer = null;
+
+        return;
+      }
+
+      this.currentMultiAnswer = [];
       this.currentAnswer = answer ? answer.value : null;
     },
     currentAnswer(value) {
