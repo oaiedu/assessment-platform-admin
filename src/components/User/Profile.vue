@@ -31,6 +31,7 @@
 
           <img
             v-if="!imagesAsURL"
+            class="profile__photo"
             style="object-fit: cover"
             src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
           />
@@ -462,7 +463,7 @@ export default {
       0
     );
 
-    this.totalCorrect = (this.subjectsTotal * 100) / questionsAmount;
+    this.totalCorrect = (this.subjectsTotal * 100) / (questionsAmount || 1);
 
     setTimeout(() => {
       this.setSubjectsPercentage();
