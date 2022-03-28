@@ -155,64 +155,11 @@
         <h3 class="quiz-detail__attempts-title">Tentativas anteriores</h3>
       </v-card-title>
 
-      <v-data-table
+      <AttemptsTable
         v-if="test && attempts"
-        hide-default-footer
-        class="quiz-detail__attempts-table"
-        no-data-text="Não há tentativas no momento"
-        :headers="headersAttempts"
-        :items="attempts"
-      >
-        <template v-slot:[`item.index`]="{ item }">
-          {{ item.index + 1 }}
-        </template>
-
-        <template v-slot:[`item.date`]="{ item }">
-          {{ getDateSentence(item.date) }}
-        </template>
-
-        <template v-slot:[`item.answers`]="{ item }">
-          {{ item.answers.length }}/{{ item.questions.length }}
-        </template>
-
-        <template v-slot:[`item.score`]="{ item }">
-          <span
-            :class="{
-              'font-weight-medium': !item.score || item.score === 100,
-              'green--text': item.score === 100,
-              'red--text': !item.score
-            }"
-          >
-            {{ item.score.toFixed(2) }}%
-          </span>
-        </template>
-
-        <template v-slot:[`item.timeTaken`]="{ item }">
-          {{ getTimeFormatted(item.timeTaken) }}
-        </template>
-
-        <template v-slot:[`item.mode`]="{ item }">
-          {{ getModeSentence(item.mode) }}
-        </template>
-
-        <template v-slot:[`item.result`]="{ item }">
-          <span
-            class="font-weight-medium"
-            :class="{
-              'green--text': item.approved,
-              'red--text': !item.approved
-            }"
-          >
-            {{ item.approved ? "Passou" : "Falhou" }}
-          </span>
-        </template>
-
-        <template v-slot:[`item.review`]="{ item }">
-          <v-btn text small color="blue" @click="reviewAttempt(item)"
-            >Revisar</v-btn
-          >
-        </template>
-      </v-data-table>
+        :attempts="attempts"
+        @reviewAttempt="reviewAttempt($event)"
+      />
     </v-card>
 
     <v-dialog v-model="resultsDialog" width="500px">
@@ -379,10 +326,13 @@ import {
 
 import { analytics } from "../../main";
 
-import { weekDays, months } from "../../utils/date";
+import AttemptsTable from "./AttemptsTable.vue";
 
 export default {
   name: "QuizDetails",
+  components: {
+    AttemptsTable
+  },
   data() {
     return {
       mdiBallot,
@@ -397,36 +347,6 @@ export default {
       resultsDialog: false,
       practice: false,
       windowWidth: 701,
-      headersAttempts: [
-        { text: "#", value: "index", sortable: false, align: "center" },
-        { text: "Data", value: "date", sortable: false, align: "center" },
-        {
-          text: "Respostas",
-          value: "answers",
-          sortable: false,
-          align: "center"
-        },
-        {
-          text: "Pontuação",
-          value: "score",
-          sortable: false,
-          align: "center"
-        },
-        {
-          text: "Tempo Gasto",
-          value: "timeTaken",
-          sortable: false,
-          align: "center"
-        },
-        { text: "Modo", value: "mode", sortable: false, align: "center" },
-        {
-          text: "Resultado",
-          value: "result",
-          sortable: false,
-          align: "center"
-        },
-        { text: "Revisar", value: "review", sortable: false, align: "center" }
-      ],
       attempts: []
     };
   },
@@ -447,27 +367,6 @@ export default {
         : score >= 50
         ? "#edab00"
         : "#ff4141";
-    },
-    getDateSentence(iso) {
-      const date = new Date(iso);
-
-      return `${weekDays[date.getDay()].substring(
-        0,
-        3
-      )}, ${date.getDate()} ${months[date.getMonth()].substring(
-        0,
-        3
-      )} ${date.getFullYear()}`;
-    },
-    getModeSentence(mode) {
-      switch (mode) {
-        case "practice":
-          return "Treino";
-        case "exam":
-          return "Exame";
-        default:
-          return "Indefinido";
-      }
     },
     getTime(item) {
       return item.unlimitedTime
@@ -714,14 +613,6 @@ export default {
   border-radius: 0.6rem;
 
   cursor: pointer;
-}
-
-.quiz-detail__attempts-table /deep/ tbody tr {
-  transition: background-color 0.1s ease;
-}
-
-.quiz-detail__attempts-table /deep/ tbody tr:hover {
-  background-color: #f7f7f7 !important;
 }
 
 .quiz-detail__score-container {
