@@ -175,15 +175,15 @@ const actions = {
   /**
    * Uploads a new avatar image to the current user.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {File} payload.images - The image to be uploaded.
+   * @param {Store} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {File} payload.image The image to be uploaded.
    * @returns {string} The image url.
    */
   async uploadAvatar({ commit }, payload) {
     try {
       const storageRef = storage.ref();
-      const file = payload.images;
+      const file = payload.image;
       const name = "avatar";
       const subfolder = auth.currentUser.uid;
       const type = file.type.split("/")[1];
