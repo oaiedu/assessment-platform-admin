@@ -24,12 +24,19 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  */
 
 /**
+ * @typedef {Object} AttemptSubject
+ * @property {string} subject Defines the subject name.
+ * @property {string[]} questions Defines an array with all questions names from this subject.
+ */
+
+/**
  * @typedef {Object} Attempt
  * @property {boolean} approved Defines whether the attempt was successful.
  * @property {AttemptAnswers[]} answers Defines an array that contains all the quiz answers.
  * @property {Date} date Defines when the attempt was finished.
  * @property {string} mode Defines the attempt mode. Ex.: 'practice'.
  * @property {string[]} questions Defines an array that contains all questions names from the quiz.
+ * @property {AttemptSubject[]} subjects Defines an array of subjects that contains their name and questions.
  * @property {string} quizId Defines the quiz id.
  * @property {number} score Defines the percentage (%) of correct answers.
  * @property {Time} timeTaken Defines how many hours, minutes and seconds the attempt has taken.
