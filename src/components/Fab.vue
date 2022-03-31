@@ -10,7 +10,7 @@
     <template v-slot:activator>
       <v-tooltip left>
         <template v-slot:activator="{ on }">
-          <v-btn v-model="fab" color="blue darken-1" v-on="on" dark fab>
+          <v-btn v-model="fab" color="blue" v-on="on" dark fab>
             <v-icon v-if="fab">{{ closeIcon }}</v-icon>
             <v-icon v-else>{{ plusIcon }}</v-icon>
           </v-btn>
@@ -25,14 +25,7 @@
       v-if="userClaims && (userClaims['appraiser'] || userClaims['admin'])"
     >
       <template v-slot:activator="{ on }">
-        <v-btn
-          fab
-          dark
-          small
-          v-on="on"
-          @click="toQuestions"
-          color="blue darken-1"
-        >
+        <v-btn fab dark small v-on="on" @click="toQuestions" color="blue">
           <v-icon>{{ fileQuestionIcon }}</v-icon>
         </v-btn>
       </template>
@@ -41,7 +34,7 @@
 
     <v-tooltip left v-if="userClaims && userClaims['admin']">
       <template v-slot:activator="{ on }">
-        <v-btn fab dark small v-on="on" @click="toTests" color="blue darken-1">
+        <v-btn fab dark small v-on="on" @click="toTests" color="blue">
           <v-icon>{{ fileMultipleIcon }}</v-icon>
         </v-btn>
       </template>

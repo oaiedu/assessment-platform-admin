@@ -238,7 +238,7 @@ export default {
     hasApprovedRequests() {
       let itHas = false;
       this.requests.forEach(request => {
-        if (request.status === "Aprovado") {
+        if (request.status === "approved") {
           itHas = true;
         }
       });
@@ -318,7 +318,7 @@ export default {
               .then(() => {
                 this.$store.dispatch("updateQuestionRequest", {
                   mode: "sttUpdate",
-                  status: "Aprovado",
+                  status: "approved",
                   request,
                   user: request.user,
                   isSearching: this.isSearching
@@ -337,7 +337,7 @@ export default {
               .then(async () => {
                 await this.$store.dispatch("updateQuestionRequest", {
                   mode: "sttUpdate",
-                  status: "Aprovado",
+                  status: "approved",
                   request,
                   user: request.user,
                   isSearching: this.isSearching
@@ -414,7 +414,7 @@ export default {
 
         await this.$store.dispatch("updateQuestionRequest", {
           mode: "sttUpdate",
-          status: "Rejeitado",
+          status: "rejected",
           request,
           user: request.user,
           isSearching: this.isSearching

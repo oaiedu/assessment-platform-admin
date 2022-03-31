@@ -363,7 +363,7 @@ export default {
       return score >= 100
         ? "#42D662"
         : score >= 80
-        ? "#1e88e5"
+        ? "#2196f3"
         : score >= 50
         ? "#edab00"
         : "#ff4141";

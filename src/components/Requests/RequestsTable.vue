@@ -1,11 +1,10 @@
 <template>
   <v-container>
-    <v-card>
+    <v-card flat outlined style="border-radius: 26px; overflow: hidden">
       <v-data-table
         hide-default-footer
         loading-text="Carregando solicitações..."
         no-data-text="Não há solicitações"
-        class="elevation-1"
         :headers="headers"
         :items="items"
         :page="page"
@@ -18,23 +17,30 @@
           v-if="items && items.length > 0"
         >
           <span
+            class="font-weight-medium"
             :style="{
               color:
-                item.status === 'Pendente'
+                item.status === 'pendant'
                   ? '#ffaa00'
-                  : item.status === 'Aprovado'
+                  : item.status === 'approved'
                   ? '#00cc66'
-                  : '#ff0000'
+                  : '#ff3333'
             }"
-            >{{ item.status }}</span
           >
+            {{ $t("REQUESTS.STATUS." + item.status) }}
+          </span>
         </template>
 
         <template v-slot:[`item.actions`]="{ item }">
           <v-row justify="end" v-if="!item.toDelete">
             <v-tooltip top v-if="userClaims && userClaims['admin']">
               <template v-slot:activator="{ on, attrs }">
-                <v-icon v-on="on" v-bind="attrs" @click="onEmailClick(item)">
+                <v-icon
+                  v-on="on"
+                  v-bind="attrs"
+                  color="blue-grey lighten-1"
+                  @click="onEmailClick(item)"
+                >
                   {{ mdiEmail }}
                 </v-icon>
               </template>
@@ -47,6 +53,7 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
+                  color="blue-grey lighten-1"
                   @click="onPdfClick(item)"
                 >
                   {{ mdiFilePdfBox }}
@@ -61,8 +68,9 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
+                  color="green"
                   :disabled="
-                    item.status === 'Aprovado' || loading || rejectLoading
+                    item.status === 'approved' || loading || rejectLoading
                   "
                   @click="onCheckClick(item)"
                 >
@@ -78,8 +86,9 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
+                  color="orange"
                   :disabled="
-                    item.status === 'Aprovado' || loading || rejectLoading
+                    item.status === 'approved' || loading || rejectLoading
                   "
                   @click="onEditClick(item)"
                 >
@@ -95,12 +104,13 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
+                  color="red"
                   :disabled="
                     loading ||
                       rejectLoading ||
                       (userClaims && userClaims['admin']
-                        ? item.status === 'Rejeitado'
-                        : item.status === 'Aprovado')
+                        ? item.status === 'rejected'
+                        : item.status === 'approved')
                   "
                   @click="
                     userClaims && userClaims['admin']
@@ -164,6 +174,16 @@ import {
 export default {
   name: "RequestsTable",
   props: ["items", "page", "itemsPerPage", "rejectLoading"],
+  data() {
+    return {
+      mdiClose,
+      mdiDelete,
+      mdiPencil,
+      mdiCheckBold,
+      mdiFilePdfBox,
+      mdiEmail
+    };
+  },
   computed: {
     headers() {
       return this.userClaims && this.userClaims["admin"]
@@ -218,16 +238,6 @@ export default {
     userClaims() {
       return this.$store.getters.getUserClaims;
     }
-  },
-  data() {
-    return {
-      mdiClose,
-      mdiDelete,
-      mdiPencil,
-      mdiCheckBold,
-      mdiFilePdfBox,
-      mdiEmail
-    };
   },
   methods: {
     itemRowStyle(item) {

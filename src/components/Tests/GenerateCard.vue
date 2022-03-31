@@ -56,9 +56,7 @@
             <template v-slot:prepend-item>
               <v-list-item ripple @click="toggle">
                 <v-list-item-action>
-                  <v-icon
-                    :color="testSubjects.length > 0 ? 'blue darken-1' : ''"
-                  >
+                  <v-icon :color="testSubjects.length > 0 ? 'blue' : ''">
                     {{ selectIcon }}
                   </v-icon>
                 </v-list-item-action>
@@ -123,7 +121,7 @@
       <v-spacer></v-spacer>
 
       <v-btn
-        color="blue darken-1"
+        color="blue"
         :dark="
           !(
             testSubjects.length === 0 ||

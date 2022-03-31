@@ -10,7 +10,7 @@
             to="/admin"
             class="see-more-button pa-0 ma-0 ml-2"
             :ripple="false"
-            :color="hover ? '#1e88e5' : '#888888'"
+            :color="hover ? '#2196f3' : '#888888'"
           >
             Ver mais
           </v-btn>

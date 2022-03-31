@@ -27,7 +27,7 @@
           left
           @click="e1 = e1 - 1"
         >
-          <v-icon color="blue darken-1">{{ mdiArrowLeft }}</v-icon>
+          <v-icon color="blue">{{ mdiArrowLeft }}</v-icon>
         </v-btn>
       </template>
       <span>Voltar</span>
@@ -36,7 +36,7 @@
     <v-tooltip left v-if="e1 < 2">
       <template v-slot:activator="{ on }">
         <v-btn
-          color="blue darken-1"
+          color="blue"
           class="mr-4"
           v-on="on"
           dark
@@ -55,7 +55,7 @@
     <v-tooltip left v-else>
       <template v-slot:activator="{ on }">
         <v-btn
-          color="blue darken-1"
+          color="blue"
           class="mr-4"
           v-on="on"
           fab
@@ -495,7 +495,7 @@ export default {
           request: {
             ...questionData,
             userId: this.userInfo.id,
-            status: "Pendente"
+            status: "pendant"
           },
           user: this.userInfo
         });

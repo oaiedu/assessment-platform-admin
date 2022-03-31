@@ -247,7 +247,7 @@ export default {
 <style>
 .users-table__highlight {
   font-weight: bold;
-  color: #1e88e5;
+  color: #2196f3;
 }
 
 .users-table .v-text-field__details {

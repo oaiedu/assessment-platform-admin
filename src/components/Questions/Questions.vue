@@ -69,7 +69,7 @@
             fab
             bottom
             right
-            color="blue darken-1"
+            color="blue"
             @click.stop="dialogNewQuestion = true"
           >
             <v-icon>{{ plusIcon }}</v-icon>

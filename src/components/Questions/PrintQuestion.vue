@@ -36,7 +36,7 @@
                   fab
                   bottom
                   right
-                  color="blue darken-1"
+                  color="blue"
                   @click="toPrint()"
                 >
                   <v-icon>{{ mdiFileOutline }}</v-icon>

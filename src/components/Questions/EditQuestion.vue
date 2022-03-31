@@ -27,7 +27,7 @@
           left
           @click="e1 = e1 - 1"
         >
-          <v-icon color="blue darken-1">{{ mdiArrowLeft }}</v-icon>
+          <v-icon color="blue">{{ mdiArrowLeft }}</v-icon>
         </v-btn>
       </template>
       <span>Voltar</span>
@@ -36,7 +36,7 @@
     <v-tooltip left v-if="e1 < 2">
       <template v-slot:activator="{ on }">
         <v-btn
-          color="blue darken-1"
+          color="blue"
           class="mr-4"
           v-on="on"
           dark
@@ -55,7 +55,7 @@
     <v-tooltip left v-else>
       <template v-slot:activator="{ on }">
         <v-btn
-          color="blue darken-1"
+          color="blue"
           class="mr-4"
           v-on="on"
           fab
@@ -84,7 +84,7 @@
                     Detalhes
                   </v-stepper-step>
 
-                  <v-divider></v-divider>
+                  <v-divider class="mx-2" style="margin-top: 50px"></v-divider>
 
                   <v-stepper-step editable step="2">
                     Respostas
@@ -572,6 +572,10 @@ export default {
 
 .answer-block .col {
   padding: 0 10px 0 10px !important;
+}
+
+.v-stepper__header {
+  box-shadow: 0 1px 0 0 #cfcfcf !important;
 }
 
 .v-text-editor__container {
