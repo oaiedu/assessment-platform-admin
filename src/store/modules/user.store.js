@@ -667,6 +667,10 @@ const actions = {
    */
   async autoSignIn({ commit, dispatch }, payload) {
     try {
+      if (!navigator.onLine) {
+        throw new Error("No internet connection");
+      }
+
       const user = await dispatch("getUserById", { id: payload.uid });
 
       analytics.setUserId(payload.uid);
