@@ -1,5 +1,5 @@
 <template>
-  <v-card width="100%" height="100%" class="question-by-subject">
+  <v-card outlined width="100%" height="100%" class="question-by-subject">
     <div class="question-by-subject-container">
       <h2 class="chart-title">
         Questões por matéria
@@ -234,6 +234,11 @@ export default {
 </script>
 
 <style scoped>
+.question-by-subject {
+  border-radius: 26px;
+  overflow: hidden;
+}
+
 .question-by-subject-container {
   position: relative;
 

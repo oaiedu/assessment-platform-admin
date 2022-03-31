@@ -62,9 +62,9 @@ export default {
   },
   methods: {
     getColor(status) {
-      if (status === "Pendente") {
+      if (status === "pendant") {
         return "#ffaa00";
-      } else if (status === "Aprovado") {
+      } else if (status === "approved") {
         return "#00cc44";
       } else {
         return "#ff2233";

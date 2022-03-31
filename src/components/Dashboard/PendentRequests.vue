@@ -1,5 +1,5 @@
 <template>
-  <v-card width="100%" height="100%" class="pendent-requests">
+  <v-card outlined width="100%" height="100%" class="pendent-requests">
     <div class="pendent-requests-container">
       <h2 class="card-title">
         {{ cardTitle }}
@@ -109,6 +109,11 @@ export default {
 </script>
 
 <style scoped>
+.pendent-requests {
+  border-radius: 26px;
+  overflow: hidden;
+}
+
 .pendent-requests-container,
 .no-content {
   display: flex;

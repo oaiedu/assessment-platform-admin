@@ -1,5 +1,5 @@
 <template>
-  <v-card width="100%" height="100%" class="data-amount">
+  <v-card outlined width="100%" height="100%" class="data-amount">
     <div class="data-amount-container" v-if="dataSize">
       <div class="user-amount details">
         <div class="icon-container">
@@ -75,6 +75,11 @@ export default {
 </script>
 
 <style scoped>
+.data-amount {
+  border-radius: 26px;
+  overflow: hidden;
+}
+
 .data-amount-container {
   display: flex;
   flex-direction: row;

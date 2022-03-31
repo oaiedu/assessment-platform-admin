@@ -86,7 +86,7 @@ export default {
 
   padding: 30px;
 
-  background-color: #ededed;
+  /* background-color: #f5f5f5; */
 }
 
 .dashboard.admin {

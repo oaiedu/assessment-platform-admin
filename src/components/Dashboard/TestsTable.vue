@@ -1,12 +1,12 @@
 <template>
-  <v-card width="100%" height="100%" class="tests-table">
+  <v-card outlined width="100%" height="100%" class="tests-table">
     <v-data-table
       hide-default-footer
       class="dashboard-tests-table"
       height="100%"
       loading-text="Carregando questionários..."
       no-data-text="Não há questionários a serem mostrados"
-      style="height: calc(100% - 48px) !important;"
+      style="height: calc(100% - 52px) !important;"
       :headers="headers"
       :items="tests"
       :loading="loading"
@@ -14,7 +14,7 @@
       @click:row="onRowClick"
     >
       <template v-slot:top>
-        <v-toolbar dense flat color="white">
+        <v-toolbar dense flat color="white" class="mt-1">
           <h1 class="table-title">Questionários recentes</h1>
         </v-toolbar>
 
@@ -241,6 +241,11 @@ export default {
   margin-right: 5px;
 
   animation: animate-icon 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tests-table {
+  border-radius: 26px;
+  overflow: hidden;
 }
 
 .table-title {
