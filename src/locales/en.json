@@ -1,3 +1,9 @@
 {
-  "message": "hello i18n !!"
+  "REQUESTS": {
+    "STATUS": {
+      "approved": "Approved",
+      "pendant": "Pendant",
+      "rejected": "Rejected"
+    }
+  }
 }
