@@ -1,93 +1,105 @@
 <template>
-  <v-container class="subjects-table">
-    <v-data-table
-      no-data-text="Não há disciplinas"
-      loading-text="Carregando disciplinas"
-      :headers="headers"
-      :items="subjects"
-      :loading="loading"
-    >
-      <template v-slot:top>
-        <v-toolbar flat dense>
-          <v-spacer></v-spacer>
-          <v-btn
-            v-if="!addingSubject"
-            dark
-            width="222"
-            color="blue"
-            @click="addingSubject = true"
-          >
-            Adicionar disciplina
-            <v-icon right dark size="24">{{ mdiPlus }}</v-icon>
-          </v-btn>
+  <v-container class="subjects-table mt-4">
+    <v-row class="ma-0 pa-0">
+      <v-text-field
+        v-model="search"
+        clearable
+        dense
+        outlined
+        rounded
+        color="blue"
+        label="Pesquisar"
+        style="max-width: 400px"
+      ></v-text-field>
 
-          <v-row v-else class="pa-0 ma-0" justify="end" align="end">
-            <v-text-field
-              autofocus
-              style="max-width: 222px !important"
-              v-model="subjectName"
-              @keyup="
-                !creationDisabled && $event.key === 'Enter' && addSubject()
-              "
-            ></v-text-field>
+      <v-spacer></v-spacer>
 
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  icon
-                  style="width: 40px; height: 40px"
-                  v-on="on"
-                  :disabled="creationDisabled"
-                  @click="addSubject()"
-                >
-                  <v-icon color="green">{{ mdiCheck }}</v-icon>
-                </v-btn>
-              </template>
-              <span>Confirmar</span>
-            </v-tooltip>
+      <v-btn
+        v-if="!addingSubject"
+        dark
+        rounded
+        width="240"
+        color="blue"
+        @click="addingSubject = true"
+      >
+        Adicionar disciplina
+        <v-icon right dark size="24">{{ mdiPlus }}</v-icon>
+      </v-btn>
 
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  icon
-                  style="width: 40px; height: 40px"
-                  v-on="on"
-                  @click="
-                    subjectName = '';
-                    addingSubject = false;
-                  "
-                >
-                  <v-icon color="red">{{ mdiClose }}</v-icon>
-                </v-btn>
-              </template>
-              <span>Cancelar</span>
-            </v-tooltip>
-          </v-row>
-        </v-toolbar>
-      </template>
+      <v-row v-else class="pa-0 ma-0" justify="end" align="end">
+        <v-text-field
+          autofocus
+          style="max-width: 240px !important"
+          v-model="subjectName"
+          @keyup="!creationDisabled && $event.key === 'Enter' && addSubject()"
+        ></v-text-field>
 
-      <template v-slot:[`item.questions`]="{ item }">
-        {{ item.questions.length }}
-      </template>
-
-      <template v-slot:[`item.actions`]="{ item }">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn
               icon
+              style="width: 40px; height: 40px"
               v-on="on"
-              @click="
-                deleteItem = item;
-                deleteSnackbar = true;
-              "
+              :disabled="creationDisabled"
+              @click="addSubject()"
             >
-              <v-icon color="red">{{ mdiDelete }}</v-icon>
+              <v-icon color="green">{{ mdiCheck }}</v-icon>
             </v-btn>
           </template>
-          <span>Excluir</span>
+          <span>Confirmar</span>
         </v-tooltip>
-      </template>
-    </v-data-table>
+
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              style="width: 40px; height: 40px"
+              v-on="on"
+              @click="
+                subjectName = '';
+                addingSubject = false;
+              "
+            >
+              <v-icon color="red">{{ mdiClose }}</v-icon>
+            </v-btn>
+          </template>
+          <span>Cancelar</span>
+        </v-tooltip>
+      </v-row>
+    </v-row>
+
+    <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
+      <v-data-table
+        no-data-text="Não há disciplinas"
+        loading-text="Carregando disciplinas"
+        :headers="headers"
+        :items="subjects"
+        :loading="loading"
+        :search="search"
+      >
+        <template v-slot:[`item.questions`]="{ item }">
+          {{ item.questions.length }}
+        </template>
+
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                icon
+                v-on="on"
+                @click="
+                  deleteItem = item;
+                  deleteSnackbar = true;
+                "
+              >
+                <v-icon color="red">{{ mdiDelete }}</v-icon>
+              </v-btn>
+            </template>
+            <span>Excluir</span>
+          </v-tooltip>
+        </template>
+      </v-data-table>
+    </v-card>
 
     <v-snackbar
       v-model="deleteSnackbar"
@@ -156,6 +168,7 @@ export default {
     mdiDelete,
     mdiCheck,
     mdiClose,
+    search: "",
     addingSubject: false,
     subjectName: "",
     deleteWarning: false,

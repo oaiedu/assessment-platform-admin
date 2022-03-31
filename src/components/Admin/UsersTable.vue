@@ -1,65 +1,92 @@
 <template>
-  <v-container>
-    <v-data-table
-      v-if="currentUser"
-      class="elevation-1 mt-2"
-      loading-text="Carregando usuários..."
-      :items="users"
-      :headers="headers"
-      :loading="loading"
-    >
-      <template v-slot:[`item.role`]="{ item }">
-        <span :class="item.email === currentUser.email && 'highlight'">{{
-          getRoleName(item.role)
-        }}</span>
-      </template>
+  <v-container class="users-table mt-4">
+    <v-row class="pa-0 ma-0">
+      <v-text-field
+        v-model="search"
+        clearable
+        dense
+        outlined
+        rounded
+        color="blue"
+        label="Pesquisar"
+        style="max-width: 400px"
+      ></v-text-field>
+    </v-row>
 
-      <template v-slot:[`item.name`]="{ item }">
-        <span :class="item.email === currentUser.email && 'highlight'">{{
-          item.name
-        }}</span>
-      </template>
+    <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
+      <v-data-table
+        v-if="currentUser"
+        loading-text="Carregando usuários..."
+        :items="users"
+        :headers="headers"
+        :loading="loading"
+        :search="search"
+      >
+        <template v-slot:[`item.role`]="{ item }">
+          <span
+            :class="
+              item.email === currentUser.email && 'users-table__highlight'
+            "
+          >
+            {{ getRoleName(item.role) }}
+          </span>
+        </template>
 
-      <template v-slot:[`item.email`]="{ item }">
-        <span :class="item.email === currentUser.email && 'highlight'">{{
-          item.email
-        }}</span>
-      </template>
+        <template v-slot:[`item.name`]="{ item }">
+          <span
+            :class="
+              item.email === currentUser.email && 'users-table__highlight'
+            "
+            >{{ item.name }}</span
+          >
+        </template>
 
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              :disabled="currentUser.email === item.email"
-              @click="
-                editDialog = true;
-                setEditItem(item);
-              "
-            >
-              {{ mdiAccountEdit }}
-            </v-icon>
-          </template>
-          <span>Editar função</span>
-        </v-tooltip>
+        <template v-slot:[`item.email`]="{ item }">
+          <span
+            :class="
+              item.email === currentUser.email && 'users-table__highlight'
+            "
+            >{{ item.email }}</span
+          >
+        </template>
 
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              class="ml-3"
-              :disabled="currentUser.email === item.email"
-              @click="sendEmail(item.email)"
-            >
-              {{ mdiEmail }}
-            </v-icon>
-          </template>
-          <span>Enviar e-mail</span>
-        </v-tooltip>
-      </template>
-    </v-data-table>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                color="orange"
+                :disabled="currentUser.email === item.email"
+                @click="
+                  editDialog = true;
+                  setEditItem(item);
+                "
+              >
+                {{ mdiAccountEdit }}
+              </v-icon>
+            </template>
+            <span>Editar função</span>
+          </v-tooltip>
+
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                class="ml-3"
+                color="blue-grey lighten-1"
+                :disabled="!item.email || currentUser.email === item.email"
+                @click="sendEmail(item.email)"
+              >
+                {{ mdiEmail }}
+              </v-icon>
+            </template>
+            <span>Enviar e-mail</span>
+          </v-tooltip>
+        </template>
+      </v-data-table>
+    </v-card>
 
     <v-dialog v-model="editDialog" max-width="500px">
       <v-card>
@@ -117,6 +144,7 @@ export default {
     return {
       mdiEmail,
       mdiAccountEdit,
+      search: "",
       editItem: {
         email: null,
         role: null,
@@ -216,9 +244,13 @@ export default {
 };
 </script>
 
-<style scoped>
-.highlight {
+<style>
+.users-table__highlight {
   font-weight: bold;
   color: #1e88e5;
+}
+
+.users-table .v-text-field__details {
+  display: none !important;
 }
 </style>
