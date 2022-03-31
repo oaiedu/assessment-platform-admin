@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer" absolute temporary>
+    <v-navigation-drawer v-model="drawer" absolute temporary width="300px">
       <v-main v-if="user" class="pt-0">
         <v-list>
           <v-list-item class="px-2">
@@ -13,6 +13,7 @@
                 :src="profileImage"
               />
             </v-avatar>
+
             <v-list-item-content class="pl-4">
               <v-list-item-title style="font-weight: 500;">{{
                 user.name
@@ -21,6 +22,10 @@
             </v-list-item-content>
           </v-list-item>
         </v-list>
+
+        <v-row class="ma-0 pa-0 mb-2" justify="space-between">
+          <LanguagePicker />
+        </v-row>
 
         <v-divider></v-divider>
 
@@ -78,6 +83,7 @@
 <script>
 import Error from "../components/Error";
 import Success from "../components/Success";
+import LanguagePicker from "../components/LanguagePicker";
 import UserNameModal from "../components/User/UserNameModal";
 import {
   mdiLogoutVariant,
@@ -94,6 +100,7 @@ export default {
   components: {
     Error,
     Success,
+    LanguagePicker,
     UserNameModal
   },
   data: () => ({
