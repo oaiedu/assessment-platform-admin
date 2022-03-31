@@ -128,7 +128,7 @@
             fab
             bottom
             right
-            color="blue darken-1"
+            color="blue"
             @click.stop="
               userClaims && !userClaims['student']
                 ? (dialogTestForm = true)

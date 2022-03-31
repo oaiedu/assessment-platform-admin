@@ -1,108 +1,149 @@
 <template>
-    <div class='paginator'>
-        <v-container>
-            <v-row justify="center">
-                <v-btn
-                    color='white'
-                    width="35px"
-                    min-width="0"
-                    height="35px"
-                    :ripple='false'
-                    @click='toFirst()'
-                    :disabled='page === 1' >
-                    <v-icon>{{ mdiChevronDoubleLeft }}</v-icon>
-                </v-btn>
+  <div class="paginator">
+    <v-container>
+      <v-row justify="center">
+        <v-btn
+          color="white"
+          width="35px"
+          min-width="0"
+          height="35px"
+          :ripple="false"
+          :outlined="page > 1"
+          :disabled="page === 1"
+          :style="{
+            border: page > 1 ? '1px solid #2196f3' : 'none',
+            'border-radius': '50%'
+          }"
+          @click="toFirst()"
+        >
+          <v-icon color="blue">{{ mdiChevronDoubleLeft }}</v-icon>
+        </v-btn>
 
-                <v-btn
-                    color='white'
-                    width="35px"
-                    min-width="0"
-                    height="35px"
-                    :ripple='false'
-                    class='ml-3'
-                    @click='onPrevious()'
-                    :disabled='page === 1' >
-                    <v-icon>{{ mdiChevronLeft }}</v-icon>
-                </v-btn>
+        <v-btn
+          color="white"
+          width="35px"
+          min-width="0"
+          height="35px"
+          class="ml-3"
+          :ripple="false"
+          :outlined="page > 1"
+          :disabled="page === 1"
+          :style="{
+            border: page > 1 ? '1px solid #2196f3' : 'none',
+            'border-radius': '50%'
+          }"
+          @click="onPrevious()"
+        >
+          <v-icon color="blue">{{ mdiChevronLeft }}</v-icon>
+        </v-btn>
 
-                <v-btn
-                    color='blue darken-1'
-                    dark
-                    width="35px"
-                    min-width="0"
-                    height="35px"
-                    :ripple='false'
-                    class='ml-3 page-button' >
-                    {{ page }}
-                </v-btn>
+        <v-btn
+          dark
+          color="blue"
+          width="35px"
+          min-width="0"
+          height="35px"
+          class="ml-3 page-button"
+          style="border-radius: 50%"
+          :ripple="false"
+        >
+          {{ page }}
+        </v-btn>
 
-                <v-btn
-                    color='white'
-                    width="35px"
-                    min-width="0"
-                    height="35px"
-                    :ripple='false'
-                    class='ml-3'
-                    @click='onNext()'
-                    :disabled='page === length' >
-                    <v-icon>{{ mdiChevronRight }}</v-icon>
-                </v-btn>
+        <v-btn
+          color="white"
+          width="35px"
+          min-width="0"
+          height="35px"
+          class="ml-3"
+          :ripple="false"
+          :outlined="page < length"
+          :disabled="page === length"
+          :style="{
+            border: page < length ? '1px solid #2196f3' : 'none',
+            'border-radius': '50%'
+          }"
+          @click="onNext()"
+        >
+          <v-icon color="blue">{{ mdiChevronRight }}</v-icon>
+        </v-btn>
 
-                <v-btn
-                    color='white'
-                    width="35px"
-                    min-width="0"
-                    height="35px"
-                    :ripple='false'
-                    class='ml-3'
-                    @click='toLast()'
-                    :disabled='page === length' >
-                    <v-icon>{{ mdiChevronDoubleRight }}</v-icon>
-                </v-btn>
-            </v-row>
-        </v-container>
-    </div>
+        <v-btn
+          color="white"
+          width="35px"
+          min-width="0"
+          height="35px"
+          class="ml-3"
+          :ripple="false"
+          :outlined="page < length"
+          :disabled="page === length"
+          :style="{
+            border: page < length ? '1px solid #2196f3' : 'none',
+            'border-radius': '50%'
+          }"
+          @click="toLast()"
+        >
+          <v-icon color="blue">{{ mdiChevronDoubleRight }}</v-icon>
+        </v-btn>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>
-    import { mdiChevronDoubleRight, mdiChevronDoubleLeft, mdiChevronRight, mdiChevronLeft} from '@mdi/js';
+import {
+  mdiChevronDoubleRight,
+  mdiChevronDoubleLeft,
+  mdiChevronRight,
+  mdiChevronLeft
+} from "@mdi/js";
 
-    export default {
-        name: 'Paginator',
-        props: { page: Number, length: Number },
-        data() {
-            return {
-                mdiChevronLeft,
-                mdiChevronRight,
-                mdiChevronDoubleLeft,
-                mdiChevronDoubleRight
-            }
-        },
-        methods: {
-            onNext() {
-                const next = this.page + 1;
-                this.$emit('pageChange', next > this.length ? { page: this.length, mode: 'last' } : { page: next, type: 'next' });
-            },
-            onPrevious() {
-                const previous = this.page - 1;
-                this.$emit('pageChange', previous < 1 ? { page: 1, mode: 'first' } : { page: previous, type: 'previous' });
-            },
-            toFirst() {
-                this.$emit('pageChange', { page: 1, mode: 'first' });
-            },
-            toLast() {
-                this.$emit('pageChange', { page: this.length, mode: 'last' });
-            }
-        }
+export default {
+  name: "Paginator",
+  props: { page: Number, length: Number },
+  data() {
+    return {
+      mdiChevronLeft,
+      mdiChevronRight,
+      mdiChevronDoubleLeft,
+      mdiChevronDoubleRight
+    };
+  },
+  methods: {
+    onNext() {
+      const next = this.page + 1;
+      this.$emit(
+        "pageChange",
+        next > this.length
+          ? { page: this.length, mode: "last" }
+          : { page: next, type: "next" }
+      );
+    },
+    onPrevious() {
+      const previous = this.page - 1;
+      this.$emit(
+        "pageChange",
+        previous < 1
+          ? { page: 1, mode: "first" }
+          : { page: previous, type: "previous" }
+      );
+    },
+    toFirst() {
+      this.$emit("pageChange", { page: 1, mode: "first" });
+    },
+    toLast() {
+      this.$emit("pageChange", { page: this.length, mode: "last" });
     }
+  }
+};
 </script>
 
 <style>
-    button.page-button {
-        font-size: 1rem !important;
-    }
+button.page-button {
+  font-size: 1rem !important;
+}
 
-    .paginator button.v-btn {
-        font-weight: 400 !important;
-    }
+.paginator button.v-btn {
+  font-weight: 400 !important;
+}
 </style>

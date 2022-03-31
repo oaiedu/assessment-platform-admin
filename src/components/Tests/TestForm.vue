@@ -17,7 +17,7 @@
             fixed
             bottom
             right
-            color="blue darken-1"
+            color="blue"
             class="mr-4"
             :loading="loading"
             :disabled="
@@ -127,9 +127,7 @@
                 <template v-slot:prepend-item>
                   <v-list-item ripple @click="toggle">
                     <v-list-item-action>
-                      <v-icon
-                        :color="testSubjects.length > 0 ? 'blue darken-1' : ''"
-                      >
+                      <v-icon :color="testSubjects.length > 0 ? 'blue' : ''">
                         {{ selectIcon }}
                       </v-icon>
                     </v-list-item-action>
@@ -164,7 +162,7 @@
               class="ma-0 py-2"
             >
               <v-btn
-                color="blue darken-1"
+                color="blue"
                 :loading="loading"
                 :dark="
                   !(
@@ -191,7 +189,7 @@
                 min="5"
                 max="100"
                 color="blue"
-                track-color="grey"
+                track-color="grey lighten-1"
                 :step="5"
               ></v-slider>
             </v-row>
@@ -199,6 +197,7 @@
             <v-row class="ma-0 pa-0">
               <v-checkbox
                 v-model="unlimitedTime"
+                color="blue"
                 label="Tempo de questionário ilimitado"
               ></v-checkbox>
             </v-row>
@@ -234,30 +233,31 @@
           </v-col>
 
           <v-col v-if="testType === 'random'">
-            <v-container>
-              <v-data-table
-                v-model="selectedRandom"
-                show-select
-                hide-default-footer
-                item-key="name"
-                class="elevation-1"
-                no-data-text="Não há questões a serem mostradas"
-                loading-text="Carregando questões..."
-                :item-class="itemRowStyle"
-                :items="selectedRandomQuestions"
-                :headers="randomHeaders"
-                :items-per-page="itemsPerPage"
-                :loading="loading"
-                :page="randomizedPage"
-              >
-                <template v-slot:[`item.level`]="{ item }">
-                  {{
-                    item.level.index || item.level.index === 0
-                      ? levels[item.level.index].label
-                      : levels[item.level].label
-                  }}
-                </template>
-              </v-data-table>
+            <v-container class="ma-0 pa-0">
+              <v-card outlined style="border-radius: 26px; overflow: hidden">
+                <v-data-table
+                  v-model="selectedRandom"
+                  show-select
+                  hide-default-footer
+                  item-key="name"
+                  no-data-text="Não há questões a serem mostradas"
+                  loading-text="Carregando questões..."
+                  :item-class="itemRowStyle"
+                  :items="selectedRandomQuestions"
+                  :headers="randomHeaders"
+                  :items-per-page="itemsPerPage"
+                  :loading="loading"
+                  :page="randomizedPage"
+                >
+                  <template v-slot:[`item.level`]="{ item }">
+                    {{
+                      item.level.index || item.level.index === 0
+                        ? levels[item.level.index].label
+                        : levels[item.level].label
+                    }}
+                  </template>
+                </v-data-table>
+              </v-card>
             </v-container>
 
             <div class="text-center pt-2">
@@ -289,7 +289,11 @@
             </v-container>
 
             <v-container class="mt-6 mb-4 pa-0">
-              <v-card v-if="selectedSubjects.length === 0" shaped flat outlined>
+              <v-card
+                v-if="selectedSubjects.length === 0"
+                outlined
+                style="border-radius: 26px; overflow: hidden"
+              >
                 <v-data-table
                   v-model="selectedQuestions"
                   show-select

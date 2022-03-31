@@ -666,24 +666,41 @@ const actions = {
    * @param {Object} payload the user payload.
    */
   async autoSignIn({ commit, dispatch }, payload) {
-    const user = await dispatch("getUserById", { id: payload.uid });
+    try {
+      if (!navigator.onLine) {
+        throw new Error("No internet connection");
+      }
 
-    analytics.setUserId(payload.uid);
+      const user = await dispatch("getUserById", { id: payload.uid });
 
-    if (!user) {
-      await dispatch("signUserUp", {
-        name: payload.displayName,
-        email: payload.email,
-        image: payload.photoURL,
-        userUid: payload.uid
+      analytics.setUserId(payload.uid);
+
+      if (!user) {
+        await dispatch("signUserUp", {
+          name: payload.displayName,
+          email: payload.email,
+          image: payload.photoURL,
+          userUid: payload.uid
+        });
+
+        return;
+      }
+
+      await dispatch("loadUserClaims");
+      dispatch("loadUserInfo", { id: payload.uid });
+      commit("setUser", { id: payload.uid });
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        "connection",
+        "",
+        "Não foi possível entrar em sua conta."
+      );
+
+      commit("setError", { message: errorModel });
+      createErrorLog("User Auto Login", error.message, {
+        payload
       });
-
-      return;
     }
-
-    await dispatch("loadUserClaims");
-    dispatch("loadUserInfo", { id: payload.uid });
-    commit("setUser", { id: payload.uid });
   },
   /**
    * Resets the user password according to it's e-mail.
@@ -707,6 +724,7 @@ const actions = {
           "",
           "Não foi possível enviar o e-mail para redefinir a senha."
         );
+
         commit("setError", { message: errorModel });
         createErrorLog("User Password Reset", error.message, {
           payload

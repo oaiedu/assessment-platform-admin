@@ -1,9 +1,8 @@
 <template>
   <v-container>
-    <v-card>
+    <v-card outlined style="border-radius: 26px; overflow: hidden">
       <v-data-table
         hide-default-footer
-        class="elevation-1"
         no-data-text="Não há questionários a serem mostrados"
         loading-text="Carregando questionários..."
         :headers="headers"

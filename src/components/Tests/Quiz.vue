@@ -1067,8 +1067,8 @@ export default {
 }
 
 .quiz__question-number.current {
-  border: 2px solid #1e88e5;
-  background-color: #1e88e544;
+  border: 2px solid #2196f3;
+  background-color: #2196f344;
 
   color: #1278d1 !important;
 }

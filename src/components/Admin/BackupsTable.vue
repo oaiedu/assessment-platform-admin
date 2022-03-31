@@ -1,11 +1,10 @@
 <template>
-  <v-container>
-    <v-row justify="end" class="mr-2">
+  <v-container class="mt-4">
+    <v-row justify="end" class="ma-0 mr-2">
       <v-btn
-        :dark="false"
-        disabled
-        color="green"
-        class="mt-2"
+        dark
+        rounded
+        color="green lighten-1"
         :loading="loading"
         @click="backup()"
       >
@@ -14,189 +13,213 @@
       </v-btn>
     </v-row>
 
-    <v-data-table
-      :items="getBackupsByMonth(currentMonth)"
-      class="elevation-1 mt-5"
-      :headers="headers"
-      :loading="loading"
-      :sort-by="['start']"
-      :sort-desc="[true]"
-      loading-text="Carregando backups..."
-      no-data-text="Não há backups neste mês"
+    <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
+      <v-data-table
+        hide-default-footer
+        loading-text="Carregando backups..."
+        no-data-text="Não há backups neste mês"
+        :items="getBackupsByMonth(currentMonth)"
+        :headers="headers"
+        :loading="loading"
+        :sort-by="['start']"
+        :sort-desc="[true]"
+      >
+        <template v-slot:top>
+          <v-toolbar flat dense>
+            <v-toolbar-title class="blue--text font-weight-medium">
+              Mês Atual
+            </v-toolbar-title>
+          </v-toolbar>
+          <v-divider></v-divider>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                color="blue"
+                :disabled="loading"
+                @click="downloadBkp(item)"
+              >
+                {{ mdiDownload }}
+              </v-icon>
+            </template>
+            <span>Download</span>
+          </v-tooltip>
+
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                class="ml-1"
+                color="red"
+                :disabled="loading"
+                @click="
+                  deleteBackupSnackBar = true;
+                  deleteItem = item;
+                "
+              >
+                {{ mdiDelete }}
+              </v-icon>
+            </template>
+            <span>Excluir</span>
+          </v-tooltip>
+        </template>
+        <template v-slot:[`item.start`]="{ item }">
+          <span>{{ formatDate(item.start) }}</span>
+        </template>
+        <template v-slot:[`item.end`]="{ item }">
+          <span>{{ formatDate(item.end) }}</span>
+        </template>
+      </v-data-table>
+    </v-card>
+
+    <v-card
+      outlined
+      class="mt-10"
+      style="border-radius: 26px; overflow: hidden"
     >
-      <template v-slot:top>
-        <v-toolbar flat dense>
-          <v-toolbar-title class="blue--text font-weight-medium"
-            >Mês Atual</v-toolbar-title
-          >
-        </v-toolbar>
-        <v-divider></v-divider>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              :disabled="loading"
-              @click="downloadBkp(item)"
-            >
-              {{ mdiDownload }}
-            </v-icon>
-          </template>
-          <span>Download</span>
-        </v-tooltip>
+      <v-data-table
+        hide-default-footer
+        loading-text="Carregando backups..."
+        no-data-text="Não há backups neste mês"
+        :items="getBackupsByMonth(lastMonth)"
+        :headers="headers"
+        :loading="loading"
+        :sort-by="['start']"
+        :sort-desc="[true]"
+      >
+        <template v-slot:top>
+          <v-toolbar flat dense>
+            <v-toolbar-title>{{ pastMonths[0] }}</v-toolbar-title>
+          </v-toolbar>
+          <v-divider></v-divider>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                color="blue"
+                @click="downloadBkp(item)"
+              >
+                {{ mdiDownload }}
+              </v-icon>
+            </template>
+            <span>Download</span>
+          </v-tooltip>
 
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              class="ml-1"
-              :disabled="loading"
-              @click="
-                deleteBackupSnackBar = true;
-                deleteItem = item;
-              "
-            >
-              {{ mdiDelete }}
-            </v-icon>
-          </template>
-          <span>Excluir</span>
-        </v-tooltip>
-      </template>
-      <template v-slot:[`item.start`]="{ item }">
-        <span>{{ formatDate(item.start) }}</span>
-      </template>
-      <template v-slot:[`item.end`]="{ item }">
-        <span>{{ formatDate(item.end) }}</span>
-      </template>
-    </v-data-table>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                class="ml-1"
+                color="red"
+                @click="
+                  deleteBackupSnackBar = true;
+                  deleteItem = item;
+                "
+              >
+                {{ mdiDelete }}
+              </v-icon>
+            </template>
+            <span>Excluir</span>
+          </v-tooltip>
+        </template>
+        <template v-slot:[`item.start`]="{ item }">
+          <span>{{ formatDate(item.start) }}</span>
+        </template>
+        <template v-slot:[`item.end`]="{ item }">
+          <span>{{ formatDate(item.end) }}</span>
+        </template>
+      </v-data-table>
+    </v-card>
 
-    <v-data-table
-      :items="getBackupsByMonth(lastMonth)"
-      class="elevation-1 mt-10"
-      :headers="headers"
-      :loading="loading"
-      :sort-by="['start']"
-      :sort-desc="[true]"
-      loading-text="Carregando backups..."
-      no-data-text="Não há backups neste mês"
+    <v-card
+      outlined
+      class="mt-10"
+      style="border-radius: 26px; overflow: hidden"
     >
-      <template v-slot:top>
-        <v-toolbar flat dense>
-          <v-toolbar-title class="blue--text font-weight-medium">{{
-            pastMonths[0]
-          }}</v-toolbar-title>
-        </v-toolbar>
-        <v-divider></v-divider>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon v-on="on" v-bind="attrs" @click="downloadBkp(item)">
-              {{ mdiDownload }}
-            </v-icon>
-          </template>
-          <span>Download</span>
-        </v-tooltip>
+      <v-data-table
+        hide-default-footer
+        loading-text="Carregando backups..."
+        no-data-text="Não há backups neste mês"
+        :items="getBackupsByMonth(twoMonthsAgo)"
+        :headers="headers"
+        :loading="loading"
+        :sort-by="['start']"
+        :sort-desc="[true]"
+      >
+        <template v-slot:top>
+          <v-toolbar flat dense>
+            <v-toolbar-title>{{ pastMonths[1] }}</v-toolbar-title>
+          </v-toolbar>
+          <v-divider></v-divider>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                color="blue"
+                @click="downloadBkp(item)"
+              >
+                {{ mdiDownload }}
+              </v-icon>
+            </template>
+            <span>Download</span>
+          </v-tooltip>
 
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              class="ml-1"
-              @click="
-                deleteBackupSnackBar = true;
-                deleteItem = item;
-              "
-            >
-              {{ mdiDelete }}
-            </v-icon>
-          </template>
-          <span>Excluir</span>
-        </v-tooltip>
-      </template>
-      <template v-slot:[`item.start`]="{ item }">
-        <span>{{ formatDate(item.start) }}</span>
-      </template>
-      <template v-slot:[`item.end`]="{ item }">
-        <span>{{ formatDate(item.end) }}</span>
-      </template>
-    </v-data-table>
-
-    <v-data-table
-      :items="getBackupsByMonth(twoMonthsAgo)"
-      class="elevation-1 mt-10"
-      :headers="headers"
-      :loading="loading"
-      :sort-by="['start']"
-      :sort-desc="[true]"
-      loading-text="Carregando backups..."
-      no-data-text="Não há backups neste mês"
-    >
-      <template v-slot:top>
-        <v-toolbar flat dense>
-          <v-toolbar-title class="blue--text font-weight-medium">{{
-            pastMonths[1]
-          }}</v-toolbar-title>
-        </v-toolbar>
-        <v-divider></v-divider>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon v-on="on" v-bind="attrs" @click="downloadBkp(item)">
-              {{ mdiDownload }}
-            </v-icon>
-          </template>
-          <span>Download</span>
-        </v-tooltip>
-
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              class="ml-1"
-              @click="
-                deleteBackupSnackBar = true;
-                deleteItem = item;
-              "
-            >
-              {{ mdiDelete }}
-            </v-icon>
-          </template>
-          <span>Excluir</span>
-        </v-tooltip>
-      </template>
-      <template v-slot:[`item.start`]="{ item }">
-        <span>{{ formatDate(item.start) }}</span>
-      </template>
-      <template v-slot:[`item.end`]="{ item }">
-        <span>{{ formatDate(item.end) }}</span>
-      </template>
-    </v-data-table>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                class="ml-1"
+                color="red"
+                @click="
+                  deleteBackupSnackBar = true;
+                  deleteItem = item;
+                "
+              >
+                {{ mdiDelete }}
+              </v-icon>
+            </template>
+            <span>Excluir</span>
+          </v-tooltip>
+        </template>
+        <template v-slot:[`item.start`]="{ item }">
+          <span>{{ formatDate(item.start) }}</span>
+        </template>
+        <template v-slot:[`item.end`]="{ item }">
+          <span>{{ formatDate(item.end) }}</span>
+        </template>
+      </v-data-table>
+    </v-card>
 
     <v-snackbar
       v-model="deleteBackupSnackBar"
-      color="white"
       light
       right
       top
+      color="white"
       :timeout="15000"
     >
       Tem certeza de que deseja excluir este Backup?
 
-      <v-btn dark class="ml-3" color="blue" text @click="deleteBkp(deleteItem)">
+      <v-btn dark text class="ml-3" color="blue" @click="deleteBkp(deleteItem)">
         Excluir
       </v-btn>
 
       <v-btn
         dark
-        color="grey"
         text
+        color="grey"
         @click="
           deleteBackupSnackBar = false;
           deleteItem = null;

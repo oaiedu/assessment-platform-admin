@@ -8,7 +8,7 @@ import { getNowISOString } from "../../utils/date";
  * @typedef {import('./questions.store.js').DeleteStatus} DeleteStatus
  * @typedef {import('./questions.store.js').Answer} Answer
  * @typedef {import('./questions.store.js').Subject} Subject
- * @typedef {"Rejeitado"|"Pendente"|"Aprovado"} RequestStatus
+ * @typedef {"rejected"|"pendant"|"approved"} RequestStatus
  */
 
 /**
@@ -1125,7 +1125,7 @@ const actions = {
 
     db.collection("question-requests")
       .where("userId", "==", userInfo.id)
-      .where("status", "==", "Aprovado")
+      .where("status", "==", "approved")
       .get()
       .then(snapshot => {
         snapshot.forEach(doc => {

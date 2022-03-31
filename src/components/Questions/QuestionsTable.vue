@@ -1,7 +1,15 @@
 <template>
   <v-container>
-    <v-card>
+    <v-card outlined style="border-radius: 26px; overflow: hidden">
       <v-data-table
+        hide-default-footer
+        no-data-text="Não há questões a serem mostradas"
+        loading-text="Carregando questões..."
+        :items="items"
+        :page="page"
+        :items-per-page="itemsPerPage"
+        :loading="loading"
+        :item-class="itemRowStyle"
         :headers="
           isActionsAvailable
             ? [
@@ -15,15 +23,6 @@
               ]
             : headers
         "
-        :items="items"
-        :page="page"
-        :items-per-page="itemsPerPage"
-        :loading="loading"
-        no-data-text="Não há questões a serem mostradas"
-        loading-text="Carregando questões..."
-        hide-default-footer
-        :item-class="itemRowStyle"
-        class="elevation-1"
       >
         <template v-slot:[`item.level`]="{ item }">
           {{ levels[item.level.index] }}
@@ -33,7 +32,12 @@
           <v-row justify="end" v-if="!item.toDelete">
             <v-tooltip top>
               <template v-slot:activator="{ on, attrs }">
-                <v-icon v-on="on" v-bind="attrs" @click="onPdfClick(item)">
+                <v-icon
+                  v-on="on"
+                  v-bind="attrs"
+                  color="blue-grey lighten-1"
+                  @click="onPdfClick(item)"
+                >
                   {{ pdfIcon }}
                 </v-icon>
               </template>
@@ -46,6 +50,7 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-2"
+                  color="orange"
                   @click="onEditClick(item)"
                 >
                   {{ pencilIcon }}
@@ -60,6 +65,7 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-2"
+                  color="red"
                   @click="onDeleteClick(item)"
                 >
                   {{ deleteIcon }}
