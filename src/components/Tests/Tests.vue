@@ -67,7 +67,7 @@
               deleteTests(true);
             "
           >
-            Confirmar Todos
+            {{ $t('AUTH.SUBJECT.confirm_all') }}
           </v-btn>
           <v-btn
             class="ml-3"
@@ -95,7 +95,7 @@
             dark
             @click="restoreAll(true)"
           >
-            Restaurar Todos
+            {{ $t('TEST.TESTS.restore_all') }}
           </v-btn>
         </v-row>
       </v-container>

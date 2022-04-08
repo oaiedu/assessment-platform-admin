@@ -29,10 +29,10 @@
               deleteQuestions();
             "
           >
-            Confirmar
+            {{ $t('AUTH.SUBJECT.confirm') }}
           </v-btn>
           <v-btn class="ml-3" color="grey darken-1" dark @click="restoreAll()">
-            Restaurar
+            {{ $t('TEST.TESTS.restore') }}
           </v-btn>
         </v-row>
       </v-container>
@@ -75,7 +75,7 @@
             <v-icon>{{ plusIcon }}</v-icon>
           </v-btn>
         </template>
-        <span>Criar Questão</span>
+        <span>{{ $t('FAB.CREATE.new_question') }}</span>
       </v-tooltip>
 
       <v-dialog
@@ -158,13 +158,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Esta questão está sendo usada em alguns questionários com geração
-          automática:
+          {{ $t('QUESTIONS.QUESTIONS.info_1') }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          Só será possível excluí-la quando os questionários forem excluídos ou
-          possuirem mais questões disponíveis para a geração.
+          {{ $t('QUESTIONS.QUESTIONS.info_2') }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -174,7 +172,7 @@
             v-bind="attrs"
             @click="deleteErrorAutoSnackBar = false"
           >
-            Fechar
+            {{ $t('QUESTIONS.ANSWERS.justifications') }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -189,12 +187,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Esta questão está sendo usada nos seguintes questionários:
+          {{ $t('QUESTIONS.QUESTIONS.test_1') }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          Só será possível excluí-la quando não se encontrar em nenhum
-          questionário.
+          {{ $t('QUESTIONS.QUESTIONS.test_2') }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -204,7 +201,7 @@
             v-bind="attrs"
             @click="deleteErrorSnackBar = false"
           >
-            Fechar
+            {{ $t('FAB.TEXT.close') }}
           </v-btn>
         </template>
       </v-snackbar>

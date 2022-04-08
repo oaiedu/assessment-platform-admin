@@ -1,9 +1,9 @@
 <template>
   <v-card height="100%" width="100%">
-    <v-card-title>Antes de continuar...</v-card-title>
+    <v-card-title>{{ $t('USERNAME_MODAL.TEXT.before_continue') }}</v-card-title>
     <v-card-text>
-      Esta conta ainda não possui um nome de usuário!<br />
-      Para usar o aplicativo, é necessário preencher o campo abaixo.
+      {{ $t('USERNAME_MODAL.WARNING.accont_without_name_1') }}<br />
+      {{ $t('USERNAME_MODAL.WARNING.accont_without_name_2') }}
     </v-card-text>
     <v-text-field
       v-model="userName"
@@ -15,7 +15,7 @@
     >
     </v-text-field>
     <v-alert dense text type="info" class="mx-6 mt-3 name-alert">
-      O nome de usuário pode ser mudado na página de Perfil.
+      {{ $t('USERNAME_MODAL.TEXT.username_change') }}
     </v-alert>
     <v-card-actions>
       <v-spacer />
@@ -29,7 +29,7 @@
         :disabled="disabled"
         @click="onContinueClick"
       >
-        Continuar
+        {{ $t('USERNAME_MODAL.TEXT.continue') }}
       </v-btn>
     </v-card-actions>
   </v-card>

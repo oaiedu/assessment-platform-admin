@@ -7,7 +7,7 @@
         </div>
         <div class="amount-info">
           <span class="amount">{{ dataSize.users }}</span>
-          <span class="type">usuários</span>
+          <span class="type">{{ $t('DASHBOARD.DATA_AMOUNT.users') }}</span>
         </div>
       </div>
       <div class="question-amount details">
@@ -18,7 +18,7 @@
         </div>
         <div class="amount-info">
           <span class="amount">{{ dataSize.questions.general }}</span>
-          <span class="type">questões</span>
+          <span class="type">{{ $t('TEST.QUIZ.questions') }}</span>
         </div>
       </div>
       <div class="subject-amount details">
@@ -27,7 +27,7 @@
         </div>
         <div class="amount-info">
           <span class="amount">{{ subjectsAmount }}</span>
-          <span class="type">disciplinas</span>
+          <span class="type">{{ $t('TEST.QUIZ.subjects') }}</span>
         </div>
       </div>
       <div class="test-amount details">
@@ -38,7 +38,7 @@
         </div>
         <div class="amount-info">
           <span class="amount">{{ dataSize.tests }}</span>
-          <span class="type">questionários</span>
+          <span class="type">{{ $t('TEST.QUIZ.quizzes') }}</span>
         </div>
       </div>
     </div>

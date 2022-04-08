@@ -41,7 +41,7 @@
 
       <v-row class="sign__forgot-pw pa-0 ma-0 my-4">
         <v-btn text color="#56b3ec" @click="forgotPassword()">
-          Esqueceu a senha?
+          {{ $t('SIGN_USER.SUBJECTS.forget_password') }}
         </v-btn>
       </v-row>
 
@@ -152,7 +152,7 @@
 
     <div class="sign__footer">
       <v-row class="to-sign__in pa-0 ma-0" v-if="showSignUp">
-        <span>Já possui uma conta?</span>
+        <span>{{ $t('SIGN_USER.SUBJECTS.already_have_accont') }}</span>
 
         <v-btn
           style="padding: 0;"
@@ -161,12 +161,12 @@
           @click="signIn"
           :ripple="false"
         >
-          <strong>Entrar</strong>
+          <strong>{{ $t('SIGN_USER.SUBJECTS.login') }}</strong>
         </v-btn>
       </v-row>
 
       <v-row class="to-sign__up pa-0 ma-0" v-else>
-        <span>Não possui uma conta?</span>
+        <span>{{ $t('SIGN_USER.SUBJECTS.not_have_accont') }}</span>
 
         <v-btn
           style="padding: 0;"
@@ -175,7 +175,7 @@
           @click="signUp"
           :ripple="false"
         >
-          <strong>Registrar-se</strong>
+          <strong>{{ $t('SIGN_USER.SUBJECTS.register') }}</strong>
         </v-btn>
       </v-row>
     </div>

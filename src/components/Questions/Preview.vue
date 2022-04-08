@@ -2,7 +2,7 @@
   <v-card fill>
     <v-card-title>Preview</v-card-title>
     <v-card-text>
-      DISCIPLINA: {{ subject }}
+      {{ $t('TEST.QUIZ.subject') }} {{ subject }}
       <br />
       ID: {{ name }}
       <br />

@@ -13,8 +13,7 @@
         v-if="hasApprovedRequests && userClaims && userClaims['appraiser']"
       >
         <v-alert text prominent type="warning" color="red" :icon="mdiAlert">
-          Solicitações aprovadas serão excluídas automaticamente quando sair
-          desta página!
+          {{ $t('REQUESTS.INBOX.request') }}
         </v-alert>
       </v-container>
 
@@ -44,10 +43,10 @@
               deleteRequests();
             "
           >
-            Confirmar
+            {{ $t('AUTH.SUBJECT.confirm') }}
           </v-btn>
           <v-btn class="ml-3" color="grey darken-1" dark @click="restoreAll()">
-            Restaurar
+            {{ $t('TEST.TESTS.restore') }}
           </v-btn>
         </v-row>
       </v-container>
@@ -133,12 +132,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Esta questão está sendo usada nos seguintes questionários:
+          {{ $t('REQUESTS.INBOX.info_1') }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          Só será possível rejeitá-la quando não se encontrar em nenhum
-          questionário.
+          {{ $t('REQUESTS.INBOX.info_2') }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -148,7 +146,7 @@
             v-bind="attrs"
             @click="rejectErrorSnackBar = false"
           >
-            Fechar
+            {{ $t('FAB.TEXT.close') }}
           </v-btn>
         </template>
       </v-snackbar>

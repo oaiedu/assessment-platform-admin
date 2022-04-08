@@ -5,5 +5,20 @@
       "pendant": "Pendant",
       "rejected": "Rejected"
     }
+  },
+  "USER": {
+    "ROLE": {
+      "admin": "Administrator",
+      "appraiser": "Appraiser",
+      "student": "Student"
+    }
+  },
+  "PROFILE": {
+    "SUBJECTS": {
+      "title": "Most correctly answered subjects"
+    },
+    "DATA_INFO": {
+      "ended_quizzes": "Ended quizzes"
+    }
   }
 }

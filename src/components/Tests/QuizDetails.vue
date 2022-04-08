@@ -5,15 +5,15 @@
     style="max-width: unset; min-height: 100%; background: #efefef"
   >
     <v-row class="pa-4 ma-0">
-      <a @click="$router.push('/')">Início</a>
+      <a @click="$router.push('/')">{{ $t('TEST.QUIZ.home') }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="$router.push('/quizzes')">Questionários</a>
+      <a @click="$router.push('/quizzes')">{{ $t('TEST.QUIZ.quizzes') }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a>Detalhes do questionário</a>
+      <a>{{ $t('TEST.QUIZ.quiz_info') }}</a>
     </v-row>
 
     <v-card flat width="100%">
@@ -38,7 +38,7 @@
         style="flex-wrap: nowrap"
       >
         <div class="quiz-detail__detail-column info-column">
-          <span class="quiz-detail__info-title">Detalhes</span>
+          <span class="quiz-detail__info-title">{{ $t('TEST.QUIZ.info') }}</span>
 
           <div class="quiz-detail__info-container">
             <div class="quiz-detail__info-column">
@@ -54,7 +54,7 @@
                   <span class="quiz-detail__amount">{{
                     test ? test.questionsAmount : 0
                   }}</span>
-                  <span class="quiz-detail__label">questões</span>
+                  <span class="quiz-detail__label">{{ $t('TEST.QUIZ.questions') }}</span>
                 </div>
               </div>
 
@@ -70,7 +70,7 @@
                   <span class="quiz-detail__amount">{{
                     test ? getSubjectsAmount(test) : 0
                   }}</span>
-                  <span class="quiz-detail__label">disciplinas</span>
+                  <span class="quiz-detail__label">{{ $t('TEST.QUIZ.subjects') }}</span>
                 </div>
               </div>
             </div>
@@ -90,7 +90,7 @@
                   <span class="quiz-detail__amount">{{
                     test ? getTime(test) : 0
                   }}</span>
-                  <span class="quiz-detail__label">tempo</span>
+                  <span class="quiz-detail__label">{{ $t('PROFILE.DATA_INFO.time') }}</span>
                 </div>
               </div>
 
@@ -108,7 +108,7 @@
                   <span class="quiz-detail__amount"
                     >{{ test ? test.approvalPercentage : 0 }}%</span
                   >
-                  <span class="quiz-detail__label">para aprovação</span>
+                  <span class="quiz-detail__label">{{ $t('TEST.QUIZ_DETAILS.for_approval') }}</span>
                 </div>
               </div>
             </div>
@@ -123,14 +123,14 @@
             elevation="0"
             @click="startDialog = true"
           >
-            Começar {{ windowWidth > 320 ? "questionário" : "" }}
+            {{ $t('TEST.GENERATE_CARD.start') }} {{ windowWidth > 320 ? "questionário" : "" }}
           </v-btn>
         </div>
 
         <v-divider class="mx-0" :vertical="windowWidth > 700"></v-divider>
 
         <div class="quiz-detail__detail-column instructions-column">
-          <span class="quiz-detail__info-title">Instruções</span>
+          <span class="quiz-detail__info-title">{{ $t('TEST.QUIZ_DETAILS.instructions') }}</span>
 
           <div
             v-if="test && test.instructions.trim().length"
@@ -139,7 +139,7 @@
           ></div>
 
           <span v-else-if="test" class="quiz-detail__instructions">
-            Este teste não possui instruções.
+            {{ $t('TEST.QUIZ_DETAILS.no_instructions') }}
           </span>
         </div>
       </v-row>
@@ -152,7 +152,7 @@
       width="100%"
     >
       <v-card-title>
-        <h3 class="quiz-detail__attempts-title">Tentativas anteriores</h3>
+        <h3 class="quiz-detail__attempts-title">{{ $t('TEST.QUIZ_DETAILS.previous_attempts') }}</h3>
       </v-card-title>
 
       <AttemptsTable
@@ -167,7 +167,7 @@
         <v-card-title class="pa-0 mt-0 mb-4">
           <v-row class="pa-0 ma-0" justify="center" style="position: relative">
             <h2 class="quiz-detail__results-title">
-              Seus resultados
+              {{ $t('TEST.QUIZ_DETAILS.outcome') }}
             </h2>
 
             <v-btn
@@ -201,7 +201,7 @@
           </div>
 
           <div class="quiz-detail__time-taken">
-            <span class="quiz-detail__time-taken-title">Tempo gasto</span>
+            <span class="quiz-detail__time-taken-title">{{ $t('TEST.QUIZ_DETAILS.time_spend') }}</span>
 
             <span class="quiz-detail__time">
               {{ results.timeTaken.hours }}h {{ results.timeTaken.minutes }}m
@@ -235,7 +235,7 @@
             :justify="windowWidth > 340 ? 'center' : 'start'"
           >
             <h2 class="quiz-detail__start-title">
-              Antes de começar
+              {{ $t('TEST.QUIZ_DETAILS.before_start') }}
             </h2>
 
             <v-btn
@@ -262,8 +262,7 @@
               class="quiz-detail__start-info"
               :class="{ 'text-center': windowWidth > 340 }"
             >
-              O questionário não possui limite de tempo. O tempo será contado de
-              forma crescente a partir do momento de início.
+              {{ $t('TEST.QUIZ_DETAILS.info_no_limit_time') }}
             </p>
 
             <p
@@ -271,12 +270,11 @@
               class="quiz-detail__start-info"
               :class="{ 'text-center': windowWidth > 340 }"
             >
-              O questionário possui um limite de tempo de
+              {{ $t('TEST.QUIZ_DETAILS.info_limit_time_1') }}
               <strong style="display: inline-flex">
                 {{ test.time.hours }}h {{ test.time.minutes }}m
                 {{ test.time.seconds }}s</strong
-              >. O tempo será contado de forma decrescente a partir do momento
-              de início e o teste deverá ser concluído antes de expirar.
+              >{{ $t('TEST.QUIZ_DETAILS.info_limit_time_2') }}
             </p>
           </v-row>
         </v-card-text>
@@ -292,7 +290,7 @@
           >
             <v-checkbox v-model="practice" @click.stop></v-checkbox>
 
-            <span>Começar como treino</span>
+            <span>{{ $t('TEST.QUIZ_DETAILS.start_was_training') }}</span>
           </div>
         </v-row>
 
@@ -305,7 +303,7 @@
               color="blue"
               @click="startQuiz()"
             >
-              Começar
+              {{ $t('TEST.GENERATE_CARD.start') }}
             </v-btn>
           </v-row>
         </v-card-actions>

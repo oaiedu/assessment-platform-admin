@@ -7,7 +7,7 @@
             type='warning'
             color="red"
             :icon='mdiAlert' >
-            Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
+           {{ $t('TEST.DELETE_ALERT.sucess') }}
         </v-alert>
 
         <v-alert

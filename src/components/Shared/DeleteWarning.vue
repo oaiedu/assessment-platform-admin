@@ -13,14 +13,14 @@
             color="blue"
             text
             @click="confirm" >
-            Excluir
+            {{ $t('TEST.TEST_TABLE.delete') }}
         </v-btn>
         <v-btn
             dark
             color="grey"
             text
             @click="cancel" >
-            Cancelar
+            {{ $t('AUTH.SUBJECT.cancel') }}
         </v-btn>
     </v-snackbar>
 </template>

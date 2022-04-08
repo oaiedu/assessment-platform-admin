@@ -11,7 +11,7 @@
       <v-btn icon dark @click="close()" class="mr-2">
         <v-icon>{{ mdiClose }}</v-icon>
       </v-btn>
-      <h2>Editar questão - {{ name }}</h2>
+      <h2>{{ $t('QUESTIONS.EDIT.edit_question') }}{{ name }}</h2>
       <v-spacer></v-spacer>
     </v-toolbar>
 
@@ -30,7 +30,7 @@
           <v-icon color="blue">{{ mdiArrowLeft }}</v-icon>
         </v-btn>
       </template>
-      <span>Voltar</span>
+      <span>{{ $t('QUESTIONS.EDIT.back') }}</span>
     </v-tooltip>
 
     <v-tooltip left v-if="e1 < 2">
@@ -49,7 +49,7 @@
           <v-icon color="white">{{ mdiArrowRight }}</v-icon>
         </v-btn>
       </template>
-      <span>Continuar</span>
+      <span>{{ $t('USERNAME_MODAL.TEXT.continue') }}</span>
     </v-tooltip>
 
     <v-tooltip left v-else>
@@ -70,7 +70,7 @@
           <v-icon color="white">{{ mdiContentSave }}</v-icon>
         </v-btn>
       </template>
-      <span>Salvar</span>
+      <span>{{ $t('TEST.TEST_FORM.save') }}</span>
     </v-tooltip>
 
     <v-container fluid>
@@ -81,7 +81,7 @@
               <v-stepper alt-labels v-model="e1">
                 <v-stepper-header>
                   <v-stepper-step editable :complete="e1 > 1" step="1">
-                    Detalhes
+                    {{ $t('TEST.QUIZ.info') }}
                   </v-stepper-step>
 
                   <v-divider class="mx-2" style="margin-top: 50px"></v-divider>

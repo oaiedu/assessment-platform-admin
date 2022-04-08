@@ -44,7 +44,7 @@
                   {{ mdiEmail }}
                 </v-icon>
               </template>
-              <span>Enviar e-mail</span>
+              <span>{{ $t('REQUESTS.TABLE.send_email') }}</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -59,7 +59,7 @@
                   {{ mdiFilePdfBox }}
                 </v-icon>
               </template>
-              <span>Visualizar PDF</span>
+              <span>{{ $t('REQUESTS.TABLE.view_pdf') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['admin']">
@@ -77,7 +77,7 @@
                   {{ mdiCheckBold }}
                 </v-icon>
               </template>
-              <span>Aprovar</span>
+              <span>{{ $t('REQUESTS.TABLE.aprove') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['appraiser']">
@@ -95,7 +95,7 @@
                   {{ mdiPencil }}
                 </v-icon>
               </template>
-              <span>Editar</span>
+              <span>{{ $t('REQUESTS.TABLE.edit') }}</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -152,7 +152,7 @@
               disabled
               text
             >
-              Excluída
+              {{ $t('TEST.TEST_TABLE.deleted') }}
             </v-btn>
           </v-row>
         </template>

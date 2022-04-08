@@ -64,7 +64,7 @@
               color="indigo lighten-2"
               @click="doExam(item)"
             >
-              Visualizar
+              {{ $t('TEST.TEST_TABLE.view') }}
             </v-btn>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -79,7 +79,7 @@
                   {{ mdiFileCompare }}
                 </v-icon>
               </template>
-              <span>Visualizar questionário</span>
+              <span>{{ $t('TEST.TEST_TABLE.view_quiz') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -109,7 +109,7 @@
                   {{ mdiDelete }}
                 </v-icon>
               </template>
-              <span>Excluir</span>
+              <span>{{ $t('TEST.TEST_TABLE.delete') }}</span>
             </v-tooltip>
           </v-row>
 
@@ -147,7 +147,7 @@
               disabled
               text
             >
-              Excluída
+              {{ $t('TEST.TEST_TABLE.deleted') }}
             </v-btn>
           </v-row>
         </template>

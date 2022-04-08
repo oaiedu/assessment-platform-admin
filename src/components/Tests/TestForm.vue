@@ -5,7 +5,8 @@
         <v-btn icon dark class="mr-2" @click="close()">
           <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
-        <h2>{{ !test ? "Criar novo" : "Editar" }} questionário</h2>
+        <h2>{{ !test ? "Criar novo" : "Editar" }} {{ $t('TEST.QUIZ.quiz') }}
+</h2>
         <v-spacer></v-spacer>
       </v-toolbar>
 
@@ -43,7 +44,7 @@
             <v-icon color="white">{{ mdiContentSave }}</v-icon>
           </v-btn>
         </template>
-        <h3>Salvar</h3>
+        <h3>{{ $t('TEST.TEST_FORM.save') }}</h3>
       </v-tooltip>
 
       <v-container fluid class="pa-15 pt-10">
@@ -133,7 +134,7 @@
                     </v-list-item-action>
                     <v-list-item-content>
                       <v-list-item-title>
-                        Selecionar todos
+                        {{ $t('TEST.GENERATE_CARD.select_all') }}
                       </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
@@ -178,7 +179,7 @@
                 "
                 @click="selectRandom()"
               >
-                Começar Seleção
+                {{ $t('TEST.TEST_FORM.star_selection') }}
               </v-btn>
             </v-row>
 
@@ -226,9 +227,7 @@
 
           <v-col v-if="testType === 'auto'" class="pt-10">
             <p class="orange--text text-center pt-10">
-              Questionários automáticos selecionam suas questões apenas quando
-              são iniciadas, de acordo com as disciplinas escolhidas, nível e
-              número de questões.
+              {{ $t('TEST.TEST_FORM.info_test') }}
             </p>
           </v-col>
 
@@ -364,9 +363,9 @@
       :timeout="15000"
     >
       <span style="color: white; font-size: 1rem">
-        Um questionário com este Título já foi criado!
+        {{ $t('TEST.TEST_FORM.title_already_in_use') }}
         <br />
-        Por favor, mude o Título.
+        {{ $t('TEST.TEST_FORM.change_title') }}
       </span>
       <template v-slot:action="{ attrs }">
         <v-btn
@@ -376,7 +375,7 @@
           v-bind="attrs"
           @click="createErrorSnackBar = false"
         >
-          Fechar
+          {{ $t('FAB.TEXT.close') }}
         </v-btn>
       </template>
     </v-snackbar>

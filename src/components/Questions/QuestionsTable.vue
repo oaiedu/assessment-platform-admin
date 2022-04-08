@@ -41,7 +41,7 @@
                   {{ pdfIcon }}
                 </v-icon>
               </template>
-              <span>Visualizar PDF</span>
+              <span>{{ $t('REQUESTS.TABLE.view_pdf') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['admin']">
@@ -56,7 +56,7 @@
                   {{ pencilIcon }}
                 </v-icon>
               </template>
-              <span>Editar</span>
+              <span>{{ $t('REQUESTS.TABLE.edit') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['admin']">
@@ -71,7 +71,7 @@
                   {{ deleteIcon }}
                 </v-icon>
               </template>
-              <span>Excluir</span>
+              <span>{{ $t('TEST.TESTS_TABLE.delete') }}</span>
             </v-tooltip>
           </v-row>
 
@@ -98,7 +98,7 @@
               disabled
               text
             >
-              Excluída
+              {{ $t('TEST.TESTS_TABLE.deleted') }}
             </v-btn>
           </v-row>
         </template>

@@ -2,7 +2,7 @@
   <v-card outlined width="100%" height="100%" class="last-data">
     <div class="last-data-container">
       <h1 class="last-data-title">
-        Últimos registros
+        {{ $t('DASHBOARD.LAST_DATA.latest_records') }}
 
         <v-hover v-slot="{ hover }">
           <v-btn
@@ -12,7 +12,7 @@
             :ripple="false"
             :color="hover ? '#2196f3' : '#888888'"
           >
-            Ver mais
+            {{ $t('DASHBOARD.LAST_DATA.see_more') }}
           </v-btn>
         </v-hover>
       </h1>
@@ -48,12 +48,12 @@
             <v-icon size="26" color="#FF2233">{{ mdiFileAlertOutline }}</v-icon>
           </div>
           <div class="data-info">
-            <span class="info-title">Registro de Erro</span>
+            <span class="info-title">{{ $t('DASHBOARD.LAST_DATA.error_log') }}</span>
             <span class="log-type info-id" v-if="lastLog">
               {{ lastLog.type }}
               <span class="creation-date">{{ formatDate(lastLog.date) }}</span>
             </span>
-            <span class="log-type info-id" v-else>Ainda não há erros</span>
+            <span class="log-type info-id" v-else>{{ $t('DASHBOARD.LAST_DATA.no_error') }}</span>
           </div>
           <div class="creation-date" v-if="lastLog">
             {{ formatDate(lastLog.date) }}
@@ -68,7 +68,7 @@
             <v-icon size="30" color="#2F80ED">{{ mdiAccount }}</v-icon>
           </div>
           <div class="data-info">
-            <span class="info-title">Usuário Criado</span>
+            <span class="info-title">{{ $t('DASHBOARD.LAST_DATA.user_created') }}</span>
             <span class="user-name info-id" v-if="lastUser">
               {{ lastUser.name }}
               <span class="creation-date">{{
@@ -76,7 +76,7 @@
               }}</span>
             </span>
             <span class="user-name info-id" v-else
-              >Nenhum usuário registrado</span
+              >{{ $t('DASHBOARD.LAST_DATA.no_user') }}</span
             >
           </div>
           <div class="creation-date" v-if="lastUser">

@@ -2,7 +2,7 @@
   <v-card>
     <v-toolbar class="pt-2 mb-4" dense flat>
       <v-card-title class="ma-0 pa-0 blue--text"
-        >Gerar questionário</v-card-title
+        >{{ $t('TEST.GENERATE_CARD.generate_new') }}</v-card-title
       >
 
       <v-spacer></v-spacer>
@@ -63,7 +63,7 @@
 
                 <v-list-item-content>
                   <v-list-item-title>
-                    Selecionar todos
+                    {{ $t('TEST.GENERATE_CARD.select_all') }}
                   </v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
@@ -137,7 +137,7 @@
         "
         @click="selectQuestions()"
       >
-        Começar
+        {{ $t('TEST.GENERATE_CARD.start') }}
       </v-btn>
     </v-card-actions>
   </v-card>

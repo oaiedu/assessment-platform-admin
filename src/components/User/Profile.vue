@@ -100,7 +100,7 @@
           style="border-radius: 26px"
         >
           <v-card-title class="profile__subjects-title pa-0 ma-0">
-            Disciplinas com mais acertos
+            {{ $t('PROFILE.SUBJECTS.title') }}
           </v-card-title>
 
           <v-row
@@ -153,7 +153,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Questionários finalizados
+                  {{ $t('PROFILE.DATA_INFO.ended_quizzes') }}
                 </span>
 
                 <span
@@ -173,7 +173,7 @@
               }}</v-icon>
 
               <div class="profile__amount-info">
-                <span class="profile__amount-item-title">Aprovações</span>
+                <span class="profile__amount-item-title">{{ $t('PROFILE.DATA_INFO.aproved') }}</span>
 
                 <span
                   class="profile__amount-item-quantity"
@@ -193,7 +193,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Respostas corretas (%)
+                  {{ $t('PROFILE.DATA_INFO.correct_answers') }}
                 </span>
 
                 <span
@@ -214,7 +214,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Tempo médio por questionário
+                  {{ $t('PROFILE.DATA_INFO.time_per_quiz') }}
                 </span>
 
                 <span
@@ -247,7 +247,7 @@
         style="border-radius: 26px; overflow: hidden"
       >
         <v-card-title class="profile__attempts-title pa-0 ma-0 mx-8 mb-1">
-          Questionários realizados
+          {{ $t('PROFILE.DATA_INFO.quizzes_done') }}
         </v-card-title>
 
         <AttemptsTable

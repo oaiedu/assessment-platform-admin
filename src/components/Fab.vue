@@ -15,8 +15,8 @@
             <v-icon v-else>{{ plusIcon }}</v-icon>
           </v-btn>
         </template>
-        <span v-if="fab">Fechar</span>
-        <span v-else>Criar</span>
+        <span v-if="fab">{{ $t('FAB.TEXT.close') }}</span>
+        <span v-else>{{ $t('FAB.TEXT.create') }}</span>
       </v-tooltip>
     </template>
 
@@ -29,7 +29,7 @@
           <v-icon>{{ fileQuestionIcon }}</v-icon>
         </v-btn>
       </template>
-      <span>Criar nova questão</span>
+      <span>{{ $t('FAB.CREATE.new_question') }}</span>
     </v-tooltip>
 
     <v-tooltip left v-if="userClaims && userClaims['admin']">
@@ -38,7 +38,7 @@
           <v-icon>{{ fileMultipleIcon }}</v-icon>
         </v-btn>
       </template>
-      <span>Criar novo questionário</span>
+      <span>{{ $t('FAB.CREATE.new_quiz') }}</span>
     </v-tooltip>
   </v-speed-dial>
 </template>

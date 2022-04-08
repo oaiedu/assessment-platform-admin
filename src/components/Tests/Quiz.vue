@@ -5,15 +5,15 @@
     style="max-width: unset; min-height: 100%; background: #efefef"
   >
     <v-row class="pa-4 ma-0">
-      <a @click="exitQuiz('/')">Início</a>
+      <a @click="exitQuiz('/')">{{ $t('TEST.QUIZ.home') }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="exitQuiz('/quizzes')">Questionários</a>
+      <a @click="exitQuiz('/quizzes')">{{ $t('TEST.QUIZ.quizzes') }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="exitQuiz('/quizzes/' + test.id)">Detalhes do questionário</a>
+      <a @click="exitQuiz('/quizzes/' + test.id)">{{ $t('TEST.QUIZ.quiz_info') }}</a>
 
       <span class="mx-3 slash">/</span>
 
@@ -37,7 +37,7 @@
     >
       <v-toolbar flat class="">
         <span class="quiz__current-question">
-          Questão {{ current }} de {{ examQuestions.length }}
+          {{ $t('TEST.QUIZ.question') }} {{ current }} {{ $t('TEST.QUIZ.of') }} {{ examQuestions.length }}
         </span>
 
         <v-spacer></v-spacer>
@@ -82,7 +82,7 @@
           />
 
           <span class="quiz__subject px-4">
-            <strong>Disciplina:</strong>
+            <strong>{{ $t('TEST.QUIZ.subject') }}:</strong>
             {{ examQuestions[current - 1].subject }}
           </span>
 
@@ -162,16 +162,16 @@
             <v-icon class="mr-2">{{
               showAnswer ? mdiEyeOffOutline : mdiEyeOutline
             }}</v-icon>
-            {{ showAnswer ? "Ocultar" : "Mostrar" }} resposta
+            {{ showAnswer ? "Ocultar" : "Mostrar" }} {{ $t('TEST.QUIZ.answer') }}
           </v-btn>
 
           <v-divider></v-divider>
 
           <div v-if="review || (practice && showAnswer)">
-            <h2 class="ma-4 mt-5 quiz__answer-description-title">Explicação</h2>
+            <h2 class="ma-4 mt-5 quiz__answer-description-title">{{ $t('TEST.QUIZ.exolanation') }}</h2>
 
             <span class="mx-4 quiz__answer-description">
-              Resposta correta:
+              {{ $t('TEST.QUIZ.correct_answer') }}
               {{ correctAnswerOption }}
             </span>
 
@@ -256,7 +256,7 @@
               @click="current - 1 < 1 ? current : current--"
             >
               <v-icon>{{ mdiChevronLeft }}</v-icon>
-              Anterior
+              {{ $t('TEST.QUIZ.before') }}
             </v-btn>
 
             <v-checkbox
@@ -279,7 +279,7 @@
               class="pr-2"
               @click="current + 1 > examQuestions.length ? current : current++"
             >
-              Próxima
+              {{ $t('TEST.QUIZ.next') }}
               <v-icon>{{ mdiChevronRight }}</v-icon>
             </v-btn>
 
@@ -293,7 +293,7 @@
               :loading="loadingFinish"
               @click="finishQuiz()"
             >
-              Enviar
+              {{ $t('TEST.QUIZ.send') }}
             </v-btn>
           </v-row>
         </div>
@@ -308,33 +308,32 @@
             v-if="timesUp"
             class="quiz__missing-questions orange--text font-weight-medium"
           >
-            TEMPO ESGOTADO
+            {{ $t('TEST.QUIZ.time_up') }}
           </span>
 
           <span
             v-else-if="review && answeredAmount < examQuestions.length"
             class="quiz__missing-questions"
           >
-            {{ answeredAmount }} questões respondidas
+            {{ answeredAmount }} {{ $t('TEST.QUIZ.answered_questions') }}
           </span>
 
           <span
             v-else-if="answeredAmount < examQuestions.length"
             class="quiz__missing-questions"
           >
-            Faltam {{ examQuestions.length - answeredAmount }} questões para
-            responder
+            {{ $t('TEST.QUIZ.left') }} {{ examQuestions.length - answeredAmount }} {{ $t('TEST.QUIZ.question_to_answer') }}
           </span>
 
           <span
             v-else-if="markedForReview.length > 0"
             class="quiz__missing-questions"
           >
-            Há {{ markedForReview.length }} questões para revisar
+            {{ $t('TEST.QUIZ.have') }} {{ markedForReview.length }} {{ $t('TEST.QUIZ.question_to_review') }}
           </span>
 
           <span v-else class="quiz__missing-questions">
-            Todas as questões foram respondidas
+            {{ $t('TEST.QUIZ.question_to_answer') }}
           </span>
 
           <div
@@ -381,23 +380,22 @@
 
     <v-dialog v-model="dialogEndQuiz" width="300">
       <v-card class="pa-4">
-        <v-card-title class="pa-0 mb-2">Espera...</v-card-title>
+        <v-card-title class="pa-0 mb-2">{{ $t('TEST.QUIZ.wait') }}</v-card-title>
 
         <span v-if="!review">
-          Ao sair do questionário, todo o seu progresso será perdido. Tem
-          certeza de que deseja sair?
+          {{ $t('TEST.QUIZ.exit_warning') }}
         </span>
 
-        <span v-else>Tem certeza de que deseja sair?</span>
+        <span v-else>{{ $t('TEST.QUIZ.confirm_exit') }}</span>
 
         <v-card-actions class="pa-0 mt-4">
           <v-btn text color="grey darken-2" @click="dialogEndQuiz = false">
-            Cancelar
+            {{ $t('TEST.QUIZ.cancel') }}
           </v-btn>
 
           <v-spacer></v-spacer>
 
-          <v-btn text color="red" @click="$router.push(exitTo)">Sair</v-btn>
+          <v-btn text color="red" @click="$router.push(exitTo)">{{ $t('TEST.QUIZ.exit') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

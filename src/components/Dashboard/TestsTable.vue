@@ -15,7 +15,7 @@
     >
       <template v-slot:top>
         <v-toolbar dense flat color="white" class="mt-1">
-          <h1 class="table-title">Questionários recentes</h1>
+          <h1 class="table-title">{{ $t('DASHBOARD.TESTS_TABLE.recent_quizzes') }}</h1>
         </v-toolbar>
 
         <div class="title-divider" />

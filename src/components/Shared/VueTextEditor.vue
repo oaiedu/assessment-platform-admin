@@ -33,7 +33,7 @@
                 >
               </v-btn>
             </template>
-            <span>Negrito</span>
+            <span>{{ $t('SHARED.TEXT_EDITOR.bold') }}</span>
           </v-tooltip>
 
           <v-tooltip top v-if="isOptionActive('italic')">
@@ -51,7 +51,7 @@
                 >
               </v-btn>
             </template>
-            <span>Itálico</span>
+            <span>{{ $t('SHARED.TEXT_EDITOR.italic') }}</span>
           </v-tooltip>
 
           <v-tooltip top v-if="isOptionActive('underline')">
@@ -71,7 +71,7 @@
                 >
               </v-btn>
             </template>
-            <span>Sublinhado</span>
+            <span>{{ $t('SHARED.TEXT_EDITOR.underlined') }}</span>
           </v-tooltip>
         </v-btn-toggle>
 
@@ -110,7 +110,7 @@
                   </div>
                 </v-btn>
               </template>
-              <span>Cor do texto</span>
+              <span>{{ $t('SHARED.TEXT_EDITOR.text_color') }}</span>
             </v-tooltip>
           </template>
 
@@ -134,7 +134,7 @@
                 colorMenu = false;
               "
             >
-              SALVAR
+              {{ $t('TEST.TEST_FORM.save') }}
             </v-btn>
           </v-row>
         </v-menu>
@@ -231,7 +231,7 @@
                 >
               </v-btn>
             </template>
-            <span>Justificar</span>
+            <span>{{ $t('SHARED.TEXT_EDITOR.justify') }}</span>
           </v-tooltip>
         </v-btn-toggle>
 
@@ -260,7 +260,7 @@
               }}</v-icon>
             </v-btn>
           </template>
-          <span>Lista numerada</span>
+          <span>{{ $t('SHARED.TEXT_EDITOR.numbered_list') }}</span>
         </v-tooltip>
 
         <v-tooltip
@@ -282,7 +282,7 @@
               }}</v-icon>
             </v-btn>
           </template>
-          <span>Lista com marcadores</span>
+          <span>{{ $t('SHARED.TEXT_EDITOR.bulleted_list') }}</span>
         </v-tooltip>
 
         <v-divider
@@ -305,7 +305,7 @@
               <v-icon :color="iconColor">{{ icons.mdiPaperclip }}</v-icon>
             </v-btn>
           </template>
-          <span>Carregar arquivo</span>
+          <span>{{ $t('SHARED.TEXT_EDITOR.load_archive') }}</span>
         </v-tooltip>
 
         <input
@@ -334,7 +334,7 @@
               <v-icon :color="iconColor">{{ icons.mdiImage }}</v-icon>
             </v-btn>
           </template>
-          <span>Carregar imagem</span>
+          <span>{{ $t('SHARED.TEXT_EDITOR.load_image') }}</span>
         </v-tooltip>
 
         <input
@@ -370,7 +370,7 @@
                   <v-icon :color="iconColor">{{ icons.mdiLinkVariant }}</v-icon>
                 </v-btn>
               </template>
-              <span>Inserir link</span>
+              <span>{{ $t('SHARED.TEXT_EDITOR.insert_link') }}</span>
             </v-tooltip>
           </template>
 
@@ -408,7 +408,7 @@
               <v-icon :color="iconColor">{{ icons.mdiLinkVariantOff }}</v-icon>
             </v-btn>
           </template>
-          <span>Remover link</span>
+          <span>{{ $t('SHARED.TEXT_EDITOR.remove_link') }}</span>
         </v-tooltip>
 
         <v-divider
@@ -434,7 +434,7 @@
               <v-icon :color="iconColor">{{ icons.mdiFormatClear }}</v-icon>
             </v-btn>
           </template>
-          <span>Remover formatação</span>
+          <span>{{ $t('SHARED.TEXT_EDITOR.remove_formacion') }}</span>
         </v-tooltip>
       </div>
 

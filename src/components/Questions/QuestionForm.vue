@@ -11,7 +11,7 @@
       <v-btn icon dark @click="close()" class="mr-2">
         <v-icon>{{ mdiClose }}</v-icon>
       </v-btn>
-      <h2>Criar nova questão</h2>
+      <h2>{{ $t('FAB.CREATE.new_question') }}</h2>
       <v-spacer></v-spacer>
     </v-toolbar>
 
@@ -30,7 +30,7 @@
           <v-icon color="blue">{{ mdiArrowLeft }}</v-icon>
         </v-btn>
       </template>
-      <span>Voltar</span>
+      <span>{{ $t('QUESTIONS.EDIT.back') }}</span>
     </v-tooltip>
 
     <v-tooltip left v-if="e1 < 2">
@@ -49,7 +49,7 @@
           <v-icon color="white">{{ mdiArrowRight }}</v-icon>
         </v-btn>
       </template>
-      <span>Continuar</span>
+      <span>{{ $t('USERNAME_MODAL.TEXT.continue') }}</span>
     </v-tooltip>
 
     <v-tooltip left v-else>
@@ -70,7 +70,7 @@
           <v-icon color="white">{{ mdiContentSave }}</v-icon>
         </v-btn>
       </template>
-      <span>Salvar</span>
+      <span>{{ $t('TEST.TEST_FORM.save') }}</span>
     </v-tooltip>
 
     <v-container fluid>
@@ -81,13 +81,13 @@
               <v-stepper alt-labels v-model="e1">
                 <v-stepper-header>
                   <v-stepper-step editable :complete="e1 > 1" step="1">
-                    Detalhes
+                    {{ $t('TEST.QUIZ.info') }}
                   </v-stepper-step>
 
                   <v-divider class="mx-2" style="margin-top: 50px"></v-divider>
 
                   <v-stepper-step editable step="2">
-                    Respostas
+                    {{ $t('TEST.QUIZ.answers') }}
                   </v-stepper-step>
                 </v-stepper-header>
 
@@ -292,9 +292,9 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Uma questão com este ID já foi criada!
+          {{ $t('QUESTIONS.FORM.id_in_use') }}
           <br />
-          Por favor, mude o ID.
+          {{ $t('QUESTIONS.FORM.change_id') }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -304,7 +304,7 @@
             v-bind="attrs"
             @click="createErrorSnackBar = false"
           >
-            Fechar
+            {{ $t('FAB.TEXT.close') }}
           </v-btn>
         </template>
       </v-snackbar>
