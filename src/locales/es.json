@@ -4,6 +4,241 @@
       "approved": "Aprobado",
       "pendant": "Pendiente",
       "rejected": "Rechazado"
+    },
+    "INBOX":{
+      "request": "¡Las solicitudes aprobadas se eliminarán automáticamente cuando abandones esta página!",
+      "info_1": "Esta pregunta se está utilizando en los siguientes cuestionarios:",
+      "info_2": "olo podras rechazarlo cuando no este en ningun cuestionario."
+    },
+    "TABLE":{
+      "send_email": "Enviar correo electrónico",
+      "view_pdf": "Ver PDF",
+      "aprove": "Aprobar",
+      "edit": "Editar"
+    }
+  },
+  "USER": {
+    "ROLE": {
+      "admin": "Administrador",
+      "appraiser": "Tasador",
+      "student": "Estudiante"
+    }
+  },
+  "PROFILE": {
+    "SUBJECTS": {
+      "title": "Disciplinas con más visitas"
+    },
+    "DATA_INFO": {
+      "ended_quizzes": "Cuestionarios terminados",
+      "aproved": "Aprobaciones",
+      "correct_answers": "Respuestas correctas (%)",
+      "time": "tiempo",
+      "time_per_quiz": "Tiempo promedio por prueba",
+      "quizzes_done":"Cuestionarios completados"
+    }
+  },
+  "SIGN_USER": {
+    "TEXT":{
+      "insert_email":"Ingrese su correo electrónico en el campo de abajo."
+    },
+    "SUBJECTS":{
+      "forget_password": "¿Olvidaste tu contraseña?",
+      "already_have_accont": "¿Ya tienes una cuenta?",
+      "login": "Iniciar sesión",
+      "not_have_accont": "¿No tienes una cuenta?",
+      "register": "Registrarse"
+    }
+  },
+  "USERNAME_MODAL":{
+    "TEXT":{
+      "before_continue": "Antes de continuar...",
+      "continue":"Continuar",
+      "username_change": "El nombre de usuario se puede cambiar en la página de perfil."
+    },
+    "WARNING":{
+      "accont_without_name_1": "¡Esta cuenta aún no tiene un nombre de usuario!",
+      "accont_without_name_2": "Para usar la aplicación, debe completar el campo a continuación."
+    }
+  },
+  "FAB":{
+    "TEXT":{
+      "close": "cerca",
+      "create": "Crear"
+    },
+    "CREATE":{
+      "new_question": "Crear nueva pregunta",
+      "new_quiz": "Crear nuevo cuestionario"
+    }
+  },
+  "AUTH":{
+    "TEXT":{
+      "intro_1": "Si estás buscando un lugar para aprender Cloud... ¡lo has encontrado! Nuestros cuestionarios son completamente gratuitos y te llevarán a tus límites, fortaleciendo tu conocimiento.",
+      "intro_2": "¡Empieza ahora mismo, no hay tiempo que perder!"
+    },
+    "SUBJECT":{
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "confirm_all": "Confirmar todo"
+    }
+  },
+  "TEST": {
+    "DELETE_ALERT":{
+      "sucess": "¡Eliminación confirmada! Cuando salgas de esta página, la tabla se actualizará.",
+      "marked": "Marcado por ti:"
+    },
+    "GENERATE_CARD":{
+      "generate_new": "Generar Cuestionario",
+      "select_all": "Seleccionar todo",
+      "start": "Comenzar"
+    },
+    "QUIZ":{
+      "home": "Hogar",
+      "quiz": "cuestionario",
+      "quizzes": "Preguntas",
+      "info": "Detalles",
+      "quiz_info": "Detalles del cuestionario",
+      "question": "Pregunta",
+      "questions": "preguntas",
+      "of": "de",
+      "subject": "Disciplina:",
+      "subjects": "Dicípulos",
+      "answer": "respuesta",
+      "answers": "Respuestas",
+      "explanation": "Explicación",
+      "correct_answer": "Respuesta correcta:",
+      "before": "Anterior",
+      "next": "siguiente",
+      "send": "Enviar",
+      "time_up": "TIEMPO FUERA",
+      "answered_questions": "preguntas respondidas",
+      "left": "Falta",
+      "question_to_answer": "preguntas para responder",
+      "have": "Hay",
+      "question_to_review": "preguntas para revisar",
+      "all_answered_questions": "Todas las preguntas respondidas",
+      "wait": "Espera...",
+      "exit_warning": "Cuando salgas de la prueba, todo tu progreso se perderá. ¿Estás seguro de que quieres salir?",
+      "confirm_exit": "¿Estás seguro de que quieres salir?",
+      "cancel": "Cancelar",
+      "exit": "Salir"
+    },
+    "QUIZ_DETAILS":{
+      "for_approval": "para aprobación",
+      "instructions": "Instrucciones",
+      "no_instructions": "Esta prueba no tiene instrucciones.",
+      "previous_attempts": "Intentos anteriores",
+      "outcome": "Tus resultados",
+      "time_spend": "Tiempo empleado",
+      "before_start": "Antes de empezar",
+      "info_no_limit_time": "La prueba no tiene límite de tiempo. El tiempo contará desde la hora de inicio.",
+      "info_limit_time_1": "La prueba tiene un límite de tiempo de",
+      "info_limit_time_2": ". El tiempo se contará hacia atrás desde la hora de inicio y la prueba debe completarse antes de que caduque.",
+      "start_was_training": "Comenzar como entrenamiento"
+    },
+    "TEST_FORM":{
+      "save": "Guardar",
+      "star_selection": "Iniciar Selección",
+      "info_test": "Los cuestionarios automáticos seleccionan sus preguntas solo cuando se inician, de acuerdo con los temas elegidos, el nivel y la cantidad de preguntas.",
+      "title_already_in_use": "¡Ya se ha creado un cuestionario con este título!",
+      "change_title": "Por favor, cambie el título."
+    },
+    "TESTS":{
+      "restore": "Restaurar",
+      "restore_all": "Restaurar todo"
+    },
+    "TESTS_TABLE":{
+      "view": "Ver",
+      "view_quiz": "Ver cuestionario",
+      "delete": "Eliminar",
+      "deleted": "Eliminado"
+    }
+  },
+  "SHARED":{
+    "TEXT_EDITOR": {
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "underlined": "Subrayado",
+      "text_color": "Color del texto",
+      "align_left": "Alinear a la izquierda",
+      "align_center": "Alinear al centro",
+      "align_right": "Alinear a la derecha",
+      "justify": "Justificar",
+      "numbered_list": "Lista numerada",
+      "bulleted_list": "Lista con viñetas",
+      "load_archive": "Cargar archivo",
+      "load_image": "Cargar imagen",
+      "insert_link": "Insertar enlace",
+      "remove_link": "Eliminar enlace",
+      "remove_formacion": "Quitar formato"
+    }
+  },
+  "QUESTIONS":{
+    "ANSWERS": {
+      "justifications": "Justificaciones"
+    },
+    "EDIT": {
+      "edit_question": "Editar pregunta - ",
+      "back": "Atras"
+    },
+    "PRINT": {
+      "create_pdf": "Generar PDF"
+    },
+    "FORM": {
+      "id_in_use": "¡Ya se ha creado una pregunta con este ID!",
+      "change_id": "Por favor cambie la ID."
+    },
+    "QUESTIONS": {
+      "info_1": "Esta pregunta esta siendo utilizada en algunos cuestionarios con generacion automatica:",
+      "info_2": "Solo sera posible borrarlo cuando se eliminen los cuestionarios o haya mas preguntas disponibles para generar.",
+      "test_1": "Esta pregunta se está utilizando en los siguientes cuestionarios:",
+      "test_2": "Solo puedes borrarlo cuando no está en ningún cuestionario."
+    }
+  },
+  "DASHBOARD":{
+    "LAST_DATA":{
+      "latest_records": "Últimos registros",
+      "see_more": "Ver más",
+      "no_backup": "No hay copias de seguridad todavía",
+      "error_log": "Registro de errores",
+      "no_error": "Aún no hay errores",
+      "user_created": "Creado por el usuario",
+      "no_user": "Ningún usuario registrado"
+    },
+    "LAST_REQUESTS":{
+      "requests": "Tus solicitudes",
+      "see_all": "Ver todo",
+      "no_resquests": "Actualmente no hay solicitudes"
+    },
+    "DATA_AMOUNT":{
+      "users": "usuarios"
+    },
+    "QUESTION_BY_SUBJECT":{
+      "questions_subject": "Preguntas por tema",
+      "no_data": "No hay datos disponibles"
+    },
+    "TESTS_BY_WEEK":{
+      "quizzes_weak": "Cuestionarios por semana",
+      "total": "Total:",
+      "weak": "Semana"
+    },
+    "TESTS_TABLE":{
+      "recent_quizzes": "Cuestionarios recientes"
+    }
+  },
+  "ADMIN":{
+    "BACKUPS_TABLE":{
+      "backup": "Copia de seguridad",
+      "current_mouth": "Mes actual",
+      "warning": "¿Está seguro de que desea eliminar esta copia de seguridad?"
+    },
+    "SUBJECTS":{
+      "add_subject": "Añadir asunto",
+      "warning": "¿Está seguro de que desea eliminar este curso?",
+      "text_1": "¡No se pueden eliminar temas que se están usando en las preguntas!",
+      "text_2": "Asegúrate de que el número de preguntas sea igual a 0."
+    },
+    "USERS_TABLE":{
+      "edit_fuction": "Función de edición"
     }
   }
 }

@@ -4,6 +4,17 @@
       "approved": "Approved",
       "pendant": "Pendant",
       "rejected": "Rejected"
+    },
+    "INBOX":{
+      "request": "Solicitações aprovadas serão excluídas automaticamente quando sair desta página!",
+      "info_1": "Esta questão está sendo usada nos seguintes questionários:",
+      "info_2": "Só será possível rejeitá-la quando não se encontrar em nenhum questionário."
+    },
+    "TABLE":{
+      "send_email": "Enviar e-mail",
+      "view_pdf": "Visualizar PDF",
+      "aprove": "Aprovar",
+      "edit": "Editar"
     }
   },
   "USER": {
@@ -15,10 +26,219 @@
   },
   "PROFILE": {
     "SUBJECTS": {
-      "title": "Most correctly answered subjects"
+      "title": "Disciplinas com mais acertos"
     },
     "DATA_INFO": {
-      "ended_quizzes": "Ended quizzes"
+      "ended_quizzes": "Questionários finalizados",
+      "aproved": "Aprovações",
+      "correct_answers": "Respostas corretas (%)",
+      "time": "tempo",
+      "time_per_quiz": "Tempo médio por questionário",
+      "quizzes_done":"Questionários realizados"
+    }
+  },
+  "SIGN_USER": {
+    "TEXT":{
+      "insert_email":"Insira seu e-mail no campo abaixo."
+    },
+    "SUBJECTS":{
+      "forget_password": "Esqueceu a senha?",
+      "already_have_accont": "Já possui uma conta?",
+      "login": "Entrar",
+      "not_have_accont": "Não possui uma conta?",
+      "register": "Registrar-se"
+    }
+  },
+  "USERNAME_MODAL":{
+    "TEXT":{
+      "before_continue": "Antes de continuar...",
+      "continue":"Continuar",
+      "username_change": "O nome de usuário pode ser mudado na página de Perfil."
+    },
+    "WARNING":{
+      "accont_without_name_1": "Esta conta ainda não possui um nome de usuário!",
+      "accont_without_name_2": "Para usar o aplicativo, é necessário preencher o campo abaixo."
+    }
+  },
+  "FAB":{
+    "TEXT":{
+      "close": "Fechar",
+      "create": "Criar"
+    },
+    "CREATE":{
+      "new_question": "Criar nova questão",
+      "new_quiz": "Criar novo questionario"
+    }
+  },
+  "AUTH":{
+    "TEXT":{
+      "intro_1": "Se está procurando por um lugar para aprender Cloud... você encontrou! Nossos questionários são totalmente gratuitos e te levarão ao seu limite, fortificando seus conhecimentos.",
+      "intro_2": "Comece agora mesmo, não há tempo a perder!"
+    },
+    "SUBJECT":{
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "confirm_all": "Confirmar Todos"
+    }
+  },
+  "TEST": {
+    "DELETE_ALERT":{
+      "sucess": "Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.",
+      "marked": "Marcadas por você:"
+    },
+    "GENERATE_CARD":{
+      "generate_new": "Gerar questionário",
+      "select_all": "Selecionar todos",
+      "start": "Começar"
+    },
+    "QUIZ":{
+      "home": "Início",
+      "quiz": "questionário",
+      "quizzes": "Questionários",
+      "info": "Detalhes",
+      "quiz_info": "Detalhes do questionário",
+      "question": "Questão",
+      "questions": "questões",
+      "of": "de",
+      "subject": "Disciplina:",
+      "subjects": "Diciplonas",
+      "answer": "resposta",
+      "answers": "Respostas",
+      "explanation": "Explicação",
+      "correct_answer": "Resposta correta:",
+      "before": "Anterior",
+      "next": "Próxima",
+      "send": "Enviar",
+      "time_up": "TEMPO ESGOTADO",
+      "answered_questions": "questões respondidas",
+      "left": "Faltam",
+      "question_to_answer": "questões para responder",
+      "have": "Há",
+      "question_to_review": "questões para revisar",
+      "all_answered_questions": "Todas as questões foram respondidas",
+      "wait": "Espera...",
+      "exit_warning": "Ao sair do questionário, todo o seu progresso será perdido. Tem certeza de que deseja sair?",
+      "confirm_exit": "Tem certeza de que deseja sair?",
+      "cancel": "Cancelar",
+      "exit": "Sair"
+    },
+    "QUIZ_DETAILS":{
+      "for_approval": "para aprovação",
+      "instructions": "Instruções",
+      "no_instructions": "Este teste não possui instruções.",
+      "previous_attempts": "Tentativas anteriores",
+      "outcome": "Seus resultados",
+      "time_spend": "Tempo gasto",
+      "before_start": "Antes de começar",
+      "info_no_limit_time": "O questionário não possui limite de tempo. O tempo será contado de forma crescente a partir do momento de início.",
+      "info_limit_time_1": "O questionário possui um limite de tempo de",
+      "info_limit_time_2": ". O tempo será contado de forma decrescente a partir do momento de início e o teste deverá ser concluído antes de expirar.",
+      "start_was_training": "Começar como treino"
+    },
+    "TEST_FORM":{
+      "save": "Salvar",
+      "star_selection": "Começar Seleção",
+      "info_test": "Questionários automáticos selecionam suas questões apenas quando são iniciadas, de acordo com as disciplinas escolhidas, nível e número de questões.",
+      "title_already_in_use": "Um questionário com este Título já foi criado!",
+      "change_title": "Por favor, mude o Título."
+    },
+    "TESTS":{
+      "restore": "Restaurar",
+      "restore_all": "Restaurar Todos"
+    },
+    "TESTS_TABLE":{
+      "view": "Visualizar",
+      "view_quiz": "Visualizar questionário",
+      "delete": "Excluir",
+      "deleted": "Excluída"
+    }
+  },
+  "SHARED":{
+    "TEXT_EDITOR": {
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "underlined": "Sublinhado",
+      "text_color": "Cor do texto",
+      "align_left": "Alinhar à esquerda",
+      "align_center": "Alinhar ao centro",
+      "align_right": "Alinhar à direita",
+      "justify": "Justificar",
+      "numbered_list": "Lista numerada",
+      "bulleted_list": "Lista com marcadores",
+      "load_archive": "Carregar arquivo",
+      "load_image": "Carregar imagem",
+      "insert_link": "Inserir link",
+      "remove_link": "Remover link",
+      "remove_formacion": "Remover formatação"
+    }
+  },
+  "QUESTIONS":{
+    "ANSWERS": {
+      "justifications": "Justificativas"
+    },
+    "EDIT": {
+      "edit_question": "Editar questão - ",
+      "back": "Voltar"
+    },
+    "PRINT": {
+      "create_pdf": "Gerar PDF"
+    },
+    "FORM": {
+      "id_in_use": "Uma questão com este ID já foi criada!",
+      "change_id": "Por favor, mude o ID."
+    },
+    "QUESTIONS": {
+      "info_1": "Esta questão está sendo usada em alguns questionários com geração automática:",
+      "info_2": "Só será possível excluí-la quando os questionários forem excluídos ou possuirem mais questões disponíveis para a geração.",
+      "test_1": "Esta questão está sendo usada nos seguintes questionários:",
+      "test_2": "Só será possível excluí-la quando não se encontrar em nenhum questionário."
+    }
+  },
+  "DASHBOARD":{
+    "LAST_DATA":{
+      "latest_records": "Últimos registros",
+      "see_more": "Ver mais",
+      "no_backup": "Ainda não há backups",
+      "error_log": "Registro de Erro",
+      "no_error": "Ainda não há erros",
+      "user_created": "Usuário Criado",
+      "no_user": "Nenhum usuário registrado"
+    },
+    "LAST_REQUESTS":{
+      "requests": "Suas solicitações",
+      "see_all": "Ver todas",
+      "no_resquests": "Não há solicitações no momento"
+    },
+    "DATA_AMOUNT":{
+      "users": "usuários"
+    },
+    "QUESTION_BY_SUBJECT":{
+      "questions_subject": "Questões por matéria",
+      "no_data": "Não há dados disponíveis"
+    },
+    "TESTS_BY_WEEK":{
+      "quizzes_weak": "Questionários por semana",
+      "total": "Total:",
+      "weak": "Semana"
+    },
+    "TESTS_TABLE":{
+      "recent_quizzes": "Questionários recentes"
+    }
+  },
+  "ADMIN":{
+    "BACKUPS_TABLE":{
+      "backup": "Fazer Backup",
+      "current_mouth": "Mês Atual",
+      "warning": "Tem certeza de que deseja excluir este Backup?"
+    },
+    "SUBJECTS":{
+      "add_subject": "Adicionar disciplina",
+      "warning": "Tem certeza de que deseja excluir este Disciplina?",
+      "text_1": "Não é possível excluir disciplinas que estão sendo usados em questões!",
+      "text_2": "Certifique-se de que o número de questões seja igual a 0."
+    },
+    "USERS_TABLE":{
+      "edit_fuction": "Editar função"
     }
   }
 }
