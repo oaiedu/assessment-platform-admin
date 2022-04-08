@@ -12,13 +12,13 @@
           <v-icon left>
             {{ mdiBallot }}
           </v-icon>
-          Disciplinas
+          {{ $t('TEST.QUIZ.subjects') }}
         </v-tab>
         <v-tab>
           <v-icon left>
             {{ mdiAccount }}
           </v-icon>
-          Usuários
+          {{ $t('DASHBOARD.DATA_AMOUNT.users') }}
         </v-tab>
         <v-tab>
           <v-icon left>

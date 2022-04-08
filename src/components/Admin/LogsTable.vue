@@ -64,7 +64,7 @@
                 {{ mdiEmail }}
               </v-icon>
             </template>
-            <span>Enviar e-mail</span>
+            <span>{{ $t('REQUESTS.TABLE.send_email') }}</span>
           </v-tooltip>
         </template>
       </v-data-table>

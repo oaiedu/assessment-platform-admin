@@ -66,7 +66,7 @@
                 {{ mdiAccountEdit }}
               </v-icon>
             </template>
-            <span>Editar função</span>
+            <span>{{ $t('ADMIN.USERS_TABLE.edit_fuction') }}</span>
           </v-tooltip>
 
           <v-tooltip top>
@@ -82,7 +82,7 @@
                 {{ mdiEmail }}
               </v-icon>
             </template>
-            <span>Enviar e-mail</span>
+            <span>{{ $t('REQUESTS.TABLE.send_email') }}</span>
           </v-tooltip>
         </template>
       </v-data-table>
@@ -113,7 +113,7 @@
             "
             text
           >
-            Cancelar
+            {{ $t('AUTH.SUBJECTS.cancel') }}
           </v-btn>
 
           <v-spacer></v-spacer>
@@ -127,7 +127,7 @@
             text
             :disabled="!editRole"
           >
-            Salvar
+            {{ $t('TEST.TEST_FORM.save') }}
           </v-btn>
         </v-card-actions>
       </v-card>

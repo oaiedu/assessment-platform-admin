@@ -101,7 +101,7 @@
       "questions": "questões",
       "of": "de",
       "subject": "Disciplina:",
-      "subjects": "diciplonas",
+      "subjects": "Diciplonas",
       "answer": "resposta",
       "answers": "Respostas",
       "explanation": "Explicação",
@@ -225,21 +225,20 @@
       "recent_quizzes": "Questionários recentes"
     }
   },
-  "ADIMN":{
+  "ADMIN":{
     "BACKUPS_TABLE":{
-      "": ""
-    },
-    "LOGS_TABLE":{
-      "": ""
-    },
-    "MANAGEMENT":{
-      "": ""
+      "backup": "Fazer Backup",
+      "current_mouth": "Mês Atual",
+      "warning": "Tem certeza de que deseja excluir este Backup?"
     },
     "SUBJECTS":{
-      "": ""
+      "add_subject": "Adicionar disciplina",
+      "warning": "Tem certeza de que deseja excluir este Disciplina?",
+      "text_1": "Não é possível excluir disciplinas que estão sendo usados em questões!",
+      "text_2": "Certifique-se de que o número de questões seja igual a 0."
     },
     "USERS_TABLE":{
-      "": ""
+      "edit_fuction": "Editar função"
     }
   }
 }

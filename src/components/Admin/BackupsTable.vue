@@ -8,7 +8,7 @@
         :loading="loading"
         @click="backup()"
       >
-        Fazer Backup
+        {{ $t('ADMIN.BACKUPS_TABLE.backup') }}
         <v-icon right dark>{{ mdiCloudUpload }}</v-icon>
       </v-btn>
     </v-row>
@@ -27,7 +27,7 @@
         <template v-slot:top>
           <v-toolbar flat dense>
             <v-toolbar-title class="blue--text font-weight-medium">
-              Mês Atual
+              {{ $t('ADMIN.BACKUPS_TABLE.current_mouth') }}
             </v-toolbar-title>
           </v-toolbar>
           <v-divider></v-divider>
@@ -64,7 +64,7 @@
                 {{ mdiDelete }}
               </v-icon>
             </template>
-            <span>Excluir</span>
+            <span>{{ $t('TEST.TESTS_TABLE.delete') }}</span>
           </v-tooltip>
         </template>
         <template v-slot:[`item.start`]="{ item }">
@@ -109,7 +109,7 @@
                 {{ mdiDownload }}
               </v-icon>
             </template>
-            <span>Download</span>
+            <span>{{ $t('TEST.TESTS_TABLE.delete') }}</span>
           </v-tooltip>
 
           <v-tooltip top>
@@ -190,7 +190,7 @@
                 {{ mdiDelete }}
               </v-icon>
             </template>
-            <span>Excluir</span>
+            <span>{{ $t('TEST.TESTS_TABLE.delete') }}</span>
           </v-tooltip>
         </template>
         <template v-slot:[`item.start`]="{ item }">
@@ -210,10 +210,10 @@
       color="white"
       :timeout="15000"
     >
-      Tem certeza de que deseja excluir este Backup?
+      {{ $t('ADMIN.BACKUPS_TABLE.warning') }}
 
       <v-btn dark text class="ml-3" color="blue" @click="deleteBkp(deleteItem)">
-        Excluir
+        {{ $t('TEST.TESTS_TABLE.delete') }}
       </v-btn>
 
       <v-btn
@@ -225,7 +225,7 @@
           deleteItem = null;
         "
       >
-        Cancelar
+        {{ $t('AUTH.SUBJECT.cancel') }}
       </v-btn>
     </v-snackbar>
   </v-container>
