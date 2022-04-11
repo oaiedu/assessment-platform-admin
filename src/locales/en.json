@@ -6,15 +6,15 @@
       "rejected": "Rejected"
     },
     "INBOX":{
-      "request": "Solicitações aprovadas serão excluídas automaticamente quando sair desta página!",
-      "info_1": "Esta questão está sendo usada nos seguintes questionários:",
-      "info_2": "Só será possível rejeitá-la quando não se encontrar em nenhum questionário."
+      "request": "Approved requests will be automatically deleted when you leave this page!",
+      "info_1": "This question is being used in the following questionnaires:",
+      "info_2": "You will only be able to reject it when it is not in any questionnaire."
     },
     "TABLE":{
-      "send_email": "Enviar e-mail",
-      "view_pdf": "Visualizar PDF",
-      "aprove": "Aprovar",
-      "edit": "Editar"
+      "send_email": "Send email",
+      "view_pdf": "View PDF",
+      "aprove": "Approve",
+      "edit": "Edit"
     }
   },
   "USER": {
@@ -26,219 +26,219 @@
   },
   "PROFILE": {
     "SUBJECTS": {
-      "title": "Disciplinas com mais acertos"
+      "title": "Disciplines with the most hits"
     },
     "DATA_INFO": {
-      "ended_quizzes": "Questionários finalizados",
-      "aproved": "Aprovações",
-      "correct_answers": "Respostas corretas (%)",
-      "time": "tempo",
-      "time_per_quiz": "Tempo médio por questionário",
-      "quizzes_done":"Questionários realizados"
+      "ended_quizzes": "Finished quizzes",
+      "aproved": "Approvals",
+      "correct_answers": "Correct answers (%)",
+      "time": "time",
+      "time_per_quiz": "Average time per quiz",
+      "quizzes_done":"Quizzes completed"
     }
   },
   "SIGN_USER": {
     "TEXT":{
-      "insert_email":"Insira seu e-mail no campo abaixo."
+      "insert_email":"Enter your email in the field below."
     },
     "SUBJECTS":{
-      "forget_password": "Esqueceu a senha?",
-      "already_have_accont": "Já possui uma conta?",
-      "login": "Entrar",
-      "not_have_accont": "Não possui uma conta?",
-      "register": "Registrar-se"
+      "forget_password": "Forget your password?",
+      "already_have_accont": "Already have an account?",
+      "login": "Login",
+      "not_have_accont": "Don't have an account?",
+      "register": "Register"
     }
   },
   "USERNAME_MODAL":{
     "TEXT":{
-      "before_continue": "Antes de continuar...",
-      "continue":"Continuar",
-      "username_change": "O nome de usuário pode ser mudado na página de Perfil."
+      "before_continue": "Before you continue...",
+      "continue":"Continue",
+      "username_change": "The username can be changed on the Profile page."
     },
     "WARNING":{
-      "accont_without_name_1": "Esta conta ainda não possui um nome de usuário!",
-      "accont_without_name_2": "Para usar o aplicativo, é necessário preencher o campo abaixo."
+      "accont_without_name_1": "This account doesn't have a username yet!",
+      "accont_without_name_2": "To use the application, you must fill in the field below."
     }
   },
   "FAB":{
     "TEXT":{
-      "close": "Fechar",
-      "create": "Criar"
+      "close": "Close",
+      "create": "Create"
     },
     "CREATE":{
-      "new_question": "Criar nova questão",
-      "new_quiz": "Criar novo questionario"
+      "new_question": "Create new question",
+      "new_quiz": "Create new quiz"
     }
   },
   "AUTH":{
     "TEXT":{
-      "intro_1": "Se está procurando por um lugar para aprender Cloud... você encontrou! Nossos questionários são totalmente gratuitos e te levarão ao seu limite, fortificando seus conhecimentos.",
-      "intro_2": "Comece agora mesmo, não há tempo a perder!"
+      "intro_1": "If you're looking for a place to learn Cloud... you've found it! Our quizzes are completely free and will take you to your limits, strengthening your knowledge.",
+      "intro_2": "Start right now, there's no time to waste!"
     },
     "SUBJECT":{
-      "cancel": "Cancelar",
-      "confirm": "Confirmar",
-      "confirm_all": "Confirmar Todos"
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "confirm_all": "Confirm All"
     }
   },
   "TEST": {
     "DELETE_ALERT":{
-      "sucess": "Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.",
-      "marked": "Marcadas por você:"
+      "sucess": "Deletion confirmed! When you leave this page, the table will be updated.",
+      "marked": "Marked by you:"
     },
     "GENERATE_CARD":{
-      "generate_new": "Gerar questionário",
-      "select_all": "Selecionar todos",
-      "start": "Começar"
+      "generate_new": "Generate Questionnaire",
+      "select_all": "Select all",
+      "start": "Start"
     },
     "QUIZ":{
-      "home": "Início",
-      "quiz": "questionário",
-      "quizzes": "Questionários",
-      "info": "Detalhes",
-      "quiz_info": "Detalhes do questionário",
-      "question": "Questão",
-      "questions": "questões",
-      "of": "de",
-      "subject": "Disciplina:",
-      "subjects": "Diciplonas",
-      "answer": "resposta",
-      "answers": "Respostas",
-      "explanation": "Explicação",
-      "correct_answer": "Resposta correta:",
-      "before": "Anterior",
-      "next": "Próxima",
-      "send": "Enviar",
-      "time_up": "TEMPO ESGOTADO",
-      "answered_questions": "questões respondidas",
-      "left": "Faltam",
-      "question_to_answer": "questões para responder",
-      "have": "Há",
-      "question_to_review": "questões para revisar",
-      "all_answered_questions": "Todas as questões foram respondidas",
-      "wait": "Espera...",
-      "exit_warning": "Ao sair do questionário, todo o seu progresso será perdido. Tem certeza de que deseja sair?",
-      "confirm_exit": "Tem certeza de que deseja sair?",
-      "cancel": "Cancelar",
-      "exit": "Sair"
+      "home": "Home",
+      "quiz": "quiz",
+      "quizzes": "Questions",
+      "info": "Details",
+      "quiz_info": "Quiz Details",
+      "question": "Question",
+      "questions": "questions",
+      "of": "of",
+      "subject": "Discipline:",
+      "subjects": "Diciples",
+      "answer": "answer",
+      "answers": "Answers",
+      "explanation": "Explanation",
+      "correct_answer": "Correct answer:",
+      "before": "Previous",
+      "next": "Next",
+      "send": "Send",
+      "time_up": "TIME OUT",
+      "answered_questions": "answered questions",
+      "left": "Missing",
+      "question_to_answer": "questions to answer",
+      "have": "There is",
+      "question_to_review": "questions to review",
+      "all_answered_questions": "All questions answered",
+      "wait": "Wait...",
+      "exit_warning": "When you exit the quiz, all your progress will be lost. Are you sure you want to exit?",
+      "confirm_exit": "Are you sure you want to exit?",
+      "cancel": "Cancel",
+      "exit": "Exit"
     },
     "QUIZ_DETAILS":{
-      "for_approval": "para aprovação",
-      "instructions": "Instruções",
-      "no_instructions": "Este teste não possui instruções.",
-      "previous_attempts": "Tentativas anteriores",
-      "outcome": "Seus resultados",
-      "time_spend": "Tempo gasto",
-      "before_start": "Antes de começar",
-      "info_no_limit_time": "O questionário não possui limite de tempo. O tempo será contado de forma crescente a partir do momento de início.",
-      "info_limit_time_1": "O questionário possui um limite de tempo de",
-      "info_limit_time_2": ". O tempo será contado de forma decrescente a partir do momento de início e o teste deverá ser concluído antes de expirar.",
-      "start_was_training": "Começar como treino"
+      "for_approval": "for approval",
+      "instructions": "Instructions",
+      "no_instructions": "This test has no instructions.",
+      "previous_attempts": "Previous attempts",
+      "outcome": "Your results",
+      "time_spend": "Time spent",
+      "before_start": "Before starting",
+      "info_no_limit_time": "The quiz has no time limit. The time will count up from the start time.",
+      "info_limit_time_1": "The quiz has a time limit of",
+      "info_limit_time_2": ". The time will be counted down from the start time and the test must be completed before it expires.",
+      "start_was_training": "Start as training"
     },
     "TEST_FORM":{
-      "save": "Salvar",
-      "star_selection": "Começar Seleção",
-      "info_test": "Questionários automáticos selecionam suas questões apenas quando são iniciadas, de acordo com as disciplinas escolhidas, nível e número de questões.",
-      "title_already_in_use": "Um questionário com este Título já foi criado!",
-      "change_title": "Por favor, mude o Título."
+      "save": "Save",
+      "star_selection": "Start Selection",
+      "info_test": "Automatic quizzes select their questions only when they are started, according to the chosen subjects, level and number of questions.",
+      "title_already_in_use": "A quiz with this Title has already been created!",
+      "change_title": "Please change the Title."
     },
     "TESTS":{
-      "restore": "Restaurar",
-      "restore_all": "Restaurar Todos"
+      "restore": "Restore",
+      "restore_all": "Restore All"
     },
     "TESTS_TABLE":{
-      "view": "Visualizar",
-      "view_quiz": "Visualizar questionário",
-      "delete": "Excluir",
-      "deleted": "Excluída"
+      "view": "View",
+      "view_quiz": "View quiz",
+      "delete": "Delete",
+      "deleted": "Deleted"
     }
   },
   "SHARED":{
     "TEXT_EDITOR": {
-      "bold": "Negrito",
-      "italic": "Itálico",
-      "underlined": "Sublinhado",
-      "text_color": "Cor do texto",
-      "align_left": "Alinhar à esquerda",
-      "align_center": "Alinhar ao centro",
-      "align_right": "Alinhar à direita",
-      "justify": "Justificar",
-      "numbered_list": "Lista numerada",
-      "bulleted_list": "Lista com marcadores",
-      "load_archive": "Carregar arquivo",
-      "load_image": "Carregar imagem",
-      "insert_link": "Inserir link",
-      "remove_link": "Remover link",
-      "remove_formacion": "Remover formatação"
+      "bold": "Bold",
+      "italic": "Italic",
+      "underlined": "Underlined",
+      "text_color": "Text color",
+      "align_left": "Align left",
+      "align_center": "Align to center",
+      "align_right": "Align right",
+      "justify": "Justify",
+      "numbered_list": "Numbered list",
+      "bulleted_list": "Bulleted List",
+      "load_archive": "Load archive",
+      "load_image": "Load image",
+      "insert_link": "Insert link",
+      "remove_link": "Remove link",
+      "remove_formacion": "Remove formatting"
     }
   },
   "QUESTIONS":{
     "ANSWERS": {
-      "justifications": "Justificativas"
+      "justifications": "Justifications"
     },
     "EDIT": {
-      "edit_question": "Editar questão - ",
-      "back": "Voltar"
+      "edit_question": "Edit question - ",
+      "back": "Back"
     },
     "PRINT": {
-      "create_pdf": "Gerar PDF"
+      "create_pdf": "Generate PDF"
     },
     "FORM": {
-      "id_in_use": "Uma questão com este ID já foi criada!",
-      "change_id": "Por favor, mude o ID."
+      "id_in_use": "A question with this ID has already been created!",
+      "change_id": "Please change the ID."
     },
     "QUESTIONS": {
-      "info_1": "Esta questão está sendo usada em alguns questionários com geração automática:",
-      "info_2": "Só será possível excluí-la quando os questionários forem excluídos ou possuirem mais questões disponíveis para a geração.",
-      "test_1": "Esta questão está sendo usada nos seguintes questionários:",
-      "test_2": "Só será possível excluí-la quando não se encontrar em nenhum questionário."
+      "info_1": "This question is being used in some questionnaires with automatic generation:",
+      "info_2": "It will only be possible to delete it when the questionnaires are deleted or have more questions available for generation.",
+      "test_1": "This question is being used in the following quizzes:",
+      "test_2": "You can only delete it when it is not in any questionnaire."
     }
   },
   "DASHBOARD":{
     "LAST_DATA":{
-      "latest_records": "Últimos registros",
-      "see_more": "Ver mais",
-      "no_backup": "Ainda não há backups",
-      "error_log": "Registro de Erro",
-      "no_error": "Ainda não há erros",
-      "user_created": "Usuário Criado",
-      "no_user": "Nenhum usuário registrado"
+      "latest_records": "Latest records",
+      "see_more": "See more",
+      "no_backup": "No backups yet",
+      "error_log": "Error Log",
+      "no_error": "No errors yet",
+      "user_created": "User Created",
+      "no_user": "No user registered"
     },
     "LAST_REQUESTS":{
-      "requests": "Suas solicitações",
-      "see_all": "Ver todas",
-      "no_resquests": "Não há solicitações no momento"
+      "requests": "Your requests",
+      "see_all": "See all",
+      "no_resquests": "There are currently no requests"
     },
     "DATA_AMOUNT":{
-      "users": "usuários"
+      "users": "users"
     },
     "QUESTION_BY_SUBJECT":{
-      "questions_subject": "Questões por matéria",
-      "no_data": "Não há dados disponíveis"
+      "questions_subject": "Questions by subject",
+      "no_data": "No data available"
     },
     "TESTS_BY_WEEK":{
-      "quizzes_weak": "Questionários por semana",
+      "quizzes_weak": "Quizzes per week",
       "total": "Total:",
-      "weak": "Semana"
+      "weak": "Week"
     },
     "TESTS_TABLE":{
-      "recent_quizzes": "Questionários recentes"
+      "recent_quizzes": "Recent Quizzes"
     }
   },
   "ADMIN":{
     "BACKUPS_TABLE":{
-      "backup": "Fazer Backup",
-      "current_mouth": "Mês Atual",
-      "warning": "Tem certeza de que deseja excluir este Backup?"
+      "backup": "Backup",
+      "current_mouth": "Current Month",
+      "warning": "Are you sure you want to delete this Backup?"
     },
     "SUBJECTS":{
-      "add_subject": "Adicionar disciplina",
-      "warning": "Tem certeza de que deseja excluir este Disciplina?",
-      "text_1": "Não é possível excluir disciplinas que estão sendo usados em questões!",
-      "text_2": "Certifique-se de que o número de questões seja igual a 0."
+      "add_subject": "Add subject",
+      "warning": "Are you sure you want to delete this Course?",
+      "text_1": "Cannot delete subjects that are being used in questions!",
+      "text_2": "Make sure the number of questions is equal to 0."
     },
     "USERS_TABLE":{
-      "edit_fuction": "Editar função"
+      "edit_fuction": "Edit function"
     }
   }
 }
