@@ -3,9 +3,14 @@
     <v-card flat outlined style="border-radius: 26px; overflow: hidden">
       <v-data-table
         hide-default-footer
-        loading-text="Carregando solicitações..."
-        no-data-text="Não há solicitações"
-        :headers="headers"
+        :loading-text="$t('REQUESTS.TABLE.loading_requests')"
+        :no-data-text="$t('REQUESTS.TABLE.no_requests')"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('REQUESTS.TABLE.HEADERS.' + h.text)
+          }))
+        "
         :items="items"
         :page="page"
         :items-per-page="itemsPerPage"
@@ -44,7 +49,7 @@
                   {{ mdiEmail }}
                 </v-icon>
               </template>
-              <span>{{ $t('REQUESTS.TABLE.send_email') }}</span>
+              <span>{{ $t("REQUESTS.TABLE.send_email") }}</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -59,7 +64,7 @@
                   {{ mdiFilePdfBox }}
                 </v-icon>
               </template>
-              <span>{{ $t('REQUESTS.TABLE.view_pdf') }}</span>
+              <span>{{ $t("REQUESTS.TABLE.view_pdf") }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['admin']">
@@ -77,7 +82,7 @@
                   {{ mdiCheckBold }}
                 </v-icon>
               </template>
-              <span>{{ $t('REQUESTS.TABLE.aprove') }}</span>
+              <span>{{ $t("REQUESTS.TABLE.approve") }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['appraiser']">
@@ -95,7 +100,7 @@
                   {{ mdiPencil }}
                 </v-icon>
               </template>
-              <span>{{ $t('REQUESTS.TABLE.edit') }}</span>
+              <span>{{ $t("REQUESTS.TABLE.edit") }}</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -122,7 +127,10 @@
                 </v-icon>
               </template>
               <span>{{
-                userClaims && userClaims["admin"] ? "Rejeitar" : "Excluir"
+                $t(
+                  "REQUESTS.TABLE." +
+                    (userClaims && userClaims["admin"] ? "reject" : "delete")
+                )
               }}</span>
             </v-tooltip>
           </v-row>
@@ -139,9 +147,12 @@
               @click="onRestoreClick(item)"
             >
               {{
-                userClaims && userClaims["appraiser"]
-                  ? "Restaurar"
-                  : "Indisponível"
+                $t(
+                  "QUESTIONS.TABLE." +
+                    (userClaims && userClaims["appraiser"]
+                      ? "restore"
+                      : "unavailable")
+                )
               }}
             </v-btn>
           </v-row>
@@ -152,7 +163,7 @@
               disabled
               text
             >
-              {{ $t('TEST.TEST_TABLE.deleted') }}
+              {{ $t("TEST.TESTS_TABLE.deleted") }}
             </v-btn>
           </v-row>
         </template>
@@ -188,48 +199,58 @@ export default {
     headers() {
       return this.userClaims && this.userClaims["admin"]
         ? [
-            { text: "ID", sortable: true, value: "name", align: "left" },
+            { text: "id", sortable: true, value: "name", align: "left" },
             {
-              text: "Usuário",
+              text: "user",
               value: "user.name",
               sortable: true,
               align: "center"
             },
             {
-              text: "E-mail",
+              text: "email",
               value: "user.email",
               sortable: true,
               align: "center"
             },
             {
-              text: "Disciplina",
+              text: "subject",
               value: "subject",
               sortable: true,
               align: "center"
             },
             {
-              text: "Status",
+              text: "status",
               value: "status",
               sortable: true,
               align: "center"
             },
-            { text: "Ações", value: "actions", sortable: false, align: "right" }
+            {
+              text: "actions",
+              value: "actions",
+              sortable: false,
+              align: "right"
+            }
           ]
         : [
-            { text: "ID", sortable: true, value: "name", align: "left" },
+            { text: "id", sortable: true, value: "name", align: "left" },
             {
-              text: "Disciplina",
+              text: "subject",
               value: "subject",
               sortable: true,
               align: "center"
             },
             {
-              text: "Status",
+              text: "status",
               value: "status",
               sortable: true,
               align: "center"
             },
-            { text: "Ações", value: "actions", sortable: false, align: "right" }
+            {
+              text: "actions",
+              value: "actions",
+              sortable: false,
+              align: "right"
+            }
           ];
     },
     loading() {
