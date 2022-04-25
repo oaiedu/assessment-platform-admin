@@ -9,11 +9,11 @@
         </div>
 
         <p class="sign__info-subtitle">
-          {{ $t('AUTH.TEXT.intro_1') }}
+          {{ $t("AUTH.TEXT.intro_1") }}
 
           <br /><br />
 
-          {{ $t('AUTH.TEXT.intro_2') }}
+          {{ $t("AUTH.TEXT.intro_2") }}
         </p>
       </div>
 
@@ -95,19 +95,19 @@
       max-width="100%"
     >
       <v-card>
-        <v-card-title>{{ $t('SIGN_USER.SUBJECT.forget_password') }}</v-card-title>
-        <v-card-subtitle>{{ $t('SIGN_USER.TEXT.insert_email') }}</v-card-subtitle>
+        <v-card-title>{{ $t("SIGN_USER.forget_password") }}</v-card-title>
+        <v-card-subtitle>{{ $t("SIGN_USER.insert_email") }}</v-card-subtitle>
         <v-card-text>
           <v-row justify="center" class="px-3">
             <v-text-field
-              :append-icon="mdiEmail"
-              name="email-resetpwd"
-              label="E-mail"
-              id="email-resetpwd"
               v-model="email"
-              type="email"
-              :rules="required"
               required
+              type="email"
+              id="email-resetpwd"
+              name="email-resetpwd"
+              :append-icon="mdiEmail"
+              :label="$t('SIGN_USER.FIELD.email')"
+              :rules="required"
             >
             </v-text-field>
           </v-row>
@@ -121,11 +121,11 @@
               email = '';
             "
           >
-            {{ $t('AUTH.SUBJECT.cancel') }}
+            {{ $t("AUTH.SUBJECT.cancel") }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn text color="blue" :disabled="!email" @click="forgotPassword()">
-            {{ $t('AUTH.SUBJECT.confirm') }}
+            {{ $t("AUTH.SUBJECT.confirm") }}
           </v-btn>
         </v-card-actions>
       </v-card>
