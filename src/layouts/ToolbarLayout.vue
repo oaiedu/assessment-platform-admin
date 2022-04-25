@@ -18,7 +18,9 @@
               <v-list-item-title style="font-weight: 500;">{{
                 user.name
               }}</v-list-item-title>
-              <v-list-item-subtitle>{{ roleName }}</v-list-item-subtitle>
+              <v-list-item-subtitle>{{
+                $t("USER.ROLE." + user.role)
+              }}</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -50,7 +52,12 @@
     <v-app-bar v-if="user" app dark dense absolute flat color="blue">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Cloud Quiz Generator</v-toolbar-title>
+      <v-toolbar-title
+        style="cursor: pointer"
+        @click="$route.path !== '/' && $router.push('/')"
+      >
+        Cloud Quiz Generator
+      </v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -60,7 +67,7 @@
       </v-btn>
 
       <v-btn v-if="userIsAuthenticated()" text @click="onLogout">
-        <v-icon left>{{ logoutIcon }}</v-icon> Sair
+        <v-icon left>{{ logoutIcon }}</v-icon> {{ $t("TOOLBAR.sign_out") }}
       </v-btn>
     </v-app-bar>
 
@@ -126,37 +133,37 @@ export default {
         drawerItems = [
           {
             icon: mdiHome,
-            title: "Página Inicial",
+            title: this.$t("TOOLBAR.DRAWER.home"),
             link: "/",
             grantAccess: "all"
           },
           {
             icon: mdiAccountCog,
-            title: "Administração",
+            title: this.$t("TOOLBAR.DRAWER.admin"),
             link: "/admin",
             grantAccess: ["admin"]
           },
           {
             icon: mdiFileQuestionOutline,
-            title: "Questões",
+            title: this.$t("TOOLBAR.DRAWER.questions"),
             link: "/questions",
             grantAccess: ["admin", "appraiser"]
           },
           {
             icon: mdiFileMultipleOutline,
-            title: "Questionários",
+            title: this.$t("TOOLBAR.DRAWER.quizzes"),
             link: "/quizzes",
             grantAccess: ["admin", "student"]
           },
           {
             icon: mdiInbox,
-            title: "Solicitações",
+            title: this.$t("TOOLBAR.DRAWER.requests"),
             link: "/inbox",
             grantAccess: ["admin", "appraiser"]
           },
           {
             icon: mdiAccount,
-            title: "Perfil",
+            title: this.$t("TOOLBAR.DRAWER.profile"),
             link: "/profile",
             grantAccess: "all"
           }
@@ -188,12 +195,6 @@ export default {
       }
 
       return menuItems;
-    },
-    roleName() {
-      const role = this.user.role;
-      if (role === "admin") return "Administrador";
-      else if (role === "appraiser") return "Avaliador";
-      else return "Aluno";
     }
   },
   methods: {
