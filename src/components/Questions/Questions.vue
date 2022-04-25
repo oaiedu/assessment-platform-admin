@@ -3,7 +3,7 @@
     <v-container>
       <v-container class="mt-10 mb-5">
         <SearchBox
-          label="Procurar por ID"
+          :label="$t('QUESTIONS.search_id')"
           @enter="searchQuery($event)"
           @textChange="searchTextChange($event)"
         />
@@ -15,7 +15,7 @@
         <DeleteAlert
           :confirmCondition="deleteConfirmed"
           :itemsCondition="hasTrueMarkStatus"
-          itemsText="As seguintes questões foram marcadas para exclusão:"
+          :itemsText="$t('QUESTIONS.delete_marked')"
           :items="markedQuestionsByUser"
         />
 
@@ -29,10 +29,10 @@
               deleteQuestions();
             "
           >
-            {{ $t('AUTH.SUBJECT.confirm') }}
+            {{ $t("AUTH.SUBJECT.confirm") }}
           </v-btn>
           <v-btn class="ml-3" color="grey darken-1" dark @click="restoreAll()">
-            {{ $t('TEST.TESTS.restore') }}
+            {{ $t("TEST.TESTS.restore") }}
           </v-btn>
         </v-row>
       </v-container>
@@ -75,7 +75,7 @@
             <v-icon>{{ plusIcon }}</v-icon>
           </v-btn>
         </template>
-        <span>{{ $t('FAB.CREATE.new_question') }}</span>
+        <span>{{ $t("FAB.CREATE.new_question") }}</span>
       </v-tooltip>
 
       <v-dialog
@@ -139,7 +139,7 @@
       </div>
 
       <DeleteWarning
-        label="Tem certeza de que deseja excluir esta questâo?"
+        :label="$t('QUESTIONS.delete_confirm')"
         :state="deleteQuestionSnackBar"
         @confirm="
           deleteQuestion(deleteSelect.name);
@@ -158,11 +158,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          {{ $t('QUESTIONS.QUESTIONS.info_1') }}
+          {{ $t("QUESTIONS.QUESTIONS.info_1") }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          {{ $t('QUESTIONS.QUESTIONS.info_2') }}
+          {{ $t("QUESTIONS.QUESTIONS.info_2") }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -172,7 +172,7 @@
             v-bind="attrs"
             @click="deleteErrorAutoSnackBar = false"
           >
-            {{ $t('QUESTIONS.ANSWERS.justifications') }}
+            {{ $t("QUESTIONS.ANSWERS.justifications") }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -187,11 +187,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          {{ $t('QUESTIONS.QUESTIONS.test_1') }}
+          {{ $t("QUESTIONS.QUESTIONS.test_1") }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          {{ $t('QUESTIONS.QUESTIONS.test_2') }}
+          {{ $t("QUESTIONS.QUESTIONS.test_2") }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -201,7 +201,7 @@
             v-bind="attrs"
             @click="deleteErrorSnackBar = false"
           >
-            {{ $t('FAB.TEXT.close') }}
+            {{ $t("FAB.TEXT.close") }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -403,7 +403,7 @@ export default {
           });
         }
       });
-      this.$store.commit("setSuccess", "Questões excluídas com sucesso!");
+      this.$store.commit("setSuccess", "Question successfully deleted!");
     },
     onPageChange(event) {
       const payload = {

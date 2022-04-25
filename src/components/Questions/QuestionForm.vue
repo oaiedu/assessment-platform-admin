@@ -11,7 +11,7 @@
       <v-btn icon dark @click="close()" class="mr-2">
         <v-icon>{{ mdiClose }}</v-icon>
       </v-btn>
-      <h2>{{ $t('FAB.CREATE.new_question') }}</h2>
+      <h2>{{ $t("FAB.CREATE.new_question") }}</h2>
       <v-spacer></v-spacer>
     </v-toolbar>
 
@@ -30,7 +30,7 @@
           <v-icon color="blue">{{ mdiArrowLeft }}</v-icon>
         </v-btn>
       </template>
-      <span>{{ $t('QUESTIONS.EDIT.back') }}</span>
+      <span>{{ $t("QUESTIONS.EDIT.back") }}</span>
     </v-tooltip>
 
     <v-tooltip left v-if="e1 < 2">
@@ -49,7 +49,7 @@
           <v-icon color="white">{{ mdiArrowRight }}</v-icon>
         </v-btn>
       </template>
-      <span>{{ $t('USERNAME_MODAL.TEXT.continue') }}</span>
+      <span>{{ $t("USERNAME_MODAL.TEXT.continue") }}</span>
     </v-tooltip>
 
     <v-tooltip left v-else>
@@ -70,7 +70,7 @@
           <v-icon color="white">{{ mdiContentSave }}</v-icon>
         </v-btn>
       </template>
-      <span>{{ $t('TEST.TEST_FORM.save') }}</span>
+      <span>{{ $t("TEST.TEST_FORM.save") }}</span>
     </v-tooltip>
 
     <v-container fluid>
@@ -81,13 +81,13 @@
               <v-stepper alt-labels v-model="e1">
                 <v-stepper-header>
                   <v-stepper-step editable :complete="e1 > 1" step="1">
-                    {{ $t('TEST.QUIZ.info') }}
+                    {{ $t("TEST.QUIZ.info") }}
                   </v-stepper-step>
 
                   <v-divider class="mx-2" style="margin-top: 50px"></v-divider>
 
                   <v-stepper-step editable step="2">
-                    {{ $t('TEST.QUIZ.answers') }}
+                    {{ $t("TEST.QUIZ.answers") }}
                   </v-stepper-step>
                 </v-stepper-header>
 
@@ -119,7 +119,7 @@
                             rounded
                             id="subject"
                             name="subject"
-                            label="Disciplina"
+                            :label="$t('QUESTIONS.FORM.subject')"
                             :items="subjectItems.map(s => s.name)"
                           ></v-select>
                         </v-col>
@@ -133,10 +133,15 @@
                             flat
                             outlined
                             rounded
-                            label="Nível"
                             item-value="value"
                             item-text="label"
-                            :items="levels"
+                            :label="$t('QUESTIONS.FORM.level')"
+                            :items="
+                              levels.map(l => ({
+                                ...l,
+                                label: $t('TEST.LEVEL.' + l.value.name)
+                              }))
+                            "
                           ></v-select>
                         </v-col>
                       </v-row>
@@ -146,7 +151,7 @@
                           <VueTextEditor
                             v-if="+e1 === 1"
                             outlined
-                            placeholder="Descrição"
+                            :placeholder="$t('QUESTIONS.FORM.description')"
                             :groups="['format', 'align', 'list', 'format2']"
                             :value="questionDescription"
                             :height="300"
@@ -163,9 +168,8 @@
                             dense
                             outlined
                             rounded
-                            label="Imagem"
-                            placeholder="Escolha uma imagem"
                             accept="image/*"
+                            :label="$t('QUESTIONS.FORM.image')"
                             @change="checkImageType"
                           />
                         </v-col>
@@ -190,7 +194,7 @@
                       <v-row class="pa-0 ma-0 mb-2">
                         <v-checkbox
                           v-model="multipleAnswers"
-                          label="Múltiplas respostas"
+                          :label="$t('QUESTIONS.FORM.multi_answers')"
                         ></v-checkbox>
                       </v-row>
 
@@ -232,7 +236,7 @@
                             rounded
                             class="pa-0 ma-0"
                             style="margin-top: -12px !important"
-                            placeholder="Justificativa"
+                            :placeholder="$t('QUESTIONS.FORM.justification')"
                           ></v-text-field>
                         </v-col>
                       </v-row>
@@ -243,7 +247,9 @@
                         <VueTextEditor
                           v-if="+e1 === 2"
                           outlined
-                          placeholder="Justificativa geral"
+                          :placeholder="
+                            $t('QUESTIONS.FORM.general_justification')
+                          "
                           :height="300"
                           :value="answerJustification"
                           :groups="['format', 'list', 'format2']"
@@ -258,7 +264,7 @@
                           outlined
                           rounded
                           class="pa-0 ma-0"
-                          label="Fonte da justificativa (URL)"
+                          :label="$t('QUESTIONS.FORM.justification_source')"
                         ></v-text-field>
                       </v-row>
                     </v-container>
@@ -292,9 +298,9 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          {{ $t('QUESTIONS.FORM.id_in_use') }}
+          {{ $t("QUESTIONS.FORM.id_in_use") }}
           <br />
-          {{ $t('QUESTIONS.FORM.change_id') }}
+          {{ $t("QUESTIONS.FORM.change_id") }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -304,7 +310,7 @@
             v-bind="attrs"
             @click="createErrorSnackBar = false"
           >
-            {{ $t('FAB.TEXT.close') }}
+            {{ $t("FAB.TEXT.close") }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -374,29 +380,25 @@ export default {
           value: {
             index: 0,
             name: "beginner"
-          },
-          label: "Iniciante"
+          }
         },
         {
           value: {
             index: 1,
             name: "intermediary"
-          },
-          label: "Intermediário"
+          }
         },
         {
           value: {
             index: 2,
             name: "advanced"
-          },
-          label: "Avançado"
+          }
         },
         {
           value: {
             index: 3,
             name: "expert"
-          },
-          label: "Experiente"
+          }
         }
       ]
     };
