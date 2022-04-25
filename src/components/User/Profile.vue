@@ -72,7 +72,7 @@
           </span>
 
           <span class="profile__email">{{ user.email }}</span>
-          <span class="profile__role">{{ roleName }}</span>
+          <span class="profile__role">{{ $t("USER.ROLE." + user.role) }}</span>
         </div>
       </div>
     </v-row>
@@ -100,7 +100,7 @@
           style="border-radius: 26px"
         >
           <v-card-title class="profile__subjects-title pa-0 ma-0">
-            Disciplinas com mais acertos
+            {{ $t("PROFILE.SUBJECTS.title") }}
           </v-card-title>
 
           <v-row
@@ -153,7 +153,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Questionários finalizados
+                  {{ $t("PROFILE.DATA_INFO.ended_quizzes") }}
                 </span>
 
                 <span
@@ -173,7 +173,9 @@
               }}</v-icon>
 
               <div class="profile__amount-info">
-                <span class="profile__amount-item-title">Aprovações</span>
+                <span class="profile__amount-item-title">{{
+                  $t("PROFILE.DATA_INFO.approved")
+                }}</span>
 
                 <span
                   class="profile__amount-item-quantity"
@@ -193,7 +195,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Respostas corretas (%)
+                  {{ $t("PROFILE.DATA_INFO.correct_answers") }}
                 </span>
 
                 <span
@@ -214,7 +216,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Tempo médio por questionário
+                  {{ $t("PROFILE.DATA_INFO.time_per_quiz") }}
                 </span>
 
                 <span
@@ -247,7 +249,7 @@
         style="border-radius: 26px; overflow: hidden"
       >
         <v-card-title class="profile__attempts-title pa-0 ma-0 mx-8 mb-1">
-          Questionários realizados
+          {{ $t("PROFILE.DATA_INFO.quizzes_done") }}
         </v-card-title>
 
         <AttemptsTable
@@ -299,12 +301,6 @@ export default {
     },
     user() {
       return this.$store.getters.userInfo;
-    },
-    roleName() {
-      const role = this.user.role;
-      if (role === "admin") return "Administrador";
-      else if (role === "appraiser") return "Avaliador";
-      else return "Aluno";
     }
   },
   methods: {
@@ -503,15 +499,11 @@ export default {
   position: relative;
 
   object-fit: cover;
-
-  transition: transform 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .v-avatar .profile__photo:hover {
   cursor: pointer;
-  opacity: 0.9;
-
-  transform: scale(1.1);
+  opacity: 0.8;
 }
 
 .profile__personal-info {

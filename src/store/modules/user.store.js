@@ -332,7 +332,7 @@ const actions = {
       if (!payload.noMessage) {
         commit(
           "setSuccess",
-          `'${userInfo.name || userInfo.email}' editado(a) com sucesso!`
+          `'${userInfo.name || userInfo.email}' successfully edited!`
         );
       }
     } catch (error) {
@@ -478,7 +478,7 @@ const actions = {
 
       commit("setUsers", users);
     } catch (error) {
-      const errorModel = showErrorMessage("load", "Usuários", error.message);
+      const errorModel = showErrorMessage("load", "Users", error.message);
 
       commit("setError", { message: errorModel });
       createErrorLog("Users Load", error.message, { users });
@@ -505,7 +505,7 @@ const actions = {
         commit("setLastUser", { ...doc.data(), id: doc.id });
       });
     } catch (error) {
-      const errorModel = showErrorMessage("load", "Usuário", error.message);
+      const errorModel = showErrorMessage("load", "Users", error.message);
 
       commit("setError", { message: errorModel });
       createErrorLog("Last User Loading", error.message, { users });
@@ -538,7 +538,7 @@ const actions = {
 
       return { ...doc.data(), id };
     } catch (error) {
-      const errorModel = showErrorMessage("load", "Usuário", error.message);
+      const errorModel = showErrorMessage("load", "User", error.message);
 
       commit("setError", { message: errorModel });
       createErrorLog("User By Id Loading", error.message, {
@@ -575,7 +575,7 @@ const actions = {
 
       return { ...doc.data(), id: doc.id };
     } catch (error) {
-      const errorModel = showErrorMessage("load", "Usuário", error.message);
+      const errorModel = showErrorMessage("load", "User", error.message);
 
       commit("setError", { message: errorModel });
       createErrorLog("User By E-mail Loading", error.message, {
@@ -629,12 +629,12 @@ const actions = {
 
       commit(
         "setSuccess",
-        `'${doc.data().name || email}' editado(a) com sucesso!`
+        `'${doc.data().name || email}' successfully edited!`
       );
     } catch (error) {
       const errorModel = showErrorMessage(
         "edition",
-        "Cargo de Usuário",
+        "User role",
         error.message
       );
 
@@ -693,7 +693,7 @@ const actions = {
       const errorModel = showErrorMessage(
         "connection",
         "",
-        "Não foi possível entrar em sua conta."
+        "It was not possible to log into your account."
       );
 
       commit("setError", { message: errorModel });
@@ -715,14 +715,14 @@ const actions = {
     auth
       .sendPasswordResetEmail(email)
       .then(() => {
-        commit("setSuccess", `E-mail enviado para ${email}`);
+        commit("setSuccess", `Email sent to ${email}`);
       })
       .catch(error => {
         commit("setLoading", false);
         const errorModel = showErrorMessage(
           "admin",
           "",
-          "Não foi possível enviar o e-mail para redefinir a senha."
+          "It was not possible to send the password recovering email."
         );
 
         commit("setError", { message: errorModel });

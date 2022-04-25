@@ -5,10 +5,10 @@
       v-if="testsByWeek && testsByWeekInterval"
     >
       <h2 class="chart-title">
-        Questionários por semana
+        {{ $t('DASHBOARD.TESTS_BY_WEEK.quizzes_weak') }}
       </h2>
       <span class="number-of-tests">
-        Total:
+        {{ $t('DASHBOARD.TESTS_BY_WEEK.total') }}
         <span :style="{ color: colorPaleteList[colorPalete] }" class="amount">
           {{ Object.values(testsByWeek).reduce((a, b) => a + b, 0) }}
         </span>
@@ -24,7 +24,7 @@
             :ripple="false"
             :color="hover ? '#2196f3' : '#888888'"
           >
-            Ver mais
+            {{ $t('DASHBOARD.LAST_DATA.see_more') }}
           </v-btn>
         </v-hover>
       </span>
@@ -35,7 +35,7 @@
           class="week-details"
         >
           <span class="week-interval"> {{ getItemWeekInterval(item) }} </span>
-          <span class="week">Semana {{ index + 1 }}:</span>
+          <span class="week">{{ $t('DASHBOARD.TESTS_BY_WEEK.weak') }} {{ index + 1 }}:</span>
           <span
             class="week-amount"
             :class="item[1] === higherTestsAmount ? 'highlight' : ''"

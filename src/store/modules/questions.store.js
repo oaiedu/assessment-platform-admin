@@ -397,7 +397,7 @@ const actions = {
           commit("setLoading", false);
           const errorModel = showErrorMessage(
             "load",
-            "Questões",
+            "Questions",
             error.message
           );
           commit("setError", { message: errorModel });
@@ -472,7 +472,7 @@ const actions = {
           commit("setLoading", false);
           const errorModel = showErrorMessage(
             "load",
-            "Questões",
+            "Questions",
             error.message
           );
           commit("setError", { message: errorModel });
@@ -522,7 +522,7 @@ const actions = {
         commit("setLoading", false);
         const errorModel = showErrorMessage(
           "load",
-          "Questões",
+          "Questions",
           "Searching error - " + error.message
         );
         commit("setError", { message: errorModel });
@@ -746,7 +746,7 @@ const actions = {
       });
 
       if (!isRequest) {
-        commit("setSuccess", "Questão restaurada com sucesso!");
+        commit("setSuccess", "Question successfully restored!");
       }
     } catch (error) {
       const errorModel = showErrorMessage("connection", "", error.message);
@@ -855,7 +855,7 @@ const actions = {
         await doc.ref.update({ questions });
       }
 
-      commit("setSuccess", "Questões restauradas com sucesso!");
+      commit("setSuccess", "Questions successfully restored!");
     } catch (error) {
       const errorModel = showErrorMessage("connection", "", error.message);
 
@@ -913,7 +913,7 @@ const actions = {
       .catch(error => {
         const errorModel = showErrorMessage(
           "exclusion",
-          "Questão",
+          "Question",
           error.message
         );
         commit("setError", { message: errorModel });
@@ -1253,9 +1253,9 @@ const actions = {
 
       await Promise.all(testPromises);
 
-      commit("setSuccess", "Questão editada com sucesso!");
+      commit("setSuccess", "Question successfully edited!");
     } catch (error) {
-      const errorModel = showErrorMessage("edition", "Questão", error.message);
+      const errorModel = showErrorMessage("edition", "Question", error.message);
 
       commit("setError", { message: errorModel });
       createErrorLog("Question DB Upload", error.message, {
@@ -1396,10 +1396,14 @@ const actions = {
       });
 
       if (!payload.isRequest) {
-        commit("setSuccess", "Questão criada com sucesso!");
+        commit("setSuccess", "Question successfully created!");
       }
     } catch (error) {
-      const errorModel = showErrorMessage("creation", "Questão", error.message);
+      const errorModel = showErrorMessage(
+        "creation",
+        "Question",
+        error.message
+      );
 
       commit("setError", { message: errorModel });
       createErrorLog("Question DB Insert", error.message, {
@@ -1424,7 +1428,7 @@ const actions = {
 
       return snapshot.docs.length ? snapshot.docs[0].data() : null;
     } catch (error) {
-      const errorModel = showErrorMessage("load", "Questão", error.message);
+      const errorModel = showErrorMessage("load", "Question", error.message);
 
       commit("setError", { message: errorModel });
       createErrorLog("Question Name Load", error.message, {

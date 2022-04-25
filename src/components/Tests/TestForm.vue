@@ -5,7 +5,9 @@
         <v-btn icon dark class="mr-2" @click="close()">
           <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
-        <h2>{{ !test ? "Criar novo" : "Editar" }} questionário</h2>
+        <h2>
+          {{ !test ? $t("FAB.CREATE.new_quiz") : $t("TEST.edit") }}
+        </h2>
         <v-spacer></v-spacer>
       </v-toolbar>
 
@@ -43,7 +45,7 @@
             <v-icon color="white">{{ mdiContentSave }}</v-icon>
           </v-btn>
         </template>
-        <h3>Salvar</h3>
+        <span>{{ $t("TEST.TEST_FORM.save") }}</span>
       </v-tooltip>
 
       <v-container fluid class="pa-15 pt-10">
@@ -57,8 +59,8 @@
                 outlined
                 dense
                 required
-                label="Título"
-                :rules="textRule"
+                :label="$t('TEST.TEST_FORM.title')"
+                :rules="textRule()"
               ></v-text-field>
             </v-row>
 
@@ -66,7 +68,7 @@
               <VueTextEditor
                 v-if="ready"
                 outlined
-                placeholder="Instruções (Opcional)"
+                :placeholder="$t('TEST.TEST_FORM.instructions')"
                 :groups="['format', 'align', 'list', 'format2']"
                 :value="instructions"
                 :height="240"
@@ -84,8 +86,13 @@
                   dense
                   item-value="value"
                   item-text="label"
-                  :items="types"
-                  label="Tipo de questionário"
+                  :items="
+                    types.map(t => ({
+                      ...t,
+                      label: $t('TEST.TYPE.' + t.label)
+                    }))
+                  "
+                  :label="$t('TEST.TEST_FORM.type')"
                 >
                 </v-select>
               </v-col>
@@ -98,9 +105,9 @@
                   rounded
                   id="randomQuestionsNumber"
                   name="randomQuestionsNumber"
-                  label="Número de Questões"
                   type="number"
-                  :rules="rule"
+                  :label="$t('TEST.TEST_FORM.questions_amount')"
+                  :rules="rule()"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -113,7 +120,7 @@
                 outlined
                 dense
                 multiple
-                label="Disciplina"
+                :label="$t('TEST.TEST_FORM.subject')"
                 :items="subjects.map(s => s.name)"
               >
                 <template v-slot:selection="{ item, index }">
@@ -133,7 +140,7 @@
                     </v-list-item-action>
                     <v-list-item-content>
                       <v-list-item-title>
-                        Selecionar todos
+                        {{ $t("TEST.GENERATE_CARD.select_all") }}
                       </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
@@ -149,17 +156,22 @@
                 flat
                 outlined
                 dense
-                label="Nível"
                 item-value="value"
                 item-text="label"
-                :items="levels"
+                :label="$t('TEST.TEST_FORM.level')"
+                :items="
+                  levels.map(l => ({
+                    ...l,
+                    label: $t('TEST.LEVEL.' + l.label)
+                  }))
+                "
               ></v-select>
             </v-row>
 
             <v-row
               v-if="testType === 'random'"
               justify="center"
-              class="ma-0 py-2"
+              class="ma-0 mb-6 pa-0"
             >
               <v-btn
                 color="blue"
@@ -178,8 +190,12 @@
                 "
                 @click="selectRandom()"
               >
-                Começar Seleção
+                {{ $t("TEST.TEST_FORM.start_selection") }}
               </v-btn>
+            </v-row>
+
+            <v-row class="ma-0 pa-0" style="color: #5d5d5d">
+              {{ $t("TEST.TEST_FORM.approval_percentage") }}
             </v-row>
 
             <v-row class="ma-0 pa-0">
@@ -198,7 +214,7 @@
               <v-checkbox
                 v-model="unlimitedTime"
                 color="blue"
-                label="Tempo de questionário ilimitado"
+                :label="$t('TEST.TEST_FORM.unlimited_time')"
               ></v-checkbox>
             </v-row>
 
@@ -206,19 +222,21 @@
               <v-text-field
                 v-model="time.hours"
                 class="mr-3"
-                label="Horas"
                 type="number"
                 style="width: 100px; flex: none"
-                :rules="[v => v >= 0 || 'Valor inválido']"
+                :label="$t('TEST.TEST_FORM.hours')"
+                :rules="[v => v >= 0 || $t('TEST.TEST_FORM.RULES.invalid')]"
                 :disabled="unlimitedTime"
               ></v-text-field>
 
               <v-text-field
                 v-model="time.minutes"
-                label="Minutos"
                 type="number"
                 style="width: 100px; flex: none"
-                :rules="[v => (v >= 0 && v < 60) || 'Valor inválido']"
+                :label="$t('TEST.TEST_FORM.minutes')"
+                :rules="[
+                  v => (v >= 0 && v < 60) || $t('TEST.TEST_FORM.RULES.invalid')
+                ]"
                 :disabled="unlimitedTime"
               ></v-text-field>
             </v-row>
@@ -226,9 +244,7 @@
 
           <v-col v-if="testType === 'auto'" class="pt-10">
             <p class="orange--text text-center pt-10">
-              Questionários automáticos selecionam suas questões apenas quando
-              são iniciadas, de acordo com as disciplinas escolhidas, nível e
-              número de questões.
+              {{ $t("TEST.TEST_FORM.info_test") }}
             </p>
           </v-col>
 
@@ -240,11 +256,16 @@
                   show-select
                   hide-default-footer
                   item-key="name"
-                  no-data-text="Não há questões a serem mostradas"
-                  loading-text="Carregando questões..."
+                  :no-data-text="$t('QUESTIONS.TABLE.no_questions')"
+                  :loading-text="$t('QUESTIONS.TABLE.loading_questions')"
                   :item-class="itemRowStyle"
                   :items="selectedRandomQuestions"
-                  :headers="randomHeaders"
+                  :headers="
+                    randomHeaders.map(h => ({
+                      ...h,
+                      text: $t('QUESTIONS.FORM.' + h.text)
+                    }))
+                  "
                   :items-per-page="itemsPerPage"
                   :loading="loading"
                   :page="randomizedPage"
@@ -282,7 +303,7 @@
                 single-line
                 outlined
                 hide-details
-                label="Procurar por ID"
+                :label="$t('QUESTIONS.search_id')"
                 :append-icon="mdiMagnify"
                 @keydown="searchQuery($event)"
               ></v-text-field>
@@ -300,9 +321,14 @@
                   hide-default-footer
                   item-key="name"
                   class="elevation-1"
-                  no-data-text="Não há questões a serem mostradas"
-                  loading-text="Carregando questões..."
-                  :headers="headers"
+                  :no-data-text="$t('QUESTIONS.TABLE.no_questions')"
+                  :loading-text="$t('QUESTIONS.TABLE.loading_questions')"
+                  :headers="
+                    headers.map(h => ({
+                      ...h,
+                      text: $t('QUESTIONS.FORM.' + h.text)
+                    }))
+                  "
                   :items="isSearching ? filteredQuestions : questions"
                   :page="isSearching ? searchPage : page"
                   :items-per-page="itemsPerPage"
@@ -327,7 +353,7 @@
                   </template>
 
                   <template v-slot:[`item.level`]="{ item }">
-                    {{ levels[item.level.index].label }}
+                    {{ $t("TEST.LEVEL." + levels[item.level.index].label) }}
                   </template>
                 </v-data-table>
               </v-card>
@@ -364,9 +390,9 @@
       :timeout="15000"
     >
       <span style="color: white; font-size: 1rem">
-        Um questionário com este Título já foi criado!
+        {{ $t("TEST.TEST_FORM.title_already_in_use") }}
         <br />
-        Por favor, mude o Título.
+        {{ $t("TEST.TEST_FORM.change_title") }}
       </span>
       <template v-slot:action="{ attrs }">
         <v-btn
@@ -376,7 +402,7 @@
           v-bind="attrs"
           @click="createErrorSnackBar = false"
         >
-          Fechar
+          {{ $t("FAB.TEXT.close") }}
         </v-btn>
       </template>
     </v-snackbar>
@@ -447,43 +473,43 @@ export default {
             index: 0,
             name: "beginner"
           },
-          label: "Iniciante"
+          label: "beginner"
         },
         {
           value: {
             index: 1,
             name: "intermediary"
           },
-          label: "Intermediário"
+          label: "intermediary"
         },
         {
           value: {
             index: 2,
             name: "advanced"
           },
-          label: "Avançado"
+          label: "advanced"
         },
         {
           value: {
             index: 3,
             name: "expert"
           },
-          label: "Experiente"
+          label: "expert"
         }
       ],
       testSubjects: [],
       types: [
         {
           value: "selected",
-          label: "Selecionado"
+          label: "selected"
         },
         {
           value: "random",
-          label: "Aleatório"
+          label: "random"
         },
         {
           value: "auto",
-          label: "Automático"
+          label: "auto"
         }
       ],
       showedQuestions: [],
@@ -494,26 +520,19 @@ export default {
       pageCount: 15,
       itemsPerPage: 8,
       headers: [
-        { text: "ID", align: "left", sortable: false, value: "name" },
+        { text: "id", align: "left", sortable: false, value: "name" },
         {
-          text: "Disciplina",
+          text: "subject",
           align: "center",
           sortable: false,
           value: "subject"
         },
-        { text: "Nível", align: "center", value: "level" }
+        { text: "level", align: "center", value: "level" }
       ],
       randomHeaders: [
-        { text: "ID", align: "center", value: "name" },
-        { text: "Disciplina", align: "center", value: "subject" },
-        { text: "Nível", align: "center", value: "level" }
-      ],
-      textRule: [v => !!v || "Este campo é obrigatório"],
-      rule: [
-        v => v >= 1 || "Apenas números positivos",
-        v =>
-          v <= this.checkNumber ||
-          "Não há questões suficientes para a disciplina e nível escolhidos"
+        { text: "id", align: "center", value: "name" },
+        { text: "subject", align: "center", value: "subject" },
+        { text: "level", align: "center", value: "level" }
       ]
     };
   },
@@ -587,6 +606,17 @@ export default {
     }
   },
   methods: {
+    textRule() {
+      return [v => !!v || this.$t("TEST.TEST_FORM.RULES.required")];
+    },
+    rule() {
+      return [
+        v => v >= 1 || this.$t("TEST.TEST_FORM.RULES.positive"),
+        v =>
+          v <= this.checkNumber ||
+          this.$t("TEST.TEST_FORM.RULES.not_enough_questions")
+      ];
+    },
     onPageChange(event) {
       const payload = {
         page: this.page,

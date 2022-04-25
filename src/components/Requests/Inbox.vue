@@ -3,7 +3,7 @@
     <v-container>
       <v-container class="mt-10 mb-5">
         <SearchBox
-          label="Procurar por ID"
+          :label="$t('QUESTIONS.search_id')"
           @enter="searchQuery($event)"
           @textChange="searchTextChange($event)"
         />
@@ -13,8 +13,7 @@
         v-if="hasApprovedRequests && userClaims && userClaims['appraiser']"
       >
         <v-alert text prominent type="warning" color="red" :icon="mdiAlert">
-          Solicitações aprovadas serão excluídas automaticamente quando sair
-          desta página!
+          {{ $t("REQUESTS.INBOX.request") }}
         </v-alert>
       </v-container>
 
@@ -30,7 +29,7 @@
         <DeleteAlert
           :confirmCondition="deleteConfirmed"
           :itemsCondition="hasTrueMarkStatus && markedRequestsByUser"
-          itemsText="As seguintes solicitações foram marcadas para exclusão:"
+          :itemsText="$t('REQUESTS.delete_marked')"
           :items="markedRequestsByUser"
         />
 
@@ -44,10 +43,10 @@
               deleteRequests();
             "
           >
-            Confirmar
+            {{ $t("AUTH.SUBJECT.confirm") }}
           </v-btn>
           <v-btn class="ml-3" color="grey darken-1" dark @click="restoreAll()">
-            Restaurar
+            {{ $t("TEST.TESTS.restore") }}
           </v-btn>
         </v-row>
       </v-container>
@@ -111,7 +110,7 @@
       </v-dialog>
 
       <DeleteWarning
-        label="Tem certeza de que deseja excluir esta solicitação?"
+        :label="$t('REQUESTS.delete_confirm')"
         :state="deleteRequestSnackBar"
         @confirm="
           deleteRequest(deleteItem);
@@ -133,12 +132,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          Esta questão está sendo usada nos seguintes questionários:
+          {{ $t("REQUESTS.INBOX.info_1") }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          Só será possível rejeitá-la quando não se encontrar em nenhum
-          questionário.
+          {{ $t("REQUESTS.INBOX.info_2") }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -148,7 +146,7 @@
             v-bind="attrs"
             @click="rejectErrorSnackBar = false"
           >
-            Fechar
+            {{ $t("FAB.TEXT.close") }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -325,7 +323,7 @@ export default {
                 });
                 this.$store.commit(
                   "setSuccess",
-                  "Solicitação aprovada com sucesso!"
+                  "Request successfully approved!"
                 );
               });
           } else {
@@ -344,7 +342,7 @@ export default {
                 });
                 this.$store.commit(
                   "setSuccess",
-                  "Solicitação aprovada com sucesso!"
+                  "Request successfully approved!"
                 );
               });
           }
@@ -421,7 +419,7 @@ export default {
         });
 
         this.rejectLoading = false;
-        this.$store.commit("setSuccess", "Solicitação rejeitada com sucesso!");
+        this.$store.commit("setSuccess", "Request successfully rejected!");
 
         return;
       }

@@ -42,7 +42,7 @@
                   <v-icon>{{ mdiFileOutline }}</v-icon>
                 </v-btn>
               </template>
-              <span>Gerar PDF</span>
+              <span>{{ $t('QUESTIONS.PRINT.create_pdf') }}</span>
             </v-tooltip>
 
             <v-tooltip right>
@@ -60,7 +60,7 @@
                   <v-icon>{{ mdiArrowLeft }}</v-icon>
                 </v-btn>
               </template>
-              <span>Voltar</span>
+              <span>{{ $t('QUESTIONS.EDIT.back') }}</span>
             </v-tooltip>
           </div>
         </div>

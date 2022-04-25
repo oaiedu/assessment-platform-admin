@@ -12,7 +12,7 @@ const models = {
    * @returns {string} the message model.
    */
   load(category, message) {
-    return "Error ao carregar " + category + ": " + message;
+    return "Error loading " + category + ": " + message;
   },
   /**
    * Gets a error message of the 'creation' type.
@@ -22,7 +22,7 @@ const models = {
    * @returns {string} the message model.
    */
   creation(category, message) {
-    return "Erro ao criar " + category + ": " + message;
+    return "Error creating " + category + ": " + message;
   },
   /**
    * Gets a error message of the 'edition' type.
@@ -32,7 +32,7 @@ const models = {
    * @returns {string} the message model.
    */
   edition(category, message) {
-    return "Erro ao editar " + category + ": " + message;
+    return "Error editing " + category + ": " + message;
   },
   /**
    * Gets a error message of the 'exclusion' type.
@@ -42,7 +42,7 @@ const models = {
    * @returns {string} the message model.
    */
   exclusion(category, message) {
-    return "Erro ao excluir " + category + ": " + message;
+    return "Error deleting " + category + ": " + message;
   },
   /**
    * Gets a error message of the 'notFound' type.
@@ -51,7 +51,7 @@ const models = {
    * @returns {string} the message model.
    */
   notFound(message) {
-    return 'Item "' + message + '" não encontrado!';
+    return 'Item "' + message + '" not found!';
   },
   /**
    * Gets a error message of the 'connection' type.
@@ -60,7 +60,7 @@ const models = {
    * @returns {string} the message model.
    */
   connection(message) {
-    return "Erro de conexão: " + message;
+    return "Connection error: " + message;
   },
   /**
    * Gets a error message of the 'admin' type.
@@ -69,7 +69,7 @@ const models = {
    * @returns {string} the message model.
    */
   admin(message) {
-    return "Erro: " + message + "\nEntre em contato com algum administrador.";
+    return "Error: " + message + "\nContact some administrator.";
   },
   /**
    * Gets a error message of the 'default' type.
@@ -78,7 +78,7 @@ const models = {
    * @returns {string} the message model.
    */
   default(message) {
-    return "Erro: " + message;
+    return "Error: " + message;
   }
 };
 

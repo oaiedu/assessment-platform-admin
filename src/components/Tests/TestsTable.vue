@@ -3,9 +3,14 @@
     <v-card outlined style="border-radius: 26px; overflow: hidden">
       <v-data-table
         hide-default-footer
-        no-data-text="Não há questionários a serem mostrados"
-        loading-text="Carregando questionários..."
-        :headers="headers"
+        :no-data-text="$t('TEST.no_quizzes')"
+        :loading-text="$t('TEST.loading_quizzes')"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: h.text ? $t('TEST.TESTS_TABLE.HEADERS.' + h.text) : ''
+          }))
+        "
         :items="items"
         :page="page"
         :items-per-page="itemsPerPage"
@@ -64,7 +69,7 @@
               color="indigo lighten-2"
               @click="doExam(item)"
             >
-              Visualizar
+              {{ $t("TEST.TESTS_TABLE.view") }}
             </v-btn>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -79,7 +84,7 @@
                   {{ mdiFileCompare }}
                 </v-icon>
               </template>
-              <span>Visualizar questionário</span>
+              <span>{{ $t("TEST.TESTS_TABLE.view_quiz") }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -94,7 +99,7 @@
                   {{ mdiPencil }}
                 </v-icon>
               </template>
-              <span>Editar</span>
+              <span>{{ $t("REQUESTS.TABLE.edit") }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -109,7 +114,7 @@
                   {{ mdiDelete }}
                 </v-icon>
               </template>
-              <span>Excluir</span>
+              <span>{{ $t("TEST.TESTS_TABLE.delete") }}</span>
             </v-tooltip>
           </v-row>
 
@@ -129,9 +134,12 @@
               @click="onRestoreClick(item)"
             >
               {{
-                userClaims && item.toDelete.userEmail !== userInfo.email
-                  ? "Indisponível"
-                  : "Restaurar"
+                $t(
+                  "TEST." +
+                    (userClaims && item.toDelete.userEmail !== userInfo.email
+                      ? "unavailable"
+                      : "restore")
+                )
               }}
             </v-btn>
           </v-row>
@@ -147,7 +155,7 @@
               disabled
               text
             >
-              Excluída
+              {{ $t("TEST.TESTS_TABLE.deleted") }}
             </v-btn>
           </v-row>
         </template>
@@ -186,7 +194,7 @@ export default {
       mdiClipboardText,
       mdiDumbbell,
       headers: [
-        { text: "Título", align: "start", value: "title" },
+        { text: "title", align: "start", value: "title" },
         {
           text: "",
           align: "right",
@@ -194,7 +202,7 @@ export default {
           sortable: false
         },
         {
-          text: "Ações",
+          text: "actions",
           align: "center",
           value: "actions",
           sortable: false,
@@ -241,10 +249,15 @@ export default {
       const attempts = this.getUserAttempts(item);
 
       if (!attempts) {
-        return "SEM TENTATIVAS";
+        return this.$t("TEST.TESTS_TABLE.no_attempts");
       }
 
-      return attempts + " TENTATIVA" + (attempts !== 1 ? "S" : "");
+      return (
+        attempts +
+        " " +
+        this.$t("TEST.TESTS_TABLE.attempt") +
+        (attempts !== 1 ? "S" : "")
+      );
     },
     getUserAttempts(item) {
       let attempts = 0;
@@ -277,7 +290,7 @@ export default {
     },
     getTime(item) {
       return item.unlimitedTime
-        ? "Ilimitado"
+        ? this.$t("TEST.QUIZ.unlimited")
         : `${item.time.hours}h ${item.time.minutes}m ${item.time.seconds}s`;
     },
     itemRowStyle(item) {

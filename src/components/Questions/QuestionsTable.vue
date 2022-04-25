@@ -3,8 +3,8 @@
     <v-card outlined style="border-radius: 26px; overflow: hidden">
       <v-data-table
         hide-default-footer
-        no-data-text="Não há questões a serem mostradas"
-        loading-text="Carregando questões..."
+        :no-data-text="$t('QUESTIONS.TABLE.no_questions')"
+        :loading-text="$t('QUESTIONS.TABLE.loading_questions')"
         :items="items"
         :page="page"
         :items-per-page="itemsPerPage"
@@ -13,19 +13,25 @@
         :headers="
           isActionsAvailable
             ? [
-                ...headers,
+                ...headers.map(h => ({
+                  ...h,
+                  text: $t('QUESTIONS.TABLE.HEADERS.' + h.text)
+                })),
                 {
-                  text: 'Ações',
+                  text: $t('QUESTIONS.TABLE.HEADERS.actions'),
                   align: 'right',
                   value: 'actions',
                   sortable: false
                 }
               ]
-            : headers
+            : headers.map(h => ({
+                ...h,
+                text: $t('QUESTIONS.TABLE.HEADERS.' + h.text)
+              }))
         "
       >
         <template v-slot:[`item.level`]="{ item }">
-          {{ levels[item.level.index] }}
+          {{ $t("TEST.LEVEL." + levels[item.level.index]) }}
         </template>
 
         <template v-slot:[`item.actions`]="{ item }" v-if="isActionsAvailable">
@@ -41,7 +47,7 @@
                   {{ pdfIcon }}
                 </v-icon>
               </template>
-              <span>Visualizar PDF</span>
+              <span>{{ $t("REQUESTS.TABLE.view_pdf") }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['admin']">
@@ -56,7 +62,7 @@
                   {{ pencilIcon }}
                 </v-icon>
               </template>
-              <span>Editar</span>
+              <span>{{ $t("REQUESTS.TABLE.edit") }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['admin']">
@@ -71,7 +77,7 @@
                   {{ deleteIcon }}
                 </v-icon>
               </template>
-              <span>Excluir</span>
+              <span>{{ $t("TEST.TESTS_TABLE.delete") }}</span>
             </v-tooltip>
           </v-row>
 
@@ -87,7 +93,12 @@
               @click="onRestoreClick(item)"
             >
               {{
-                userClaims && userClaims["admin"] ? "Restaurar" : "Indisponível"
+                $t(
+                  "QUESTIONS.TABLE." +
+                    (userClaims && userClaims["admin"]
+                      ? "restore"
+                      : "unavailable")
+                )
               }}
             </v-btn>
           </v-row>
@@ -98,7 +109,7 @@
               disabled
               text
             >
-              Excluída
+              {{ $t("TEST.TESTS_TABLE.deleted") }}
             </v-btn>
           </v-row>
         </template>
@@ -119,11 +130,11 @@ export default {
       pencilIcon: mdiPencil,
       deleteIcon: mdiDelete,
       headers: [
-        { text: "ID", align: "left", value: "name" },
-        { text: "Disciplina", align: "left", value: "subject" },
-        { text: "Nível", value: "level" }
+        { text: "id", align: "left", value: "name" },
+        { text: "subject", align: "left", value: "subject" },
+        { text: "level", value: "level" }
       ],
-      levels: ["Iniciante", "Intermediário", "Avançado", "Experiente"]
+      levels: ["beginner", "intermediary", "advanced", "expert"]
     };
   },
   computed: {

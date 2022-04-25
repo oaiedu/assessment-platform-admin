@@ -12,7 +12,7 @@
             :ripple="false"
             :color="hover ? '#2196f3' : '#888888'"
           >
-            Ver mais
+            {{ $t("DASHBOARD.LAST_DATA.see_more") }}
           </v-btn>
         </v-hover>
       </h2>
@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="no-content" v-else>
-        Não há solicitações pendentes
+        {{ $t("DASHBOARD.LAST_REQUESTS.no_resquests") }}
       </div>
     </div>
   </v-card>
@@ -88,9 +88,9 @@ export default {
         this.userClaims &&
         (this.userClaims["admin"] || this.userClaims["appraiser"])
       ) {
-        return "Solicitações pendentes";
+        return this.$t("DASHBOARD.LAST_REQUESTS.latest_requests");
       } else {
-        return "Questões pendentes";
+        return this.$t("DASHBOARD.LAST_REQUESTS.latest_questions");
       }
     }
   },
