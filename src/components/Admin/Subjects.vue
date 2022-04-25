@@ -8,8 +8,8 @@
         outlined
         rounded
         color="blue"
-        label="Pesquisar"
         style="max-width: 400px"
+        :label="$t('ADMIN.search')"
       ></v-text-field>
 
       <v-spacer></v-spacer>
@@ -22,7 +22,7 @@
         color="blue"
         @click="addingSubject = true"
       >
-        {{ $t('ADMIN.SUBJECTS.add_subject') }}
+        {{ $t("ADMIN.SUBJECTS.add_subject") }}
         <v-icon right dark size="24">{{ mdiPlus }}</v-icon>
       </v-btn>
 
@@ -46,7 +46,7 @@
               <v-icon color="green">{{ mdiCheck }}</v-icon>
             </v-btn>
           </template>
-          <span>{{ $t('AUTH.SUBJECT.confirm') }}</span>
+          <span>{{ $t("AUTH.SUBJECT.confirm") }}</span>
         </v-tooltip>
 
         <v-tooltip top>
@@ -63,16 +63,21 @@
               <v-icon color="red">{{ mdiClose }}</v-icon>
             </v-btn>
           </template>
-          <span>{{ $t('TEST.QUIZ.cancel') }}</span>
+          <span>{{ $t("ADMIN.cancel") }}</span>
         </v-tooltip>
       </v-row>
     </v-row>
 
     <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
       <v-data-table
-        no-data-text="Não há disciplinas"
-        loading-text="Carregando disciplinas"
-        :headers="headers"
+        :loading-text="$t('ADMIN.SUBJECTS.loading_subjects')"
+        :no-data-text="$t('ADMIN.SUBJECTS.no_subjects')"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('ADMIN.SUBJECTS.HEADERS.' + h.text)
+          }))
+        "
         :items="subjects"
         :loading="loading"
         :search="search"
@@ -95,7 +100,7 @@
                 <v-icon color="red">{{ mdiDelete }}</v-icon>
               </v-btn>
             </template>
-            <span>{{ $t('TEST.TEST_TABLE.delete') }}</span>
+            <span>{{ $t("ADMIN.delete") }}</span>
           </v-tooltip>
         </template>
       </v-data-table>
@@ -109,7 +114,7 @@
       top
       :timeout="15000"
     >
-      {{ $t('ADMIN.SUBJECTS.warning') }}
+      {{ $t("ADMIN.SUBJECTS.warning") }}
       <v-btn
         dark
         class="ml-3"
@@ -117,7 +122,7 @@
         text
         @click="deleteSubject(deleteItem)"
       >
-        {{ $t('TEST.TEST_TABLE.delete') }}
+        {{ $t("ADMIN.delete") }}
       </v-btn>
 
       <v-btn
@@ -129,7 +134,7 @@
           deleteItem = null;
         "
       >
-        {{ $t('AUTH.SUBJECT.cancel') }}
+        {{ $t("ADMIN.cancel") }}
       </v-btn>
     </v-snackbar>
 
@@ -143,9 +148,9 @@
     >
       <v-row class="pa-0 ma-0" align="center">
         <span class="font-weight-medium">
-          {{ $t('ADMIN.SUBJECTS.text_1') }}
+          {{ $t("ADMIN.SUBJECTS.text_1") }}
           <br />
-          {{ $t('ADMIN.SUBJECTS.text_2') }}
+          {{ $t("ADMIN.SUBJECTS.text_2") }}
         </span>
 
         <v-btn dark class="ml-3" icon @click="deleteWarning = false">
@@ -174,9 +179,9 @@ export default {
     deleteSnackbar: false,
     deleteItem: null,
     headers: [
-      { text: "Nome", align: "left", value: "name", sortable: true },
-      { text: "Questões", align: "center", value: "amount", sortable: true },
-      { text: "Ações", align: "right", value: "actions", sortable: false }
+      { text: "name", align: "left", value: "name", sortable: true },
+      { text: "questions", align: "center", value: "amount", sortable: true },
+      { text: "actions", align: "right", value: "actions", sortable: false }
     ]
   }),
   computed: {

@@ -8,7 +8,7 @@
         :loading="loading"
         @click="backup()"
       >
-        {{ $t('ADMIN.BACKUPS_TABLE.backup') }}
+        {{ $t("ADMIN.BACKUPS_TABLE.backup") }}
         <v-icon right dark>{{ mdiCloudUpload }}</v-icon>
       </v-btn>
     </v-row>
@@ -16,10 +16,15 @@
     <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
       <v-data-table
         hide-default-footer
-        loading-text="Carregando backups..."
-        no-data-text="Não há backups neste mês"
+        :loading-text="$t('ADMIN.BACKUPS_TABLE.loading_backups')"
+        :no-data-text="$t('ADMIN.BACKUPS_TABLE.no_backups')"
         :items="getBackupsByMonth(currentMonth)"
-        :headers="headers"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('ADMIN.BACKUPS_TABLE.HEADERS.' + h.text)
+          }))
+        "
         :loading="loading"
         :sort-by="['start']"
         :sort-desc="[true]"
@@ -27,7 +32,7 @@
         <template v-slot:top>
           <v-toolbar flat dense>
             <v-toolbar-title class="blue--text font-weight-medium">
-              {{ $t('ADMIN.BACKUPS_TABLE.current_mouth') }}
+              {{ $t("ADMIN.BACKUPS_TABLE.current_month") }}
             </v-toolbar-title>
           </v-toolbar>
           <v-divider></v-divider>
@@ -45,7 +50,7 @@
                 {{ mdiDownload }}
               </v-icon>
             </template>
-            <span>Download</span>
+            <span>{{ $t("ADMIN.download") }}</span>
           </v-tooltip>
 
           <v-tooltip top>
@@ -64,7 +69,7 @@
                 {{ mdiDelete }}
               </v-icon>
             </template>
-            <span>{{ $t('TEST.TESTS_TABLE.delete') }}</span>
+            <span>{{ $t("ADMIN.delete") }}</span>
           </v-tooltip>
         </template>
         <template v-slot:[`item.start`]="{ item }">
@@ -83,10 +88,15 @@
     >
       <v-data-table
         hide-default-footer
-        loading-text="Carregando backups..."
-        no-data-text="Não há backups neste mês"
+        :loading-text="$t('ADMIN.BACKUPS_TABLE.loading_backups')"
+        :no-data-text="$t('ADMIN.BACKUPS_TABLE.no_backups')"
         :items="getBackupsByMonth(lastMonth)"
-        :headers="headers"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('ADMIN.BACKUPS_TABLE.HEADERS.' + h.text)
+          }))
+        "
         :loading="loading"
         :sort-by="['start']"
         :sort-desc="[true]"
@@ -109,7 +119,7 @@
                 {{ mdiDownload }}
               </v-icon>
             </template>
-            <span>{{ $t('TEST.TESTS_TABLE.delete') }}</span>
+            <span>{{ $t("ADMIN.download") }}</span>
           </v-tooltip>
 
           <v-tooltip top>
@@ -146,10 +156,15 @@
     >
       <v-data-table
         hide-default-footer
-        loading-text="Carregando backups..."
-        no-data-text="Não há backups neste mês"
+        :loading-text="$t('ADMIN.BACKUPS_TABLE.loading_backups')"
+        :no-data-text="$t('ADMIN.BACKUPS_TABLE.no_backups')"
         :items="getBackupsByMonth(twoMonthsAgo)"
-        :headers="headers"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('ADMIN.BACKUPS_TABLE.HEADERS.' + h.text)
+          }))
+        "
         :loading="loading"
         :sort-by="['start']"
         :sort-desc="[true]"
@@ -172,7 +187,7 @@
                 {{ mdiDownload }}
               </v-icon>
             </template>
-            <span>Download</span>
+            <span>{{ $t("ADMIN.download") }}</span>
           </v-tooltip>
 
           <v-tooltip top>
@@ -190,7 +205,7 @@
                 {{ mdiDelete }}
               </v-icon>
             </template>
-            <span>{{ $t('TEST.TESTS_TABLE.delete') }}</span>
+            <span>{{ $t("ADMIN.delete") }}</span>
           </v-tooltip>
         </template>
         <template v-slot:[`item.start`]="{ item }">
@@ -210,10 +225,10 @@
       color="white"
       :timeout="15000"
     >
-      {{ $t('ADMIN.BACKUPS_TABLE.warning') }}
+      {{ $t("ADMIN.BACKUPS_TABLE.warning") }}
 
       <v-btn dark text class="ml-3" color="blue" @click="deleteBkp(deleteItem)">
-        {{ $t('TEST.TESTS_TABLE.delete') }}
+        {{ $t("ADMIN.delete") }}
       </v-btn>
 
       <v-btn
@@ -225,7 +240,7 @@
           deleteItem = null;
         "
       >
-        {{ $t('AUTH.SUBJECT.cancel') }}
+        {{ $t("ADMIN.cancel") }}
       </v-btn>
     </v-snackbar>
   </v-container>
@@ -247,31 +262,31 @@ export default {
       months: null,
       headers: [
         {
-          text: "ID",
+          text: "id",
           value: "id",
           align: "left",
           sortable: true
         },
         {
-          text: "Tamanho",
+          text: "size",
           value: "size",
           align: "center",
           sortable: true
         },
         {
-          text: "Data de Início",
+          text: "start_date",
           value: "start",
           align: "center",
           sortable: true
         },
         {
-          text: "Data de Término",
+          text: "end_date",
           value: "end",
           align: "center",
           sortable: true
         },
         {
-          text: "Ações",
+          text: "actions",
           value: "actions",
           align: "center",
           sortable: false
@@ -298,7 +313,10 @@ export default {
         : this.currentMonth - 2;
     },
     pastMonths() {
-      return [this.months[this.lastMonth], this.months[this.twoMonthsAgo]];
+      return [
+        this.$t("SHARED.DATE.MONTH." + this.months[this.lastMonth]),
+        this.$t("SHARED.DATE.MONTH." + this.months[this.twoMonthsAgo])
+      ];
     }
   },
   methods: {
@@ -307,7 +325,9 @@ export default {
 
       const dateTime = new Date(date).toString();
       const sub = dateTime.substr(7, 17);
-      const monthName = this.months[month].substr(0, 3);
+      const monthName = this.$t(
+        "SHARED.DATE.MONTH." + this.months[month]
+      ).substr(0, 3);
 
       return monthName + sub;
     },

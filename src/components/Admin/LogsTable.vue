@@ -8,17 +8,19 @@
         outlined
         rounded
         color="blue"
-        label="Pesquisar"
         style="max-width: 400px"
+        :label="$t('ADMIN.search')"
       ></v-text-field>
     </v-row>
 
     <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
       <v-data-table
-        loading-text="Carregando logs..."
-        no-data-text="Não há logs a serem exibidos"
+        :loading-text="$t('ADMIN.LOGS.loading_logs')"
+        :no-data-text="$t('ADMIN.LOGS.no_logs')"
         :items="logs"
-        :headers="headers"
+        :headers="
+          headers.map(h => ({ ...h, text: $t('ADMIN.LOGS.HEADERS.' + h.text) }))
+        "
         :loading="loading"
         :search="search"
       >
@@ -64,7 +66,7 @@
                 {{ mdiEmail }}
               </v-icon>
             </template>
-            <span>{{ $t('REQUESTS.TABLE.send_email') }}</span>
+            <span>{{ $t("REQUESTS.TABLE.send_email") }}</span>
           </v-tooltip>
         </template>
       </v-data-table>
@@ -83,11 +85,11 @@ export default {
       mdiEmail,
       search: "",
       headers: [
-        { text: "ID", align: "left", value: "id", sortable: true },
-        { text: "Tipo", align: "center", value: "type", sortable: true },
-        { text: "Usuário", align: "center", value: "userInfo", sortable: true },
-        { text: "Data", align: "center", value: "date", sortable: true },
-        { text: "Ações", align: "center", value: "actions", sortable: false }
+        { text: "id", align: "left", value: "id", sortable: true },
+        { text: "type", align: "center", value: "type", sortable: true },
+        { text: "user", align: "center", value: "userInfo", sortable: true },
+        { text: "date", align: "center", value: "date", sortable: true },
+        { text: "actions", align: "center", value: "actions", sortable: false }
       ]
     };
   },

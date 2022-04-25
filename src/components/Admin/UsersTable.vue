@@ -8,17 +8,24 @@
         outlined
         rounded
         color="blue"
-        label="Pesquisar"
         style="max-width: 400px"
+        :label="$t('ADMIN.search')"
       ></v-text-field>
     </v-row>
 
     <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
       <v-data-table
         v-if="currentUser"
-        loading-text="Carregando usuários..."
+        :loading-text="$t('ADMIN.USERS_TABLE.loading_users')"
+        :no-data-text="$t('ADMIN.USERS_TABLE.no_users')"
         :items="users"
-        :headers="headers"
+        locale="pt"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('ADMIN.USERS_TABLE.HEADERS.' + h.text)
+          }))
+        "
         :loading="loading"
         :search="search"
       >
@@ -28,7 +35,7 @@
               item.email === currentUser.email && 'users-table__highlight'
             "
           >
-            {{ getRoleName(item.role) }}
+            {{ $t("USER.ROLE." + item.role) }}
           </span>
         </template>
 
@@ -66,7 +73,7 @@
                 {{ mdiAccountEdit }}
               </v-icon>
             </template>
-            <span>{{ $t('ADMIN.USERS_TABLE.edit_fuction') }}</span>
+            <span>{{ $t("ADMIN.USERS_TABLE.edit_role") }}</span>
           </v-tooltip>
 
           <v-tooltip top>
@@ -82,7 +89,7 @@
                 {{ mdiEmail }}
               </v-icon>
             </template>
-            <span>{{ $t('REQUESTS.TABLE.send_email') }}</span>
+            <span>{{ $t("REQUESTS.TABLE.send_email") }}</span>
           </v-tooltip>
         </template>
       </v-data-table>
@@ -96,11 +103,11 @@
         <v-card-text>
           <v-select
             v-model="editRole"
-            :items="roles"
-            label="Selecione a função"
             item-value="value"
             item-text="text"
             menu-props="auto"
+            :label="$t('ADMIN.USERS_TABLE.select_role')"
+            :items="roles.map(r => ({ ...r, text: $t('USER.ROLE.' + r.text) }))"
           >
           </v-select>
         </v-card-text>
@@ -113,7 +120,7 @@
             "
             text
           >
-            {{ $t('AUTH.SUBJECTS.cancel') }}
+            {{ $t("AUTH.SUBJECT.cancel") }}
           </v-btn>
 
           <v-spacer></v-spacer>
@@ -127,7 +134,7 @@
             text
             :disabled="!editRole"
           >
-            {{ $t('TEST.TEST_FORM.save') }}
+            {{ $t("TEST.TEST_FORM.save") }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -153,31 +160,31 @@ export default {
       editRole: null,
       editDialog: false,
       roles: [
-        { text: "Administrador", value: "admin" },
-        { text: "Aluno", value: "student" },
-        { text: "Avaliador", value: "appraiser" }
+        { text: "admin", value: "admin" },
+        { text: "student", value: "student" },
+        { text: "appraiser", value: "appraiser" }
       ],
       headers: [
         {
-          text: "Função",
+          text: "role",
           value: "role",
           align: "left",
           sortable: true
         },
         {
-          text: "Nome",
+          text: "name",
           value: "name",
           align: "center",
           sortable: true
         },
         {
-          text: "E-mail",
+          text: "email",
           value: "email",
           align: "center",
           sortable: true
         },
         {
-          text: "Ações",
+          text: "actions",
           value: "actions",
           align: "center",
           sortable: false
@@ -197,11 +204,6 @@ export default {
     }
   },
   methods: {
-    getRoleName(role) {
-      if (role === "admin") return "Administrador";
-      else if (role === "appraiser") return "Avaliador";
-      else return "Aluno";
-    },
     sendEmail(email) {
       const a = document.createElement("a");
       a.href = "mailto:" + email;
