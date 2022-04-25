@@ -1,9 +1,9 @@
 <template>
   <v-card>
     <v-toolbar class="pt-2 mb-4" dense flat>
-      <v-card-title class="ma-0 pa-0 blue--text"
-        >{{ $t('TEST.GENERATE_CARD.generate_new') }}</v-card-title
-      >
+      <v-card-title class="ma-0 pa-0 blue--text">{{
+        $t("TEST.GENERATE_CARD.generate_new")
+      }}</v-card-title>
 
       <v-spacer></v-spacer>
 
@@ -18,14 +18,14 @@
       <v-row class="ma-0 pa-0">
         <v-col class="ma-0 pa-0">
           <v-text-field
+            v-model="questionsNumber"
             dense
             outlined
             rounded
-            name="questionsNumber"
-            label="Número de Questões"
             id="questionsNumber"
-            v-model="questionsNumber"
+            name="questionsNumber"
             type="number"
+            :label="$t('TEST.TEST_FORM.questions_amount')"
             :rules="rule"
           ></v-text-field>
         </v-col>
@@ -34,13 +34,13 @@
       <v-row class="ma-0 pa-0">
         <v-col class="ma-0 pa-0">
           <v-select
+            v-model="testSubjects"
             rounded
             flat
             outlined
             dense
             multiple
-            label="Disciplina"
-            v-model="testSubjects"
+            :label="$t('TEST.TEST_FORM.subject')"
             :items="subjects.map(s => s.name)"
           >
             <template v-slot:selection="{ item, index }">
@@ -63,7 +63,7 @@
 
                 <v-list-item-content>
                   <v-list-item-title>
-                    {{ $t('TEST.GENERATE_CARD.select_all') }}
+                    {{ $t("TEST.GENERATE_CARD.select_all") }}
                   </v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
@@ -81,17 +81,19 @@
           flat
           outlined
           dense
-          label="Nível"
           item-value="value"
           item-text="label"
-          :items="levels"
+          :label="$t('TEST.TEST_FORM.level')"
+          :items="
+            levels.map(l => ({ ...l, label: $t('TEST.LEVEL.' + l.label) }))
+          "
         ></v-select>
       </v-row>
 
       <v-row class="ma-0 pa-0">
         <v-checkbox
           v-model="unlimitedTime"
-          label="Tempo de questionário ilimitado"
+          :label="$t('TEST.TEST_FORM.unlimited_time')"
         ></v-checkbox>
       </v-row>
 
@@ -99,19 +101,21 @@
         <v-text-field
           v-model="time.hours"
           class="mr-3"
-          label="Horas"
           type="number"
           style="width: 100px; flex: none"
-          :rules="[v => v >= 0 || 'Valor inválido']"
+          :label="$t('TEST.TEST_FORM.hours')"
+          :rules="[v => v >= 0 || $t('TEST.TEST_FORM.RULES.invalid')]"
           :disabled="unlimitedTime"
         ></v-text-field>
 
         <v-text-field
           v-model="time.minutes"
-          label="Minutos"
           type="number"
           style="width: 100px; flex: none"
-          :rules="[v => (v >= 0 && v < 60) || 'Valor inválido']"
+          :label="$t('TEST.TEST_FORM.minutes')"
+          :rules="[
+            v => (v >= 0 && v < 60) || $t('TEST.TEST_FORM.RULES.invalid')
+          ]"
           :disabled="unlimitedTime"
         ></v-text-field>
       </v-row>
@@ -137,7 +141,7 @@
         "
         @click="selectQuestions()"
       >
-        {{ $t('TEST.GENERATE_CARD.start') }}
+        {{ $t("TEST.GENERATE_CARD.start") }}
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -175,35 +179,29 @@ export default {
             index: 0,
             name: "beginner"
           },
-          label: "Iniciante"
+          label: "beginner"
         },
         {
           value: {
             index: 1,
             name: "intermediary"
           },
-          label: "Intermediário"
+          label: "intermediary"
         },
         {
           value: {
             index: 2,
             name: "advanced"
           },
-          label: "Avançado"
+          label: "advanced"
         },
         {
           value: {
             index: 3,
             name: "expert"
           },
-          label: "Experiente"
+          label: "expert"
         }
-      ],
-      rule: [
-        v => v >= 1 || "Apenas números positivos",
-        v =>
-          v <= this.checkNumber ||
-          "Não há questões suficientes para a disciplina e nível escolhidos"
       ]
     };
   },
@@ -240,6 +238,14 @@ export default {
     }
   },
   methods: {
+    rule() {
+      return [
+        v => v >= 1 || this.$t("TEST.TEST_FORM.RULES.positive"),
+        v =>
+          v <= this.checkNumber ||
+          this.$t("TEST.TEST_FORM.RULES.not_enough_questions")
+      ];
+    },
     async selectQuestions() {
       this.$store.commit("setLoading", true);
 

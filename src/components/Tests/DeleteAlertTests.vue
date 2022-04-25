@@ -8,7 +8,7 @@
       color="red"
       :icon="mdiAlert"
     >
-      {{ $t('TEST.DELETE_ALERT.sucess') }}
+      {{ $t("TEST.DELETE_ALERT.success") }}
     </v-alert>
 
     <v-alert
@@ -25,7 +25,7 @@
 
       <div v-if="isAdmin">
         <br />
-        {{ $t('TEST.DELETE_ALERT.marked') }}
+        {{ $t("TEST.DELETE_ALERT.marked") }}
         <br />
         {{ adminItems }}
       </div>

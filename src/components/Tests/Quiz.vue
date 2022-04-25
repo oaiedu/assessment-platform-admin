@@ -5,19 +5,21 @@
     style="max-width: unset; min-height: 100%; background: #efefef"
   >
     <v-row class="pa-4 ma-0">
-      <a @click="exitQuiz('/')">{{ $t('TEST.QUIZ.home') }}</a>
+      <a @click="exitQuiz('/')">{{ $t("TEST.QUIZ.home") }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="exitQuiz('/quizzes')">{{ $t('TEST.QUIZ.quizzes') }}</a>
+      <a @click="exitQuiz('/quizzes')">{{ $t("TEST.QUIZ.quizzes") }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="exitQuiz('/quizzes/' + test.id)">{{ $t('TEST.QUIZ.quiz_info') }}</a>
+      <a @click="exitQuiz('/quizzes/' + test.id)">{{
+        $t("TEST.QUIZ.quiz_info")
+      }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a>{{ test ? test.title : "Questionário" }}</a>
+      <a>{{ test ? test.title : $t("TEST.QUIZ.quiz_t") }}</a>
     </v-row>
 
     <v-progress-circular
@@ -37,7 +39,8 @@
     >
       <v-toolbar flat class="">
         <span class="quiz__current-question">
-          {{ $t('TEST.QUIZ.question') }} {{ current }} {{ $t('TEST.QUIZ.of') }} {{ examQuestions.length }}
+          {{ $t("TEST.QUIZ.question") }} {{ current }} {{ $t("TEST.QUIZ.of") }}
+          {{ examQuestions.length }}
         </span>
 
         <v-spacer></v-spacer>
@@ -59,8 +62,11 @@
           text
           color="error"
           @click="exitQuiz(review ? '/quizzes/' + test.id : '/quizzes')"
-          >Sair
-          {{ !review && windowWidth > 540 ? "do Questionário" : "" }}</v-btn
+        >
+          {{ $t("TEST.QUIZ.exit") }}
+          {{
+            !review && windowWidth > 540 ? $t("TEST.QUIZ.from_quiz") : ""
+          }}</v-btn
         >
       </v-toolbar>
 
@@ -82,7 +88,7 @@
           />
 
           <span class="quiz__subject px-4">
-            <strong>{{ $t('TEST.QUIZ.subject') }}:</strong>
+            <strong>{{ $t("TEST.QUIZ.subject") }}</strong>
             {{ examQuestions[current - 1].subject }}
           </span>
 
@@ -162,16 +168,19 @@
             <v-icon class="mr-2">{{
               showAnswer ? mdiEyeOffOutline : mdiEyeOutline
             }}</v-icon>
-            {{ showAnswer ? "Ocultar" : "Mostrar" }} {{ $t('TEST.QUIZ.answer') }}
+            {{ $t("TEST.QUIZ." + (showAnswer ? "hide" : "show")) }}
+            {{ $t("TEST.QUIZ.answer") }}
           </v-btn>
 
           <v-divider></v-divider>
 
           <div v-if="review || (practice && showAnswer)">
-            <h2 class="ma-4 mt-5 quiz__answer-description-title">{{ $t('TEST.QUIZ.exolanation') }}</h2>
+            <h2 class="ma-4 mt-5 quiz__answer-description-title">
+              {{ $t("TEST.QUIZ.explanation") }}
+            </h2>
 
             <span class="mx-4 quiz__answer-description">
-              {{ $t('TEST.QUIZ.correct_answer') }}
+              {{ $t("TEST.QUIZ.correct_answer") }}
               {{ correctAnswerOption }}
             </span>
 
@@ -228,7 +237,7 @@
 
           <v-row v-if="!review && windowWidth <= 830" class="pa-0 px-4 ma-0">
             <v-checkbox
-              label="Marcar para revisão"
+              :label="$t('TEST.QUIZ.mark_review')"
               :disabled="finished"
               :input-value="
                 markedForReview.includes(examQuestions[current - 1].name)
@@ -256,12 +265,12 @@
               @click="current - 1 < 1 ? current : current--"
             >
               <v-icon>{{ mdiChevronLeft }}</v-icon>
-              {{ $t('TEST.QUIZ.before') }}
+              {{ $t("TEST.QUIZ.before") }}
             </v-btn>
 
             <v-checkbox
               v-if="!review && windowWidth > 830"
-              label="Marcar para revisão"
+              :label="$t('TEST.QUIZ.mark_review')"
               :disabled="finished"
               :input-value="
                 markedForReview.includes(examQuestions[current - 1].name)
@@ -279,7 +288,7 @@
               class="pr-2"
               @click="current + 1 > examQuestions.length ? current : current++"
             >
-              {{ $t('TEST.QUIZ.next') }}
+              {{ $t("TEST.QUIZ.next") }}
               <v-icon>{{ mdiChevronRight }}</v-icon>
             </v-btn>
 
@@ -293,7 +302,7 @@
               :loading="loadingFinish"
               @click="finishQuiz()"
             >
-              {{ $t('TEST.QUIZ.send') }}
+              {{ $t("TEST.QUIZ.send") }}
             </v-btn>
           </v-row>
         </div>
@@ -308,32 +317,35 @@
             v-if="timesUp"
             class="quiz__missing-questions orange--text font-weight-medium"
           >
-            {{ $t('TEST.QUIZ.time_up') }}
+            {{ $t("TEST.QUIZ.time_up") }}
           </span>
 
           <span
             v-else-if="review && answeredAmount < examQuestions.length"
             class="quiz__missing-questions"
           >
-            {{ answeredAmount }} {{ $t('TEST.QUIZ.answered_questions') }}
+            {{ answeredAmount }} {{ $t("TEST.QUIZ.answered_questions") }}
           </span>
 
           <span
             v-else-if="answeredAmount < examQuestions.length"
             class="quiz__missing-questions"
           >
-            {{ $t('TEST.QUIZ.left') }} {{ examQuestions.length - answeredAmount }} {{ $t('TEST.QUIZ.question_to_answer') }}
+            {{ $t("TEST.QUIZ.left") }}
+            {{ examQuestions.length - answeredAmount }}
+            {{ $t("TEST.QUIZ.question_to_answer") }}
           </span>
 
           <span
             v-else-if="markedForReview.length > 0"
             class="quiz__missing-questions"
           >
-            {{ $t('TEST.QUIZ.have') }} {{ markedForReview.length }} {{ $t('TEST.QUIZ.question_to_review') }}
+            {{ $t("TEST.QUIZ.have") }} {{ markedForReview.length }}
+            {{ $t("TEST.QUIZ.question_to_review") }}
           </span>
 
           <span v-else class="quiz__missing-questions">
-            {{ $t('TEST.QUIZ.question_to_answer') }}
+            {{ $t("TEST.QUIZ.question_to_answer") }}
           </span>
 
           <div
@@ -380,22 +392,26 @@
 
     <v-dialog v-model="dialogEndQuiz" width="300">
       <v-card class="pa-4">
-        <v-card-title class="pa-0 mb-2">{{ $t('TEST.QUIZ.wait') }}</v-card-title>
+        <v-card-title class="pa-0 mb-2">{{
+          $t("TEST.QUIZ.wait")
+        }}</v-card-title>
 
         <span v-if="!review">
-          {{ $t('TEST.QUIZ.exit_warning') }}
+          {{ $t("TEST.QUIZ.exit_warning") }}
         </span>
 
-        <span v-else>{{ $t('TEST.QUIZ.confirm_exit') }}</span>
+        <span v-else>{{ $t("TEST.QUIZ.confirm_exit") }}</span>
 
         <v-card-actions class="pa-0 mt-4">
           <v-btn text color="grey darken-2" @click="dialogEndQuiz = false">
-            {{ $t('TEST.QUIZ.cancel') }}
+            {{ $t("TEST.QUIZ.cancel") }}
           </v-btn>
 
           <v-spacer></v-spacer>
 
-          <v-btn text color="red" @click="$router.push(exitTo)">{{ $t('TEST.QUIZ.exit') }}</v-btn>
+          <v-btn text color="red" @click="$router.push(exitTo)">{{
+            $t("TEST.QUIZ.exit")
+          }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

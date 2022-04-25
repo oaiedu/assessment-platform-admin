@@ -2,8 +2,13 @@
   <v-data-table
     hide-default-footer
     class="attempts-table"
-    no-data-text="Não há tentativas no momento"
-    :headers="headersAttempts"
+    :no-data-text="$t('TEST.ATTEMPTS.no_attempts')"
+    :headers="
+      headersAttempts.map(h => ({
+        ...h,
+        text: $t('TEST.ATTEMPTS.HEADERS.' + h.text)
+      }))
+    "
     :items="attempts"
   >
     <template v-slot:[`item.index`]="{ item }">
@@ -36,7 +41,7 @@
     </template>
 
     <template v-slot:[`item.mode`]="{ item }">
-      {{ getModeSentence(item.mode) }}
+      {{ $t("TEST.ATTEMPTS.MODE." + (item.mode || "undefined")) }}
     </template>
 
     <template v-slot:[`item.result`]="{ item }">
@@ -47,14 +52,14 @@
           'red--text': !item.approved
         }"
       >
-        {{ item.approved ? "Passou" : "Falhou" }}
+        {{ $t("TEST.ATTEMPTS." + (item.approved ? "approved" : "failed")) }}
       </span>
     </template>
 
     <template v-slot:[`item.review`]="{ item }">
-      <v-btn text small color="blue" @click="reviewAttempt(item)"
-        >Revisar</v-btn
-      >
+      <v-btn text small color="blue" @click="reviewAttempt(item)">
+        {{ $t("TEST.ATTEMPTS.HEADERS.review") }}
+      </v-btn>
     </template>
   </v-data-table>
 </template>
@@ -71,33 +76,33 @@ export default {
     return {
       headersAttempts: [
         { text: "#", value: "index", sortable: false, align: "center" },
-        { text: "Data", value: "date", sortable: false, align: "center" },
+        { text: "date", value: "date", sortable: false, align: "center" },
         {
-          text: "Respostas",
+          text: "answers",
           value: "answers",
           sortable: false,
           align: "center"
         },
         {
-          text: "Pontuação",
+          text: "score",
           value: "score",
           sortable: false,
           align: "center"
         },
         {
-          text: "Tempo Gasto",
+          text: "time_taken",
           value: "timeTaken",
           sortable: false,
           align: "center"
         },
-        { text: "Modo", value: "mode", sortable: false, align: "center" },
+        { text: "mode", value: "mode", sortable: false, align: "center" },
         {
-          text: "Resultado",
+          text: "result",
           value: "result",
           sortable: false,
           align: "center"
         },
-        { text: "Revisar", value: "review", sortable: false, align: "center" }
+        { text: "review", value: "review", sortable: false, align: "center" }
       ]
     };
   },
@@ -105,23 +110,11 @@ export default {
     getDateSentence(iso) {
       const date = new Date(iso);
 
-      return `${weekDays[date.getDay()].substring(
-        0,
-        3
-      )}, ${date.getDate()} ${months[date.getMonth()].substring(
-        0,
-        3
-      )} ${date.getFullYear()}`;
-    },
-    getModeSentence(mode) {
-      switch (mode) {
-        case "practice":
-          return "Treino";
-        case "exam":
-          return "Exame";
-        default:
-          return "Indefinido";
-      }
+      return `${this.$t(
+        "SHARED.DATE.WEEKDAY." + weekDays[date.getDay()]
+      ).substring(0, 3)}, ${date.getDate()} ${this.$t(
+        "SHARED.DATE.MONTH." + months[date.getMonth()]
+      ).substring(0, 3)} ${date.getFullYear()}`;
     },
     reviewAttempt(item) {
       this.$emit("reviewAttempt", item);

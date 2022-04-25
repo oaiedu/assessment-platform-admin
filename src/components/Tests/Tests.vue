@@ -3,7 +3,7 @@
     <v-container>
       <v-container class="mt-10 mb-5">
         <SearchBox
-          label="Procurar por título"
+          :label="$t('TEST.search_title')"
           @enter="searchQuery($event)"
           @textChange="searchTextChange($event)"
         />
@@ -22,7 +22,7 @@
         <DeleteAlert
           :confirmCondition="deleteConfirmed"
           :itemsCondition="hasTrueMarkStatus"
-          itemsText="Os seguintes questionários foram marcados para exclusão:"
+          :itemsText="$t('TEST.delete_marked')"
           :items="markedTestsByUser"
           :isAdmin="userClaims && userClaims['admin']"
           :adminItems="markedTestsAdmin"
@@ -67,7 +67,7 @@
               deleteTests(true);
             "
           >
-            {{ $t('AUTH.SUBJECT.confirm_all') }}
+            {{ $t("AUTH.SUBJECT.confirm_all") }}
           </v-btn>
           <v-btn
             class="ml-3"
@@ -95,7 +95,7 @@
             dark
             @click="restoreAll(true)"
           >
-            {{ $t('TEST.TESTS.restore_all') }}
+            {{ $t("TEST.TESTS.restore_all") }}
           </v-btn>
         </v-row>
       </v-container>
@@ -142,8 +142,8 @@
         </template>
         <span>{{
           userClaims && !userClaims["student"]
-            ? "Criar Questionário"
-            : "Gerar Questionário"
+            ? $t("FAB.CREATE.new_quiz")
+            : $t("TEST.GENERATE_CARD.generate_new")
         }}</span>
       </v-tooltip>
 
@@ -197,7 +197,7 @@
       </div>
 
       <DeleteWarning
-        label="Tem certeza de que deseja excluir este questionário?"
+        :label="$t('TEST.delete_confirm')"
         :state="deleteTestSnackBar"
         @confirm="
           deleteTest(deleteSelect.id);
