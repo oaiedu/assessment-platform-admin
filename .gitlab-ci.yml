@@ -10,7 +10,7 @@ stages:
 build-production:
   stage: build
   script:
-    - npm ci --progress=false
+    - npm ci --progress=false --legacy-peer-deps
     - export NODE_OPTIONS=--openssl-legacy-provider
     - npm run build
   artifacts:
@@ -22,7 +22,7 @@ build-production:
 build-develop:
   stage: build
   script:
-    - npm ci --progress=false
+    - npm ci --progress=false --legacy-peer-deps
     - export NODE_OPTIONS=--openssl-legacy-provider
     - npm run build:dev
   artifacts:
@@ -34,7 +34,7 @@ build-develop:
 build-branch:
   stage: build
   script:
-    - npm ci --progress=false
+    - npm ci --progress=false --legacy-peer-deps
     - export NODE_OPTIONS=--openssl-legacy-provider
     - npm run build:dev
   artifacts:
