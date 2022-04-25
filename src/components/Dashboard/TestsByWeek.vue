@@ -1,14 +1,14 @@
 <template>
-  <v-card width="100%" height="100%" class="tests-by-week">
+  <v-card outlined width="100%" height="100%" class="tests-by-week">
     <div
       class="tests-by-week-container"
       v-if="testsByWeek && testsByWeekInterval"
     >
       <h2 class="chart-title">
-        Questionários por semana
+        {{ $t('DASHBOARD.TESTS_BY_WEEK.quizzes_weak') }}
       </h2>
       <span class="number-of-tests">
-        Total:
+        {{ $t('DASHBOARD.TESTS_BY_WEEK.total') }}
         <span :style="{ color: colorPaleteList[colorPalete] }" class="amount">
           {{ Object.values(testsByWeek).reduce((a, b) => a + b, 0) }}
         </span>
@@ -22,9 +22,9 @@
             to="/quizzes"
             class="see-more-button pa-0 ma-0 ml-2"
             :ripple="false"
-            :color="hover ? '#1e88e5' : '#888888'"
+            :color="hover ? '#2196f3' : '#888888'"
           >
-            Ver mais
+            {{ $t('DASHBOARD.LAST_DATA.see_more') }}
           </v-btn>
         </v-hover>
       </span>
@@ -35,7 +35,7 @@
           class="week-details"
         >
           <span class="week-interval"> {{ getItemWeekInterval(item) }} </span>
-          <span class="week">Semana {{ index + 1 }}:</span>
+          <span class="week">{{ $t('DASHBOARD.TESTS_BY_WEEK.weak') }} {{ index + 1 }}:</span>
           <span
             class="week-amount"
             :class="item[1] === higherTestsAmount ? 'highlight' : ''"
@@ -236,6 +236,11 @@ export default {
 </script>
 
 <style scoped>
+.tests-by-week {
+  border-radius: 26px;
+  overflow: hidden;
+}
+
 .tests-by-week-container {
   position: relative;
 

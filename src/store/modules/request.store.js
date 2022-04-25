@@ -8,7 +8,7 @@ import { getNowISOString } from "../../utils/date";
  * @typedef {import('./questions.store.js').DeleteStatus} DeleteStatus
  * @typedef {import('./questions.store.js').Answer} Answer
  * @typedef {import('./questions.store.js').Subject} Subject
- * @typedef {"Rejeitado"|"Pendente"|"Aprovado"} RequestStatus
+ * @typedef {"rejected"|"pendant"|"approved"} RequestStatus
  */
 
 /**
@@ -428,13 +428,9 @@ const actions = {
         data: questionRequests
       });
 
-      commit("setSuccess", "Solicitação criada com sucesso!");
+      commit("setSuccess", "Request successfully created!");
     } catch (error) {
-      const errorModel = showErrorMessage(
-        "creation",
-        "Solicitação",
-        error.message
-      );
+      const errorModel = showErrorMessage("creation", "Request", error.message);
 
       commit("setError", { message: errorModel });
       createErrorLog("Request DB Insert", error.message, {
@@ -495,14 +491,10 @@ const actions = {
       }
 
       if (mode !== "sttUpdate") {
-        commit("setSuccess", "Solicitação editada com sucesso!");
+        commit("setSuccess", "Request successfully edited!");
       }
     } catch (error) {
-      const errorModel = showErrorMessage(
-        "edition",
-        "Solicitação",
-        error.message
-      );
+      const errorModel = showErrorMessage("edition", "Request", error.message);
 
       commit("setError", { message: errorModel });
       createErrorLog("Request DB Update", error.message, { payload });
@@ -583,7 +575,7 @@ const actions = {
           commit("setLoading", false);
           const errorModel = showErrorMessage(
             "load",
-            "Solicitações",
+            "Requests",
             error.message
           );
           commit("setError", { message: errorModel });
@@ -677,7 +669,7 @@ const actions = {
           commit("setLoading", false);
           const errorModel = showErrorMessage(
             "load",
-            "Solicitações",
+            "Requests",
             error.message
           );
           commit("setError", { message: errorModel });
@@ -746,7 +738,7 @@ const actions = {
         commit("setLoading", false);
         const errorModel = showErrorMessage(
           "load",
-          "Solicitações",
+          "Requests",
           "Searching error - " + error.message
         );
         commit("setError", { message: errorModel });
@@ -905,7 +897,7 @@ const actions = {
         commit("removeDeleteMarkRequest", name);
         commit("updateCurrentRequestsPage", { ...request, user });
         commit("setLoading", false);
-        commit("setSuccess", "Solicitação restaurada com sucesso!");
+        commit("setSuccess", "Request successfully restored!");
       })
       .catch(error => {
         commit("setLoading", false);
@@ -969,7 +961,7 @@ const actions = {
           commit("updateCurrentRequestsPage", { ...request, user });
           if (isSearching)
             commit("updateFilteredRequest", { ...request, user });
-          commit("setSuccess", "Solicitações restauradas com sucesso!");
+          commit("setSuccess", "Requests successfully restored!");
         });
       })
       .then(() => commit("setLoading", false))
@@ -1029,12 +1021,12 @@ const actions = {
           });
 
         commit("setLoading", false);
-        commit("setSuccess", "Solicitação excluída com sucesso!");
+        commit("setSuccess", "Request successfully deleted!");
       })
       .catch(error => {
         const errorModel = showErrorMessage(
           "exclusion",
-          "Solicitação",
+          "Request",
           error.message
         );
         commit("setError", { message: errorModel });
@@ -1125,7 +1117,7 @@ const actions = {
 
     db.collection("question-requests")
       .where("userId", "==", userInfo.id)
-      .where("status", "==", "Aprovado")
+      .where("status", "==", "approved")
       .get()
       .then(snapshot => {
         snapshot.forEach(doc => {
@@ -1214,7 +1206,7 @@ const actions = {
         commit("setLoading", false);
         const errorModel = showErrorMessage(
           "load",
-          "Solicitações Pendentes",
+          "Pendent Requests",
           error.message
         );
         commit("setError", { message: errorModel });
@@ -1280,9 +1272,7 @@ const actions = {
         commit("setLoading", false);
         const errorModel = showErrorMessage(
           "load",
-          mode === "other"
-            ? "Solicitações Pendentes"
-            : "Solicitações do Usuário",
+          mode === "other" ? "Pendent Requests" : "User Requests",
           error.message
         );
         commit("setError", { message: errorModel });

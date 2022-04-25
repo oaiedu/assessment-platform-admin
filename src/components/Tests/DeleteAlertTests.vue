@@ -8,7 +8,7 @@
       color="red"
       :icon="mdiAlert"
     >
-      Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.
+      {{ $t("TEST.DELETE_ALERT.success") }}
     </v-alert>
 
     <v-alert
@@ -25,7 +25,7 @@
 
       <div v-if="isAdmin">
         <br />
-        Marcadas por você:
+        {{ $t("TEST.DELETE_ALERT.marked") }}
         <br />
         {{ adminItems }}
       </div>

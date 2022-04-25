@@ -2,7 +2,7 @@
   <v-container class="profile__container ma-0 pa-0 pb-8" fluid>
     <v-row
       class="profile__personal-row ma-0 pa-0"
-      style="height: 130px; background-color: #f5f5f5 "
+      style="height: 100px; background-color: #2196f3"
       :class="{
         'px-12': $vuetify.breakpoint.width >= 940,
         'px-4': $vuetify.breakpoint.width < 940
@@ -45,15 +45,23 @@
 
         <div class="profile__personal-info ml-4">
           <span class="profile__name">
-            <span v-if="!editingName" class="mr-2">{{ nickName }}</span>
+            <span v-if="!editingName" class="mr-2 white--text">{{
+              nickName
+            }}</span>
 
             <span v-else>
-              <v-text-field v-model="nickName" class="ma-0 pa-0"></v-text-field>
+              <v-text-field
+                v-model="nickName"
+                dark
+                hide-details
+                class="ma-0 pa-0"
+                color="white"
+              ></v-text-field>
             </span>
 
             <v-btn icon :loading="loadingName">
               <v-icon
-                color="grey darken-1"
+                color="grey lighten-4"
                 @click="
                   !editingName ? (editingName = !editingName) : updateName()
                 "
@@ -64,7 +72,7 @@
           </span>
 
           <span class="profile__email">{{ user.email }}</span>
-          <span class="profile__role">{{ roleName }}</span>
+          <span class="profile__role">{{ $t("USER.ROLE." + user.role) }}</span>
         </div>
       </div>
     </v-row>
@@ -92,7 +100,7 @@
           style="border-radius: 26px"
         >
           <v-card-title class="profile__subjects-title pa-0 ma-0">
-            Disciplinas com mais acertos
+            {{ $t("PROFILE.SUBJECTS.title") }}
           </v-card-title>
 
           <v-row
@@ -145,7 +153,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Questionários finalizados
+                  {{ $t("PROFILE.DATA_INFO.ended_quizzes") }}
                 </span>
 
                 <span
@@ -165,7 +173,9 @@
               }}</v-icon>
 
               <div class="profile__amount-info">
-                <span class="profile__amount-item-title">Aprovações</span>
+                <span class="profile__amount-item-title">{{
+                  $t("PROFILE.DATA_INFO.approved")
+                }}</span>
 
                 <span
                   class="profile__amount-item-quantity"
@@ -179,18 +189,18 @@
 
           <v-row class="ma-0 pa-0">
             <div class="profile__amount-item">
-              <v-icon color="#1e88e5" style="background-color: #1e88e53f">{{
+              <v-icon color="#2196f3" style="background-color: #2196f33f">{{
                 mdiOrderBoolAscendingVariant
               }}</v-icon>
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Respostas corretas (%)
+                  {{ $t("PROFILE.DATA_INFO.correct_answers") }}
                 </span>
 
                 <span
                   class="profile__amount-item-quantity"
-                  style="color: #1e88e5"
+                  style="color: #2196f3"
                 >
                   {{ Math.floor(totalCorrect) }}%
                 </span>
@@ -206,7 +216,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  Tempo médio por questionário
+                  {{ $t("PROFILE.DATA_INFO.time_per_quiz") }}
                 </span>
 
                 <span
@@ -235,11 +245,11 @@
         elevation="0"
         width="100%"
         min-height="360"
-        class="pa-4 px-8 ma-0"
-        style="border-radius: 26px"
+        class="pa-0 py-4 ma-0"
+        style="border-radius: 26px; overflow: hidden"
       >
-        <v-card-title class="profile__attempts-title pa-0 ma-0">
-          Questionários realizados
+        <v-card-title class="profile__attempts-title pa-0 ma-0 mx-8 mb-1">
+          {{ $t("PROFILE.DATA_INFO.quizzes_done") }}
         </v-card-title>
 
         <AttemptsTable
@@ -280,7 +290,7 @@ export default {
     editingName: false,
     loadingImage: false,
     loadingName: false,
-    subjectColors: ["#219653", "#1e88e5", "#ff9900", "#922fdf", "#ff5533"],
+    subjectColors: ["#219653", "#2196f3", "#ff9900", "#922fdf", "#ff5533"],
     subjects: [],
     subjectsTotal: 0,
     totalCorrect: 0
@@ -291,12 +301,6 @@ export default {
     },
     user() {
       return this.$store.getters.userInfo;
-    },
-    roleName() {
-      const role = this.user.role;
-      if (role === "admin") return "Administrador";
-      else if (role === "appraiser") return "Avaliador";
-      else return "Aluno";
     }
   },
   methods: {
@@ -481,35 +485,31 @@ export default {
   display: flex;
   align-items: center;
 
-  transform: translateY(50%);
+  transform: translateY(30%);
 }
 
 .v-avatar {
   position: relative;
 
-  border: 3px solid transparent;
-  background-color: #888;
+  border: 4px solid transparent;
+  background-color: #fff;
 }
 
 .v-avatar .profile__photo {
   position: relative;
 
   object-fit: cover;
-
-  transition: transform 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .v-avatar .profile__photo:hover {
   cursor: pointer;
-  opacity: 0.9;
-
-  transform: scale(1.1);
+  opacity: 0.8;
 }
 
 .profile__personal-info {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .profile__name {
@@ -644,7 +644,7 @@ export default {
 }
 
 .profile__container /deep/ .attempts-table {
-  height: calc(100% - 16px);
+  height: calc(100% - 20px);
 }
 
 .profile__container /deep/ .attempts-table .v-data-table__wrapper {

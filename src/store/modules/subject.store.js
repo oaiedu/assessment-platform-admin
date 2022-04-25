@@ -144,7 +144,7 @@ const actions = {
 
       commit("setSubjects", data);
     } catch (error) {
-      const errorModel = showErrorMessage("load", "Disciplina", error.message);
+      const errorModel = showErrorMessage("load", "Subject", error.message);
       commit("setError", { message: errorModel });
       createErrorLog("Subject Load", error.message, {
         data
@@ -176,13 +176,9 @@ const actions = {
       });
 
       commit("addSubject", { ...subject, id: doc.id });
-      commit("setSuccess", "Disciplina criado com sucesso!");
+      commit("setSuccess", "Subject successfully created!");
     } catch (error) {
-      const errorModel = showErrorMessage(
-        "creation",
-        "Disciplina",
-        error.message
-      );
+      const errorModel = showErrorMessage("creation", "Subject", error.message);
       commit("setError", { message: errorModel });
       createErrorLog("Subject Creation", error.message, {
         data
@@ -226,11 +222,11 @@ const actions = {
           data: data.questions
         });
       }
-      commit("setSuccess", "Disciplina excluído com sucesso!");
+      commit("setSuccess", "Subject successfully deleted!");
     } catch (error) {
       const errorModel = showErrorMessage(
         "exclusion",
-        "Disciplina",
+        "Subject",
         error.message
       );
       commit("setError", { message: errorModel });

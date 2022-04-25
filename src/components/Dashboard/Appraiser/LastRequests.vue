@@ -1,13 +1,15 @@
 <template>
   <v-card width="100%" height="100%" class="last-requests">
     <div class="last-requests-container">
-      <h1 class="last-requests-title">Suas solicitações</h1>
+      <h1 class="last-requests-title">
+        {{ $t("DASHBOARD.LAST_REQUESTS.requests") }}
+      </h1>
       <span
         class="see-all"
         v-if="requests && requests.length >= 4"
         @click="pushUrl"
       >
-        Ver todas
+        {{ $t("DASHBOARD.LAST_REQUESTS.see_all") }}
       </span>
       <div
         v-if="requests && requests.length > 0"
@@ -26,12 +28,12 @@
               backgroundColor: getColor(item.status) + '33'
             }"
           >
-            {{ item.status }}
+            {{ $t("REQUESTS.STATUS." + item.status) }}
           </div>
         </div>
       </div>
       <div v-else class="no-content">
-        Não há solicitações no momento
+        {{ $t("DASHBOARD.LAST_REQUESTS.no_resquests") }}
       </div>
     </div>
   </v-card>
@@ -62,9 +64,9 @@ export default {
   },
   methods: {
     getColor(status) {
-      if (status === "Pendente") {
+      if (status === "pendant") {
         return "#ffaa00";
-      } else if (status === "Aprovado") {
+      } else if (status === "approved") {
         return "#00cc44";
       } else {
         return "#ff2233";

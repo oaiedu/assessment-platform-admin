@@ -1,8 +1,8 @@
 <template>
-  <v-card width="100%" height="100%" class="question-by-subject">
+  <v-card outlined width="100%" height="100%" class="question-by-subject">
     <div class="question-by-subject-container">
       <h2 class="chart-title">
-        Questões por matéria
+        {{ $t("DASHBOARD.QUESTION_BY_SUBJECT.questions_subject") }}
 
         <v-hover v-if="userClaims && !userClaims['student']" v-slot="{ hover }">
           <v-btn
@@ -10,9 +10,9 @@
             to="/questions"
             class="see-more-button pa-0 ma-0 ml-2"
             :ripple="false"
-            :color="hover ? '#1e88e5' : '#888888'"
+            :color="hover ? '#2196f3' : '#888888'"
           >
-            Ver mais
+            {{ $t("DASHBOARD.LAST_DATA.see_more") }}
           </v-btn>
         </v-hover>
       </h2>
@@ -22,7 +22,7 @@
           class="subject-item"
           style="margin-left: -12px"
         >
-          Não há dados disponíveis
+          {{ $t("DASHBOARD.QUESTION_BY_SUBJECT.no_data") }}
         </span>
         <span
           v-for="(item, index) in sortedChartData"
@@ -200,7 +200,10 @@ export default {
         .reduce((a, b) => a + b, 0);
 
       if (others) {
-        data.push({ name: "Outros", value: others });
+        data.push({
+          name: this.$t("DASHBOARD.QUESTION_BY_SUBJECT.others"),
+          value: others
+        });
       }
 
       data.sort((a, b) => a.value - b.value);
@@ -234,6 +237,11 @@ export default {
 </script>
 
 <style scoped>
+.question-by-subject {
+  border-radius: 26px;
+  overflow: hidden;
+}
+
 .question-by-subject-container {
   position: relative;
 

@@ -9,13 +9,11 @@
         </div>
 
         <p class="sign__info-subtitle">
-          Se está procurando por um lugar para aprender Cloud... você encontrou!
-          Nossos questionários são totalmente gratuitos e te levarão ao seu
-          limite, fortificando seus conhecimentos.
+          {{ $t("AUTH.TEXT.intro_1") }}
 
           <br /><br />
 
-          Comece agora mesmo, não há tempo a perder!
+          {{ $t("AUTH.TEXT.intro_2") }}
         </p>
       </div>
 
@@ -97,19 +95,19 @@
       max-width="100%"
     >
       <v-card>
-        <v-card-title>Esqueceu a senha?</v-card-title>
-        <v-card-subtitle>Insira seu e-mail no campo abaixo.</v-card-subtitle>
+        <v-card-title>{{ $t("SIGN_USER.forget_password") }}</v-card-title>
+        <v-card-subtitle>{{ $t("SIGN_USER.insert_email") }}</v-card-subtitle>
         <v-card-text>
           <v-row justify="center" class="px-3">
             <v-text-field
-              :append-icon="mdiEmail"
-              name="email-resetpwd"
-              label="E-mail"
-              id="email-resetpwd"
               v-model="email"
-              type="email"
-              :rules="required"
               required
+              type="email"
+              id="email-resetpwd"
+              name="email-resetpwd"
+              :append-icon="mdiEmail"
+              :label="$t('SIGN_USER.FIELD.email')"
+              :rules="required"
             >
             </v-text-field>
           </v-row>
@@ -123,11 +121,11 @@
               email = '';
             "
           >
-            Cancelar
+            {{ $t("AUTH.SUBJECT.cancel") }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn text color="blue" :disabled="!email" @click="forgotPassword()">
-            Confirmar
+            {{ $t("AUTH.SUBJECT.confirm") }}
           </v-btn>
         </v-card-actions>
       </v-card>

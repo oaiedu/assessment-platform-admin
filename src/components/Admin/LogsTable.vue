@@ -1,51 +1,76 @@
 <template>
-  <v-container>
-    <v-data-table
-      :items="logs"
-      class="elevation-1 mt-2"
-      :headers="headers"
-      :loading="loading"
-      loading-text="Carregando logs..."
-      no-data-text="Não há logs a serem exibidos"
-    >
-      <template v-slot:[`item.id`]="{ item }">
-        {{ getIdPart(item.id) }}
-      </template>
+  <v-container class="logs-table mt-4">
+    <v-row class="ma-0 pa-0">
+      <v-text-field
+        v-model="search"
+        clearable
+        dense
+        outlined
+        rounded
+        color="blue"
+        style="max-width: 400px"
+        :label="$t('ADMIN.search')"
+      ></v-text-field>
+    </v-row>
 
-      <template v-slot:[`item.userInfo`]="{ item }">
-        {{ item.user.name || item.user.email }}
-      </template>
+    <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
+      <v-data-table
+        :loading-text="$t('ADMIN.LOGS.loading_logs')"
+        :no-data-text="$t('ADMIN.LOGS.no_logs')"
+        :items="logs"
+        :headers="
+          headers.map(h => ({ ...h, text: $t('ADMIN.LOGS.HEADERS.' + h.text) }))
+        "
+        :loading="loading"
+        :search="search"
+      >
+        <template v-slot:[`item.id`]="{ item }">
+          {{ getIdPart(item.id) }}
+        </template>
 
-      <template v-slot:[`item.date`]="{ item }">
-        {{ formatDate(item.date) }}
-      </template>
+        <template v-slot:[`item.userInfo`]="{ item }">
+          {{ item.user.name || item.user.email }}
+        </template>
 
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon v-on="on" v-bind="attrs" @click="downloadLog(item)">
-              {{ mdiDownload }}
-            </v-icon>
-          </template>
-          <span>Download</span>
-        </v-tooltip>
+        <template v-slot:[`item.date`]="{ item }">
+          {{ formatDate(item.date) }}
+        </template>
 
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              class="ml-3"
-              :disabled="item.user.email === userInfo.email"
-              @click="sendEmail(item.user.email)"
-            >
-              {{ mdiEmail }}
-            </v-icon>
-          </template>
-          <span>Enviar e-mail</span>
-        </v-tooltip>
-      </template>
-    </v-data-table>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                color="blue"
+                @click="downloadLog(item)"
+              >
+                {{ mdiDownload }}
+              </v-icon>
+            </template>
+            <span>Download</span>
+          </v-tooltip>
+
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                class="ml-3"
+                color="blue-grey lighten-1"
+                :disabled="
+                  !item.user.email || item.user.email === userInfo.email
+                "
+                @click="sendEmail(item.user.email)"
+              >
+                {{ mdiEmail }}
+              </v-icon>
+            </template>
+            <span>{{ $t("REQUESTS.TABLE.send_email") }}</span>
+          </v-tooltip>
+        </template>
+      </v-data-table>
+    </v-card>
   </v-container>
 </template>
 
@@ -58,12 +83,13 @@ export default {
     return {
       mdiDownload,
       mdiEmail,
+      search: "",
       headers: [
-        { text: "ID", align: "left", value: "id", sortable: true },
-        { text: "Tipo", align: "center", value: "type", sortable: true },
-        { text: "Usuário", align: "center", value: "userInfo", sortable: true },
-        { text: "Data", align: "center", value: "date", sortable: true },
-        { text: "Ações", align: "center", value: "actions", sortable: false }
+        { text: "id", align: "left", value: "id", sortable: true },
+        { text: "type", align: "center", value: "type", sortable: true },
+        { text: "user", align: "center", value: "userInfo", sortable: true },
+        { text: "date", align: "center", value: "date", sortable: true },
+        { text: "actions", align: "center", value: "actions", sortable: false }
       ]
     };
   },
@@ -134,3 +160,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.logs-table .v-text-field__details {
+  display: none !important;
+}
+</style>

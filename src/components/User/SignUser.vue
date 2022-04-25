@@ -8,7 +8,7 @@
 
     <div class="sign__title">
       <h2>
-        {{ showSignIn ? "Entrar em minha conta" : "Criar uma conta" }}
+        {{ $t("SIGN_USER.title_" + (showSignIn ? "login" : "register")) }}
       </h2>
     </div>
 
@@ -16,12 +16,12 @@
       <v-row class="pa-0 ma-0">
         <v-text-field
           v-model="email"
+          required
           id="email"
           name="email"
-          label="E-mail"
           type="email"
-          required
-          :rules="required"
+          :label="$t('SIGN_USER.FIELD.email')"
+          :rules="requiredRule()"
         ></v-text-field>
       </v-row>
 
@@ -31,8 +31,8 @@
           required
           id="password"
           name="password"
-          label="Senha"
-          :rules="required"
+          :label="$t('SIGN_USER.FIELD.password')"
+          :rules="requiredRule()"
           :type="showPassword ? 'text' : 'password'"
           :append-icon="showPassword ? mdiEyeOff : mdiEye"
           @click:append="showPassword = !showPassword"
@@ -41,7 +41,7 @@
 
       <v-row class="sign__forgot-pw pa-0 ma-0 my-4">
         <v-btn text color="#56b3ec" @click="forgotPassword()">
-          Esqueceu a senha?
+          {{ $t("SIGN_USER.forget_password") }}
         </v-btn>
       </v-row>
 
@@ -56,7 +56,7 @@
         :disabled="!(email && password)"
         :loading="loading"
       >
-        Entrar
+        {{ $t("SIGN_USER.login") }}
         <span class="custom-loader">
           <v-icon light></v-icon>
         </span>
@@ -70,9 +70,9 @@
           required
           id="name"
           name="name"
-          label="Nome"
           type="text"
-          :rules="required"
+          :label="$t('SIGN_USER.FIELD.name')"
+          :rules="requiredRule()"
         ></v-text-field>
       </v-row>
 
@@ -82,9 +82,9 @@
           required
           id="email"
           name="email"
-          label="E-mail"
           type="email"
-          :rules="required"
+          :label="$t('SIGN_USER.FIELD.email')"
+          :rules="requiredRule()"
         ></v-text-field>
       </v-row>
 
@@ -94,8 +94,8 @@
           required
           id="password"
           name="password"
-          label="Senha"
-          :rules="required"
+          :label="$t('SIGN_USER.FIELD.password')"
+          :rules="requiredRule()"
           :type="showPassword ? 'text' : 'password'"
           :append-icon="showPassword ? mdiEyeOff : mdiEye"
           @click:append="showPassword = !showPassword"
@@ -107,8 +107,8 @@
           v-model="confirmPassword"
           id="confirmPassword"
           name="confirmPassword"
-          label="Confirmar senha"
-          :rules="[...required, comparePassword]"
+          :label="$t('SIGN_USER.FIELD.confirm_password')"
+          :rules="[...requiredRule(), comparePassword]"
           :type="showPasswordConfirm ? 'text' : 'password'"
           :append-icon="showPasswordConfirm ? mdiEyeOff : mdiEye"
           @click:append="showPasswordConfirm = !showPasswordConfirm"
@@ -126,7 +126,7 @@
         :disabled="!(name && email && password && confirmPassword)"
         :loading="loading"
       >
-        Criar conta
+        {{ $t("SIGN_USER.create_account") }}
         <span class="custom-loader">
           <v-icon light></v-icon>
         </span>
@@ -134,7 +134,7 @@
     </v-form>
 
     <v-row class="pa-0 ma-0 grey--text" style="flex: 0">
-      <span class="sign__or">or</span>
+      <span class="sign__or">{{ $t("SIGN_USER.or") }}</span>
     </v-row>
 
     <v-row class="pa-0 ma-0" style="flex: 0">
@@ -152,7 +152,7 @@
 
     <div class="sign__footer">
       <v-row class="to-sign__in pa-0 ma-0" v-if="showSignUp">
-        <span>Já possui uma conta?</span>
+        <span>{{ $t("SIGN_USER.already_have_account") }}</span>
 
         <v-btn
           style="padding: 0;"
@@ -161,12 +161,12 @@
           @click="signIn"
           :ripple="false"
         >
-          <strong>Entrar</strong>
+          <strong>{{ $t("SIGN_USER.login") }}</strong>
         </v-btn>
       </v-row>
 
       <v-row class="to-sign__up pa-0 ma-0" v-else>
-        <span>Não possui uma conta?</span>
+        <span>{{ $t("SIGN_USER.no_account") }}</span>
 
         <v-btn
           style="padding: 0;"
@@ -175,7 +175,7 @@
           @click="signUp"
           :ripple="false"
         >
-          <strong>Registrar-se</strong>
+          <strong>{{ $t("SIGN_USER.register") }}</strong>
         </v-btn>
       </v-row>
     </div>
@@ -198,15 +198,13 @@ export default {
     password: "",
     confirmPassword: "",
     showPassword: false,
-    showPasswordConfirm: false,
-    required: [
-      value => (value && value.length > 0) || "Este campo é obrigatório!"
-    ]
+    showPasswordConfirm: false
   }),
   computed: {
     comparePassword() {
       return (
-        this.password === this.confirmPassword || "As senhas não correspondem!"
+        this.password === this.confirmPassword ||
+        this.$t("SIGN_USER.ERROR.password_dont_match")
       );
     },
     error() {
@@ -217,6 +215,12 @@ export default {
     }
   },
   methods: {
+    requiredRule() {
+      return [
+        value =>
+          (value && value.length > 0) || this.$t("SIGN_USER.ERROR.required")
+      ];
+    },
     googleSign() {
       this.$emit("googleSign");
     },

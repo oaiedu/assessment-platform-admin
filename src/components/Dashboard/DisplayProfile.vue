@@ -1,5 +1,5 @@
 <template>
-  <v-card width="100%" height="100%" class="display-profile">
+  <v-card outlined width="100%" height="100%" class="display-profile">
     <div class="display-container" v-if="user">
       <div class="avatar-container">
         <v-avatar size="90">
@@ -14,7 +14,7 @@
       <div class="user-info" v-if="user">
         <h3 class="user-name">{{ user.name }}</h3>
         <span class="user-email">{{ user.email }}</span>
-        <span class="user-role">{{ roleName }}</span>
+        <span class="user-role">{{ $t("USER.ROLE." + user.role) }}</span>
       </div>
     </div>
   </v-card>
@@ -25,12 +25,6 @@ export default {
   computed: {
     user() {
       return this.$store.getters.userInfo;
-    },
-    roleName() {
-      const role = this.user.role;
-      if (role === "admin") return "Administrador";
-      else if (role === "appraiser") return "Avaliador";
-      else return "Aluno";
     }
   },
   methods: {
@@ -59,6 +53,11 @@ export default {
 </script>
 
 <style scoped>
+.display-profile {
+  border-radius: 26px;
+  overflow: hidden;
+}
+
 .display-container {
   display: flex;
   flex-direction: row;

@@ -11,10 +11,10 @@
       </span>
     </v-row>
 
-    <h4 v-if="justifications" class="pa-0 ma-0 mt-6 mb-2">Justificativas</h4>
+    <h4 v-if="justifications" class="pa-0 ma-0 mt-6 mb-2">{{ $t('QUESTIONS.ANSWERS.justifications') }}</h4>
 
     <span v-if="justifications">
-      Resposta correta:
+      {{ $t('TEST.QUIZ.correct_answer') }}
       {{ correctAnswerOption }}
     </span>
 

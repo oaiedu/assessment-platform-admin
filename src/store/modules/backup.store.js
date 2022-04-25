@@ -30,18 +30,18 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  */
 const initialState = () => ({
   months: {
-    "1": "Janeiro",
-    "2": "Fevereiro",
-    "3": "Março",
-    "4": "Abril",
-    "5": "Maio",
-    "6": "Junho",
-    "7": "Julho",
-    "8": "Agosto",
-    "9": "Setembro",
-    "10": "Outubro",
-    "11": "Novembro",
-    "12": "Dezembro"
+    "1": "january",
+    "2": "february",
+    "3": "march",
+    "4": "april",
+    "5": "may",
+    "6": "june",
+    "7": "july",
+    "8": "august",
+    "9": "septembre",
+    "10": "octobre",
+    "11": "november",
+    "12": "december"
   },
   backups: [],
   lastBackup: null
@@ -187,7 +187,7 @@ const actions = {
           .then(() => {
             commit("newBackup", bkp);
             commit("setLoading", false);
-            commit("setSuccess", "Backup realizado com sucesso!");
+            commit("setSuccess", "Backup successfully done!");
           })
           .catch(error => console.error(error));
       })
@@ -329,7 +329,7 @@ const actions = {
                 doc.ref.delete();
                 commit("removeBackup", doc.data());
                 commit("setLoading", false);
-                commit("setSuccess", "Backup excluído com sucesso!");
+                commit("setSuccess", "Backup successfully deleted!");
               });
             })
             .catch(error => {

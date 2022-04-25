@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <template>
-      <v-tabs v-model="tab" class="mt-10" background-color="white">
+      <v-tabs v-model="tab" color="blue" class="mt-4" background-color="white">
         <v-tab>
           <v-icon left>
             {{ mdiDatabase }}
@@ -12,13 +12,13 @@
           <v-icon left>
             {{ mdiBallot }}
           </v-icon>
-          Disciplinas
+          {{ $t('TEST.QUIZ.subjects') }}
         </v-tab>
         <v-tab>
           <v-icon left>
             {{ mdiAccount }}
           </v-icon>
-          Usuários
+          {{ $t('DASHBOARD.DATA_AMOUNT.users') }}
         </v-tab>
         <v-tab>
           <v-icon left>

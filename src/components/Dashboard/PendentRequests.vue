@@ -1,5 +1,5 @@
 <template>
-  <v-card width="100%" height="100%" class="pendent-requests">
+  <v-card outlined width="100%" height="100%" class="pendent-requests">
     <div class="pendent-requests-container">
       <h2 class="card-title">
         {{ cardTitle }}
@@ -10,9 +10,9 @@
             to="/inbox"
             class="see-more-button pa-0 ma-0 ml-2"
             :ripple="false"
-            :color="hover ? '#1e88e5' : '#888888'"
+            :color="hover ? '#2196f3' : '#888888'"
           >
-            Ver mais
+            {{ $t("DASHBOARD.LAST_DATA.see_more") }}
           </v-btn>
         </v-hover>
       </h2>
@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="no-content" v-else>
-        Não há solicitações pendentes
+        {{ $t("DASHBOARD.LAST_REQUESTS.no_resquests") }}
       </div>
     </div>
   </v-card>
@@ -88,9 +88,9 @@ export default {
         this.userClaims &&
         (this.userClaims["admin"] || this.userClaims["appraiser"])
       ) {
-        return "Solicitações pendentes";
+        return this.$t("DASHBOARD.LAST_REQUESTS.latest_requests");
       } else {
-        return "Questões pendentes";
+        return this.$t("DASHBOARD.LAST_REQUESTS.latest_questions");
       }
     }
   },
@@ -109,6 +109,11 @@ export default {
 </script>
 
 <style scoped>
+.pendent-requests {
+  border-radius: 26px;
+  overflow: hidden;
+}
+
 .pendent-requests-container,
 .no-content {
   display: flex;

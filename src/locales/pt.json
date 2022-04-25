@@ -1,3 +1,452 @@
 {
-  "message": "olá i18n !!"
+  "TOOLBAR": {
+    "sign_out": "Sair",
+    "DRAWER": {
+      "home": "Página inicial",
+      "admin": "Administração",
+      "questions": "Questões",
+      "quizzes": "Questionários",
+      "requests": "Solicitações",
+      "profile": "Perfil"
+    }
+  },
+  "REQUESTS": {
+    "delete_marked": "As seguintes solicitações foram marcadas para exclusão:",
+    "delete_confirm": "Tem certeza de que deseja excluir esta solicitação?",
+    "STATUS": {
+      "approved": "Aprovado",
+      "pendant": "Pendente",
+      "rejected": "Rejeitado"
+    },
+    "INBOX": {
+      "request": "Solicitações aprovadas serão excluídas automaticamente quando sair desta página!",
+      "info_1": "Esta questão está sendo usada nos seguintes questionários:",
+      "info_2": "Só será possível rejeitá-la quando não se encontrar em nenhum questionário."
+    },
+    "TABLE": {
+      "loading_requests": "Carregando solicitações...",
+      "no_requests": "Não há solicitações",
+      "send_email": "Enviar e-mail",
+      "view_pdf": "Visualizar PDF",
+      "approve": "Aprovar",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "reject": "Rejeitar",
+      "HEADERS": {
+        "id": "ID",
+        "user": "Usuário",
+        "email": "Email",
+        "subject": "Disciplina",
+        "status": "Status",
+        "actions": "Ações"
+      }
+    }
+  },
+  "USER": {
+    "ROLE": {
+      "admin": "Administrador",
+      "appraiser": "Avaliador",
+      "student": "Estudante"
+    }
+  },
+  "PROFILE": {
+    "SUBJECTS": {
+      "title": "Disciplinas com mais acertos"
+    },
+    "DATA_INFO": {
+      "ended_quizzes": "Questionários finalizados",
+      "approved": "Aprovações",
+      "correct_answers": "Respostas corretas (%)",
+      "time": "tempo",
+      "time_per_quiz": "Tempo médio por questionário",
+      "quizzes_done": "Questionários realizados"
+    }
+  },
+  "SIGN_USER": {
+    "title_login": "Entrar com minha conta",
+    "title_register": "Criar uma conta",
+    "insert_email": "Insira seu email no campo abaixo.",
+    "forget_password": "Esqueceu sua senha?",
+    "already_have_account": "Já possui uma conta?",
+    "login": "Entrar",
+    "or": "ou",
+    "no_account": "Não tem uma conta?",
+    "register": "Registrar",
+    "create_account": "Criar conta",
+    "FIELD": {
+      "name": "Nome",
+      "email": "Email",
+      "password": "Senha",
+      "confirm_password": "Confirmar senha"
+    },
+    "ERROR": {
+      "required": "Este campo é obrigatório!",
+      "password_dont_match": "As senhas não correspondem!"
+    }
+  },
+  "USERNAME_MODAL": {
+    "user_name": "Nome de usuário",
+    "invalid": "Nome de usuário inválido",
+    "TEXT": {
+      "before_continue": "Antes de continuar...",
+      "continue": "Continuar",
+      "username_change": "O nome de usuário pode ser mudado na página de Perfil."
+    },
+    "WARNING": {
+      "accont_without_name_1": "Esta conta ainda não possui um nome de usuário!",
+      "accont_without_name_2": "Para usar o aplicativo, é necessário preencher o campo abaixo."
+    }
+  },
+  "FAB": {
+    "TEXT": {
+      "close": "Fechar",
+      "create": "Criar"
+    },
+    "CREATE": {
+      "new_question": "Criar nova questão",
+      "new_quiz": "Criar novo questionario"
+    }
+  },
+  "AUTH": {
+    "TEXT": {
+      "intro_1": "Se está procurando por um lugar para aprender Cloud... você encontrou! Nossos questionários são totalmente gratuitos e te levarão ao seu limite, fortificando seus conhecimentos.",
+      "intro_2": "Comece agora mesmo, não há tempo a perder!"
+    },
+    "SUBJECT": {
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "confirm_all": "Confirmar Todos"
+    }
+  },
+  "TEST": {
+    "restore": "Restaurar",
+    "unavailable": "Indiponível",
+    "loading_quizzes": "Carregando questionários...",
+    "no_quizzes": "Não há questionários",
+    "search_title": "Procurar por título",
+    "delete_marked": "Os seguintes questionários foram marcados para exclusão:",
+    "delete_confirm": "Tem certeza de que deseja excluir este questionário?",
+    "edit": "Editar questionário",
+    "LEVEL": {
+      "beginner": "Iniciante",
+      "intermediary": "Intermediário",
+      "advanced": "Avançado",
+      "expert": "Experiente"
+    },
+    "TYPE": {
+      "selected": "Selecionado",
+      "auto": "Automático",
+      "random": "Aleatório"
+    },
+    "DELETE_ALERT": {
+      "success": "Exclusão confirmada! Quando deixar esta página, a tabela será atualizada.",
+      "marked": "Marcadas por você:"
+    },
+    "GENERATE_CARD": {
+      "generate_new": "Gerar questionário",
+      "select_all": "Selecionar todos",
+      "start": "Começar"
+    },
+    "ATTEMPTS": {
+      "no_attempts": "Não há tentativas no momento",
+      "approved": "Passou",
+      "failed": "Falhou",
+      "MODE": {
+        "practice": "Treino",
+        "exam": "Exame",
+        "undefined": "Indefinido"
+      },
+      "HEADERS": {
+        "#": "#",
+        "date": "Data",
+        "answers": "Respostas",
+        "score": "Pontuação",
+        "time_taken": "Tempo gasto",
+        "mode": "Modo",
+        "result": "Resultado",
+        "review": "Revisar"
+      }
+    },
+    "QUIZ": {
+      "home": "Início",
+      "quiz": "questionário",
+      "quiz_t": "Questionário",
+      "quizzes": "questionários",
+      "quizzes_t": "Questionários",
+      "unlimited": "Ilimitado",
+      "level": "Nível",
+      "info": "Detalhes",
+      "quiz_info": "Detalhes do questionário",
+      "question": "Questão",
+      "questions": "questões",
+      "of": "de",
+      "subject": "Disciplina:",
+      "subjects": "disciplinas",
+      "mark_review": "Marcar para revisão",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "answer": "resposta",
+      "answers": "Respostas",
+      "explanation": "Explicação",
+      "correct_answer": "Resposta correta:",
+      "before": "Anterior",
+      "next": "Próxima",
+      "send": "Enviar",
+      "time_up": "TEMPO ESGOTADO",
+      "answered_questions": "questões respondidas",
+      "left": "Faltam",
+      "question_to_answer": "questões para responder",
+      "have": "Há",
+      "question_to_review": "questões para revisar",
+      "all_answered_questions": "Todas as questões foram respondidas",
+      "wait": "Espera...",
+      "exit_warning": "Ao sair do questionário, todo o seu progresso será perdido. Tem certeza de que deseja sair?",
+      "confirm_exit": "Tem certeza de que deseja sair?",
+      "cancel": "Cancelar",
+      "exit": "Sair",
+      "from_quiz": "do questionário"
+    },
+    "QUIZ_DETAILS": {
+      "for_approval": "para aprovação",
+      "instructions": "Instruções",
+      "no_instructions": "Este teste não possui instruções.",
+      "previous_attempts": "Tentativas anteriores",
+      "outcome": "Seus resultados",
+      "time_spend": "Tempo gasto",
+      "before_start": "Antes de começar",
+      "info_no_limit_time": "O questionário não possui limite de tempo. O tempo será contado de forma crescente a partir do momento de início.",
+      "info_limit_time_1": "O questionário possui um limite de tempo de",
+      "info_limit_time_2": ". O tempo será contado de forma decrescente a partir do momento de início e o teste deverá ser concluído antes de expirar.",
+      "start_was_training": "Começar como treino"
+    },
+    "TEST_FORM": {
+      "save": "Salvar",
+      "start_selection": "Começar Seleção",
+      "info_test": "Questionários automáticos selecionam suas questões apenas quando são iniciadas, de acordo com as disciplinas escolhidas, nível e número de questões.",
+      "title_already_in_use": "Um questionário com este Título já foi criado!",
+      "change_title": "Por favor, mude o Título.",
+      "title": "Título",
+      "instructions": "Instruções (Opcional)",
+      "type": "Tipo de questionário",
+      "level": "Nível",
+      "unlimited_time": "Tempo de questionário ilimitado",
+      "hours": "Horas",
+      "minutes": "Minutos",
+      "questions_amount": "Número de questões",
+      "subject": "Disciplina",
+      "approval_percentage": "Porcentagem de aprovação",
+      "RULES": {
+        "required": "Este campo é obrigatório!",
+        "invalid": "Valor inválido",
+        "positive": "Apenas números positivos",
+        "not_enough_questions": "Não há questões suficientes para a disciplina e nível escolhidos"
+      }
+    },
+    "TESTS": {
+      "restore": "Restaurar",
+      "restore_all": "Restaurar Todos"
+    },
+    "TESTS_TABLE": {
+      "view": "Visualizar",
+      "view_quiz": "Visualizar questionário",
+      "delete": "Excluir",
+      "deleted": "Excluída",
+      "attempt": "TENTATIVA",
+      "no_attempts": "SEM TENTATIVAS",
+      "HEADERS": {
+        "title": "Título",
+        "actions": "Ações"
+      }
+    }
+  },
+  "SHARED": {
+    "TEXT_EDITOR": {
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "underlined": "Sublinhado",
+      "text_color": "Cor do texto",
+      "align_left": "Alinhar à esquerda",
+      "align_center": "Alinhar ao centro",
+      "align_right": "Alinhar à direita",
+      "justify": "Justificar",
+      "numbered_list": "Lista numerada",
+      "bulleted_list": "Lista com marcadores",
+      "load_archive": "Carregar arquivo",
+      "load_image": "Carregar imagem",
+      "insert_link": "Inserir link",
+      "remove_link": "Remover link",
+      "remove_formacion": "Remover formatação"
+    },
+    "DATE": {
+      "today_at": "Hoje às",
+      "yesterday_at": "Ontem às",
+      "WEEKDAY": {
+        "sunday": "Domingo",
+        "monday": "Segunda-feira",
+        "tuesday": "Terça-feira",
+        "wednesday": "Quarta-feira",
+        "thursday": "Quinta-feira",
+        "friday": "Sexta-feira",
+        "saturday": "Sábado"
+      },
+      "MONTH": {
+        "january": "Janeiro",
+        "february": "Fevereiro",
+        "march": "Março",
+        "april": "Abril",
+        "may": "Maio",
+        "june": "Junho",
+        "july": "Julho",
+        "august": "Agosto",
+        "september": "Setembro",
+        "october": "Outubro",
+        "november": "Novembro",
+        "december": "Dezembro"
+      }
+    }
+  },
+  "QUESTIONS": {
+    "search_id": "Procurar by ID",
+    "delete_marked": "As seguintes questões foram marcadas para exclusão:",
+    "delete_confirm": "Tem certeza de que deseja excluir esta questão?",
+    "ANSWERS": {
+      "answers": "Respostas",
+      "justifications": "Justificativas"
+    },
+    "EDIT": {
+      "edit_question": "Editar questão - ",
+      "back": "Voltar"
+    },
+    "PRINT": {
+      "create_pdf": "Gerar PDF"
+    },
+    "FORM": {
+      "id_in_use": "Uma questão com este ID já foi criada!",
+      "change_id": "Por favor, mude o ID.",
+      "id": "ID",
+      "subject": "Disciplina",
+      "level": "Nível",
+      "image": "Imagem",
+      "description": "Descrição",
+      "multi_answers": "Múltiplas respostas",
+      "justification": "Justificativa",
+      "general_justification": "Justificativa geral",
+      "justification_source": "Fonte da justificativa (URL)"
+    },
+    "QUESTIONS": {
+      "info_1": "Esta questão está sendo usada em alguns questionários com geração automática:",
+      "info_2": "Só será possível excluí-la quando os questionários forem excluídos ou possuirem mais questões disponíveis para a geração.",
+      "test_1": "Esta questão está sendo usada nos seguintes questionários:",
+      "test_2": "Só será possível excluí-la quando não se encontrar em nenhum questionário."
+    },
+    "TABLE": {
+      "restore": "Restaurar",
+      "unavailable": "Indisponível",
+      "loading_questions": "Carregando questões...",
+      "no_questions": "Não há questões",
+      "HEADERS": {
+        "id": "ID",
+        "subject": "Disciplina",
+        "level": "Nível",
+        "actions": "Ações"
+      }
+    }
+  },
+  "DASHBOARD": {
+    "LAST_DATA": {
+      "latest_records": "Últimos registros",
+      "see_more": "Ver mais",
+      "no_backup": "Ainda não há backups",
+      "error_log": "Registro de Erro",
+      "no_error": "Ainda não há erros",
+      "user_created": "Usuário Criado",
+      "no_user": "Nenhum usuário registrado"
+    },
+    "LAST_REQUESTS": {
+      "requests": "Suas solicitações",
+      "latest_requests": "Solicitações recentes",
+      "latest_questions": "Questões recentes",
+      "see_all": "Ver todas",
+      "no_resquests": "Não há solicitações no momento"
+    },
+    "DATA_AMOUNT": {
+      "users": "usuários"
+    },
+    "QUESTION_BY_SUBJECT": {
+      "questions_subject": "Questões por matéria",
+      "no_data": "Não há dados disponíveis",
+      "others": "Outros"
+    },
+    "TESTS_BY_WEEK": {
+      "quizzes_weak": "Questionários por semana",
+      "total": "Total:",
+      "weak": "Semana"
+    },
+    "TESTS_TABLE": {
+      "recent_quizzes": "Questionários recentes",
+      "HEADERS": {
+        "title": "Título",
+        "type": "Tipo",
+        "questions_amount": "Nº de Questões",
+        "level": "Nível",
+        "last_update": "Última atualização"
+      }
+    }
+  },
+  "ADMIN": {
+    "search": "Pesquisar",
+    "download": "Baixar",
+    "delete": "Excluir",
+    "cancel": "Cancelar",
+    "BACKUPS_TABLE": {
+      "backup": "Fazer Backup",
+      "current_month": "Mês Atual",
+      "warning": "Tem certeza de que deseja excluir este Backup?",
+      "loading_backups": "Carregando backups...",
+      "no_backups": "Não há backups neste mês",
+      "HEADERS": {
+        "id": "ID",
+        "size": "Tamanho",
+        "start_date": "Data de início",
+        "end_date": "Data de término",
+        "actions": "Ações"
+      }
+    },
+    "SUBJECTS": {
+      "add_subject": "Adicionar disciplina",
+      "warning": "Tem certeza de que deseja excluir este Disciplina?",
+      "loading_subjects": "Carregando disciplinas...",
+      "no_subjects": "Não há disciplinas",
+      "text_1": "Não é possível excluir disciplinas que estão sendo usados em questões!",
+      "text_2": "Certifique-se de que o número de questões seja igual a 0.",
+      "HEADERS": {
+        "name": "Nome",
+        "questions": "Questões",
+        "actions": "Ações"
+      }
+    },
+    "USERS_TABLE": {
+      "edit_role": "Editar cargo",
+      "select_role": "Selecione o cargo",
+      "loading_users": "Carregando usuários...",
+      "no_users": "Não há usuários",
+      "HEADERS": {
+        "role": "Cargo",
+        "name": "Nome",
+        "email": "Email",
+        "actions": "Ações"
+      }
+    },
+    "LOGS": {
+      "loading_logs": "Carregando registros...",
+      "no_logs": "Não há registros registros",
+      "HEADERS": {
+        "id": "ID",
+        "type": "Tipo",
+        "user": "Usuário",
+        "date": "Data",
+        "actions": "Ações"
+      }
+    }
+  }
 }

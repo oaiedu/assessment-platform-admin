@@ -1,208 +1,246 @@
 <template>
-  <v-container>
-    <v-row justify="end" class="mr-2">
+  <v-container class="mt-4">
+    <v-row justify="end" class="ma-0 mr-2">
       <v-btn
-        :dark="false"
-        disabled
-        color="green"
-        class="mt-2"
+        dark
+        rounded
+        color="green lighten-1"
         :loading="loading"
         @click="backup()"
       >
-        Fazer Backup
+        {{ $t("ADMIN.BACKUPS_TABLE.backup") }}
         <v-icon right dark>{{ mdiCloudUpload }}</v-icon>
       </v-btn>
     </v-row>
 
-    <v-data-table
-      :items="getBackupsByMonth(currentMonth)"
-      class="elevation-1 mt-5"
-      :headers="headers"
-      :loading="loading"
-      :sort-by="['start']"
-      :sort-desc="[true]"
-      loading-text="Carregando backups..."
-      no-data-text="Não há backups neste mês"
+    <v-card outlined class="mt-5" style="border-radius: 26px; overflow: hidden">
+      <v-data-table
+        hide-default-footer
+        :loading-text="$t('ADMIN.BACKUPS_TABLE.loading_backups')"
+        :no-data-text="$t('ADMIN.BACKUPS_TABLE.no_backups')"
+        :items="getBackupsByMonth(currentMonth)"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('ADMIN.BACKUPS_TABLE.HEADERS.' + h.text)
+          }))
+        "
+        :loading="loading"
+        :sort-by="['start']"
+        :sort-desc="[true]"
+      >
+        <template v-slot:top>
+          <v-toolbar flat dense>
+            <v-toolbar-title class="blue--text font-weight-medium">
+              {{ $t("ADMIN.BACKUPS_TABLE.current_month") }}
+            </v-toolbar-title>
+          </v-toolbar>
+          <v-divider></v-divider>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                color="blue"
+                :disabled="loading"
+                @click="downloadBkp(item)"
+              >
+                {{ mdiDownload }}
+              </v-icon>
+            </template>
+            <span>{{ $t("ADMIN.download") }}</span>
+          </v-tooltip>
+
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                class="ml-1"
+                color="red"
+                :disabled="loading"
+                @click="
+                  deleteBackupSnackBar = true;
+                  deleteItem = item;
+                "
+              >
+                {{ mdiDelete }}
+              </v-icon>
+            </template>
+            <span>{{ $t("ADMIN.delete") }}</span>
+          </v-tooltip>
+        </template>
+        <template v-slot:[`item.start`]="{ item }">
+          <span>{{ formatDate(item.start) }}</span>
+        </template>
+        <template v-slot:[`item.end`]="{ item }">
+          <span>{{ formatDate(item.end) }}</span>
+        </template>
+      </v-data-table>
+    </v-card>
+
+    <v-card
+      outlined
+      class="mt-10"
+      style="border-radius: 26px; overflow: hidden"
     >
-      <template v-slot:top>
-        <v-toolbar flat dense>
-          <v-toolbar-title class="blue--text font-weight-medium"
-            >Mês Atual</v-toolbar-title
-          >
-        </v-toolbar>
-        <v-divider></v-divider>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              :disabled="loading"
-              @click="downloadBkp(item)"
-            >
-              {{ mdiDownload }}
-            </v-icon>
-          </template>
-          <span>Download</span>
-        </v-tooltip>
+      <v-data-table
+        hide-default-footer
+        :loading-text="$t('ADMIN.BACKUPS_TABLE.loading_backups')"
+        :no-data-text="$t('ADMIN.BACKUPS_TABLE.no_backups')"
+        :items="getBackupsByMonth(lastMonth)"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('ADMIN.BACKUPS_TABLE.HEADERS.' + h.text)
+          }))
+        "
+        :loading="loading"
+        :sort-by="['start']"
+        :sort-desc="[true]"
+      >
+        <template v-slot:top>
+          <v-toolbar flat dense>
+            <v-toolbar-title>{{ pastMonths[0] }}</v-toolbar-title>
+          </v-toolbar>
+          <v-divider></v-divider>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                color="blue"
+                @click="downloadBkp(item)"
+              >
+                {{ mdiDownload }}
+              </v-icon>
+            </template>
+            <span>{{ $t("ADMIN.download") }}</span>
+          </v-tooltip>
 
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              class="ml-1"
-              :disabled="loading"
-              @click="
-                deleteBackupSnackBar = true;
-                deleteItem = item;
-              "
-            >
-              {{ mdiDelete }}
-            </v-icon>
-          </template>
-          <span>Excluir</span>
-        </v-tooltip>
-      </template>
-      <template v-slot:[`item.start`]="{ item }">
-        <span>{{ formatDate(item.start) }}</span>
-      </template>
-      <template v-slot:[`item.end`]="{ item }">
-        <span>{{ formatDate(item.end) }}</span>
-      </template>
-    </v-data-table>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                class="ml-1"
+                color="red"
+                @click="
+                  deleteBackupSnackBar = true;
+                  deleteItem = item;
+                "
+              >
+                {{ mdiDelete }}
+              </v-icon>
+            </template>
+            <span>Excluir</span>
+          </v-tooltip>
+        </template>
+        <template v-slot:[`item.start`]="{ item }">
+          <span>{{ formatDate(item.start) }}</span>
+        </template>
+        <template v-slot:[`item.end`]="{ item }">
+          <span>{{ formatDate(item.end) }}</span>
+        </template>
+      </v-data-table>
+    </v-card>
 
-    <v-data-table
-      :items="getBackupsByMonth(lastMonth)"
-      class="elevation-1 mt-10"
-      :headers="headers"
-      :loading="loading"
-      :sort-by="['start']"
-      :sort-desc="[true]"
-      loading-text="Carregando backups..."
-      no-data-text="Não há backups neste mês"
+    <v-card
+      outlined
+      class="mt-10"
+      style="border-radius: 26px; overflow: hidden"
     >
-      <template v-slot:top>
-        <v-toolbar flat dense>
-          <v-toolbar-title class="blue--text font-weight-medium">{{
-            pastMonths[0]
-          }}</v-toolbar-title>
-        </v-toolbar>
-        <v-divider></v-divider>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon v-on="on" v-bind="attrs" @click="downloadBkp(item)">
-              {{ mdiDownload }}
-            </v-icon>
-          </template>
-          <span>Download</span>
-        </v-tooltip>
+      <v-data-table
+        hide-default-footer
+        :loading-text="$t('ADMIN.BACKUPS_TABLE.loading_backups')"
+        :no-data-text="$t('ADMIN.BACKUPS_TABLE.no_backups')"
+        :items="getBackupsByMonth(twoMonthsAgo)"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('ADMIN.BACKUPS_TABLE.HEADERS.' + h.text)
+          }))
+        "
+        :loading="loading"
+        :sort-by="['start']"
+        :sort-desc="[true]"
+      >
+        <template v-slot:top>
+          <v-toolbar flat dense>
+            <v-toolbar-title>{{ pastMonths[1] }}</v-toolbar-title>
+          </v-toolbar>
+          <v-divider></v-divider>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                color="blue"
+                @click="downloadBkp(item)"
+              >
+                {{ mdiDownload }}
+              </v-icon>
+            </template>
+            <span>{{ $t("ADMIN.download") }}</span>
+          </v-tooltip>
 
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              class="ml-1"
-              @click="
-                deleteBackupSnackBar = true;
-                deleteItem = item;
-              "
-            >
-              {{ mdiDelete }}
-            </v-icon>
-          </template>
-          <span>Excluir</span>
-        </v-tooltip>
-      </template>
-      <template v-slot:[`item.start`]="{ item }">
-        <span>{{ formatDate(item.start) }}</span>
-      </template>
-      <template v-slot:[`item.end`]="{ item }">
-        <span>{{ formatDate(item.end) }}</span>
-      </template>
-    </v-data-table>
-
-    <v-data-table
-      :items="getBackupsByMonth(twoMonthsAgo)"
-      class="elevation-1 mt-10"
-      :headers="headers"
-      :loading="loading"
-      :sort-by="['start']"
-      :sort-desc="[true]"
-      loading-text="Carregando backups..."
-      no-data-text="Não há backups neste mês"
-    >
-      <template v-slot:top>
-        <v-toolbar flat dense>
-          <v-toolbar-title class="blue--text font-weight-medium">{{
-            pastMonths[1]
-          }}</v-toolbar-title>
-        </v-toolbar>
-        <v-divider></v-divider>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon v-on="on" v-bind="attrs" @click="downloadBkp(item)">
-              {{ mdiDownload }}
-            </v-icon>
-          </template>
-          <span>Download</span>
-        </v-tooltip>
-
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              v-on="on"
-              v-bind="attrs"
-              class="ml-1"
-              @click="
-                deleteBackupSnackBar = true;
-                deleteItem = item;
-              "
-            >
-              {{ mdiDelete }}
-            </v-icon>
-          </template>
-          <span>Excluir</span>
-        </v-tooltip>
-      </template>
-      <template v-slot:[`item.start`]="{ item }">
-        <span>{{ formatDate(item.start) }}</span>
-      </template>
-      <template v-slot:[`item.end`]="{ item }">
-        <span>{{ formatDate(item.end) }}</span>
-      </template>
-    </v-data-table>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                v-on="on"
+                v-bind="attrs"
+                class="ml-1"
+                color="red"
+                @click="
+                  deleteBackupSnackBar = true;
+                  deleteItem = item;
+                "
+              >
+                {{ mdiDelete }}
+              </v-icon>
+            </template>
+            <span>{{ $t("ADMIN.delete") }}</span>
+          </v-tooltip>
+        </template>
+        <template v-slot:[`item.start`]="{ item }">
+          <span>{{ formatDate(item.start) }}</span>
+        </template>
+        <template v-slot:[`item.end`]="{ item }">
+          <span>{{ formatDate(item.end) }}</span>
+        </template>
+      </v-data-table>
+    </v-card>
 
     <v-snackbar
       v-model="deleteBackupSnackBar"
-      color="white"
       light
       right
       top
+      color="white"
       :timeout="15000"
     >
-      Tem certeza de que deseja excluir este Backup?
+      {{ $t("ADMIN.BACKUPS_TABLE.warning") }}
 
-      <v-btn dark class="ml-3" color="blue" text @click="deleteBkp(deleteItem)">
-        Excluir
+      <v-btn dark text class="ml-3" color="blue" @click="deleteBkp(deleteItem)">
+        {{ $t("ADMIN.delete") }}
       </v-btn>
 
       <v-btn
         dark
-        color="grey"
         text
+        color="grey"
         @click="
           deleteBackupSnackBar = false;
           deleteItem = null;
         "
       >
-        Cancelar
+        {{ $t("ADMIN.cancel") }}
       </v-btn>
     </v-snackbar>
   </v-container>
@@ -224,31 +262,31 @@ export default {
       months: null,
       headers: [
         {
-          text: "ID",
+          text: "id",
           value: "id",
           align: "left",
           sortable: true
         },
         {
-          text: "Tamanho",
+          text: "size",
           value: "size",
           align: "center",
           sortable: true
         },
         {
-          text: "Data de Início",
+          text: "start_date",
           value: "start",
           align: "center",
           sortable: true
         },
         {
-          text: "Data de Término",
+          text: "end_date",
           value: "end",
           align: "center",
           sortable: true
         },
         {
-          text: "Ações",
+          text: "actions",
           value: "actions",
           align: "center",
           sortable: false
@@ -275,7 +313,10 @@ export default {
         : this.currentMonth - 2;
     },
     pastMonths() {
-      return [this.months[this.lastMonth], this.months[this.twoMonthsAgo]];
+      return [
+        this.$t("SHARED.DATE.MONTH." + this.months[this.lastMonth]),
+        this.$t("SHARED.DATE.MONTH." + this.months[this.twoMonthsAgo])
+      ];
     }
   },
   methods: {
@@ -284,7 +325,9 @@ export default {
 
       const dateTime = new Date(date).toString();
       const sub = dateTime.substr(7, 17);
-      const monthName = this.months[month].substr(0, 3);
+      const monthName = this.$t(
+        "SHARED.DATE.MONTH." + this.months[month]
+      ).substr(0, 3);
 
       return monthName + sub;
     },

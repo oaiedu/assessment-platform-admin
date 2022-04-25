@@ -1,12 +1,16 @@
 <template>
   <v-container>
-    <v-card>
+    <v-card flat outlined style="border-radius: 26px; overflow: hidden">
       <v-data-table
         hide-default-footer
-        loading-text="Carregando solicitações..."
-        no-data-text="Não há solicitações"
-        class="elevation-1"
-        :headers="headers"
+        :loading-text="$t('REQUESTS.TABLE.loading_requests')"
+        :no-data-text="$t('REQUESTS.TABLE.no_requests')"
+        :headers="
+          headers.map(h => ({
+            ...h,
+            text: $t('REQUESTS.TABLE.HEADERS.' + h.text)
+          }))
+        "
         :items="items"
         :page="page"
         :items-per-page="itemsPerPage"
@@ -18,27 +22,34 @@
           v-if="items && items.length > 0"
         >
           <span
+            class="font-weight-medium"
             :style="{
               color:
-                item.status === 'Pendente'
+                item.status === 'pendant'
                   ? '#ffaa00'
-                  : item.status === 'Aprovado'
+                  : item.status === 'approved'
                   ? '#00cc66'
-                  : '#ff0000'
+                  : '#ff3333'
             }"
-            >{{ item.status }}</span
           >
+            {{ $t("REQUESTS.STATUS." + item.status) }}
+          </span>
         </template>
 
         <template v-slot:[`item.actions`]="{ item }">
           <v-row justify="end" v-if="!item.toDelete">
             <v-tooltip top v-if="userClaims && userClaims['admin']">
               <template v-slot:activator="{ on, attrs }">
-                <v-icon v-on="on" v-bind="attrs" @click="onEmailClick(item)">
+                <v-icon
+                  v-on="on"
+                  v-bind="attrs"
+                  color="blue-grey lighten-1"
+                  @click="onEmailClick(item)"
+                >
                   {{ mdiEmail }}
                 </v-icon>
               </template>
-              <span>Enviar e-mail</span>
+              <span>{{ $t("REQUESTS.TABLE.send_email") }}</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -47,12 +58,13 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
+                  color="blue-grey lighten-1"
                   @click="onPdfClick(item)"
                 >
                   {{ mdiFilePdfBox }}
                 </v-icon>
               </template>
-              <span>Visualizar PDF</span>
+              <span>{{ $t("REQUESTS.TABLE.view_pdf") }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['admin']">
@@ -61,15 +73,16 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
+                  color="green"
                   :disabled="
-                    item.status === 'Aprovado' || loading || rejectLoading
+                    item.status === 'approved' || loading || rejectLoading
                   "
                   @click="onCheckClick(item)"
                 >
                   {{ mdiCheckBold }}
                 </v-icon>
               </template>
-              <span>Aprovar</span>
+              <span>{{ $t("REQUESTS.TABLE.approve") }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['appraiser']">
@@ -78,15 +91,16 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
+                  color="orange"
                   :disabled="
-                    item.status === 'Aprovado' || loading || rejectLoading
+                    item.status === 'approved' || loading || rejectLoading
                   "
                   @click="onEditClick(item)"
                 >
                   {{ mdiPencil }}
                 </v-icon>
               </template>
-              <span>Editar</span>
+              <span>{{ $t("REQUESTS.TABLE.edit") }}</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -95,12 +109,13 @@
                   v-on="on"
                   v-bind="attrs"
                   class="ml-3"
+                  color="red"
                   :disabled="
                     loading ||
                       rejectLoading ||
                       (userClaims && userClaims['admin']
-                        ? item.status === 'Rejeitado'
-                        : item.status === 'Aprovado')
+                        ? item.status === 'rejected'
+                        : item.status === 'approved')
                   "
                   @click="
                     userClaims && userClaims['admin']
@@ -112,7 +127,10 @@
                 </v-icon>
               </template>
               <span>{{
-                userClaims && userClaims["admin"] ? "Rejeitar" : "Excluir"
+                $t(
+                  "REQUESTS.TABLE." +
+                    (userClaims && userClaims["admin"] ? "reject" : "delete")
+                )
               }}</span>
             </v-tooltip>
           </v-row>
@@ -129,9 +147,12 @@
               @click="onRestoreClick(item)"
             >
               {{
-                userClaims && userClaims["appraiser"]
-                  ? "Restaurar"
-                  : "Indisponível"
+                $t(
+                  "QUESTIONS.TABLE." +
+                    (userClaims && userClaims["appraiser"]
+                      ? "restore"
+                      : "unavailable")
+                )
               }}
             </v-btn>
           </v-row>
@@ -142,7 +163,7 @@
               disabled
               text
             >
-              Excluída
+              {{ $t("TEST.TESTS_TABLE.deleted") }}
             </v-btn>
           </v-row>
         </template>
@@ -164,61 +185,6 @@ import {
 export default {
   name: "RequestsTable",
   props: ["items", "page", "itemsPerPage", "rejectLoading"],
-  computed: {
-    headers() {
-      return this.userClaims && this.userClaims["admin"]
-        ? [
-            { text: "ID", sortable: true, value: "name", align: "left" },
-            {
-              text: "Usuário",
-              value: "user.name",
-              sortable: true,
-              align: "center"
-            },
-            {
-              text: "E-mail",
-              value: "user.email",
-              sortable: true,
-              align: "center"
-            },
-            {
-              text: "Disciplina",
-              value: "subject",
-              sortable: true,
-              align: "center"
-            },
-            {
-              text: "Status",
-              value: "status",
-              sortable: true,
-              align: "center"
-            },
-            { text: "Ações", value: "actions", sortable: false, align: "right" }
-          ]
-        : [
-            { text: "ID", sortable: true, value: "name", align: "left" },
-            {
-              text: "Disciplina",
-              value: "subject",
-              sortable: true,
-              align: "center"
-            },
-            {
-              text: "Status",
-              value: "status",
-              sortable: true,
-              align: "center"
-            },
-            { text: "Ações", value: "actions", sortable: false, align: "right" }
-          ];
-    },
-    loading() {
-      return this.$store.getters.loading;
-    },
-    userClaims() {
-      return this.$store.getters.getUserClaims;
-    }
-  },
   data() {
     return {
       mdiClose,
@@ -228,6 +194,71 @@ export default {
       mdiFilePdfBox,
       mdiEmail
     };
+  },
+  computed: {
+    headers() {
+      return this.userClaims && this.userClaims["admin"]
+        ? [
+            { text: "id", sortable: true, value: "name", align: "left" },
+            {
+              text: "user",
+              value: "user.name",
+              sortable: true,
+              align: "center"
+            },
+            {
+              text: "email",
+              value: "user.email",
+              sortable: true,
+              align: "center"
+            },
+            {
+              text: "subject",
+              value: "subject",
+              sortable: true,
+              align: "center"
+            },
+            {
+              text: "status",
+              value: "status",
+              sortable: true,
+              align: "center"
+            },
+            {
+              text: "actions",
+              value: "actions",
+              sortable: false,
+              align: "right"
+            }
+          ]
+        : [
+            { text: "id", sortable: true, value: "name", align: "left" },
+            {
+              text: "subject",
+              value: "subject",
+              sortable: true,
+              align: "center"
+            },
+            {
+              text: "status",
+              value: "status",
+              sortable: true,
+              align: "center"
+            },
+            {
+              text: "actions",
+              value: "actions",
+              sortable: false,
+              align: "right"
+            }
+          ];
+    },
+    loading() {
+      return this.$store.getters.loading;
+    },
+    userClaims() {
+      return this.$store.getters.getUserClaims;
+    }
   },
   methods: {
     itemRowStyle(item) {
