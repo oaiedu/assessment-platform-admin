@@ -2,7 +2,7 @@
   <v-card outlined width="100%" height="100%" class="question-by-subject">
     <div class="question-by-subject-container">
       <h2 class="chart-title">
-        {{ $t('DASHBOARD.QUESTION_BY_SUBJECT.questions_subject') }}
+        {{ $t("DASHBOARD.QUESTION_BY_SUBJECT.questions_subject") }}
 
         <v-hover v-if="userClaims && !userClaims['student']" v-slot="{ hover }">
           <v-btn
@@ -12,7 +12,7 @@
             :ripple="false"
             :color="hover ? '#2196f3' : '#888888'"
           >
-            {{ $t('DASHBOARD.LAST_DATA.see_more') }}
+            {{ $t("DASHBOARD.LAST_DATA.see_more") }}
           </v-btn>
         </v-hover>
       </h2>
@@ -22,7 +22,7 @@
           class="subject-item"
           style="margin-left: -12px"
         >
-          {{ $t('DASHBOARD.QUESTION_BY_SUBJECT.no_data') }}
+          {{ $t("DASHBOARD.QUESTION_BY_SUBJECT.no_data") }}
         </span>
         <span
           v-for="(item, index) in sortedChartData"
@@ -200,7 +200,10 @@ export default {
         .reduce((a, b) => a + b, 0);
 
       if (others) {
-        data.push({ name: "Outros", value: others });
+        data.push({
+          name: this.$t("DASHBOARD.QUESTION_BY_SUBJECT.others"),
+          value: others
+        });
       }
 
       data.sort((a, b) => a.value - b.value);

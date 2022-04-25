@@ -4,10 +4,15 @@
       hide-default-footer
       class="dashboard-tests-table"
       height="100%"
-      loading-text="Carregando questionários..."
-      no-data-text="Não há questionários a serem mostrados"
       style="height: calc(100% - 52px) !important;"
-      :headers="headers"
+      :loading-text="$t('TEST.loading_quizzes')"
+      :no-data-text="$t('TEST.no_quizzes')"
+      :headers="
+        headers.map(h => ({
+          ...h,
+          text: $t('DASHBOARD.TESTS_TABLE.HEADERS.' + h.text)
+        }))
+      "
       :items="tests"
       :loading="loading"
       :item-class="itemRowStyle"
@@ -15,7 +20,9 @@
     >
       <template v-slot:top>
         <v-toolbar dense flat color="white" class="mt-1">
-          <h1 class="table-title">{{ $t('DASHBOARD.TESTS_TABLE.recent_quizzes') }}</h1>
+          <h1 class="table-title">
+            {{ $t("DASHBOARD.TESTS_TABLE.recent_quizzes") }}
+          </h1>
         </v-toolbar>
 
         <div class="title-divider" />
@@ -48,13 +55,7 @@
           </div>
 
           <span class="type-text">
-            {{
-              item.type === "selected"
-                ? "Selecionado"
-                : item.type === "random"
-                ? "Aleatório"
-                : "Automático"
-            }}
+            {{ $t("TEST.TYPE." + item.type) }}
           </span>
         </div>
       </template>
@@ -68,7 +69,7 @@
             mdiDumbbell
           }}</v-icon>
 
-          {{ getLevel(item).label }}
+          {{ $t("TEST.LEVEL." + getLevel(item).label) }}
         </span>
       </template>
 
@@ -94,17 +95,17 @@ export default {
   data() {
     return {
       headers: [
-        { text: "Título", sortable: false, value: "title", align: "center" },
-        { text: "Tipo", sortable: false, value: "type", align: "center" },
+        { text: "title", sortable: false, value: "title", align: "center" },
+        { text: "type", sortable: false, value: "type", align: "center" },
         {
-          text: "Nº de Questões",
+          text: "questions_amount",
           sortable: false,
           value: "questionsAmount",
           align: "center"
         },
-        { text: "Nível", sortable: false, value: "level", align: "center" },
+        { text: "level", sortable: false, value: "level", align: "center" },
         {
-          text: "Última atualização",
+          text: "last_update",
           sortable: false,
           value: "updated",
           align: "center"
@@ -142,22 +143,22 @@ export default {
       switch (level) {
         case 0:
           return {
-            label: "Iniciante",
+            label: "beginner",
             color: "green"
           };
         case 1:
           return {
-            label: "Intermediário",
+            label: "intermediary",
             color: "blue"
           };
         case 2:
           return {
-            label: "Avançado",
+            label: "advanced",
             color: "orange"
           };
         case 3:
           return {
-            label: "Experiente",
+            label: "expert",
             color: "red"
           };
       }
@@ -197,11 +198,13 @@ export default {
         .substr(0, 5);
 
       if (diffDays === 0) {
-        return `Hoje às ${testTime}`;
+        return `${this.$t("SHARED.DATE.today_at")} ${testTime}`;
       } else if (diffDays === 1) {
-        return `Ontem às ${testTime}`;
+        return `${this.$t("SHARED.DATE.yesterday_at")} ${testTime}`;
       } else {
-        return `${this.months[parseInt(month)].substr(0, 3)} ${day} ${year}`;
+        return `${this.$t(
+          "SHARED.DATE.MONTH." + this.months[parseInt(month)]
+        ).substr(0, 3)} ${day} ${year}`;
       }
     },
     onRowClick(item) {
