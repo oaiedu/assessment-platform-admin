@@ -45,9 +45,7 @@
 
         <div class="profile__personal-info ml-4">
           <span class="profile__name">
-            <span v-if="!editingName" class="mr-2 white--text">{{
-              nickName
-            }}</span>
+            <span v-if="!editingName" class="mr-2">{{ nickName }}</span>
 
             <span v-else>
               <v-text-field
@@ -61,7 +59,6 @@
 
             <v-btn icon :loading="loadingName">
               <v-icon
-                color="grey lighten-4"
                 @click="
                   !editingName ? (editingName = !editingName) : updateName()
                 "
@@ -510,6 +507,8 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 4px;
+
+  margin-bottom: 5px;
 }
 
 .profile__name {
@@ -520,14 +519,20 @@ export default {
 
   font-size: 1.8rem;
   font-weight: 500;
+  color: white;
 }
 
 .profile__name /deep/ .v-input__slot {
   margin: 0 !important;
+  color: white !important;
 }
 
 .profile__name /deep/ .v-text-field__details {
   display: none !important;
+}
+
+.profile__name /deep/ svg {
+  color: #efefef;
 }
 
 .profile__card-column.subject {
@@ -690,6 +695,25 @@ export default {
     height: 2rem;
 
     margin-left: 2.3rem;
+
+    color: #1d1d1d;
+  }
+
+  .profile__name /deep/ svg {
+    color: #5d5d5d;
+  }
+
+  .profile__name /deep/ .v-input__slot {
+    margin: 0 !important;
+    color: #1d1d1d !important;
+  }
+
+  .profile__name /deep/ .v-input__slot:before {
+    border-color: rgba(33, 33, 33, 0.7) !important;
+  }
+
+  .profile__name /deep/ input {
+    color: #1d1d1d;
   }
 }
 </style>
