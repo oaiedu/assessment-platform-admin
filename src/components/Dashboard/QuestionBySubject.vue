@@ -239,7 +239,7 @@ export default {
 <style scoped>
 .question-by-subject {
   border-radius: 26px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .question-by-subject-container {

@@ -13,7 +13,8 @@ import store from "./store";
 
 import { getConfig } from "./api/firebase";
 
-import i18n from './i18n';
+import i18n from "./i18n";
+import { showErrorMessage } from "./utils/errors";
 
 Vue.config.productionTip = false;
 
@@ -34,6 +35,17 @@ new Vue({
   i18n,
   render: h => h(App),
   async created() {
+    if (!navigator.onLine) {
+      const errorModel = showErrorMessage(
+        "connection",
+        "",
+        "Please try again later."
+      );
+
+      store.commit("setError", { message: errorModel });
+      return;
+    }
+
     await this.$store.dispatch("loadSubjects");
     await this.$store.dispatch("loadDataSize");
 
