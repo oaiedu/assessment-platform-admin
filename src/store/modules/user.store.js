@@ -676,6 +676,14 @@ const actions = {
       analytics.setUserId(payload.uid);
 
       if (!user) {
+        if (
+          !navigator.onLine ||
+          (payload.providerData[0] &&
+            payload.providerData[0].providerId === "google.com")
+        ) {
+          throw new Error("No internet connection");
+        }
+
         await dispatch("signUserUp", {
           name: payload.displayName,
           email: payload.email,
