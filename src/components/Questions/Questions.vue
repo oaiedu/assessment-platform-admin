@@ -1,13 +1,25 @@
 <template>
   <div>
     <v-container>
-      <v-container class="mt-10 mb-5">
+      <v-row class="mt-10 mb-5 pa-6" justify="space-between">
         <SearchBox
           :label="$t('QUESTIONS.search_id')"
           @enter="searchQuery($event)"
           @textChange="searchTextChange($event)"
         />
-      </v-container>
+
+        <v-col class="ma-0 ml-4 pa-0" cols="4">
+          <v-select
+            v-model="selectedSubject"
+            dense
+            rounded
+            outlined
+            clearable
+            label="Filter by subject"
+            :items="subjects.map(s => s.name)"
+          ></v-select>
+        </v-col>
+      </v-row>
 
       <v-container
         v-if="hasDeleteMarkQuestions && userClaims && userClaims['admin']"
@@ -253,7 +265,8 @@ export default {
       isSearching: false,
       page: 1,
       searchPage: 1,
-      itemsPerPage: 8
+      itemsPerPage: 8,
+      selectedSubject: null
     };
   },
   computed: {
@@ -324,6 +337,9 @@ export default {
           }
         }
       });
+    },
+    selectedSubject() {
+      this.searchQuery(this.search);
     }
   },
   methods: {
@@ -426,22 +442,30 @@ export default {
       }
     },
     searchTextChange(text) {
-      if ((text === null || text.length === 0) && this.isSearching) {
+      this.search = text;
+
+      if (!text && !this.selectedSubject && this.isSearching) {
         this.isSearching = false;
         this.searchPage = 1;
         this.$store.commit("resetFilteredQuestions");
+      } else if (!text && this.selectedSubject) {
+        this.searchQuery(text);
       }
     },
     searchQuery(text) {
       this.searchPage = 1;
       this.$store.commit("resetFilteredQuestions");
 
-      if (text && text.length > 0) {
+      if (text || this.selectedSubject) {
         this.isSearching = true;
-        this.$store.dispatch("searchQuestions", text);
+        this.$store.dispatch("searchQuestions", {
+          query: text,
+          subject: this.selectedSubject
+        });
 
         analytics.logEvent("search", {
-          search_term: text
+          search_term: text,
+          subject: this.selectedSubject
         });
       } else {
         this.isSearching = false;
