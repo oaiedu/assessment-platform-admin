@@ -496,21 +496,42 @@ const actions = {
   /**
    * Searches for questions based on their name.
    *
-   * @param {Store} store - The vuex store.
-   * @param {string} payload - The string to be searched.
+   * @param {Store} store The vuex store.
+   * @param {string | { query: string, subject?: string }} payload The string to be searched.
    */
   searchQuestions({ commit }, payload) {
     commit("setLoading", true);
 
+    let query = "";
+    let subject = null;
+
+    if (typeof payload === "string") {
+      query = payload || "";
+    } else {
+      query = payload.query || "";
+      subject = payload.subject;
+    }
+
     const data = [];
 
-    db.collection("questions")
+    let q = db
+      .collection("questions")
       .orderBy("name")
-      .where("name", ">=", payload.toUpperCase())
-      .where("name", "<=", payload.toUpperCase() + "~")
-      .get()
+      .where("name", ">=", query.toUpperCase());
+
+    if (query) {
+      q = q
+        .where("name", ">=", query.toUpperCase())
+        .where("name", "<=", query.toUpperCase() + "~");
+    }
+
+    q.get()
       .then(snapshot => {
         snapshot.forEach(doc => {
+          if (subject && doc.data().subject !== subject) {
+            return;
+          }
+
           data.push(doc.data());
         });
       })

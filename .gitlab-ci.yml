@@ -1,7 +1,7 @@
 image: node:latest
 
 before_script:
-  - npm i -g firebase-tools
+  - npm i -g firebase-tools@11.18.0
 
 stages:
   - build
