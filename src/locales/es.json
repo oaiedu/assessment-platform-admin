@@ -367,7 +367,7 @@
       "latest_requests": "Últimas solicitudes",
       "latest_questions": "Últimas preguntas",
       "see_all": "Ver todo",
-      "no_resquests": "Actualmente no hay solicitudes"
+      "no_requests": "Actualmente no hay solicitudes"
     },
     "DATA_AMOUNT": {
       "users": "usuarios"
