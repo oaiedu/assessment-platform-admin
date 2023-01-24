@@ -497,7 +497,7 @@ export default {
       } else {
         const request = {
           ...questionData,
-          status: "Pendente",
+          status: "pendant",
           userId: this.userInfo.id
         };
 
