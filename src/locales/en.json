@@ -367,7 +367,7 @@
       "latest_requests": "Latest requests",
       "latest_questions": "Latest questions",
       "see_all": "See all",
-      "no_resquests": "There are currently no requests"
+      "no_requests": "There are currently no requests"
     },
     "DATA_AMOUNT": {
       "users": "users"

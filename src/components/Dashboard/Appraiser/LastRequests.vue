@@ -33,7 +33,7 @@
         </div>
       </div>
       <div v-else class="no-content">
-        {{ $t("DASHBOARD.LAST_REQUESTS.no_resquests") }}
+        {{ $t("DASHBOARD.LAST_REQUESTS.no_requests") }}
       </div>
     </div>
   </v-card>
