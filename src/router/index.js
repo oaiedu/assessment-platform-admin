@@ -8,6 +8,7 @@ import Quiz from "@/components/Tests/Quiz.vue";
 import QuizDetails from "@/components/Tests/QuizDetails.vue";
 import Inbox from "@/components/Requests/Inbox.vue";
 import Home from "@/views/Home.vue";
+import Test from "@/views/Test.vue";
 import Management from "@/components/Admin/Management.vue";
 import AuthGuard from "./auth-guard";
 import { analytics } from "../main";
@@ -19,6 +20,12 @@ const routes = [
     path: "/",
     component: Home,
     name: "home",
+    beforeEnter: AuthGuard
+  },
+  {
+    path: "/test",
+    component: Test,
+    name: "test",
     beforeEnter: AuthGuard
   },
   {

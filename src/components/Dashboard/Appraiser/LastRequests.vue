@@ -1,5 +1,5 @@
 <template>
-  <v-card width="100%" height="100%" class="last-requests">
+  <v-card outlined width="100%" height="100%" class="last-requests">
     <div class="last-requests-container">
       <h1 class="last-requests-title">
         {{ $t("DASHBOARD.LAST_REQUESTS.requests") }}
@@ -89,6 +89,12 @@ export default {
 </script>
 
 <style scoped>
+.last-requests {
+  border-radius: 26px;
+  overflow: auto;
+
+}
+
 .last-requests-container,
 .no-content {
   display: flex;
@@ -160,13 +166,13 @@ export default {
 .details-container .name {
   color: #2196f3;
   font-weight: 500;
-  font-size: 1.05rem;
+  font-size: 0.93rem;
 }
 
 .details-container .subject {
   color: #777;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 
   overflow: hidden;
   text-overflow: ellipsis;
