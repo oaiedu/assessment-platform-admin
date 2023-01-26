@@ -1,4 +1,4 @@
-import uuid from "uuid-random";
+import { LogEntity } from "../entities/log.entity";
 import store from "../store";
 
 import { getNowISOString } from "./date";
@@ -111,8 +111,7 @@ export const showErrorMessage = (type, category, message) => {
 export const createErrorLog = (type, message, payload) => {
   const user = store.getters.userInfo;
 
-  const log = {
-    id: uuid(),
+  const log = new LogEntity({
     type,
     date: getNowISOString(),
     user: {
@@ -122,7 +121,7 @@ export const createErrorLog = (type, message, payload) => {
     },
     message,
     payload: payload || null
-  };
+  });
 
   const toAdd = window.location.pathname === "/admin";
 
