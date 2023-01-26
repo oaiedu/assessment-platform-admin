@@ -24,10 +24,6 @@
         :loading="loading"
         :search="search"
       >
-        <template v-slot:[`item.id`]="{ item }">
-          {{ getIdPart(item.id) }}
-        </template>
-
         <template v-slot:[`item.userInfo`]="{ item }">
           {{ item.user.name || item.user.email }}
         </template>
@@ -116,10 +112,6 @@ export default {
       const day = dateParts[2];
 
       return `${time} - ${day}/${month}/${year}`;
-    },
-    getIdPart(id) {
-      const parts = id.split("-");
-      return `${parts[0]}-${parts[1]}...`;
     },
     sendEmail(email) {
       const a = document.createElement("a");
