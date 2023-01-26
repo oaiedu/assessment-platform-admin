@@ -1,8 +1,6 @@
 import { Store } from "vuex";
-import axios from "axios";
 
-import { db } from "../../main";
-import { getNowISOString } from "../../utils/date";
+import { BackupController } from "../../controllers/backup.controller";
 
 import { createErrorLog, showErrorMessage } from "../../utils/errors";
 
@@ -22,6 +20,11 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @property {Backup[]} backups - An array of backups.
  * @property {Backup|null} lastBackup - The last backup made.
  */
+
+/**
+ * Defines the backup controller.
+ */
+const controller = new BackupController();
 
 /**
  * Gets the initial state for backup store.
@@ -53,8 +56,8 @@ const mutations = {
   /**
    * Sets to the state a new array of backups.
    *
-   * @param {BackupState} state - The backup state.
-   * @param {Backup[]} data - An array of backups.
+   * @param {BackupState} state The backup state.
+   * @param {Backup[]} data An array of backups.
    */
   setBackups(state, data) {
     state.backups = data;
@@ -62,7 +65,7 @@ const mutations = {
   /**
    * Pushes a new backup to backups list.
    *
-   * @param {BackupState} state - The backup state.
+   * @param {BackupState} state The backup state.
    * @param {Backup} data
    */
   newBackup(state, data) {
@@ -71,8 +74,8 @@ const mutations = {
   /**
    * Remove a backup from backups list.
    *
-   * @param {BackupState} state - The backup state.
-   * @param {Backup} data - The backup to remove.
+   * @param {BackupState} state The backup state.
+   * @param {Backup} data The backup to remove.
    */
   removeBackup(state, data) {
     const backups = [...state.backups];
@@ -87,8 +90,8 @@ const mutations = {
   /**
    * Sets the last backup with the given data.
    *
-   * @param {BackupState} state - The backup state.
-   * @param {Backup} data - The backup to be setted.
+   * @param {BackupState} state The backup state.
+   * @param {Backup} data The backup to be setted.
    */
   setLastBackup(state, data) {
     state.lastBackup = data;
@@ -96,7 +99,7 @@ const mutations = {
   /**
    * Resets the backup state to it's initial state.
    *
-   * @param {BackupState} state - The backup state.
+   * @param {BackupState} state The backup state.
    */
   RESETBackup(state) {
     const newState = initialState();
@@ -110,288 +113,160 @@ const actions = {
   /**
    * Backups all Firebase data and sends it to the google drive cloud service.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.now - The iso string of when the backups started.
+   * @param {Store} store The vuex store.
    */
-  async backupFirebase({ commit, state }, payload) {
+  async backupFirebase({ commit }) {
     commit("setLoading", true);
 
-    const { now } = payload;
-    let url = "";
+    try {
+      const backup = await controller.backup();
 
-    if (process.env.NODE_ENV === "production") {
-      url =
-        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=" +
-        now.replace(/:/g, "-");
+      if (backup) {
+        commit("newBackup", backup);
+      }
+
+      commit("setSuccess", "Backup successfully done!");
+    } catch (error) {
+      createErrorLog("Backup Data", error.message, null);
+
+      const errorModel = showErrorMessage("creation", "Backup", error.message);
+      commit("setError", { message: errorModel });
+    } finally {
+      commit("setLoading", false);
     }
-
-    const bkp = {
-      id: "",
-      size: "",
-      start: "",
-      end: "",
-      cloudId: "",
-      month: ""
-    };
-
-    await axios
-      .get(url)
-      .then(res => {
-        bkp.size = res.data.size;
-        bkp.end = getNowISOString();
-        bkp.cloudId = res.data.cloudId;
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "creation",
-          "Backup",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Backup Url GET", error.message, { payload, bkp, url });
-      });
-
-    db.collection("backups")
-      .get()
-      .then(snapshot => {
-        let lastBkpId;
-        let bkpId;
-
-        if (snapshot.docs.length > 0) {
-          snapshot.forEach(doc => {
-            const id = parseInt(doc.data().id.substr(3, 4));
-            if (!lastBkpId) {
-              lastBkpId = id;
-            } else {
-              if (id > lastBkpId) {
-                lastBkpId = id;
-              }
-            }
-          });
-
-          bkpId = lastBkpId + 1;
-        } else bkpId = 1;
-
-        bkp.id =
-          "mb" + (bkpId >= 1000 ? bkpId : bkpId.toString().padStart(4, "0"));
-        bkp.start = now;
-        bkp.month = state.months[new Date(bkp.start).getMonth() + 1].substr(
-          0,
-          3
-        );
-
-        db.collection("backups")
-          .add(bkp)
-          .then(() => {
-            commit("newBackup", bkp);
-            commit("setLoading", false);
-            commit("setSuccess", "Backup successfully done!");
-          })
-          .catch(error => console.error(error));
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "creation",
-          "Backup",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Backup DB Insert", error.message, { payload, bkp });
-      });
   },
   /**
    * Loads all the backups from the last 3 months.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store} store The vuex store.
    */
-  loadBackups({ commit, state }) {
+  async loadBackups({ commit }) {
     commit("setLoading", true);
 
-    const data = [];
-    const currentMonth = new Date().getMonth() + 1;
-    const lastMonth = currentMonth - 1 === 0 ? 12 : currentMonth - 1;
-    const twoMonthsAgo =
-      currentMonth - 2 <= 0 ? currentMonth + 12 - 2 : currentMonth - 2;
+    try {
+      const backups = await controller.getLastMonths();
+      commit("setBackups", backups);
+    } catch (error) {
+      createErrorLog("Backups Load", error.message, null);
 
-    const months = [
-      state.months[currentMonth].substr(0, 3),
-      state.months[lastMonth].substr(0, 3),
-      state.months[twoMonthsAgo].substr(0, 3)
-    ];
-
-    db.collection("backups")
-      .where("month", "in", months)
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          data.push(doc.data());
-        });
-      })
-      .then(() => {
-        commit("setBackups", data);
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("load", "Backup", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Backups Load", error.message, { data });
-      });
+      const errorModel = showErrorMessage("load", "Backup", error.message);
+      commit("setError", { message: errorModel });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Downloads a backup according to it's cloudId.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.id - The backup id.
-   * @param {string} payload.cloudId - The backup cloud id.
-   * @param {string} payload.date - The backup start date.
+   * @param {Store} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.registry The backup registry.
+   * @param {string} payload.cloudId The backup cloud id.
+   * @param {string} payload.date The backup start date.
    */
-  downloadBackup({ commit }, payload) {
+  async downloadBackup({ commit }, payload) {
     commit("setLoading", true);
 
-    let url = "";
+    const setError = error => {
+      createErrorLog("Backup Download", error.message, { payload });
 
-    if (process.env.NODE_ENV === "production") {
-      url =
-        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-downloadBackup?id=" +
-        payload.cloudId;
+      const errorModel = showErrorMessage(
+        "connection",
+        "",
+        "Download error - " + error.message
+      );
+      commit("setError", { message: errorModel });
+    };
+
+    try {
+      const result = await controller.download(payload);
+
+      if (!result) {
+        return;
+      }
+
+      if (result.error) {
+        return setError(result.error);
+      }
+
+      const a = document.createElement("a");
+      a.href = result.url;
+
+      a.download = `${payload.registry.toUpperCase()}-${payload.date.replace(
+        /\s/g,
+        "_"
+      )}.zip`;
+
+      a.click();
+      a.remove();
+    } catch (error) {
+      setError(error);
+    } finally {
+      commit("setLoading", false);
     }
-
-    axios
-      .get(url)
-      .then(res => {
-        const data = res.data.backup;
-
-        if (data && res.data.error) {
-          const error = res.data.error;
-          const errorModel = showErrorMessage(
-            "connection",
-            "",
-            "Download error - " + error.message
-          );
-          commit("setError", { message: errorModel });
-          createErrorLog("Backup Download", error.message, { payload, url });
-        } else {
-          const url = "data:application/zip;base64," + data;
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${payload.id.toUpperCase()}-${payload.date.replace(
-            /\s/g,
-            "_"
-          )}.zip`;
-          a.click();
-          a.remove();
-        }
-
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "connection",
-          "",
-          "Download error - " + error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Backup Download", error.message, { payload, url });
-      });
   },
   /**
+   * Deletes a backup.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.id - The backup cloud id.
+   * @param {Store} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.id The backup cloud id.
    */
   async deleteBackup({ commit }, payload) {
     commit("setLoading", true);
 
-    let url = "";
-    if (process.env.NODE_ENV === "production") {
-      url =
-        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-deleteBackup?id=" +
-        payload.id;
-    }
-
-    await axios
-      .get(url)
-      .then(res => {
-        const deleted = res.data.deleted;
-        if (deleted) {
-          db.collection("backups")
-            .where("cloudId", "==", payload.id)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
-                doc.ref.delete();
-                commit("removeBackup", doc.data());
-                commit("setLoading", false);
-                commit("setSuccess", "Backup successfully deleted!");
-              });
-            })
-            .catch(error => {
-              commit("setLoading", false);
-              commit("setError", error);
-            });
-        } else {
-          const error = res.data.error;
-          commit("setLoading", false);
-          const errorModel = showErrorMessage(
-            "exclusion",
-            "Backup",
-            error.message
-          );
-          commit("setError", { message: errorModel });
-          createErrorLog("Backup Delete", error.message, {
-            payload,
-            deleted,
-            url
-          });
-        }
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "connection",
-          "",
-          "Delete error - " + error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Backup Url Delete", error.message, { payload, url });
+    const setError = error => {
+      createErrorLog("Backup Delete", error.message ?? "", {
+        id: payload.id
       });
+
+      const errorModel = showErrorMessage(
+        "exclusion",
+        "Backup",
+        error.message ?? ""
+      );
+      commit("setError", { message: errorModel });
+    };
+
+    try {
+      const { backup, success, error } = await controller.delete(payload.id);
+
+      if (!success) {
+        return setError(error);
+      }
+
+      commit("removeBackup", backup);
+      commit("setSuccess", "Backup successfully deleted!");
+    } catch (error) {
+      setError(error);
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Loads the most recent backup.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store} store The vuex store.
    */
-  loadLastBackup({ commit }) {
+  async loadLastBackup({ commit }) {
     commit("setLoading", true);
 
-    db.collection("backups")
-      .orderBy("start", "desc")
-      .limit(1)
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          commit("setLastBackup", doc.data());
-          commit("setLoading", false);
-        });
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("load", "Backup", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Last Backup Loading", error.message, null);
-      });
+    try {
+      const backup = await controller.getLast();
+      commit("setLastBackup", backup);
+    } catch (error) {
+      createErrorLog("Last Backup Loading", error.message, null);
+
+      const errorModel = showErrorMessage("load", "Backup", error.message);
+      commit("setError", { message: errorModel });
+    } finally {
+      commit("setLoading", false);
+    }
   },
   /**
    * Resets the backup state to it's initial state.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store} store The vuex store.
    */
   resetBackup({ commit }) {
     commit("RESETBackup");
@@ -402,7 +277,7 @@ const getters = {
   /**
    * Gets the months object from the backup state.
    *
-   * @param {BackupState} state - The backup state.
+   * @param {BackupState} state The backup state.
    * @returns {Object.<string, string>} The months object, from 1 to 12.
    */
   getMonths(state) {
@@ -411,7 +286,7 @@ const getters = {
   /**
    * Gets all the backups from the backup state.
    *
-   * @param {BackupState} state - The backup state.
+   * @param {BackupState} state The backup state.
    * @returns {Backup[]} An array of backups.
    */
   getBackups(state) {
@@ -420,7 +295,7 @@ const getters = {
   /**
    * Gets the most recent backup from the backup state.
    *
-   * @param {BackupState} state - The backup state.
+   * @param {BackupState} state The backup state.
    * @returns {Backup} The most recent backup.
    */
   getLastBackup(state) {
