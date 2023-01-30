@@ -6,20 +6,10 @@ import { BackupEntity } from '../../entities/backup.entity'
 import { createErrorLog, showErrorMessage } from '../../utils/errors'
 
 /**
- * @typedef {Object} Backup
- * @property {string} id - The backup id.
- * @property {string} cloudId - The backup cloud id (google drive cloud service).
- * @property {string} size - The backup size.
- * @property {string} month - The month that the backup was created.
- * @property {string} start - The iso string of when the backup started.
- * @property {string} end - The iso string of when the backup ended.
- */
-
-/**
  * @typedef {Object} BackupState
  * @property {Object.<string, string>} months - The months object, from 1 to 12.
- * @property {Backup[]} backups - An array of backups.
- * @property {Backup|null} lastBackup - The last backup made.
+ * @property {BackupEntity[]} backups - An array of backups.
+ * @property {BackupEntity|null} lastBackup - The last backup made.
  */
 
 /**
@@ -80,7 +70,7 @@ const mutations = {
    * Remove a backup from backups list.
    *
    * @param {BackupState} state The backup state.
-   * @param {Backup} data The backup to remove.
+   * @param {BackupEntity} data The backup to remove.
    */
   removeBackup(state, data) {
     const backups = [...state.backups]
@@ -284,7 +274,7 @@ const getters = {
    * Gets the months object from the backup state.
    *
    * @param {BackupState} state The backup state.
-   * @returns {Object.<string, string>} The months object, from 1 to 12.
+   * @returns {Record<string, string>} The months object, from 1 to 12.
    */
   getMonths(state) {
     return state.months
@@ -293,7 +283,7 @@ const getters = {
    * Gets all the backups from the backup state.
    *
    * @param {BackupState} state The backup state.
-   * @returns {Backup[]} An array of backups.
+   * @returns {BackupEntity[]} An array of backups.
    */
   getBackups(state) {
     return state.backups
@@ -302,7 +292,7 @@ const getters = {
    * Gets the most recent backup from the backup state.
    *
    * @param {BackupState} state The backup state.
-   * @returns {Backup} The most recent backup.
+   * @returns {BackupEntity} The most recent backup.
    */
   getLastBackup(state) {
     return state.lastBackup
