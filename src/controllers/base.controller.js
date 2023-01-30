@@ -1,4 +1,4 @@
-import { db } from "../main";
+import { db } from '../main'
 
 /**
  * @template {any} T
@@ -41,13 +41,15 @@ export class Controller {
    * @protected
    *
    * @param {string} collection the collection name.
-   * @param {Type<T>} entity the entity to be get.
+   * @param {Type<T>} entityType the entity to be get.
    * @returns {Promise<T[]>} a list of entities.
    */
-  async getAll(collection, entity) {
-    const snap = await db.collection(collection).get();
+  async getAll(collection, entityType) {
+    const snap = await db.collection(collection).get()
 
-    return snap.docs.map(doc => entity.fromMap({ ...doc.data(), id: doc.id }));
+    return snap.docs.map(doc =>
+      entityType.fromMap({ ...doc.data(), id: doc.id }),
+    )
   }
 
   /**
@@ -58,19 +60,19 @@ export class Controller {
    *
    * @param {string} collection the collection name.
    * @param {string} id the document id.
-   * @param {Type<T>} entity the entity to be get.
+   * @param {Type<T>} entityType the entity to be get.
    * @returns {Promise<T>} the found entity.
    */
-  async getOne(collection, id, entity) {
+  async getOne(collection, id, entityType) {
     const doc = await db
       .collection(collection)
       .doc(id)
-      .get();
+      .get()
 
-    var a = await this.getAll("", entity);
-    a[0];
+    var a = await this.getAll('', entityType)
+    a[0]
 
-    return entity.fromMap({ ...doc.data(), id: doc.id });
+    return entityType.fromMap({ ...doc.data(), id: doc.id })
   }
 
   /**
@@ -80,30 +82,32 @@ export class Controller {
    * @protected
    *
    * @param {string} collection the collection name.
-   * @param {Type<T>} entity the entity to be get.
+   * @param {Type<T>} entityType the entity to be get.
    * @param {Query} query the query to be used.
    * @returns {Promise<T[]>} the found entities.
    */
-  async query(collection, entity, query = {}) {
-    let q = db.collection(collection);
+  async query(collection, entityType, query = {}) {
+    let q = db.collection(collection)
 
-    const { orderBy = [], where = [], limit } = query;
+    const { orderBy = [], where = [], limit } = query
 
-    orderBy.forEach(({ field, mode = "asc" }) => {
-      q = q.orderBy(field, mode);
-    });
+    orderBy.forEach(({ field, mode = 'asc' }) => {
+      q = q.orderBy(field, mode)
+    })
 
     where.forEach(({ field, operator, value }) => {
-      q = q.where(field, operator, value);
-    });
+      q = q.where(field, operator, value)
+    })
 
     if (limit) {
-      q = q.limit(limit);
+      q = q.limit(limit)
     }
 
-    const snap = await q.get();
+    const snap = await q.get()
 
-    return snap.docs.map(doc => entity.fromMap({ ...doc.data(), id: doc.id }));
+    return snap.docs.map(doc =>
+      entityType.fromMap({ ...doc.data(), id: doc.id }),
+    )
   }
 
   /**
@@ -123,17 +127,20 @@ export class Controller {
    * @protected
    *
    * @param {string} collection the collection name.
-   * @param {T} entity the entity to be created.
+   * @param {Type<T>} entityType the entity type to be created.
+   * @param {Partial<T>} data the data to be set.
    * @returns {Promise<T>} the created entity with its id.
    */
-  async createOne(collection, entity) {
-    if (entity.id) {
-      delete entity.id;
+  async createOne(collection, entityType, data) {
+    if (data.id) {
+      delete data.id
     }
 
-    const doc = await db.collection(collection).add(entity.toMap());
+    const entity = new entityType(data)
 
-    return entity.constructor.fromMap({ ...entity, id: doc.id });
+    const doc = await db.collection(collection).add(entity.toMap())
+
+    return entityType.fromMap({ ...entity.toMap(), id: doc.id })
   }
 
   /**
@@ -146,23 +153,24 @@ export class Controller {
    * @protected
    *
    * @param {string} collection the collection name.
-   * @param {T} entity the entity to be updated.
+   * @param {Type<T>} entityType the entity type to be updated.
+   * @param {Partial<T>} data the data to be set.
    * @returns {Promise<T>} the updated entity.
    */
-  async updateOne(collection, entity) {
-    if (!entity.id) {
-      throw new Error("bad-request/id-not-provided");
+  async updateOne(collection, entityType, data) {
+    if (!data.id) {
+      throw new Error('bad-request/id-not-provided')
     }
 
-    const id = entity.id;
-    delete entity.id;
+    const id = data.id
+    delete data.id
 
     const doc = db
       .collection(collection)
       .doc(id)
-      .update(entity.toMap());
+      .update(data)
 
-    return entity.constructor.fromMap({ ...entity, id: doc.id });
+    return entityType.fromMap({ ...new entityType(data).toMap(), id: doc.id })
   }
 
   /**
@@ -176,15 +184,16 @@ export class Controller {
    * @protected
    *
    * @param {string} collection the collection name.
-   * @param {T} entity the entity to be set.
+   * @param {Type<T>} entityType the entity type to be created/updated.
+   * @param {Partial<T>} data the data to be set.
    * @returns {Promise<T>} the created/updated entity.
    */
-  async createOrUpdate(collection, entity) {
-    if (entity.id) {
-      return this.update(collection, entity);
+  async createOrUpdate(collection, entityType, data) {
+    if (entityType.id) {
+      return this.update(collection, entityType, data)
     }
 
-    return this.create(collection, entity);
+    return this.create(collection, entityType, data)
   }
 
   /**
@@ -203,18 +212,18 @@ export class Controller {
    * @returns {Promise<T>} the set entity.
    */
   async setOne(collection, entity) {
-    const id = entity.id;
+    const id = entity.id
 
     if (id) {
-      delete entity.id;
+      delete entity.id
     }
 
     const doc = db
       .collection(collection)
       .doc(id)
-      .set(entity.toMap());
+      .set(entity.toMap())
 
-    return entity.constructor.fromMap({ ...entity, id: doc.id });
+    return entity.constructor.fromMap({ ...entity, id: doc.id })
   }
 
   /**
@@ -229,14 +238,14 @@ export class Controller {
    */
   async delete(collection, entity) {
     if (!entity.id) {
-      throw new Error("bad-request/id-not-provided");
+      throw new Error('bad-request/id-not-provided')
     }
 
     await db
       .collection(collection)
       .doc(entity.id)
-      .delete();
+      .delete()
 
-    return entity.constructor.fromMap({ ...entity });
+    return entity.constructor.fromMap({ ...entity })
   }
 }
