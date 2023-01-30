@@ -10,12 +10,12 @@ export class DataSizeController extends Controller {
   /**
    * Gets the data size object from the database.
    *
-   * @returns the data size object.
+   * @returns {Promise<DataSizeEntity?>} the data size object.
    */
   async getOne() {
     const list = await super.getAll(DATA_SIZE_COLLECTION, DataSizeEntity)
 
-    return list[0]
+    return list[0] ?? null
   }
 
   /**
@@ -25,6 +25,10 @@ export class DataSizeController extends Controller {
    */
   async updateOne(data) {
     const size = await this.getOne()
+
+    if (!size) {
+      return null
+    }
 
     data.id = size.id
 
