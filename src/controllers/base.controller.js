@@ -233,19 +233,22 @@ export class Controller {
    * @protected
    *
    * @param {string} collection the collection name.
-   * @param {T} entity the entity to be deleted.
-   * @returns {Promise<T>} the deleted entity.
+   * @param {Type<T>} entityType the entity type to be used.
+   * @param {string} id the id of the entity to be deleted.
+   * @returns the deleted entity.
    */
-  async delete(collection, entity) {
-    if (!entity.id) {
-      throw new Error('bad-request/id-not-provided')
-    }
-
-    await db
+  async deleteOne(collection, entityType, id) {
+    const doc = await db
       .collection(collection)
       .doc(entity.id)
-      .delete()
+      .get()
 
-    return entity.constructor.fromMap({ ...entity })
+    if (!doc.exists) {
+      return null
+    }
+
+    await doc.ref.delete()
+
+    return new entityType({ ...doc.data(), id })
   }
 }
