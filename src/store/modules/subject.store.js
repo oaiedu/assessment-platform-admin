@@ -177,7 +177,7 @@ const actions = {
       commit('setSuccess', 'Subject successfully created!')
     } catch (error) {
       createErrorLog('Subject Creation', error.message, {
-        data,
+        payload,
       })
 
       const errorModel = showErrorMessage('creation', 'Subject', error.message)

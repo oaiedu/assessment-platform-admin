@@ -1,4 +1,5 @@
 import { SubjectEntity } from '../entities/subject.entity'
+import { analytics } from '../main'
 import { Controller } from './base.controller'
 
 const SUBJECT_COLLECTION = 'subjects'

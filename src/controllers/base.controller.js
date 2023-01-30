@@ -240,15 +240,16 @@ export class Controller {
   async deleteOne(collection, entityType, id) {
     const doc = await db
       .collection(collection)
-      .doc(entity.id)
+      .doc(id)
       .get()
 
     if (!doc.exists) {
       return null
     }
 
+    const entity = new entityType({ ...doc.data(), id })
     await doc.ref.delete()
 
-    return new entityType({ ...doc.data(), id })
+    return entity
   }
 }

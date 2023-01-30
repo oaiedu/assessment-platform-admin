@@ -1,4 +1,4 @@
-import { Log } from '../entities/log.entity'
+import { LogEntity } from '../entities/log.entity'
 import store from '../store'
 
 import { getNowISOString } from './date'
