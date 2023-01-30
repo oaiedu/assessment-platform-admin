@@ -5,8 +5,8 @@
 
 /**
  * @typedef {Object} ToDelete
- * @property {boolean} status If true, the question can be restored. If false, it will be deleted.
- * @property {string?} userEmail The user that marked the question to be deleted.
+ * @property {boolean} status If `true`, the question can be restored. If `false`, it will be deleted.
+ * @property {string?} userEmail Defines the user that marked the question to be deleted.
  */
 
 /**
@@ -14,7 +14,7 @@
  * @property {string} id Defines an unique identifier for all app entities.
  * @property {string} created Defines an ISOString (Date) for when the entity was created.
  * @property {string} updated Defines an ISOString (Date) for when the entity was updated.
- * @property {ToDelete} toDelete The entity exclusion status.
+ * @property {ToDelete} toDelete Defines the entity exclusion status.
  */
 
 /**
@@ -26,35 +26,47 @@ export class Entity {
    * @param {Partial<BaseEntity>} partial
    */
   constructor(partial) {
-    const now = Date.now();
+    const now = Date.now()
 
     /**
      * Defines the entity unique identifier.
      *
      * @type {string}
      */
-    this.id = partial.id;
+    this.id = partial.id
 
     /**
      * Defines the entity creation date.
      *
      * @type {string}
      */
-    this.created = partial.created ?? now;
+    this.created = partial.created ?? now
 
     /**
      * Defines the entity edition date.
      *
      * @type {string}
      */
-    this.updated = partial.updated ?? now;
+    this.updated = partial.updated ?? now
 
     /**
      * Defines the entity deletion status.
      *
      * @type {ToDelete}
      */
-    this.toDelete = partial.toDelete ?? null;
+    this.toDelete = partial.toDelete ?? null
+  }
+
+  /**
+   * Clones the current entity into a new one with a different reference.
+   *
+   * @template T
+   *
+   * @param {Type<T>} entity the entity type.
+   * @returns {T} a clone of this entity.
+   */
+  clone(entity) {
+    return new entity(this.toMap())
   }
 
   /**
@@ -66,22 +78,22 @@ export class Entity {
     /**
      * @type {Record<keyof this, unknown>}
      */
-    const map = {};
+    const map = {}
 
     Object.entries(this).forEach(([key, value]) => {
       if (!value) {
-        return;
+        return
       }
 
       if (value instanceof Entity) {
-        map[key] = value.toMap();
-        return;
+        map[key] = value.toMap()
+        return
       }
 
-      map[key] = value;
-    });
+      map[key] = value
+    })
 
-    return map;
+    return map
   }
 
   /**
@@ -94,6 +106,6 @@ export class Entity {
    * @returns {T}
    */
   static fromMap(map, entity = Entity) {
-    return new entity(map);
+    return new entity(map)
   }
 }
