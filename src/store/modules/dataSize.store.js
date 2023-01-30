@@ -29,9 +29,6 @@ const controller = new DataSizeController()
  * @returns {DataSizeState} The initial data size state object.
  */
 const initialState = () => ({
-  /**
-   * @type {DataSizeEntity}
-   */
   dataSize: null,
 })
 
