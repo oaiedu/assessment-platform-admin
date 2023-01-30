@@ -1,20 +1,24 @@
-import { Store } from "vuex";
-import { analytics, db } from "../../main";
-import { createErrorLog, showErrorMessage } from "../../utils/errors";
+import { Store } from 'vuex'
+import { DataSizeController } from '../../controllers/data-size.controller'
+import { SubjectController } from '../../controllers/subject.controller'
+import { SubjectEntity } from '../../entities/subject.entity'
 
-/**
- * @typedef {Object} Subject
- * @property {string} id The subject id.
- * @property {string} name The subject name.
- * @property {Object[]} questions All questions names and levels from the current subject.
- * @property {string} questions.name The question name.
- * @property {number} questions.level The question level index.
- */
+import { createErrorLog, showErrorMessage } from '../../utils/errors'
 
 /**
  * @typedef {Object} SubjectState
- * @property {Subject[]} subjects An array of subjects.
+ * @property {SubjectEntity[]} subjects An array of subjects.
  */
+
+/**
+ * Defines the subject controller.
+ */
+const controller = new SubjectController()
+
+/**
+ * Defines the data size controller.
+ */
+const dsController = new DataSizeController()
 
 /**
  * Gets the initial state for subject store.
@@ -22,32 +26,32 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  * @returns {SubjectState} The initial subject state object.
  */
 const initialState = () => ({
-  subjects: []
-});
+  subjects: [],
+})
 
-const state = initialState();
+const state = initialState()
 
 const mutations = {
   /**
    * Sets the subjects with the given data.
    *
    * @param {SubjectState} state - The subject state.
-   * @param {Subject[]} data - The subjects to be set.
+   * @param {SubjectEntity[]} data - The subjects to be set.
    */
   setSubjects(state, data) {
-    state.subjects = data;
+    state.subjects = data.map(subject => subject.clone())
   },
 
   /**
    * Adds a subject to the state.
    *
    * @param {SubjectState} state The subject state.
-   * @param {Subject} data The subject to be added.
+   * @param {SubjectEntity} data The subject to be added.
    */
   addSubject(state, data) {
-    const subjects = [...state.subjects];
-    subjects.push(data);
-    state.subjects = subjects;
+    const subjects = [...state.subjects]
+    subjects.push(data.clone())
+    state.subjects = subjects
   },
 
   /**
@@ -64,36 +68,36 @@ const mutations = {
    * @param {boolean} data.remove Whether the question will be removed.
    */
   addRemoveQuestion(state, data) {
-    const subjects = [...state.subjects];
-    const subjectIndex = subjects.findIndex(s => s.id === data.subjectId);
+    const subjects = [...state.subjects]
+    const subjectIndex = subjects.findIndex(s => s.id === data.subjectId)
 
     if (!subjects[subjectIndex]) {
-      return;
+      return
     }
 
     const index = subjects[subjectIndex].questions.findIndex(
-      q => q.name === data.questionId
-    );
+      q => q.name === data.questionId,
+    )
 
     if (data.remove && index !== -1) {
-      subjects[subjectIndex].questions.splice(index, 1);
+      subjects[subjectIndex].questions.splice(index, 1)
     } else if (index === -1) {
       subjects[subjectIndex].questions.push({
         name: data.questionId,
-        level: data.questionLevel
-      });
+        level: data.questionLevel,
+      })
     } else if (!data.remove && index !== -1) {
       subjects[subjectIndex].questions[index] = {
         name: data.questionId,
-        level: data.questionLevel
-      };
+        level: data.questionLevel,
+      }
     }
 
     subjects[subjectIndex].questions.sort((q1, q2) =>
-      q1.name < q2.name ? -1 : 1
-    );
+      q1.name < q2.name ? -1 : 1,
+    )
 
-    state.subjects = subjects;
+    state.subjects = subjects
   },
 
   /**
@@ -103,12 +107,12 @@ const mutations = {
    * @param {string} data The subject id.
    */
   removeSubject(state, data) {
-    const subjects = [...state.subjects];
-    const index = subjects.findIndex(s => s.id === data);
+    const subjects = [...state.subjects]
+    const index = subjects.findIndex(s => s.id === data)
 
     if (index !== -1) {
-      subjects.splice(index, 1);
-      state.subjects = subjects;
+      subjects.splice(index, 1)
+      state.subjects = subjects
     }
   },
 
@@ -118,12 +122,12 @@ const mutations = {
    * @param {SubjectState} state - The subject state.
    */
   RESETSubject(state) {
-    const newState = initialState();
+    const newState = initialState()
     Object.keys(newState).forEach(key => {
-      state[key] = newState[key];
-    });
-  }
-};
+      state[key] = newState[key]
+    })
+  },
+}
 
 const actions = {
   /**
@@ -132,25 +136,26 @@ const actions = {
    * @param {Store} store The vuex store.
    */
   async loadSubjects({ commit }) {
-    commit("setLoading", true);
-    const data = [];
+    commit('setLoading', true)
+
+    /**
+     * @type {SubjectEntity[]}
+     */
+    let data = []
 
     try {
-      const subjects = await db.collection("subjects").get();
+      data = await controller.getAll()
 
-      subjects.forEach(doc => {
-        data.push({ ...doc.data(), id: doc.id });
-      });
-
-      commit("setSubjects", data);
+      commit('setSubjects', data)
     } catch (error) {
-      const errorModel = showErrorMessage("load", "Subject", error.message);
-      commit("setError", { message: errorModel });
-      createErrorLog("Subject Load", error.message, {
-        data
-      });
+      createErrorLog('Subject Load', error.message, {
+        data,
+      })
+
+      const errorModel = showErrorMessage('load', 'Subject', error.message)
+      commit('setError', { message: errorModel })
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
   },
 
@@ -161,30 +166,24 @@ const actions = {
    * @param {string} payload The subject name.
    */
   async createSubject({ commit }, payload) {
-    commit("setLoading", true);
+    commit('setLoading', true)
 
     try {
-      const subject = {
+      const subject = await controller.createOne({
         name: payload,
-        questions: []
-      };
+      })
 
-      const doc = await db.collection("subjects").add(subject);
-
-      analytics.logEvent("create_subject", {
-        name: subject.name
-      });
-
-      commit("addSubject", { ...subject, id: doc.id });
-      commit("setSuccess", "Subject successfully created!");
+      commit('addSubject', subject)
+      commit('setSuccess', 'Subject successfully created!')
     } catch (error) {
-      const errorModel = showErrorMessage("creation", "Subject", error.message);
-      commit("setError", { message: errorModel });
-      createErrorLog("Subject Creation", error.message, {
-        data
-      });
+      createErrorLog('Subject Creation', error.message, {
+        data,
+      })
+
+      const errorModel = showErrorMessage('creation', 'Subject', error.message)
+      commit('setError', { message: errorModel })
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
   },
 
@@ -192,49 +191,41 @@ const actions = {
    * Deletes a subject from the Firestore.
    *
    * @param {Store} store The vuex store.
-   * @param {Subject} payload The subject data.
+   * @param {SubjectEntity} payload The subject data.
    */
   async deleteSubject({ commit }, payload) {
-    commit("setLoading", true);
+    commit('setLoading', true)
+
+    const { id, name } = payload
 
     try {
-      await db
-        .collection("subjects")
-        .doc(payload.id)
-        .delete();
-      commit("removeSubject", payload.id);
+      await controller.deleteOne(id)
+      commit('removeSubject', id)
 
-      const dataSizeSnap = await db.collection("data-size").get();
-      const dataSize = dataSizeSnap.docs[0];
+      const dataSize = await dsController.getOne()
 
-      if (dataSize) {
-        /**
-         * @type {import("./dataSize.store").DataSize}
-         */
-        const data = dataSize.data();
-
-        delete data.questions.subject[payload.name];
-
-        dataSize.ref.update({ questions: data.questions });
-
-        commit("addRemoveSize", {
-          key: "questions",
-          data: data.questions
-        });
+      if (!dataSize) {
+        return
       }
-      commit("setSuccess", "Subject successfully deleted!");
+
+      delete dataSize.questions.subject[name]
+      dsController.updateOne({ questions: dataSize.questions })
+
+      commit('addRemoveSize', {
+        key: 'questions',
+        data: dataSize.questions,
+      })
+
+      commit('setSuccess', 'Subject successfully deleted!')
     } catch (error) {
-      const errorModel = showErrorMessage(
-        "exclusion",
-        "Subject",
-        error.message
-      );
-      commit("setError", { message: errorModel });
-      createErrorLog("Subject Exclusion", error.message, {
-        payload
-      });
+      createErrorLog('Subject Exclusion', error.message, {
+        payload,
+      })
+
+      const errorModel = showErrorMessage('exclusion', 'Subject', error.message)
+      commit('setError', { message: errorModel })
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
   },
 
@@ -244,9 +235,9 @@ const actions = {
    * @param {Store} store - The vuex store.
    */
   resetSubject({ commit }) {
-    commit("RESETSubject");
-  }
-};
+    commit('RESETSubject')
+  },
+}
 
 const getters = {
   /**
@@ -256,8 +247,9 @@ const getters = {
    * @returns {(name: string) => string[]} An array with all questions ids.
    */
   getSubjectQuestions: state => name => {
-    const subject = state.subjects.find(subject => subject.name === name);
-    return subject ? subject.questions : [];
+    const subject = state.subjects.find(subject => subject.name === name)
+
+    return subject ? subject.questions : []
   },
   /**
    * Gets the amount of questions from a specific subject and
@@ -267,14 +259,15 @@ const getters = {
    * @returns {(name: string, level: number) => string[]} The amount of questions.
    */
   getNumberOfQuestionBySubjectAndLevel: state => (name, level) => {
-    const subject = state.subjects.find(subject => subject.name === name);
-    return subject ? subject.questions.filter(q => q.level <= level).length : 0;
-  }
-};
+    const subject = state.subjects.find(subject => subject.name === name)
+
+    return subject ? subject.questions.filter(q => q.level <= level).length : 0
+  },
+}
 
 export default {
   state,
   mutations,
   actions,
-  getters
-};
+  getters,
+}
