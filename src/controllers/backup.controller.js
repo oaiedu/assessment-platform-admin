@@ -1,11 +1,11 @@
-import axios from "axios";
+import axios from 'axios'
 
-import { BackupEntity } from "../entities/backup.entity";
-import { Controller } from "./base.controller";
+import { BackupEntity } from '../entities/backup.entity'
+import { Controller } from './base.controller'
 
-import { getNowISOString, months } from "../utils/date";
+import { getNowISOString, months } from '../utils/date'
 
-const BACKUP_COLLECTION = "backups";
+const BACKUP_COLLECTION = 'backups'
 
 /**
  * Class that represents the backup controller.
@@ -15,41 +15,41 @@ export class BackupController extends Controller {
    * Creates a backup from the database into the cloud.
    */
   async backup() {
-    let url = "";
+    let url = ''
 
-    const now = getNowISOString();
+    const now = getNowISOString()
 
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === 'production') {
       url =
-        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=" +
-        now.replace(/:/g, "-");
+        'https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-backupFirestoreAuth?now=' +
+        now.replace(/:/g, '-')
     } else {
-      return null;
+      return null
     }
 
-    const res = await axios.get(url);
+    const res = await axios.get(url)
 
     const backup = new BackupEntity({
       start: now,
       end: getNowISOString(),
       size: res.data.size,
-      cloudId: res.data.cloudId
-    });
+      cloudId: res.data.cloudId,
+    })
 
-    const lastBackup = await this.getLast();
+    const lastBackup = await this.getLast()
 
-    let registry = 0;
+    let registry = 0
     if (lastBackup) {
-      registry = +lastBackup.registry.substring(3) + 1;
+      registry = +lastBackup.registry.substring(3) + 1
     } else {
-      registry = 1;
+      registry = 1
     }
 
-    backup.registry = `mb${registry.toString().padStart(4, "0")}`;
+    backup.registry = `mb${registry.toString().padStart(4, '0')}`
 
-    backup.month = months[new Date(now).getMonth()].substring(0, 3);
+    backup.month = months[new Date(now).getMonth()].substring(0, 3)
 
-    return super.createOne(BACKUP_COLLECTION, backup);
+    return super.createOne(BACKUP_COLLECTION, BackupEntity, backup)
   }
 
   /**
@@ -62,24 +62,24 @@ export class BackupController extends Controller {
    * @returns {{url?: string, error?: Object}|null} an object containing whether the URL or the error.
    */
   async download(payload) {
-    let url = "";
+    let url = ''
 
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === 'production') {
       url =
-        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-downloadBackup?id=" +
-        payload.cloudId;
+        'https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-downloadBackup?id=' +
+        payload.cloudId
     } else {
-      return null;
+      return null
     }
 
-    const res = await axios.get(url);
-    const { backup, error } = res.data;
+    const res = await axios.get(url)
+    const { backup, error } = res.data
 
     if (!backup && error) {
-      return { error };
+      return { error }
     }
 
-    return { url: `data:application/zip;base64,${backup}` };
+    return { url: `data:application/zip;base64,${backup}` }
   }
 
   /**
@@ -90,44 +90,44 @@ export class BackupController extends Controller {
       limit: 1,
       orderBy: [
         {
-          field: "start",
-          mode: "desc"
-        }
-      ]
-    });
+          field: 'start',
+          mode: 'desc',
+        },
+      ],
+    })
 
-    return backups[0] ?? null;
+    return backups[0] ?? null
   }
 
   /**
    * Gets the backups from the last 3 months, including the current one.
    */
   async getLastMonths() {
-    const date = new Date();
+    const date = new Date()
 
-    const currentMonth = date.getMonth();
+    const currentMonth = date.getMonth()
 
-    date.setMonth(currentMonth - 1);
-    const lastMonth = date.getMonth();
+    date.setMonth(currentMonth - 1)
+    const lastMonth = date.getMonth()
 
-    date.setMonth(currentMonth - 1);
-    const twoMonthsAgo = date.getMonth();
+    date.setMonth(currentMonth - 1)
+    const twoMonthsAgo = date.getMonth()
 
     const filteredMonths = [
       months[currentMonth].substring(0, 3),
       months[lastMonth].substring(0, 3),
-      months[twoMonthsAgo].substring(0, 3)
-    ];
+      months[twoMonthsAgo].substring(0, 3),
+    ]
 
     return super.query(BACKUP_COLLECTION, BackupEntity, {
       where: [
         {
-          field: "month",
-          operator: "in",
-          value: filteredMonths
-        }
-      ]
-    });
+          field: 'month',
+          operator: 'in',
+          value: filteredMonths,
+        },
+      ],
+    })
   }
 
   /**
@@ -137,54 +137,52 @@ export class BackupController extends Controller {
    * @returns an object containing the deletion status.
    */
   async delete(cloudId) {
-    let url = "";
+    let url = ''
 
     const data = {
       backup: null,
       success: false,
-      error: {}
-    };
-
-    if (process.env.NODE_ENV === "production") {
-      url =
-        "https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-deleteBackup?id=" +
-        cloudId;
-    } else {
-      return data;
+      error: {},
     }
 
-    const res = await axios.get(url);
-    const { deleted } = res.data;
+    if (process.env.NODE_ENV === 'production') {
+      url =
+        'https://us-central1-cloud-quiz-generator.cloudfunctions.net/backup-deleteBackup?id=' +
+        cloudId
+    } else {
+      return data
+    }
+
+    const res = await axios.get(url)
+    const { deleted } = res.data
 
     if (!deleted) {
-      return data;
+      return data
     }
 
     try {
       const backup = await super.query(BACKUP_COLLECTION, BackupEntity, {
         where: [
           {
-            field: "cloudId",
-            operator: "==",
-            value: cloudId
-          }
-        ]
-      })[0];
+            field: 'cloudId',
+            operator: '==',
+            value: cloudId,
+          },
+        ],
+      })[0]
 
       if (!backup) {
-        return data;
+        return data
       }
 
-      await super.delete(BACKUP_COLLECTION, backup);
+      await super.delete(BACKUP_COLLECTION, backup)
 
-      data.backup = backup;
-      data.success = true;
-
-      return data;
+      data.backup = backup
+      data.success = true
     } catch (error) {
-      data.error = error;
-
-      return data;
+      data.error = error
+    } finally {
+      return data
     }
   }
 }
