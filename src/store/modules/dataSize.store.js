@@ -70,7 +70,7 @@ const actions = {
   /**
    * Loads the data size from Firebase.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<DataSizeState>} store - The vuex store.
    */
   async loadDataSize({ commit }) {
     commit('setLoading', true)
@@ -95,7 +95,7 @@ const actions = {
   /**
    * Adds one to data size tests by week key into the current week.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<DataSizeState>} store - The vuex store.
    */
   addTestsByWeek({ commit, state }) {
     const currentWeek = getWeekInterval()[0]
@@ -138,7 +138,7 @@ const actions = {
   /**
    * Removes of data size tests by week key according to the tests into the given payload.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<DataSizeState>} store The vuex store.
    * @param {Object} payload The payload of the action.
    * @param {Test[]} payload.tests The tests that will be removed.
    */
@@ -176,7 +176,7 @@ const actions = {
   /**
    * Resets the data size state.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<DataSizeState>} store - The vuex store.
    */
   resetDataSize({ commit }) {
     commit('RESETDataSize')

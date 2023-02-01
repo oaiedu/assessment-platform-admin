@@ -128,7 +128,7 @@ const actions = {
   /**
    * Loads the error logs from Firebase.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<LogsState>} store The vuex store.
    */
   async loadLogs({ commit }) {
     commit('setLoading', true)
@@ -147,7 +147,7 @@ const actions = {
   /**
    * Loads the most recent error log from Firebase.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<LogsState>} store The vuex store.
    */
   async loadLastLog({ commit }) {
     commit('setLoading', true)
@@ -166,7 +166,7 @@ const actions = {
   /**
    * Creates an error log into the Firestore.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<LogsState>} store The vuex store.
    * @param {Object} payload The action payload.
    * @param {LogEntity} payload.log The error log to be created.
    * @param {boolean} payload.toAdd Whether to add the log into the state or not.
@@ -191,7 +191,7 @@ const actions = {
   /**
    * Clears the logs state error.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<LogsState>} store The vuex store.
    */
   clearError({ commit }) {
     commit('clearError')
@@ -199,7 +199,7 @@ const actions = {
   /**
    * Clears the logs state success.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<LogsState>} store The vuex store.
    */
   clearSuccess({ commit }) {
     commit('clearSuccess')
@@ -207,7 +207,7 @@ const actions = {
   /**
    * Clears the logs state loading, setting it to false.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<LogsState>} store The vuex store.
    */
   clearLoading({ commit }) {
     commit('setLoading', false)
@@ -215,7 +215,7 @@ const actions = {
   /**
    * Resets the logs state to it's initial state.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<LogsState>} store The vuex store.
    */
   resetLogs({ commit }) {
     commit('RESETLogs')

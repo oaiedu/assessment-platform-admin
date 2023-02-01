@@ -7,7 +7,7 @@ import { createErrorLog, showErrorMessage } from '../../utils/errors'
 
 /**
  * @typedef {Object} BackupState
- * @property {Object.<string, string>} months - The months object, from 1 to 12.
+ * @property {Record<string, string>} months - The months object, from 1 to 12.
  * @property {BackupEntity[]} backups - An array of backups.
  * @property {BackupEntity|null} lastBackup - The last backup made.
  */
@@ -109,7 +109,7 @@ const actions = {
   /**
    * Backups all Firebase data and sends it to the google drive cloud service.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<BackupState>} store The vuex store.
    */
   async backupFirebase({ commit }) {
     commit('setLoading', true)
@@ -134,7 +134,7 @@ const actions = {
   /**
    * Loads all the backups from the last 3 months.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<BackupState>} store The vuex store.
    */
   async loadBackups({ commit }) {
     commit('setLoading', true)
@@ -154,7 +154,7 @@ const actions = {
   /**
    * Downloads a backup according to it's cloudId.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<BackupState>} store The vuex store.
    * @param {Object} payload The action payload.
    * @param {string} payload.registry The backup registry.
    * @param {string} payload.cloudId The backup cloud id.
@@ -204,7 +204,7 @@ const actions = {
   /**
    * Deletes a backup.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<BackupState>} store The vuex store.
    * @param {Object} payload The action payload.
    * @param {string} payload.id The backup cloud id.
    */
@@ -242,7 +242,7 @@ const actions = {
   /**
    * Loads the most recent backup.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<BackupState>} store The vuex store.
    */
   async loadLastBackup({ commit }) {
     commit('setLoading', true)
@@ -262,7 +262,7 @@ const actions = {
   /**
    * Resets the backup state to it's initial state.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<BackupState>} store The vuex store.
    */
   resetBackup({ commit }) {
     commit('RESETBackup')
