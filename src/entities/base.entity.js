@@ -3,6 +3,8 @@
  * @typedef {{ new (...args: unknown[]) => T }} Type
  */
 
+import { getNowISOString } from '../utils/date'
+
 /**
  * @typedef {Object} ToDelete
  * @property {boolean} status If `true`, the question can be restored. If `false`, it will be deleted.
@@ -26,12 +28,12 @@ export class Entity {
    * @param {Partial<BaseEntity>} partial
    */
   constructor(partial) {
-    const now = Date.now()
+    const now = getNowISOString()
 
     /**
      * Defines the entity unique identifier.
      *
-     * @type {string}
+     * @type {string | undefined}
      */
     this.id = partial.id
 
