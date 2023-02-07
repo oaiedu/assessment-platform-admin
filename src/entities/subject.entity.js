@@ -6,6 +6,9 @@ import { Entity } from './base.entity'
  * @property {string} name Defines the question name/id.
  */
 
+/**
+ * Class that represents the subject entity.
+ */
 export class SubjectEntity extends Entity {
   /**
    * @param {Partial<SubjectEntity>} partial
@@ -23,7 +26,7 @@ export class SubjectEntity extends Entity {
     /**
      * Defines a list of objects that represents the questions and its level.
      *
-     * @type {SubjectQuestion}
+     * @type {SubjectQuestion[]}
      */
     this.questions = partial.questions ?? []
   }
