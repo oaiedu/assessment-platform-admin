@@ -8,11 +8,11 @@
           min-width="0"
           height="35px"
           :ripple="false"
-          :outlined="page > 1"
-          :disabled="page === 1"
+          :outlined="page > 1 && !disabled"
+          :disabled="page === 1 || disabled"
           :style="{
-            border: page > 1 ? '1px solid #2196f3' : 'none',
-            'border-radius': '50%'
+            border: page > 1 && !disabled ? '1px solid #2196f3' : 'none',
+            'border-radius': '50%',
           }"
           @click="toFirst()"
         >
@@ -26,11 +26,11 @@
           height="35px"
           class="ml-3"
           :ripple="false"
-          :outlined="page > 1"
-          :disabled="page === 1"
+          :outlined="page > 1 && !disabled"
+          :disabled="page === 1 || disabled"
           :style="{
-            border: page > 1 ? '1px solid #2196f3' : 'none',
-            'border-radius': '50%'
+            border: page > 1 && !disabled ? '1px solid #2196f3' : 'none',
+            'border-radius': '50%',
           }"
           @click="onPrevious()"
         >
@@ -57,11 +57,11 @@
           height="35px"
           class="ml-3"
           :ripple="false"
-          :outlined="page < length"
-          :disabled="page === length"
+          :outlined="page < length && !disabled"
+          :disabled="page === length || disabled"
           :style="{
-            border: page < length ? '1px solid #2196f3' : 'none',
-            'border-radius': '50%'
+            border: page < length && !disabled ? '1px solid #2196f3' : 'none',
+            'border-radius': '50%',
           }"
           @click="onNext()"
         >
@@ -75,11 +75,11 @@
           height="35px"
           class="ml-3"
           :ripple="false"
-          :outlined="page < length"
-          :disabled="page === length"
+          :outlined="page < length && !disabled"
+          :disabled="page === length || disabled"
           :style="{
-            border: page < length ? '1px solid #2196f3' : 'none',
-            'border-radius': '50%'
+            border: page < length && !disabled ? '1px solid #2196f3' : 'none',
+            'border-radius': '50%',
           }"
           @click="toLast()"
         >
@@ -95,47 +95,55 @@ import {
   mdiChevronDoubleRight,
   mdiChevronDoubleLeft,
   mdiChevronRight,
-  mdiChevronLeft
-} from "@mdi/js";
+  mdiChevronLeft,
+} from '@mdi/js'
 
 export default {
-  name: "Paginator",
-  props: { page: Number, length: Number },
+  name: 'Paginator',
+  props: {
+    page: Number,
+    length: Number,
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
   data() {
     return {
       mdiChevronLeft,
       mdiChevronRight,
       mdiChevronDoubleLeft,
-      mdiChevronDoubleRight
-    };
+      mdiChevronDoubleRight,
+    }
   },
   methods: {
     onNext() {
-      const next = this.page + 1;
+      const next = this.page + 1
       this.$emit(
-        "pageChange",
+        'pageChange',
         next > this.length
-          ? { page: this.length, mode: "last" }
-          : { page: next, type: "next" }
-      );
+          ? { page: this.length, mode: 'last' }
+          : { page: next, direction: 'forward' },
+      )
     },
     onPrevious() {
-      const previous = this.page - 1;
+      const previous = this.page - 1
       this.$emit(
-        "pageChange",
+        'pageChange',
         previous < 1
-          ? { page: 1, mode: "first" }
-          : { page: previous, type: "previous" }
-      );
+          ? { page: 1, mode: 'first' }
+          : { page: previous, direction: 'backward' },
+      )
     },
     toFirst() {
-      this.$emit("pageChange", { page: 1, mode: "first" });
+      this.$emit('pageChange', { page: 1, mode: 'first' })
     },
     toLast() {
-      this.$emit("pageChange", { page: this.length, mode: "last" });
-    }
-  }
-};
+      this.$emit('pageChange', { page: this.length, mode: 'last' })
+    },
+  },
+}
 </script>
 
 <style>
