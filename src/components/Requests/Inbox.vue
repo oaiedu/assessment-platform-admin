@@ -13,7 +13,7 @@
         v-if="hasApprovedRequests && userClaims && userClaims['appraiser']"
       >
         <v-alert text prominent type="warning" color="red" :icon="mdiAlert">
-          {{ $t("REQUESTS.INBOX.request") }}
+          {{ $t('REQUESTS.INBOX.request') }}
         </v-alert>
       </v-container>
 
@@ -39,14 +39,14 @@
             color="red"
             dark
             @click="
-              deleteConfirmed = true;
-              deleteRequests();
+              deleteConfirmed = true
+              deleteRequests()
             "
           >
-            {{ $t("AUTH.SUBJECT.confirm") }}
+            {{ $t('AUTH.SUBJECT.confirm') }}
           </v-btn>
           <v-btn class="ml-3" color="grey darken-1" dark @click="restoreAll()">
-            {{ $t("TEST.TESTS.restore") }}
+            {{ $t('TEST.TESTS.restore') }}
           </v-btn>
         </v-row>
       </v-container>
@@ -74,8 +74,8 @@
               : Math.ceil(filteredRequests.length / itemsPerPage)
           "
           @pageChange="
-            !isSearching ? (page = $event.page) : (searchPage = $event.page);
-            onPageChange($event);
+            !isSearching ? (page = $event.page) : (searchPage = $event.page)
+            onPageChange($event)
           "
         />
       </div>
@@ -113,12 +113,12 @@
         :label="$t('REQUESTS.delete_confirm')"
         :state="deleteRequestSnackBar"
         @confirm="
-          deleteRequest(deleteItem);
-          deleteRequestSnackBar = false;
+          deleteRequest(deleteItem)
+          deleteRequestSnackBar = false
         "
         @cancel="
-          deleteRequestSnackBar = false;
-          deleteItem = null;
+          deleteRequestSnackBar = false
+          deleteItem = null
         "
       />
 
@@ -132,11 +132,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          {{ $t("REQUESTS.INBOX.info_1") }}
+          {{ $t('REQUESTS.INBOX.info_1') }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          {{ $t("REQUESTS.INBOX.info_2") }}
+          {{ $t('REQUESTS.INBOX.info_2') }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -146,7 +146,7 @@
             v-bind="attrs"
             @click="rejectErrorSnackBar = false"
           >
-            {{ $t("FAB.TEXT.close") }}
+            {{ $t('FAB.TEXT.close') }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -155,15 +155,19 @@
 </template>
 
 <script>
-import { mdiAlert } from "@mdi/js";
-import PrintQuestion from "../Questions/PrintQuestion";
-import EditQuestion from "../Questions/EditQuestion";
-import RequestsTable from "./RequestsTable";
-import Paginator from "../Paginator";
-import DeleteWarning from "../Shared/DeleteWarning";
-import DeleteAlert from "./DeleteAlertRequests";
-import SearchBox from "../Shared/SearchBox";
-import { analytics } from "../../main";
+import { mdiAlert } from '@mdi/js'
+
+import { QuestionEntity } from '../../entities/question.entity'
+
+import PrintQuestion from '../Questions/PrintQuestion'
+import EditQuestion from '../Questions/EditQuestion'
+import RequestsTable from './RequestsTable'
+import Paginator from '../Paginator'
+import DeleteWarning from '../Shared/DeleteWarning'
+import DeleteAlert from './DeleteAlertRequests'
+import SearchBox from '../Shared/SearchBox'
+
+import { analytics } from '../../main'
 
 export default {
   components: {
@@ -173,7 +177,7 @@ export default {
     RequestsTable,
     DeleteWarning,
     DeleteAlert,
-    SearchBox
+    SearchBox,
   },
   data() {
     return {
@@ -191,351 +195,346 @@ export default {
       searchPage: 1,
       itemsPerPage: 8,
       questionTests: [],
-      rejectErrorSnackBar: false
-    };
+      rejectErrorSnackBar: false,
+    }
   },
   computed: {
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     requests() {
-      return this.$store.getters.getCurrentRequestsPage;
+      return this.$store.getters.getCurrentRequestsPage
     },
     deleteMarkRequests() {
-      return this.$store.getters.getDeleteMarkRequests;
+      return this.$store.getters.getDeleteMarkRequests
     },
     markedRequestsByUser() {
       if (this.hasDeleteMarkRequests) {
         const requests = this.deleteMarkRequests.filter(
-          r => r.toDelete.userId === this.userInfo.id
-        );
+          r => r.toDelete.userId === this.userInfo.id,
+        )
 
-        const names = requests.filter(r => r.toDelete && r.toDelete.status);
+        const names = requests.filter(r => r.toDelete && r.toDelete.status)
 
-        return names.map(r => r.name).join(", ");
+        return names.map(r => r.name).join(', ')
       } else {
-        return [];
+        return []
       }
     },
     hasDeleteMarkRequests() {
-      return this.deleteMarkRequests && this.deleteMarkRequests.length > 0;
+      return this.deleteMarkRequests && this.deleteMarkRequests.length > 0
     },
     hasTrueMarkStatus() {
-      const requests = this.deleteMarkRequests.map(q => q.toDelete.status);
-      return requests.includes(true);
+      const requests = this.deleteMarkRequests.map(q => q.toDelete.status)
+      return requests.includes(true)
     },
     filteredRequests() {
-      return this.$store.getters.getFilteredRequests;
+      return this.$store.getters.getFilteredRequests
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
+      return this.$store.getters.getUserClaims
     },
     userInfo() {
-      return this.$store.getters.userInfo;
+      return this.$store.getters.userInfo
     },
     hasApprovedRequests() {
-      let itHas = false;
+      let itHas = false
       this.requests.forEach(request => {
-        if (request.status === "approved") {
-          itHas = true;
+        if (request.status === 'approved') {
+          itHas = true
         }
-      });
-      return itHas;
+      })
+      return itHas
     },
     pageAmount() {
-      const requestAmount = this.$store.getters.getDataSize[
-        "question-requests"
-      ];
+      const requestAmount = this.$store.getters.getDataSize['question-requests']
       const amount =
-        this.userClaims && this.userClaims["admin"]
+        this.userClaims && this.userClaims['admin']
           ? requestAmount.general
-          : requestAmount.users[this.userInfo.id];
-      return Math.ceil(amount / this.itemsPerPage) || 1;
+          : requestAmount.users[this.userInfo.id]
+      return Math.ceil(amount / this.itemsPerPage) || 1
     },
     getQuestionTests() {
-      const titles = this.questionTests.map(t => "'" + t.title + "'");
-      titles.sort((t1, t2) => (t1 > t2 ? 1 : -1));
-      return titles.join(", ");
-    }
+      const titles = this.questionTests.map(t => "'" + t.title + "'")
+      titles.sort((t1, t2) => (t1 > t2 ? 1 : -1))
+      return titles.join(', ')
+    },
   },
   methods: {
     sendEmail(email) {
-      const a = document.createElement("a");
-      a.href = "mailto:" + email;
-      a.click();
-      a.remove();
+      const a = document.createElement('a')
+      a.href = 'mailto:' + email
+      a.click()
+      a.remove()
     },
     printRequest(request) {
-      this.dialogPDF = true;
-      this.editItem = request;
+      this.dialogPDF = true
+      this.editItem = request
     },
     deleteRequest(request) {
-      this.deleteRequestSnackBar = false;
-      this.deleteItem = null;
-      this.$store.dispatch("deleteMarkRequest", {
+      this.deleteRequestSnackBar = false
+      this.deleteItem = null
+      this.$store.dispatch('deleteMarkRequest', {
         name: request.name,
         isSearching: this.isSearching,
-        userId: this.userInfo.id
-      });
+        userId: this.userInfo.id,
+      })
     },
     deleteRequests() {
-      const requests = this.deleteMarkRequests;
+      const requests = this.deleteMarkRequests
       requests.forEach(request => {
         if (
           request.toDelete.status &&
           request.toDelete.userId === this.userInfo.id
         ) {
-          this.$store.dispatch("changeDeleteStatusRequests", {
+          this.$store.dispatch('changeDeleteStatusRequests', {
             name: request.name,
-            isSearching: this.isSearching
-          });
+            isSearching: this.isSearching,
+          })
         }
-      });
+      })
     },
     checkRequest(request) {
-      const toCreate = { ...request };
-
-      delete toCreate.userId;
-      delete toCreate.user;
-      delete toCreate.created;
-      delete toCreate.updated;
-      delete toCreate.status;
-      delete toCreate.toDelete;
+      const toCreate = new QuestionEntity({
+        ...request,
+        created: null,
+        updated: null,
+        toDelete: null,
+      })
 
       this.$store
-        .dispatch("getQuestionByName", request.name)
+        .dispatch('getQuestionByName', request.name)
         .then(fQuestion => {
           if (fQuestion && fQuestion.toDelete) {
             this.$store
-              .dispatch("restoreMarkedQuestion", {
-                name: fQuestion.name,
+              .dispatch('restoreMarkedQuestion', {
+                id: fQuestion.id,
                 isSearching: false,
                 isRequest: true,
-                data: toCreate
               })
               .then(() => {
-                this.$store.dispatch("updateQuestionRequest", {
-                  mode: "sttUpdate",
-                  status: "approved",
+                this.$store.dispatch('updateQuestionRequest', {
+                  mode: 'sttUpdate',
+                  status: 'approved',
                   request,
                   user: request.user,
-                  isSearching: this.isSearching
-                });
+                  isSearching: this.isSearching,
+                })
                 this.$store.commit(
-                  "setSuccess",
-                  "Request successfully approved!"
-                );
-              });
+                  'setSuccess',
+                  'Request successfully approved!',
+                )
+              })
           } else {
             this.$store
-              .dispatch("createQuestion", {
+              .dispatch('createQuestion', {
                 question: toCreate,
-                isRequest: true
+                isRequest: true,
               })
               .then(async () => {
-                await this.$store.dispatch("updateQuestionRequest", {
-                  mode: "sttUpdate",
-                  status: "approved",
+                await this.$store.dispatch('updateQuestionRequest', {
+                  mode: 'sttUpdate',
+                  status: 'approved',
                   request,
                   user: request.user,
-                  isSearching: this.isSearching
-                });
+                  isSearching: this.isSearching,
+                })
                 this.$store.commit(
-                  "setSuccess",
-                  "Request successfully approved!"
-                );
-              });
+                  'setSuccess',
+                  'Request successfully approved!',
+                )
+              })
           }
-        });
+        })
     },
     editRequest(request) {
-      this.dialogEditRequest = true;
-      this.editItem = request;
+      this.dialogEditRequest = true
+      this.editItem = request
     },
     askDelete(request) {
-      this.deleteRequestSnackBar = true;
-      this.deleteItem = request;
+      this.deleteRequestSnackBar = true
+      this.deleteItem = request
     },
     async rejectRequest(request) {
-      this.rejectLoading = true;
+      this.rejectLoading = true
 
-      this.questionTests = [];
+      this.questionTests = []
 
-      const tests = await this.$store.dispatch("checkQuestionInTests", {
-        name: request.name
-      });
+      const tests = await this.$store.dispatch('checkQuestionInTests', {
+        name: request.name,
+      })
 
       const allAuto = tests.reduce(
-        (prev, curr) => curr.type === "auto" && prev,
-        true
-      );
+        (prev, curr) => curr.type === 'auto' && prev,
+        true,
+      )
 
-      let error = false;
+      let error = false
 
       if (allAuto) {
         for (const t of tests) {
-          const questionsNames = [...t.questionsNames];
+          const questionsNames = [...t.questionsNames]
 
-          const index = questionsNames.indexOf(request.name);
+          const index = questionsNames.indexOf(request.name)
 
           if (index === -1) {
-            this.rejectLoading = false;
-            return;
+            this.rejectLoading = false
+            return
           }
 
-          questionsNames.splice(index, 1);
+          questionsNames.splice(index, 1)
 
           if (questionsNames.length < t.questionsAmount) {
-            this.questionTests.push(t);
-            error = true;
-            continue;
+            this.questionTests.push(t)
+            error = true
+            continue
           }
 
-          await this.$store.dispatch("updateTest", {
+          await this.$store.dispatch('updateTest', {
             testData: { ...t, questionsNames },
-            noMessage: true
-          });
+            noMessage: true,
+          })
         }
       }
 
       if (error) {
-        this.rejectErrorSnackBar = true;
-        this.rejectLoading = false;
-        return;
+        this.rejectErrorSnackBar = true
+        this.rejectLoading = false
+        return
       }
 
       if (!tests.length || allAuto) {
-        await this.$store.dispatch("changeDeleteStatusQuestions", {
-          name: request.name,
-          isSearching: false
-        });
+        await this.$store.dispatch('changeDeleteStatusQuestions', {
+          names: [request.name],
+          isSearching: false,
+        })
 
-        await this.$store.dispatch("updateQuestionRequest", {
-          mode: "sttUpdate",
-          status: "rejected",
+        await this.$store.dispatch('updateQuestionRequest', {
+          mode: 'sttUpdate',
+          status: 'rejected',
           request,
           user: request.user,
-          isSearching: this.isSearching
-        });
+          isSearching: this.isSearching,
+        })
 
-        this.rejectLoading = false;
-        this.$store.commit("setSuccess", "Request successfully rejected!");
+        this.rejectLoading = false
+        this.$store.commit('setSuccess', 'Request successfully rejected!')
 
-        return;
+        return
       }
 
-      this.rejectLoading = false;
-      this.questionTests = [...tests];
-      this.rejectErrorSnackBar = true;
+      this.rejectLoading = false
+      this.questionTests = [...tests]
+      this.rejectErrorSnackBar = true
     },
     onPageChange(event) {
       const payload = {
         page: this.page,
-        itemsPerPage: this.itemsPerPage
-      };
+        itemsPerPage: this.itemsPerPage,
+      }
 
       if (!this.isSearching) {
         if (!event.mode) {
-          this.$store.dispatch("loadRequestPage", {
+          this.$store.dispatch('loadRequestPage', {
             ...payload,
             type: event.type,
             claims: this.userClaims,
-            userInfo: this.userInfo
-          });
+            userInfo: this.userInfo,
+          })
         } else {
-          this.$store.dispatch("loadFOLRequestPage", {
+          this.$store.dispatch('loadFOLRequestPage', {
             ...payload,
             mode: event.mode,
             claims: this.userClaims,
-            userInfo: this.userInfo
-          });
+            userInfo: this.userInfo,
+          })
         }
       }
     },
     searchTextChange(text) {
       if ((text === null || text.length === 0) && this.isSearching) {
-        this.isSearching = false;
-        this.searchPage = 1;
-        this.$store.commit("resetFilteredRequests");
+        this.isSearching = false
+        this.searchPage = 1
+        this.$store.commit('resetFilteredRequests')
       }
     },
     searchQuery(text) {
-      this.searchPage = 1;
-      this.$store.commit("resetFilteredRequests");
+      this.searchPage = 1
+      this.$store.commit('resetFilteredRequests')
 
       if (text && text.length > 0) {
-        this.isSearching = true;
-        this.$store.dispatch("searchRequests", {
+        this.isSearching = true
+        this.$store.dispatch('searchRequests', {
           key: text,
           claims: this.userClaims,
-          userInfo: this.userInfo
-        });
+          userInfo: this.userInfo,
+        })
 
-        analytics.logEvent("search", {
-          search_term: text
-        });
+        analytics.logEvent('search', {
+          search_term: text,
+        })
       } else {
-        this.isSearching = false;
+        this.isSearching = false
       }
     },
     itemRowStyle(item) {
       return item.toDelete
         ? item.toDelete.status
-          ? "item-to-delete"
-          : "item-deleted"
-        : "";
+          ? 'item-to-delete'
+          : 'item-deleted'
+        : ''
     },
     restoreRequest(item) {
-      this.$store.dispatch("restoreMarkedRequest", {
+      this.$store.dispatch('restoreMarkedRequest', {
         name: item.name,
-        isSearching: this.isSearching
-      });
+        isSearching: this.isSearching,
+      })
     },
     restoreAll() {
-      this.$store.dispatch("restoreAllMarkedRequests", {
+      this.$store.dispatch('restoreAllMarkedRequests', {
         user: this.userInfo,
-        isSearching: this.isSearching
-      });
-    }
+        isSearching: this.isSearching,
+      })
+    },
   },
   watch: {
     search(text) {
       if ((text === null || text.length === 0) && this.isSearching) {
-        this.isSearching = false;
-        this.searchPage = 1;
-        this.$store.commit("resetFilteredRequests");
+        this.isSearching = false
+        this.searchPage = 1
+        this.$store.commit('resetFilteredRequests')
       }
-    }
+    },
   },
   mounted() {
-    this.deleteConfirmed = false;
-    this.$store.dispatch("checkDeleteMarkRequests");
-    this.$store.dispatch("loadFOLRequestPage", {
+    this.deleteConfirmed = false
+    this.$store.dispatch('checkDeleteMarkRequests')
+    this.$store.dispatch('loadFOLRequestPage', {
       claims: this.userClaims,
       userInfo: this.userInfo,
       page: 1,
       itemsPerPage: this.itemsPerPage,
-      mode: "first"
-    });
+      mode: 'first',
+    })
   },
   beforeDestroy() {
     if (
       this.userClaims &&
-      this.userClaims["appraiser"] &&
+      this.userClaims['appraiser'] &&
       this.hasApprovedRequests
     ) {
-      this.$store.dispatch("deleteApprovedRequests", {
-        userInfo: this.userInfo
-      });
+      this.$store.dispatch('deleteApprovedRequests', {
+        userInfo: this.userInfo,
+      })
     }
 
     if (this.deleteConfirmed) {
-      this.$store.dispatch("deleteRequests");
-      this.$store.dispatch("resetRequests");
-      this.$store.dispatch("loadDataSize");
+      this.$store.dispatch('deleteRequests')
+      this.$store.dispatch('resetRequests')
+      this.$store.dispatch('loadDataSize')
     }
-  }
-};
+  },
+}
 </script>
 
 <style scoped>
