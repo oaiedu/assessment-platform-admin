@@ -11,14 +11,14 @@ export class LogController extends Controller {
    * Gets all logs from the database.
    */
   async getAll() {
-    return super.getAll(LOG_COLLECTION, LogEntity)
+    return super._getAll(LOG_COLLECTION, LogEntity)
   }
 
   /**
    * Gets the last error log.
    */
   async getLast() {
-    const logs = await super.query(LOG_COLLECTION, LogEntity, {
+    const logs = await super._query(LOG_COLLECTION, LogEntity, {
       limit: 1,
       orderBy: [
         {
@@ -37,6 +37,6 @@ export class LogController extends Controller {
    * @param {Partial<LogEntity>} data the log to be created.
    */
   async createOne(data) {
-    return super.createOne(LOG_COLLECTION, LogEntity, data)
+    return super._createOne(LOG_COLLECTION, LogEntity, data)
   }
 }

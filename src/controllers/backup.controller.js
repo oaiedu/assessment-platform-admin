@@ -49,7 +49,7 @@ export class BackupController extends Controller {
 
     backup.month = months[new Date(now).getMonth()].substring(0, 3)
 
-    return super.createOne(BACKUP_COLLECTION, BackupEntity, backup)
+    return super._createOne(BACKUP_COLLECTION, BackupEntity, backup)
   }
 
   /**
@@ -86,7 +86,7 @@ export class BackupController extends Controller {
    * Gets the last backup from the database.
    */
   async getLast() {
-    const backups = await super.query(BACKUP_COLLECTION, BackupEntity, {
+    const backups = await super._query(BACKUP_COLLECTION, BackupEntity, {
       limit: 1,
       orderBy: [
         {
@@ -119,7 +119,7 @@ export class BackupController extends Controller {
       months[twoMonthsAgo].substring(0, 3),
     ]
 
-    return super.query(BACKUP_COLLECTION, BackupEntity, {
+    return super._query(BACKUP_COLLECTION, BackupEntity, {
       where: [
         {
           field: 'month',
@@ -161,7 +161,7 @@ export class BackupController extends Controller {
     }
 
     try {
-      const backup = await super.query(BACKUP_COLLECTION, BackupEntity, {
+      const backup = await super._query(BACKUP_COLLECTION, BackupEntity, {
         where: [
           {
             field: 'cloudId',
@@ -175,7 +175,7 @@ export class BackupController extends Controller {
         return data
       }
 
-      await super.delete(BACKUP_COLLECTION, backup)
+      await super._delete(BACKUP_COLLECTION, backup)
 
       data.backup = backup
       data.success = true
