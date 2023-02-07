@@ -133,7 +133,7 @@ const actions = {
   /**
    * Loads all subjects from Firebase.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<SubjectState>} store The vuex store.
    */
   async loadSubjects({ commit }) {
     commit('setLoading', true)
@@ -162,7 +162,7 @@ const actions = {
   /**
    * Creates a subject into the Firestore.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<SubjectState>} store The vuex store.
    * @param {string} payload The subject name.
    */
   async createSubject({ commit }, payload) {
@@ -190,7 +190,7 @@ const actions = {
   /**
    * Deletes a subject from the Firestore.
    *
-   * @param {Store} store The vuex store.
+   * @param {Store<SubjectState>} store The vuex store.
    * @param {SubjectEntity} payload The subject data.
    */
   async deleteSubject({ commit }, payload) {
@@ -232,7 +232,7 @@ const actions = {
   /**
    * Resets the subject state to it's initial state.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<SubjectState>} store - The vuex store.
    */
   resetSubject({ commit }) {
     commit('RESETSubject')
