@@ -1,4 +1,8 @@
-import { db } from '../main'
+import firebase from 'firebase/app'
+import { Entity } from '../entities/base.entity'
+
+import { db, storage } from '../main'
+import { getNowISOString } from '../utils/date'
 
 /**
  * @template {any} T
@@ -30,6 +34,22 @@ import { db } from '../main'
  */
 
 /**
+ * @typedef {Object} PaginationQuery
+ * @property {string} orderBy The sorting field name.
+ * @property {[string, string]?} lastDoc A 2 position list containing the first and last documents, respectively.
+ * @property {number} itemsPerPage The amount of items per page. Defaults to `8`.
+ * @property {'forward'|'backward'} direction The loading direction. Defaults to `next`.
+ */
+
+/**
+ * @template T
+ * @typedef {Object} PaginationQueryResponse
+ * @property {T[]} data A list of entities.
+ * @property {string?} startDoc The starting document of the list.
+ * @property {string?} endDoc The ending document of the list.
+ */
+
+/**
  * Class that represents the base controller, which will be extended from
  * other controllers to execute its basic functionalities.
  */
@@ -44,7 +64,7 @@ export class Controller {
    * @param {Type<T>} entityType the entity to be get.
    * @returns {Promise<T[]>} a list of entities.
    */
-  async getAll(collection, entityType) {
+  async _getAll(collection, entityType) {
     const snap = await db.collection(collection).get()
 
     return snap.docs.map(doc =>
@@ -59,18 +79,15 @@ export class Controller {
    * @protected
    *
    * @param {string} collection the collection name.
-   * @param {string} id the document id.
    * @param {Type<T>} entityType the entity to be get.
+   * @param {string} id the document id.
    * @returns {Promise<T>} the found entity.
    */
-  async getOne(collection, id, entityType) {
+  async _getOne(collection, entityType, id) {
     const doc = await db
       .collection(collection)
       .doc(id)
       .get()
-
-    var a = await this.getAll('', entityType)
-    a[0]
 
     return entityType.fromMap({ ...doc.data(), id: doc.id })
   }
@@ -86,7 +103,7 @@ export class Controller {
    * @param {Query} query the query to be used.
    * @returns {Promise<T[]>} the found entities.
    */
-  async query(collection, entityType, query = {}) {
+  async _query(collection, entityType, query = {}) {
     let q = db.collection(collection)
 
     const { orderBy = [], where = [], limit } = query
@@ -111,14 +128,50 @@ export class Controller {
   }
 
   /**
+   * Lists some entities from the database according to the given parameters.
+   *
+   * @template T
    * @protected
+   *
+   * @param {string} collection the collection name.
+   * @param {Type<T>} entityType the entity type to be used.
+   * @param {PaginationQuery} query an object that contains the pagination data.
+   * @returns {Promise<PaginationQueryResponse<T>>} an object containing the gotten entities and other data.
    */
-  async list() {}
+  async _list(
+    collection,
+    entityType,
+    { orderBy, lastDoc = null, itemsPerPage = 8, direction = 'forward' },
+  ) {
+    let query = db.collection(collection).orderBy(orderBy)
 
-  /**
-   * @protected
-   */
-  async listLast() {}
+    let start = lastDoc ? lastDoc[0] : null
+    let end = lastDoc ? lastDoc[1] : null
+
+    if (direction === 'forward') {
+      if (end) {
+        query = query.startAfter(end)
+      }
+
+      query = query.limit(itemsPerPage)
+    } else {
+      if (start) {
+        query = query.endBefore(start)
+      }
+
+      query = query.limitToLast(itemsPerPage)
+    }
+
+    const snap = await query.get()
+    const startDoc = snap.size ? snap.docs[0].data()[orderBy] : null
+    const endDoc = snap.size ? snap.docs[snap.size - 1].data()[orderBy] : null
+
+    return {
+      data: snap.docs.map(doc => new entityType({ ...doc.data(), id: doc.id })),
+      startDoc,
+      endDoc,
+    }
+  }
 
   /**
    * Creates an entity into the database.
@@ -131,7 +184,7 @@ export class Controller {
    * @param {Partial<T>} data the data to be set.
    * @returns {Promise<T>} the created entity with its id.
    */
-  async createOne(collection, entityType, data) {
+  async _createOne(collection, entityType, data) {
     if (data.id) {
       delete data.id
     }
@@ -157,20 +210,63 @@ export class Controller {
    * @param {Partial<T>} data the data to be set.
    * @returns {Promise<T>} the updated entity.
    */
-  async updateOne(collection, entityType, data) {
+  async _updateOne(collection, entityType, data) {
     if (!data.id) {
       throw new Error('bad-request/id-not-provided')
     }
 
+    data.updated = getNowISOString()
+
     const id = data.id
     delete data.id
 
-    const doc = db
+    const doc = await db
       .collection(collection)
       .doc(id)
-      .update(data)
+      .get()
 
-    return entityType.fromMap({ ...new entityType(data).toMap(), id: doc.id })
+    await doc.ref.update(data)
+
+    for (const key in data) {
+      if (typeof key === firebase.firestore.FieldValue) {
+        delete data[key]
+      }
+    }
+
+    return entityType.fromMap({
+      ...doc.data(),
+      ...data,
+      id: doc.id,
+    })
+  }
+
+  /**
+   * Updates one or more entities according to the given query.
+   *
+   * @template T
+   * @protected
+   *
+   * @param {string} collection the collection name.
+   * @param {Type<T>} entityType the entity type to be used.
+   * @param {Query} query the query to be used.
+   * @param {Partial<T>} data the data to be set.
+   * @returns {Promise<T[]>} a list with the updated entities.
+   */
+  async _updateQuery(collection, entityType, query, data) {
+    if (!query.where.length) {
+      throw new Error('no-constraints')
+    }
+
+    const entities = await this._query(collection, entityType, query)
+
+    return Promise.all(
+      entities.map(entity =>
+        this._updateOne(collection, entityType, {
+          ...data,
+          id: entity.id,
+        }),
+      ),
+    )
   }
 
   /**
@@ -186,14 +282,14 @@ export class Controller {
    * @param {string} collection the collection name.
    * @param {Type<T>} entityType the entity type to be created/updated.
    * @param {Partial<T>} data the data to be set.
-   * @returns {Promise<T>} the created/updated entity.
+   * @returns the created/updated entity.
    */
-  async createOrUpdate(collection, entityType, data) {
-    if (entityType.id) {
-      return this.update(collection, entityType, data)
+  async _createOrUpdate(collection, entityType, data) {
+    if (data.id) {
+      return this._updateOne(collection, entityType, data)
     }
 
-    return this.create(collection, entityType, data)
+    return this._createOne(collection, entityType, data)
   }
 
   /**
@@ -211,19 +307,41 @@ export class Controller {
    * @param {T} entity the entity to be set.
    * @returns {Promise<T>} the set entity.
    */
-  async setOne(collection, entity) {
+  async _setOne(collection, entity) {
     const id = entity.id
 
     if (id) {
       delete entity.id
     }
 
-    const doc = db
-      .collection(collection)
-      .doc(id)
-      .set(entity.toMap())
+    const doc = db.collection(collection).doc(id)
+
+    await doc.set(entity.toMap())
 
     return entity.constructor.fromMap({ ...entity, id: doc.id })
+  }
+
+  /**
+   * Soft deletes an entity, meaning it will be marked to be deleted
+   * by the user itself or some administrator.
+   *
+   * @template T
+   * @protected
+   *
+   * @param {string} collection the collection name.
+   * @param {Type<T>} entityType the entity type to be used.
+   * @param {string} id the entity id.
+   * @param {string} userEmail the user that deleted the entity.
+   * @returns the soft deleted entity.
+   */
+  async _softDeleteOne(collection, entityType, id, userEmail) {
+    return this._updateOne(collection, entityType, {
+      id,
+      toDelete: {
+        status: true,
+        userEmail,
+      },
+    })
   }
 
   /**
@@ -237,7 +355,7 @@ export class Controller {
    * @param {string} id the id of the entity to be deleted.
    * @returns the deleted entity.
    */
-  async deleteOne(collection, entityType, id) {
+  async _deleteOne(collection, entityType, id) {
     const doc = await db
       .collection(collection)
       .doc(id)
@@ -251,5 +369,135 @@ export class Controller {
     await doc.ref.delete()
 
     return entity
+  }
+
+  /**
+   * Deletes one or more entities according to the given query.
+   *
+   * @template T
+   * @protected
+   *
+   * @param {string} collection the collection name.
+   * @param {Type<T>} entityType the entity type to be used.
+   * @param {Query} query the query to be used.
+   * @returns {Promise<T[]>} a list with the deleted entities.
+   */
+  async _deleteQuery(collection, entityType, query) {
+    if (!query.where.length) {
+      throw new Error('no-constraints')
+    }
+
+    const entities = await this._query(collection, entityType, query)
+
+    /**
+     * @type {T[]}
+     */
+    const deleted = []
+
+    for (const entity of entities) {
+      const e = await this._deleteOne(collection, entityType, entity.id)
+
+      deleted.push(e)
+    }
+
+    return deleted
+  }
+
+  /**
+   * Restores an entity from the database.
+   *
+   * @template T
+   * @protected
+   *
+   * @param {string} collection the collection name.
+   * @param {Type<T>} entityType the entity type to be used.
+   * @param {string} id the entity id.
+   * @returns the restored entity.
+   */
+  async _restoreOne(collection, entityType, id) {
+    return this._updateOne(collection, entityType, {
+      id,
+      toDelete: null,
+    })
+  }
+
+  /**
+   * Restores all entities from a collection into the database.
+   *
+   * @template T
+   * @protected
+   *
+   * @param {string} collection the collection name.
+   * @param {Type<T>} entityType the entity type to be used.
+   * @returns the restored entities.
+   */
+  async _restoreAll(collection, entityType) {
+    return this._updateQuery(
+      collection,
+      entityType,
+      {
+        where: [
+          {
+            field: 'toDelete.status',
+            operator: '==',
+            value: true,
+          },
+        ],
+      },
+      {
+        toDelete: null,
+      },
+    )
+  }
+
+  /**
+   * Deletes a file from the storage.
+   *
+   * @protected
+   *
+   * @param {string?} child the storage child path.
+   */
+  async _deleteFile(child) {
+    if (!child) {
+      return
+    }
+
+    if (child.includes('/o/')) {
+      child = child.split('?alt=media')[0].split('/o/')[1]
+    }
+
+    child = decodeURIComponent(child)
+
+    await storage
+      .ref()
+      .child(child)
+      .delete()
+  }
+
+  /**
+   * Uploads a file to the storage.
+   *
+   * @protected
+   *
+   * @param {File} file the file to be uploaded.
+   * @param {string?} filename the name of the file.
+   * @returns the file URL.
+   */
+  async _uploadFile(file, filename) {
+    if (!file) {
+      return null
+    }
+
+    const name = filename ?? file.name
+    const type = file.type.split('/')[1]
+
+    const result = await storage
+      .ref()
+      .child(`${name}.${type}`)
+      .put(file)
+
+    const url = await result.ref.getDownloadURL()
+    console.log(url)
+    return `${url}`
   }
 }
