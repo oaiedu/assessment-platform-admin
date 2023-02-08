@@ -304,21 +304,25 @@ export class Controller {
    * @protected
    *
    * @param {string} collection the collection name.
-   * @param {T} entity the entity to be set.
+   * @param {Type<T>} entityType the entity type to be used.
+   * @param {Partial<T>} data the data to be set.
    * @returns {Promise<T>} the set entity.
    */
-  async _setOne(collection, entity) {
-    const id = entity.id
+  async _setOne(collection, entityType, data) {
+    const id = data.id
 
     if (id) {
-      delete entity.id
+      delete data.id
     }
 
     const doc = db.collection(collection).doc(id)
 
+    const entity = new entityType(data)
+
     await doc.set(entity.toMap())
 
-    return entity.constructor.fromMap({ ...entity, id: doc.id })
+    entity.id = id
+    return entity
   }
 
   /**
@@ -496,8 +500,6 @@ export class Controller {
       .child(`${name}.${type}`)
       .put(file)
 
-    const url = await result.ref.getDownloadURL()
-    console.log(url)
-    return `${url}`
+    return result.ref.getDownloadURL()
   }
 }
