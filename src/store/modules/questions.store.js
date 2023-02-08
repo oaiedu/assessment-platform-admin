@@ -219,29 +219,33 @@ const mutations = {
    */
   updateQuestion(state, data) {
     const questions = state.questions
+
     for (let key in questions) {
       if (questions[key]) {
         questions[key].forEach((item, index) => {
           if (item.name === data.name) {
-            state.questions[key][index] = data
+            state.questions[key][index] = data.clone()
           }
         })
       }
     }
   },
   /**
-   * Updates a question that's in the filtered questions array, according to the question's name.
+   * Updates a question that's in the filtered questions array, according
+   * to the question's name.
    *
    * @param {QuestionsState} state The questions state.
    * @param {QuestionEntity} data The question to be updated.
    */
   updateFilteredQuestion(state, data) {
     const questions = [...state.filteredQuestions]
+
     questions.forEach((item, index) => {
       if (item.name === data.name) {
-        questions[index] = data
+        questions[index] = data.clone()
       }
     })
+
     state.filteredQuestions = questions
   },
   /**
@@ -252,11 +256,13 @@ const mutations = {
    */
   updateCurrentQuestionsPage(state, data) {
     const questions = [...state.currentQuestionsPage]
+
     questions.forEach((item, index) => {
       if (item.name === data.name) {
-        questions[index] = data
+        questions[index] = data.clone()
       }
     })
+
     state.currentQuestionsPage = questions
   },
   /**
@@ -267,6 +273,7 @@ const mutations = {
    */
   deleteQuestion(state, data) {
     const questions = state.questions
+
     for (let key in questions) {
       if (questions[key]) {
         questions[key].forEach((item, index) => {
@@ -285,6 +292,7 @@ const mutations = {
    */
   deleteFilteredQuestion(state, data) {
     const questions = [...state.filteredQuestions]
+
     questions.forEach((item, index) => {
       if (item.name === data) {
         state.filteredQuestions.splice(index, 1)
