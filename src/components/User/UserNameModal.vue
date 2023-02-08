@@ -1,9 +1,9 @@
 <template>
   <v-card height="100%" width="100%">
-    <v-card-title>{{ $t("USERNAME_MODAL.TEXT.before_continue") }}</v-card-title>
+    <v-card-title>{{ $t('USERNAME_MODAL.TEXT.before_continue') }}</v-card-title>
     <v-card-text>
-      {{ $t("USERNAME_MODAL.WARNING.accont_without_name_1") }}<br />
-      {{ $t("USERNAME_MODAL.WARNING.accont_without_name_2") }}
+      {{ $t('USERNAME_MODAL.WARNING.accont_without_name_1') }}<br />
+      {{ $t('USERNAME_MODAL.WARNING.accont_without_name_2') }}
     </v-card-text>
     <v-text-field
       v-model="userName"
@@ -15,7 +15,7 @@
     >
     </v-text-field>
     <v-alert dense text type="info" class="mx-6 mt-3 name-alert">
-      {{ $t("USERNAME_MODAL.TEXT.username_change") }}
+      {{ $t('USERNAME_MODAL.TEXT.username_change') }}
     </v-alert>
     <v-card-actions>
       <v-spacer />
@@ -29,41 +29,43 @@
         :disabled="disabled"
         @click="onContinueClick"
       >
-        {{ $t("USERNAME_MODAL.TEXT.continue") }}
+        {{ $t('USERNAME_MODAL.TEXT.continue') }}
       </v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
-import { mdiAccount } from "@mdi/js";
-import { nameValidation } from "@/utils/validations";
+import { mdiAccount } from '@mdi/js'
+import { nameValidation } from '@/utils/validations'
 
 export default {
-  name: "UserNameModal",
+  name: 'UserNameModal',
   data() {
     return {
       mdiAccount,
-      userName: ""
-    };
+      userName: '',
+    }
   },
   computed: {
     disabled() {
-      return !this.userName || !nameValidation(this.userName);
+      return !this.userName || !nameValidation(this.userName)
     },
     loading() {
-      return this.$store.getters.loading;
-    }
+      return this.$store.getters.loading
+    },
   },
   methods: {
     rules() {
-      return [v => (v && nameValidation(v)) || $t("USERNAME_MODAL.invalid")];
+      return [
+        v => (v && nameValidation(v)) || this.$t('USERNAME_MODAL.invalid'),
+      ]
     },
     onContinueClick() {
-      this.$emit("continueClick", this.userName);
-    }
-  }
-};
+      this.$emit('continueClick', this.userName)
+    },
+  },
+}
 </script>
 
 <style scoped>
