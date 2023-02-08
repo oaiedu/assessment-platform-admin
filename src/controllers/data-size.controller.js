@@ -1,5 +1,6 @@
-import { DataSizeEntity } from '../entities/data-size.entity'
 import { Controller } from './base.controller'
+
+import { DataSizeEntity } from '../entities/data-size.entity'
 
 const DATA_SIZE_COLLECTION = 'data-size'
 
@@ -10,12 +11,30 @@ export class DataSizeController extends Controller {
   /**
    * Gets the data size object from the database.
    *
-   * @returns {Promise<DataSizeEntity?>} the data size object.
+   * @returns the data size object.
    */
   async getOne() {
     const list = await super._getAll(DATA_SIZE_COLLECTION, DataSizeEntity)
 
-    return list[0] ?? null
+    let dataSize = list[0]
+
+    if (!dataSize) {
+      dataSize = await super._createOne(DATA_SIZE_COLLECTION, DataSizeEntity, {
+        'question-requests': {
+          general: 0,
+          users: [],
+        },
+        questions: {
+          general: 0,
+          subject: {},
+        },
+        tests: 0,
+        testsByWeek: {},
+        users: 0,
+      })
+    }
+
+    return dataSize
   }
 
   /**
