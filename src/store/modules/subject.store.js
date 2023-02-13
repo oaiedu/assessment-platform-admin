@@ -148,12 +148,13 @@ const actions = {
 
       commit('setSubjects', data)
     } catch (error) {
+      const errorModel = showErrorMessage('load', 'Subject', error.message)
+
+      commit('setError', { message: errorModel })
+
       createErrorLog('Subject Load', error.message, {
         data,
       })
-
-      const errorModel = showErrorMessage('load', 'Subject', error.message)
-      commit('setError', { message: errorModel })
     } finally {
       commit('setLoading', false)
     }
@@ -176,12 +177,11 @@ const actions = {
       commit('addSubject', subject)
       commit('setSuccess', 'Subject successfully created!')
     } catch (error) {
-      createErrorLog('Subject Creation', error.message, {
-        payload,
-      })
-
       const errorModel = showErrorMessage('creation', 'Subject', error.message)
+
       commit('setError', { message: errorModel })
+
+      createErrorLog('Subject Creation', error.message, payload)
     } finally {
       commit('setLoading', false)
     }
@@ -218,14 +218,38 @@ const actions = {
 
       commit('setSuccess', 'Subject successfully deleted!')
     } catch (error) {
-      createErrorLog('Subject Exclusion', error.message, {
-        payload,
-      })
-
       const errorModel = showErrorMessage('exclusion', 'Subject', error.message)
+
       commit('setError', { message: errorModel })
+
+      createErrorLog('Subject Exclusion', error.message, payload)
     } finally {
       commit('setLoading', false)
+    }
+  },
+
+  /**
+   * Gets all the questions names from a subject.
+   *
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {string} payload The subject name.
+   * @returns An array of names.
+   */
+  async getSubjectQuestions({ commit }, payload) {
+    try {
+      const subject = await controller.getByName(payload)
+
+      if (!subject) {
+        return []
+      }
+
+      return subject.questions
+    } catch (error) {
+      const errorModel = showErrorMessage('load', 'IDs' + error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Test Subject Names', error.message, payload)
     }
   },
 
