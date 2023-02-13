@@ -120,7 +120,7 @@ export const createErrorLog = (type, message, payload) => {
       email: user ? user.email : null,
     },
     message,
-    payload: payload || null,
+    payload: payload ? JSON.stringify(payload) : null,
   })
 
   const toAdd = window.location.pathname === '/admin'
