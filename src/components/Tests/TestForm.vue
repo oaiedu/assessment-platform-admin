@@ -423,6 +423,7 @@ import Ripple from 'vuetify/lib/directives/ripple'
 import Paginator from '../Paginator'
 import VueTextEditor from '../Shared/VueTextEditor.vue'
 import { analytics } from '../../main'
+import { Entity } from '../../entities/base.entity'
 
 export default {
   directives: { Ripple },
@@ -582,6 +583,13 @@ export default {
     },
   },
   watch: {
+    testType(value) {
+      if (value !== 'selected') {
+        return
+      }
+
+      this.selectedSubjects = []
+    },
     selectedSubjects() {
       this.questions.forEach(element => {
         for (let i = 0; i < this.selectedSubjects.length; i++) {
@@ -752,7 +760,7 @@ export default {
 
       const exist = await this.$store.dispatch('testExists', this.title)
 
-      if (exist > 0) {
+      if (exist) {
         this.createErrorSnackBar = true
         return
       }
@@ -812,10 +820,11 @@ export default {
 
       await this.$store.dispatch('createTest', {
         testData,
-        userInfo: this.$store.getters.userInfo,
       })
 
       this.$store.commit('setLoading', false)
+
+      this.$emit('testCreated')
 
       this.close()
     },
@@ -827,18 +836,33 @@ export default {
       const amount = await this.$store.dispatch('testExists', this.title)
 
       if (
-        (this.test.title !== this.title && amount > 0) ||
+        (this.test.title !== this.title && amount) ||
         (this.test.title === this.title && amount > 1)
       ) {
         this.createErrorSnackBar = true
         return
       }
 
+      if (this.testType === 'random') {
+        this.selectedQuestions = []
+
+        for (const question of this.selectedRandom) {
+          const q = await this.$store.dispatch(
+            'getQuestionByName',
+            question.name,
+          )
+          this.selectedQuestions.push(q.toMap())
+        }
+      }
+
       this.selectedQuestions.forEach(element => {
-        this.testItems.push(element)
+        this.testItems.push(
+          element instanceof Entity ? element.toMap() : element,
+        )
       })
 
       const testData = {
+        id: this.test.id,
         title: this.title,
         instructions: this.instructions,
         approvalPercentage: this.approvalPercentage,
@@ -855,7 +879,7 @@ export default {
         },
         userId: this.test.userId,
         created: this.test.created,
-        id: this.test.id,
+        uuid: this.test.uuid,
       }
 
       if (this.testType === 'auto') {

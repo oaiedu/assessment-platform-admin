@@ -5,15 +5,15 @@
     style="max-width: unset; min-height: 100%; background: #efefef"
   >
     <v-row class="pa-4 ma-0">
-      <a @click="$router.push('/')">{{ $t("TEST.QUIZ.home") }}</a>
+      <a @click="$router.push('/')">{{ $t('TEST.QUIZ.home') }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="$router.push('/quizzes')">{{ $t("TEST.QUIZ.quizzes_t") }}</a>
+      <a @click="$router.push('/quizzes')">{{ $t('TEST.QUIZ.quizzes_t') }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a>{{ $t("TEST.QUIZ.quiz_info") }}</a>
+      <a>{{ $t('TEST.QUIZ.quiz_info') }}</a>
     </v-row>
 
     <v-card flat width="100%">
@@ -22,16 +22,16 @@
 
         <span class="ml-3">
           <div class="quiz-detail__level">
-            {{ $t("TEST.QUIZ.level") }}:
+            {{ $t('TEST.QUIZ.level') }}:
             {{
               test
-                ? $t("TEST.LEVEL." + getLevel(test).label)
-                : $t("TEST.unavailable")
+                ? $t('TEST.LEVEL.' + getLevel(test).label)
+                : $t('TEST.unavailable')
             }}
           </div>
 
           <div class="quiz-detail__title ma-0 mt-2 pa-0">
-            {{ test ? test.title : $t("TEST.QUIZ.quiz_t") }}
+            {{ test ? test.title : $t('TEST.QUIZ.quiz_t') }}
           </div>
         </span>
       </v-card-title>
@@ -44,7 +44,7 @@
       >
         <div class="quiz-detail__detail-column info-column">
           <span class="quiz-detail__info-title">{{
-            $t("TEST.QUIZ.info")
+            $t('TEST.QUIZ.info')
           }}</span>
 
           <div class="quiz-detail__info-container">
@@ -62,7 +62,7 @@
                     test ? test.questionsAmount : 0
                   }}</span>
                   <span class="quiz-detail__label">{{
-                    $t("TEST.QUIZ.questions")
+                    $t('TEST.QUIZ.questions')
                   }}</span>
                 </div>
               </div>
@@ -80,7 +80,7 @@
                     test ? getSubjectsAmount(test) : 0
                   }}</span>
                   <span class="quiz-detail__label">{{
-                    $t("TEST.QUIZ.subjects")
+                    $t('TEST.QUIZ.subjects')
                   }}</span>
                 </div>
               </div>
@@ -102,7 +102,7 @@
                     test ? getTime(test) : 0
                   }}</span>
                   <span class="quiz-detail__label">{{
-                    $t("PROFILE.DATA_INFO.time")
+                    $t('PROFILE.DATA_INFO.time')
                   }}</span>
                 </div>
               </div>
@@ -122,7 +122,7 @@
                     >{{ test ? test.approvalPercentage : 0 }}%</span
                   >
                   <span class="quiz-detail__label">{{
-                    $t("TEST.QUIZ_DETAILS.for_approval")
+                    $t('TEST.QUIZ_DETAILS.for_approval')
                   }}</span>
                 </div>
               </div>
@@ -138,8 +138,8 @@
             elevation="0"
             @click="startDialog = true"
           >
-            {{ $t("TEST.GENERATE_CARD.start") }}
-            {{ windowWidth > 320 ? $t("TEST.QUIZ.quiz") : "" }}
+            {{ $t('TEST.GENERATE_CARD.start') }}
+            {{ windowWidth > 320 ? $t('TEST.QUIZ.quiz') : '' }}
           </v-btn>
         </div>
 
@@ -147,7 +147,7 @@
 
         <div class="quiz-detail__detail-column instructions-column">
           <span class="quiz-detail__info-title">{{
-            $t("TEST.QUIZ_DETAILS.instructions")
+            $t('TEST.QUIZ_DETAILS.instructions')
           }}</span>
 
           <div
@@ -157,7 +157,7 @@
           ></div>
 
           <span v-else-if="test" class="quiz-detail__instructions">
-            {{ $t("TEST.QUIZ_DETAILS.no_instructions") }}
+            {{ $t('TEST.QUIZ_DETAILS.no_instructions') }}
           </span>
         </div>
       </v-row>
@@ -171,7 +171,7 @@
     >
       <v-card-title>
         <h3 class="quiz-detail__attempts-title">
-          {{ $t("TEST.QUIZ_DETAILS.previous_attempts") }}
+          {{ $t('TEST.QUIZ_DETAILS.previous_attempts') }}
         </h3>
       </v-card-title>
 
@@ -187,7 +187,7 @@
         <v-card-title class="pa-0 mt-0 mb-4">
           <v-row class="pa-0 ma-0" justify="center" style="position: relative">
             <h2 class="quiz-detail__results-title">
-              {{ $t("TEST.QUIZ_DETAILS.outcome") }}
+              {{ $t('TEST.QUIZ_DETAILS.outcome') }}
             </h2>
 
             <v-btn
@@ -211,7 +211,7 @@
                     ${color(results.score)} ${results.score}%,
                     ${color(results.score)}20 ${results.score}%,
                     ${color(results.score)}20 100%
-                  )`
+                  )`,
               }"
             >
               <span class="quiz-detail__score"
@@ -222,7 +222,7 @@
 
           <div class="quiz-detail__time-taken">
             <span class="quiz-detail__time-taken-title">{{
-              $t("TEST.QUIZ_DETAILS.time_spend")
+              $t('TEST.QUIZ_DETAILS.time_spend')
             }}</span>
 
             <span class="quiz-detail__time">
@@ -257,7 +257,7 @@
             :justify="windowWidth > 340 ? 'center' : 'start'"
           >
             <h2 class="quiz-detail__start-title">
-              {{ $t("TEST.QUIZ_DETAILS.before_start") }}
+              {{ $t('TEST.QUIZ_DETAILS.before_start') }}
             </h2>
 
             <v-btn
@@ -284,7 +284,7 @@
               class="quiz-detail__start-info"
               :class="{ 'text-center': windowWidth > 340 }"
             >
-              {{ $t("TEST.QUIZ_DETAILS.info_no_limit_time") }}
+              {{ $t('TEST.QUIZ_DETAILS.info_no_limit_time') }}
             </p>
 
             <p
@@ -292,11 +292,11 @@
               class="quiz-detail__start-info"
               :class="{ 'text-center': windowWidth > 340 }"
             >
-              {{ $t("TEST.QUIZ_DETAILS.info_limit_time_1") }}
+              {{ $t('TEST.QUIZ_DETAILS.info_limit_time_1') }}
               <strong style="display: inline-flex">
                 {{ test.time.hours }}h {{ test.time.minutes }}m
                 {{ test.time.seconds }}s</strong
-              >{{ $t("TEST.QUIZ_DETAILS.info_limit_time_2") }}
+              >{{ $t('TEST.QUIZ_DETAILS.info_limit_time_2') }}
             </p>
           </v-row>
         </v-card-text>
@@ -312,7 +312,7 @@
           >
             <v-checkbox v-model="practice" @click.stop></v-checkbox>
 
-            <span>{{ $t("TEST.QUIZ_DETAILS.start_was_training") }}</span>
+            <span>{{ $t('TEST.QUIZ_DETAILS.start_was_training') }}</span>
           </div>
         </v-row>
 
@@ -325,7 +325,7 @@
               color="blue"
               @click="startQuiz()"
             >
-              {{ $t("TEST.GENERATE_CARD.start") }}
+              {{ $t('TEST.GENERATE_CARD.start') }}
             </v-btn>
           </v-row>
         </v-card-actions>
@@ -341,17 +341,17 @@ import {
   mdiClose,
   mdiFileDocumentOutline,
   mdiHelp,
-  mdiThumbUpOutline
-} from "@mdi/js";
+  mdiThumbUpOutline,
+} from '@mdi/js'
 
-import { analytics } from "../../main";
+import { analytics } from '../../main'
 
-import AttemptsTable from "./AttemptsTable.vue";
+import AttemptsTable from './AttemptsTable.vue'
 
 export default {
-  name: "QuizDetails",
+  name: 'QuizDetails',
   components: {
-    AttemptsTable
+    AttemptsTable,
   },
   data() {
     return {
@@ -367,136 +367,136 @@ export default {
       resultsDialog: false,
       practice: false,
       windowWidth: 701,
-      attempts: []
-    };
+      attempts: [],
+    }
   },
   computed: {
     userInfo() {
-      return this.$store.getters.userInfo;
-    }
+      return this.$store.getters.userInfo
+    },
   },
   methods: {
     onResize() {
-      this.windowWidth = window.innerWidth;
+      this.windowWidth = window.innerWidth
     },
     color(score) {
       return score >= 100
-        ? "#42D662"
+        ? '#42D662'
         : score >= 80
-        ? "#2196f3"
+        ? '#2196f3'
         : score >= 50
-        ? "#edab00"
-        : "#ff4141";
+        ? '#edab00'
+        : '#ff4141'
     },
     getTime(item) {
-      return item.unlimitedTime
-        ? "Ilimitado"
-        : this.getTimeFormatted(item.time);
+      return item.unlimitedTime ? 'Ilimitado' : this.getTimeFormatted(item.time)
     },
     getTimeFormatted(time) {
-      return `${time.hours}h ${time.minutes}m ${time.seconds}s`;
+      return `${time.hours}h ${time.minutes}m ${time.seconds}s`
     },
     getLevel(item) {
-      const level = item.level.index;
+      console.log(item)
+
+      const level = item.level.index
 
       switch (level) {
         case 0:
           return {
-            label: "beginner",
-            color: "green"
-          };
+            label: 'beginner',
+            color: 'green',
+          }
         case 1:
           return {
-            label: "intermediary",
-            color: "blue"
-          };
+            label: 'intermediary',
+            color: 'blue',
+          }
         case 2:
           return {
-            label: "advanced",
-            color: "orange"
-          };
+            label: 'advanced',
+            color: 'orange',
+          }
         case 3:
           return {
-            label: "expert",
-            color: "red"
-          };
+            label: 'expert',
+            color: 'red',
+          }
       }
     },
     getSubjectsAmount(item) {
-      const subjects = [];
+      const subjects = []
 
       item.questions.forEach(q => {
         if (!subjects.includes(q.subject)) {
-          subjects.push(q.subject);
+          subjects.push(q.subject)
         }
-      });
+      })
 
-      return subjects.length || item.subjects.length;
+      return subjects.length || item.subjects.length
     },
     startQuiz() {
-      const id = this.$route.params.id;
+      const id = this.$route.params.id
 
-      analytics.logEvent("start_quiz", {
+      analytics.logEvent('start_quiz', {
         id,
-        mode: id === "generated" || this.practice ? "practice" : "exam"
-      });
+        mode: id === 'generated' || this.practice ? 'practice' : 'exam',
+      })
 
-      if (id === "generated") {
+      if (id === 'generated') {
         this.$router.push({
-          name: "quiz.exam",
+          name: 'quiz.exam',
           params: {
-            id: "generated",
+            id: 'generated',
             test: this.test,
-            mode: "practice"
-          }
-        });
+            mode: 'practice',
+          },
+        })
       } else {
         this.$router.push({
-          name: "quiz.exam",
-          params: { id, mode: this.practice ? "practice" : "exam" }
-        });
+          name: 'quiz.exam',
+          params: { id, mode: this.practice ? 'practice' : 'exam' },
+        })
       }
     },
     reviewAttempt(item) {
-      const id = this.$route.params.id;
+      const id = this.$route.params.id
 
       this.$router.push({
-        name: "quiz.exam",
-        params: { id, mode: "practice", attempt: item, review: true }
-      });
-    }
+        name: 'quiz.exam',
+        params: { id, mode: 'practice', attempt: item, review: true },
+      })
+    },
   },
   async mounted() {
-    this.onResize();
-    window.addEventListener("resize", this.onResize, { passive: true });
+    this.onResize()
+    window.addEventListener('resize', this.onResize, { passive: true })
 
-    const id = this.$route.params.id;
+    const id = this.$route.params.id
 
-    if (id === "generated") {
-      this.test = this.$route.params.test;
-      this.results = this.$route.params.results;
+    if (id === 'generated') {
+      this.test = this.$route.params.test
+      this.results = this.$route.params.results
     } else {
-      this.test = await this.$store.dispatch("getTestById", id);
+      this.test = await this.$store.dispatch('getTestById', id)
     }
 
     if (this.results) {
-      this.resultsDialog = true;
+      this.resultsDialog = true
     }
 
     if (this.userInfo && this.userInfo.attempts) {
       this.attempts = this.userInfo.attempts
         .filter(a => a.quizId === id)
-        .map((a, i) => ({ index: i, ...a }));
+        .map((a, i) => ({ index: i, ...a }))
     }
   },
   beforeDestroy() {
     if (!window) {
-      return;
+      return
     }
 
-    window.removeEventListener("resize", this.onResize, { passive: true });
-  }
-};
+    window.removeEventListener('resize', this.onResize, { passive: true })
+  },
+}
 </script>
 
 <style scoped>
@@ -657,7 +657,7 @@ export default {
 }
 
 .quiz-detail__donut::before {
-  content: "";
+  content: '';
 
   position: absolute;
   top: 50%;
