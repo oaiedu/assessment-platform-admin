@@ -7,8 +7,8 @@ import { getNowISOString } from '../utils/date'
 
 /**
  * @typedef {Object} ToDelete
- * @property {boolean} status If `true`, the question can be restored. If `false`, it will be deleted.
- * @property {string?} userEmail Defines the user that marked the question to be deleted.
+ * @property {boolean} status If `true`, the entity can be restored. If `false`, it will be deleted.
+ * @property {string?} userEmail Defines the user that marked the entity to be deleted.
  */
 
 /**
