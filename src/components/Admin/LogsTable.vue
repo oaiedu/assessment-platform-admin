@@ -62,7 +62,7 @@
                 {{ mdiEmail }}
               </v-icon>
             </template>
-            <span>{{ $t("REQUESTS.TABLE.send_email") }}</span>
+            <span>{{ $t('REQUESTS.TABLE.send_email') }}</span>
           </v-tooltip>
         </template>
       </v-data-table>
@@ -71,86 +71,86 @@
 </template>
 
 <script>
-import { mdiDownload, mdiEmail } from "@mdi/js";
+import { mdiDownload, mdiEmail } from '@mdi/js'
 
 export default {
-  name: "LogsTable",
+  name: 'LogsTable',
   data() {
     return {
       mdiDownload,
       mdiEmail,
-      search: "",
+      search: '',
       headers: [
-        { text: "id", align: "left", value: "id", sortable: true },
-        { text: "type", align: "center", value: "type", sortable: true },
-        { text: "user", align: "center", value: "userInfo", sortable: true },
-        { text: "date", align: "center", value: "date", sortable: true },
-        { text: "actions", align: "center", value: "actions", sortable: false }
-      ]
-    };
+        { text: 'id', align: 'left', value: 'id', sortable: true },
+        { text: 'type', align: 'center', value: 'type', sortable: true },
+        { text: 'user', align: 'center', value: 'userInfo', sortable: true },
+        { text: 'date', align: 'center', value: 'date', sortable: true },
+        { text: 'actions', align: 'center', value: 'actions', sortable: false },
+      ],
+    }
   },
   computed: {
     logs() {
-      const logs = this.$store.getters.logs;
-      logs.sort((l1, l2) => (l1.date < l2.date ? 1 : -1));
-      return logs;
+      const logs = this.$store.getters.logs
+      logs.sort((l1, l2) => (l1.date < l2.date ? 1 : -1))
+      return logs
     },
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     userInfo() {
-      return this.$store.getters.userInfo;
-    }
+      return this.$store.getters.userInfo
+    },
   },
   methods: {
     formatDate(date) {
-      const dateParts = date.split("T")[0].split("-");
-      const time = date.split("T")[1].split(".")[0];
+      const dateParts = date.split('T')[0].split('-')
+      const time = date.split('T')[1].split('.')[0]
 
-      const year = dateParts[0];
-      const month = dateParts[1];
-      const day = dateParts[2];
+      const year = dateParts[0]
+      const month = dateParts[1]
+      const day = dateParts[2]
 
-      return `${time} - ${day}/${month}/${year}`;
+      return `${time} - ${day}/${month}/${year}`
     },
     sendEmail(email) {
-      const a = document.createElement("a");
-      a.href = "mailto:" + email;
-      a.click();
-      a.remove();
+      const a = document.createElement('a')
+      a.href = 'mailto:' + email
+      a.click()
+      a.remove()
     },
     downloadLog(item) {
       const template =
-        "ID: " +
+        'ID: ' +
         item.id +
-        "\nDate: " +
+        '\nDate: ' +
         item.date +
-        "\nType: " +
+        '\nType: ' +
         item.type +
-        "\nUser: " +
+        '\nUser: ' +
         item.user.id +
-        " - " +
+        ' - ' +
         item.user.email +
-        "\nError: " +
+        '\nError: ' +
         item.message +
-        "\nPayload: " +
-        JSON.stringify(item.payload);
+        '\nPayload: ' +
+        JSON.stringify(JSON.parse(item.payload))
 
-      const a = document.createElement("a");
-      a.href = "data:text/plain;charset=utf-8," + encodeURIComponent(template);
+      const a = document.createElement('a')
+      a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(template)
       a.download =
-        "log_" +
-        item.type.replace(/\s/g, "_").toLowerCase() +
-        "_" +
+        'log_' +
+        item.type.replace(/\s/g, '_').toLowerCase() +
+        '_' +
         item.id +
-        "_" +
+        '_' +
         item.date +
-        ".txt";
-      a.click();
-      a.remove();
-    }
-  }
-};
+        '.txt'
+      a.click()
+      a.remove()
+    },
+  },
+}
 </script>
 
 <style>
