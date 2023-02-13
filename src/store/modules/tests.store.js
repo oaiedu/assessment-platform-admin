@@ -1,9 +1,9 @@
-import { Store } from "vuex";
-import uuid from "uuid-random";
+import { Store } from 'vuex'
 
-import { analytics, db } from "../../main";
-import { getNowISOString } from "../../utils/date";
-import { createErrorLog, showErrorMessage } from "../../utils/errors";
+import { createErrorLog, showErrorMessage } from '../../utils/errors'
+import { TestController } from '../../controllers/test.controller'
+import { TestEntity } from '../../entities/test.entity'
+import { QuestionEntity } from '../../entities/question.entity'
 
 /**
  * @typedef {import('./questions.store.js').Question} Question
@@ -56,44 +56,20 @@ import { createErrorLog, showErrorMessage } from "../../utils/errors";
  */
 
 /**
- * @typedef {Object} TestCreation
- * @property {string} userId Defines the user that created the quiz.
- * @property {string} title Defines the quiz title.
- * @property {string} instructions Defines the quiz instructions.
- * @property {"selected"|"random"} type Defines the quiz type.
- * @property {Question[]} questions Defines the quiz questions.
- */
-
-/**
- * @typedef {Object} Test
- * @property {string} id Defines the quiz id.
- * @property {string} created Defines the quiz creation date.
- * @property {string} updated Defines the quiz edition date.
- * @property {string} userId Defines the user that created the quiz.
- * @property {string} title Defines the quiz title.
- * @property {string} instructions Defines the quiz instructions.
- * @property {number} questionsAmount Defines how many questions the quiz have.
- * @property {number} approvalPercentage Defines how much of the quiz must be correct to approve the user.
- * @property {boolean} unlimitedTime Defines whether the quiz has unlimited time.
- * @property {Time} time Defines the quiz timer.
- * @property {Level} level Defines the quiz level.
- * @property {"selected"|"random"|"auto"} type Defines the quiz type.
- * @property {Question[]} questions Defines an array of questions.
- * @property {string[]} questionsNames Defines an array that contains all questions names added to the quiz.
- * @property {Object<string, number>} userAttempts Defines an object containing all user attempts (id and number of attempts).
- * @property {DeleteStatus|undefined} toDelete Defines the quiz deletion status.
- */
-
-/**
  * @typedef {Object} TestsState
- * @property {Object.<string, Test[]>} tests Defines the pages with it's quizzes list.
- * @property {Test[]} filteredTests Defines an array of quizzes filtered by id.
- * @property {Test[]} currentTestsPage Defines an array of quizzes of the current page.
+ * @property {Record<string, TestEntity[]>} tests Defines the pages with it's quizzes list.
+ * @property {TestEntity[]} filteredTests Defines an array of quizzes filtered by id.
+ * @property {TestEntity[]} currentTestsPage Defines an array of quizzes of the current page.
  * @property {[string, string]|null} lastTestDocument Defines an array with the first and last quiz id from the last request.
- * @property {Question[]} testQuestions Defines an array of questions from a specific quiz.
- * @property {Test[]} deleteMarkTests Defines an array of quizzes that were marked to be deleted.
- * @property {Test[]} lastTests Defines an array of the most recent quizzes.
+ * @property {QuestionEntity[]} testQuestions Defines an array of questions from a specific quiz.
+ * @property {TestEntity[]} deleteMarkTests Defines an array of quizzes that were marked to be deleted.
+ * @property {TestEntity[]} lastTests Defines an array of the most recent quizzes.
  */
+
+/**
+ * Defines the test controller.
+ */
+const controller = new TestController()
 
 /**
  * Gets the initial state of tests state.
@@ -107,1101 +83,797 @@ const initialState = () => ({
   lastTestDocument: null,
   testQuestions: [],
   deleteMarkTests: [],
-  lastTests: []
-});
+  lastTests: [],
+})
 
-const state = initialState();
+const state = initialState()
 
 const mutations = {
   /**
    * Sets a page of tests according to the given data.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Object} data - The data containing the page number and it's data.
-   * @param {string} data.page - The page number.
-   * @param {Test[]} data.data - An array of tests.
+   * @param {TestsState} state The tests state.
+   * @param {Object} data The data containing the page number and it's data.
+   * @param {string} data.page The page number.
+   * @param {TestEntity[]} data.data An array of tests.
    */
   setTestPage(state, data) {
-    state.tests[data.page] = data.data;
+    const { page, data: tests } = data
+
+    state.tests[page] = tests.map(t => t.clone())
   },
   /**
    * Sets the filtered tests.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test[]} data - An array of filtered tests.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity[]} data An array of filtered tests.
    */
   setFilteredTests(state, data) {
-    state.filteredTests = data;
+    state.filteredTests = data.map(t => t.clone())
   },
   /**
    * Sets the most recent tests.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test[]} data - An array of tests.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity[]} data An array of tests.
    */
   setLastTests(state, data) {
-    state.lastTests = data;
+    state.lastTests = data.map(t => t.clone())
   },
   /**
    * Cleans the filtered tests array.
    *
-   * @param {TestsState} state - The tests state.
+   * @param {TestsState} state The tests state.
    */
   resetFilteredTests(state) {
-    state.filteredTests = [];
+    state.filteredTests = []
   },
   /**
    * Cleans the current tests page array.
    *
-   * @param {TestsState} state - The tests state.
+   * @param {TestsState} state The tests state.
    */
   resetCurrentTestsPage(state) {
-    state.currentTestsPage = [];
+    state.currentTestsPage = []
   },
   /**
    * Sets the current tests page array.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test[]} data - An array of tests.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity[]} data An array of tests.
    */
   setCurrentTestsPage(state, data) {
-    state.currentTestsPage = data;
+    state.currentTestsPage = data.map(t => t.clone())
   },
   /**
    * Adds a test to the array of tests marked to be deleted.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test} data - The test to be added.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity} data The test to be added.
    */
   addDeleteMarkTest(state, data) {
-    state.deleteMarkTests.push(data);
+    state.deleteMarkTests.push(data.clone())
   },
   /**
    * Updates a test that's in the array of tests marked to be deleted.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test} data - The test to be updated.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity} data The test to be updated.
    */
   updateDeleteMarkTest(state, data) {
-    const tests = [...state.deleteMarkTests];
-    tests.forEach((item, index) => {
-      if (item.id === data.id) {
-        tests[index] = data;
+    const tests = [...state.deleteMarkTests]
+
+    for (let index = 0; index <= tests.length; index++) {
+      const item = tests[index]
+
+      if (!item) {
+        continue
       }
-    });
-    state.deleteMarkTests = tests;
+
+      if (item.id === data.id) {
+        tests[index] = data.clone()
+        break
+      }
+    }
+
+    state.deleteMarkTests = tests
   },
   /**
    * Removes a test from the array of tests marked to be deleted.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test} data - The id of the test to be removed.
+   * @param {TestsState} state The tests state.
+   * @param {string} data The id of the test to be removed.
    */
   removeDeleteMarkTest(state, data) {
-    const tests = [...state.deleteMarkTests];
-    tests.forEach((item, index) => {
-      if (item.id === data) {
-        state.deleteMarkTests.splice(index, 1);
+    const tests = [...state.deleteMarkTests]
+
+    for (let index = 0; index <= tests.length; index++) {
+      const item = tests[index]
+
+      if (!item) {
+        continue
       }
-    });
+
+      if (item.id === data) {
+        tests.splice(index, 1)
+        break
+      }
+    }
+
+    state.deleteMarkTests = tests
   },
   /**
    * Sets the array of tests marked to be deleted.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test[]} data - An array of tests marked to be deleted.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity[]} data An array of tests marked to be deleted.
    */
   setDeleteMarkTests(state, data) {
-    state.deleteMarkTests = data;
+    state.deleteMarkTests = data.map(t => t.clone())
   },
   /**
    * Sets a test as marked to be deleted.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Object} data - The data containing the test id and the deletion status.
-   * @param {string} data.id - The test id.
-   * @param {DeleteStatus} data.toDelete - The test deletion status.
+   * @param {TestsState} state The tests state.
+   * @param {Object} data The data containing the test id and the deletion status.
+   * @param {string} data.id The test id.
+   * @param {DeleteStatus} data.toDelete The test deletion status.
    */
   setDeleteMarkTest(state, data) {
-    const tests = state.tests;
-    for (let key in tests) {
-      if (tests[key]) {
-        tests[key].forEach((item, index) => {
-          if (item.id === data.id) {
-            state.tests[key][index] = {
-              ...item,
-              toDelete: data.toDelete
-            };
-          }
-        });
+    const { id, toDelete } = data
+
+    const tests = { ...state.tests }
+
+    outer: for (let key in tests) {
+      if (!tests[key]) {
+        continue
+      }
+
+      for (let index = 0; index <= tests[key].length; index++) {
+        const item = tests[key][index]
+
+        if (!item) {
+          continue
+        }
+
+        if (item.id === id) {
+          tests[key][index].toDelete = toDelete
+
+          break outer
+        }
       }
     }
+
+    state.tests = tests
   },
   /**
    * Sets a test as marked to be deleted into the filtered tests array.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Object} data - The data containing the test id and the deletion status.
-   * @param {string} data.id - The test id.
-   * @param {DeleteStatus} data.toDelete - The test deletion status.
+   * @param {TestsState} state The tests state.
+   * @param {Object} data The data containing the test id and the deletion status.
+   * @param {string} data.id The test id.
+   * @param {DeleteStatus} data.toDelete The test deletion status.
    */
   setDeleteMarkFilteredTest(state, data) {
-    const tests = [...state.filteredTests];
-    tests.forEach((item, index) => {
-      if (item.id === data.id) {
-        tests[index] = { ...item, toDelete: data.toDelete };
+    const { id, toDelete } = data
+
+    const tests = [...state.filteredTests]
+
+    for (let index = 0; index <= tests.length; index++) {
+      const item = tests[index]
+
+      if (!item) {
+        continue
       }
-    });
-    state.filteredTests = tests;
+
+      if (item.id === id) {
+        tests[index].toDelete = toDelete
+        break
+      }
+    }
+
+    state.filteredTests = tests
   },
   /**
    * Sets the test questions.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Question[]} data - An array of questions.
+   * @param {TestsState} state The tests state.
+   * @param {QuestionEntity[]} data An array of questions.
    */
   setTestQuestions(state, data) {
-    state.testQuestions = data;
-  },
-  /**
-   * Creates a test into the tests object, according to the given data.
-   *
-   * @param {TestsState} state - The tests state.
-   * @param {Object} data - The data containing the test data and the page number.
-   * @param {number} data.page - The page number.
-   * @param {number} data.amount - The total amount of tests.
-   * @param {Test} data.data - The test to be created.
-   */
-  createTest(state, data) {
-    const page = data.page;
-    const tests = [...(state.tests["p" + page] || [])];
-    const amount = data.amount;
-    const oneBefore = state.tests["p" + (page - 1)] || [];
-    if (tests.length > 0 || oneBefore.length === 10 || amount === 0) {
-      tests.push(data.data);
-      state.tests["p" + page] = [...tests];
-      if (amount === 0 || state.currentTestsPage.length < 10) {
-        state.currentTestsPage.push(data.data);
-      }
-    }
+    state.testQuestions = data.map(t => t.clone())
   },
   /**
    * Updates a test into the test object, according to the test's id.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {test} data - The test to be updated.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity} data The test to be updated.
    */
   updateTest(state, data) {
-    const tests = { ...state.tests };
-    for (let key in tests) {
-      if (tests[key]) {
-        state.tests[key].forEach((item, index) => {
-          if (item.id === data.id) {
-            tests[key][index] = data;
-          }
-        });
+    const tests = { ...state.tests }
+
+    outer: for (let key in tests) {
+      if (!tests[key]) {
+        continue
+      }
+
+      for (let index = 0; index <= tests[key].length; index++) {
+        const item = tests[key][index]
+
+        if (!item) {
+          continue
+        }
+
+        if (item.id === data.id) {
+          tests[key][index] = data.clone()
+          break outer
+        }
       }
     }
 
-    state.tests = tests;
+    state.tests = tests
   },
   /**
    * Updates a test that's in the filtered tests array, according to the test's id.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test} data - The test to be updated.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity} data The test to be updated.
    */
   updateFilteredTest(state, data) {
-    const tests = [...state.filteredTests];
-    tests.forEach((item, index) => {
-      if (item.id === data.id) {
-        tests[index] = data;
+    const tests = [...state.filteredTests]
+
+    for (let index = 0; index <= tests.length; index++) {
+      const item = tests[index]
+
+      if (!item) {
+        continue
       }
-    });
-    state.filteredTests = tests;
+
+      if (item.id === data.id) {
+        tests[index] = data.clone()
+        break
+      }
+    }
+
+    state.filteredTests = tests
   },
   /**
    * Updates a test that's in the current tests page array, according to the test's id.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {Test} data - The test to be updated.
+   * @param {TestsState} state The tests state.
+   * @param {TestEntity} data The test to be updated.
    */
   updateCurrentTestsPage(state, data) {
-    const tests = [...state.currentTestsPage];
-    tests.forEach((item, index) => {
-      if (item.id === data.id) {
-        tests[index] = data;
+    const tests = [...state.currentTestsPage]
+
+    for (let index = 0; index <= tests.length; index++) {
+      const item = tests[index]
+
+      if (!item) {
+        continue
       }
-    });
-    state.currentTestsPage = tests;
+
+      if (item.id === data.id) {
+        tests[index] = data.clone()
+        break
+      }
+    }
+
+    state.currentTestsPage = tests
   },
   /**
    * Deletes a test from the test object, according to the given data.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {string} data - The id of the test to be deleted.
+   * @param {TestsState} state The tests state.
+   * @param {string} data The id of the test to be deleted.
    */
   deleteTest(state, data) {
-    const tests = state.tests;
-    for (let key in tests) {
-      if (tests[key]) {
-        tests[key].forEach((item, index) => {
-          if (item.id === data) {
-            state.tests[key].splice(index, 1);
-          }
-        });
+    const tests = state.tests
+
+    outer: for (let key in tests) {
+      if (!tests[key]) {
+        continue
+      }
+
+      for (let index = 0; index <= tests[key].length; index++) {
+        const item = tests[key][index]
+
+        if (!item) {
+          continue
+        }
+
+        if (item.id === data) {
+          state.tests[key].splice(index, 1)
+          break outer
+        }
       }
     }
   },
   /**
    * Deletes a test from the filtered tests array, according to the given data.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {string} data - The id of the test to be deleted.
+   * @param {TestsState} state The tests state.
+   * @param {string} data The id of the test to be deleted.
    */
   deleteFilteredTest(state, data) {
-    const tests = state.filteredTests;
-    tests.forEach((item, index) => {
-      if (item.id === data) {
-        state.filteredTests.splice(index, 1);
+    const tests = [...state.filteredTests]
+
+    for (let index = 0; index <= tests.length; index++) {
+      const item = tests[index]
+
+      if (!item) {
+        continue
       }
-    });
+
+      if (item.id === data) {
+        tests[index].splice(index, 1)
+        break
+      }
+    }
+
+    state.filteredTests = tests
   },
   /**
    * Sets the last test request ids.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {[string, string]} data An array of strings containing the first and last test ids from the last request.
+   * @param {TestsState} state The tests state.
+   * @param {[string, string]?} data An array of strings containing the first and last test uuid from the last request.
    */
   setLastTestDocument(state, data) {
-    state.lastTestDocument = data;
+    state.lastTestDocument = data
   },
   /**
    * Resets the tests state to it's initial state.
    *
-   * @param {TestsState} state - The tests state.
+   * @param {TestsState} state The tests state.
    */
   RESETTests(state) {
-    const newState = initialState();
+    const newState = initialState()
     Object.keys(newState).forEach(key => {
-      state[key] = newState[key];
-    });
-  }
-};
+      state[key] = newState[key]
+    })
+  },
+}
 
 const actions = {
   /**
-   * Loads a page of tests according to the payload data.
+   * Reloads the tests page.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {number} payload.page - The page number.
-   * @param {number} payload.itemsPerPage - The amount of items per page.
-   * @param {"next"|"previous"} payload.type - The request type.
+   * @param {Store<TestsState>} store The vuex store.
    */
-  loadTestPage({ commit, dispatch, state }, payload) {
-    commit("setLoading", true);
+  async refetchTests({ dispatch, state }) {
+    state.tests = {}
 
-    const { page, itemsPerPage, type } = payload;
-    const data = [];
+    await dispatch('checkDeleteMarkTests')
 
-    const pages = Object.keys(state.tests);
-
-    if (!pages.includes("p" + page)) {
-      let request = null;
-      const ref = db.collection("tests").orderBy("id");
-
-      if (type === "next") {
-        request = ref
-          .startAfter(state.lastTestDocument[1])
-          .limit(itemsPerPage)
-          .get();
-      } else {
-        request = ref
-          .endBefore(state.lastTestDocument[0])
-          .limitToLast(itemsPerPage)
-          .get();
-      }
-
-      let first = null,
-        last = null;
-
-      request
-        .then(async snapshot => {
-          if (snapshot.docs.length > 0) {
-            first = snapshot.docs[0].data().id;
-            last = snapshot.docs[snapshot.docs.length - 1].data().id;
-
-            const promises = snapshot.docs.map(async doc => {
-              const userData = await dispatch("getUserById", {
-                id: doc.data().userId
-              });
-              data.push({ ...doc.data(), user: userData });
-              return userData;
-            });
-
-            await Promise.all(promises);
-          }
-        })
-        .then(() => {
-          commit("setCurrentTestsPage", data);
-          commit("setTestPage", { page: "p" + page, data });
-          commit("setLastTestDocument", [first, last]);
-          commit("setLoading", false);
-        })
-        .catch(error => {
-          commit("setLoading", false);
-          const errorModel = showErrorMessage("load", "Quizzes", error.message);
-          commit("setError", { message: errorModel });
-          createErrorLog("Test Page Load", error.message, {
-            payload,
-            data
-          });
-        });
-    } else {
-      const pageContent = state.tests["p" + page];
-      const first = pageContent[0].id;
-      const last = pageContent[pageContent.length - 1].id;
-
-      commit("setCurrentTestsPage", pageContent);
-      commit("setLastTestDocument", [first, last]);
-      commit("setLoading", false);
-    }
+    await dispatch('loadTestPage', {
+      page: 1,
+      itemsPerPage: 8,
+      mode: 'first',
+    })
   },
   /**
-   * Loads the first or last page according to the payload data.
+   * Loads a page of tests according to the payload data.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {number} payload.page - The page number.
-   * @param {number} payload.itemsPerPage - The amount of items per page.
-   * @param {"first"|"last"} payload.mode - The request mode.
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {number} payload.page The page number.
+   * @param {number} payload.itemsPerPage The amount of items per page.
+   * @param {'forward'|'backward'|null} payload.direction The request direction.
+   * @param {'first'|'last'|null} payload.mode The request mode.
    */
-  loadFOLTestPage({ commit, dispatch, state }, payload) {
-    commit("setLoading", true);
+  async loadTestPage({ commit, dispatch, state }, payload) {
+    commit('setLoading', true)
 
-    const { page, itemsPerPage, mode } = payload;
-    const data = [];
+    const { page, itemsPerPage, direction, mode } = payload
+    const pages = Object.keys(state.tests)
 
-    const pages = Object.keys(state.tests);
+    const dir = direction ?? (mode === 'first' ? 'forward' : 'backward')
 
-    const testAmount = this.getters.getDataSize.tests;
-    const amount = testAmount % 10;
+    let perPage = itemsPerPage
 
-    if (!pages.includes("p" + page)) {
-      let request = null;
-      const ref = db.collection("tests").orderBy("id");
+    if (mode === 'last') {
+      perPage = this.getters.getDataSize.questions.general % itemsPerPage || 0
+    }
 
-      if (mode === "first") {
-        request = ref.limit(itemsPerPage).get();
-      } else {
-        request = ref.limitToLast(amount || 10).get();
+    try {
+      await dispatch('deleteTests')
+
+      if (pages.includes(`p${page}`)) {
+        const pageContent = state.tests[`p${page}`]
+
+        if (pageContent && pageContent.length) {
+          const startDoc = pageContent[0].uuid
+          const endDoc = pageContent[pageContent.length - 1].uuid
+
+          commit('setLastTestDocument', [startDoc, endDoc])
+        }
+
+        return void commit('setCurrentTestsPage', pageContent)
       }
 
-      let first = null,
-        last = null;
+      const { data, startDoc, endDoc } = await controller.list({
+        direction: dir,
+        itemsPerPage: perPage,
+        lastDoc: mode ? null : state.lastTestDocument,
+        orderBy: 'uuid',
+      })
 
-      request
-        .then(async snapshot => {
-          if (snapshot.docs.length > 0) {
-            first = snapshot.docs[0].data().id;
-            last = snapshot.docs[snapshot.docs.length - 1].data().id;
+      commit('setCurrentTestsPage', data)
+      commit('setTestPage', { page: `p${page}`, data })
 
-            const promises = snapshot.docs.map(async doc => {
-              const userData = await dispatch("getUserById", {
-                id: doc.data().userId
-              });
-              data.push({ ...doc.data(), user: userData });
-              return userData;
-            });
-
-            await Promise.all(promises);
-          }
-        })
-        .then(() => {
-          if (data.length > 0) {
-            commit("setCurrentTestsPage", data);
-            commit("setTestPage", { page: "p" + page, data });
-            commit("setLastTestDocument", [first, last]);
-          }
-          commit("setLoading", false);
-        })
-        .catch(error => {
-          commit("setLoading", false);
-          const errorModel = showErrorMessage("load", "Quizzes", error.message);
-          commit("setError", { message: errorModel });
-          createErrorLog("Test FOL Page Load", error.message, {
-            payload,
-            data
-          });
-        });
-    } else {
-      const pageContent = state.tests["p" + page];
-
-      if (pageContent && pageContent[0]) {
-        const first = pageContent[0].id;
-        const last = pageContent[pageContent.length - 1].id;
-        commit("setCurrentTestsPage", pageContent);
-        commit("setLastTestDocument", [first, last]);
+      if (startDoc) {
+        return void commit('setLastTestDocument', [startDoc, endDoc])
       }
-      commit("setLoading", false);
+
+      commit('setLastTestDocument', null)
+    } catch (error) {
+      const errorModel = showErrorMessage('load', 'Quizzes', error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Test Page Load', error.message, payload)
+    } finally {
+      commit('setLoading', false)
     }
   },
   /**
    * Checks if a test with the given title exists.
    *
-   * @param {Store} store - The vuex store.
-   * @param {string} payload - The test title.
-   * @returns {Promise<number>} The number of tests that match the given title.
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {string} payload The test title.
+   * @returns The number of tests that match the given title.
    */
   async testExists(_, payload) {
-    return new Promise((resolve, reject) => {
-      try {
-        db.collection("tests")
-          .where("title", "==", payload)
-          .get()
-          .then(snapshot => {
-            if (snapshot.docs.length > 0) resolve(snapshot.docs.length);
-            else resolve(0);
-          })
-          .catch(error => {
-            const errorModel = showErrorMessage(
-              "connection",
-              "",
-              error.message
-            );
-            commit("setError", { message: errorModel });
-            createErrorLog("Test Exists Check", error.message, {
-              payload
-            });
-          });
-      } catch (error) {
-        reject();
-      }
-    });
+    try {
+      const tests = await controller.query({
+        where: [
+          {
+            field: 'title',
+            operator: '==',
+            value: payload,
+          },
+        ],
+      })
+
+      return tests.length
+    } catch (error) {
+      const errorModel = showErrorMessage('connection', '', error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Test Exists Check', error.message, payload)
+    }
   },
   /**
    * Searches for tests based on their title.
    *
-   * @param {Store} store - The vuex store.
-   * @param {string} payload - The string to be searched.
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {string} payload The string to be searched.
    */
-  searchTests({ commit, dispatch }, payload) {
-    commit("setLoading", true);
+  async searchTests({ commit }, payload) {
+    commit('setLoading', true)
 
-    const data = [];
+    try {
+      const tests = await controller.search(payload)
 
-    db.collection("tests")
-      .orderBy("title")
-      .where("title", ">=", payload)
-      .where("title", "<=", payload + "~")
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          data.push(doc.data());
-        });
-      })
-      .then(async () => {
-        await db
-          .collection("tests")
-          .orderBy("title")
-          .where("title", ">=", payload.toUpperCase())
-          .where("title", "<=", payload.toUpperCase() + "~")
-          .get()
-          .then(snap => {
-            const ids = data.map(t => t.id);
-            snap.forEach(document => {
-              if (!ids.includes(document.data().id)) {
-                data.push(document.data());
-              }
-            });
-          });
-      })
-      .then(async () => {
-        await db
-          .collection("tests")
-          .orderBy("title")
-          .where("title", ">=", payload.toLowerCase())
-          .where("title", "<=", payload.toLowerCase() + "~")
-          .get()
-          .then(snap => {
-            const ids = data.map(t => t.id);
-            snap.forEach(document => {
-              if (!ids.includes(document.data().id)) {
-                data.push(document.data());
-              }
-            });
-          });
-      })
-      .then(async () => {
-        const promises = data.map(async (doc, index) => {
-          const userData = await dispatch("getUserById", {
-            id: doc.userId
-          });
-          data[index] = { ...doc, user: userData };
-          return userData;
-        });
+      commit('setFilteredTests', tests)
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        'load',
+        'Quizzes',
+        'Searching error - ' + error.message,
+      )
 
-        await Promise.all(promises);
+      commit('setError', { message: errorModel })
 
-        commit("setFilteredTests", data);
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "load",
-          "Quizzes",
-          "Searching error - " + error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Test Search", error.message, { payload, data });
-      });
+      createErrorLog('Test Search', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Loads the questions from a given test.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Test} payload - The test payload.
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {TestEntity} payload The test payload.
    */
   loadTestQuestions({ commit }, payload) {
-    commit("setTestQuestions", [...payload.questions]);
+    commit('setTestQuestions', [...payload.questions])
   },
   /**
    * Loads all tests that are marked to be deleted.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<TestsState>} store The vuex store.
    */
-  checkDeleteMarkTests({ commit, dispatch }) {
-    const data = [];
-
-    db.collection("tests")
-      .where("toDelete.status", "==", true)
-      .get()
-      .then(async snapshot => {
-        const promises = snapshot.docs.map(async doc => {
-          const userData = await dispatch("getUserById", {
-            id: doc.data().userId
-          });
-          data.push({ ...doc.data(), user: userData });
-          return userData;
-        });
-
-        await Promise.all(promises);
+  async checkDeleteMarkTests({ commit }) {
+    try {
+      const tests = await controller.query({
+        where: [{ field: 'toDelete.status', operator: '==', value: true }],
       })
-      .then(() => {
-        commit("setDeleteMarkTests", data);
-      })
-      .catch(error => {
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Test Mark Check", error.message, { data });
-      });
+
+      commit('setDeleteMarkTests', tests)
+    } catch (error) {
+      const errorModel = showErrorMessage('connection', '', error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Test Mark Check', error.message)
+    }
   },
   /**
    * Marks a test to be deleted.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.id - The test id.
-   * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
-   * @param {string} payload.userEmail - The current user e-mail.
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.id The test id.
+   * @param {boolean} payload.isSearching Whether the application is using filtered tests or not.
+   * @param {string} payload.userEmail The current user e-mail.
    */
-  deleteMarkTest({ commit, dispatch }, payload) {
-    commit("setLoading", true);
+  async deleteMarkTest({ commit }, payload) {
+    commit('setLoading', true)
 
-    const { id, isSearching, userEmail } = payload;
+    const { id, isSearching, userEmail } = payload
 
-    db.collection("tests")
-      .where("id", "==", id)
-      .get()
-      .then(async snapshot => {
-        const doc = snapshot.docs[0];
+    try {
+      const test = await controller.softDeleteOne(id, userEmail)
 
-        const toDelete = {
-          status: true,
-          userEmail
-        };
+      const deleteMark = {
+        id: test.id,
+        toDelete: test.toDelete,
+      }
 
-        doc.ref.update({ toDelete });
+      if (isSearching) {
+        commit('setDeleteMarkFilteredTest', deleteMark)
+      }
 
-        const user = await dispatch("getUserById", {
-          id: doc.data().userId
-        });
+      commit('setDeleteMarkTest', deleteMark)
+      commit('updateCurrentTestsPage', test)
+      commit('addDeleteMarkTest', test)
+    } catch (error) {
+      const errorModel = showErrorMessage('connection', '', error.message)
 
-        commit("setDeleteMarkTest", { id, toDelete });
+      commit('setError', { message: errorModel })
 
-        if (isSearching) {
-          commit("setDeleteMarkFilteredTest", { id, toDelete });
-        }
-
-        commit("updateCurrentTestsPage", {
-          ...doc.data(),
-          toDelete,
-          user
-        });
-        commit("addDeleteMarkTest", { ...doc.data(), toDelete, user });
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Test Delete Mark", error.message, { payload });
-      });
+      createErrorLog('Test Delete Mark', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Restores a test from being marked to be deleted.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.id - The test id.
-   * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.id The test id.
+   * @param {boolean} payload.isSearching Whether the application is using filtered tests or not.
    */
-  restoreMarkedTest({ commit, dispatch }, payload) {
-    commit("setLoading", true);
+  async restoreMarkedTest({ commit, dispatch }, payload) {
+    commit('setLoading', true)
 
-    const { id, isSearching } = payload;
-    let docData = null;
+    const { id, isSearching } = payload
 
-    db.collection("tests")
-      .where("id", "==", id)
-      .get()
-      .then(async snapshot => {
-        const doc = snapshot.docs[0];
+    try {
+      const test = await controller.restoreOne(id)
 
-        /**
-         * @type {Test}
-         */
-        const data = doc.data();
-        docData = data;
+      if (isSearching) {
+        commit('updateFilteredTest', test)
+      }
 
-        /**
-         * @type {Test}
-         */
-        const test = {
-          id: data.id,
-          title: data.title,
-          created: data.created,
-          updated: data.updated,
-          questions: data.questions,
-          questionsNames: data.questionsNames,
-          questionsAmount: data.questionsAmount,
-          approvalPercentage: data.approvalPercentage,
-          time: data.time,
-          unlimitedTime: data.unlimitedTime,
-          level: data.level,
-          type: data.type,
-          userId: data.userId,
-          userAttempts: data.userAttempts,
-          instructions: data.instructions
-        };
+      commit('updateTest', test)
+      commit('updateCurrentTestsPage', test)
+      commit('removeDeleteMarkTest', id)
 
-        await doc.ref.set(test);
+      commit('setSuccess', 'Quiz successfully restored!')
+    } catch (error) {
+      const errorModel = showErrorMessage('connection', '', error.message)
 
-        const user = await dispatch("getUserById", { id: test.userId });
-        test["user"] = user;
+      commit('setError', { message: errorModel })
 
-        commit("updateTest", test);
-
-        if (isSearching) {
-          commit("updateFilteredTest", test);
-        }
-
-        commit("removeDeleteMarkTest", id);
-        commit("updateCurrentTestsPage", test);
-        commit("setLoading", false);
-        commit("setSuccess", "Quiz successfully restored!");
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Test Restore", error.message, {
-          payload,
-          docData
-        });
-      });
+      createErrorLog('Test Restore', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Restores all tests that are marked to be deleted from the database or the current user, depending on the given data.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<TestsState>} store - The vuex store.
    * @param {Object} payload - The action payload.
    * @param {boolean} payload.all - Whether will restore all database tests or only from the current user.
    * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
    * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
    */
-  restoreAllMarkedTests({ commit, dispatch, state }, payload) {
-    commit("setLoading", true);
+  async restoreAllMarkedTests({ commit, dispatch, state }, payload) {
+    commit('setLoading', true)
 
-    const { all, isSearching, user } = payload;
-    let docData = null;
+    const { all, isSearching, user } = payload
 
-    const ref = db.collection("tests").where("toDelete.status", "==", true);
-    let request = null;
+    try {
+      const tests = await controller.restoreAll(all ? null : user.email)
 
-    if (all) {
-      request = ref;
-    } else {
-      request = ref.where("toDelete.userEmail", "==", user.email);
-    }
+      tests.forEach(test => {
+        if (isSearching) {
+          commit('updateFilteredTest', test)
+        }
 
-    request
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(async doc => {
-          /**
-           * @type {Test}
-           */
-          const data = doc.data();
-          docData = data;
+        commit('updateTest', test)
+        commit('updateCurrentTestsPage', test)
 
-          /**
-           * @type {Test}
-           */
-          const test = {
-            id: data.id,
-            title: data.title,
-            created: data.created,
-            updated: data.updated,
-            questions: data.questions,
-            questionsNames: data.questionsNames,
-            questionsAmount: data.questionsAmount,
-            approvalPercentage: data.approvalPercentage,
-            time: data.time,
-            unlimitedTime: data.unlimitedTime,
-            level: data.level,
-            type: data.type,
-            userId: data.userId,
-            userAttempts: data.userAttempts,
-            instructions: data.instructions
-          };
+        const markedTests = state.deleteMarkTests.filter(t =>
+          all ? !t.toDelete.status : t.uuid !== test.uuid,
+        )
 
-          await doc.ref.set(test);
-
-          const userData = await dispatch("getUserById", {
-            id: test.userId
-          });
-          test["user"] = userData;
-
-          if (all) {
-            const falseMarkedTests = state.deleteMarkTests.filter(
-              t => !t.toDelete.status
-            );
-            commit("setDeleteMarkTests", falseMarkedTests);
-          } else {
-            const markedTests = state.deleteMarkTests.filter(
-              t => t.id !== test.id
-            );
-            commit("setDeleteMarkTests", markedTests);
-          }
-
-          commit("updateTest", test);
-          commit("updateCurrentTestsPage", test);
-          if (isSearching) commit("updateFilteredTest", test);
-          commit("setSuccess", "Quizzes successfully restored!");
-        });
+        commit('setDeleteMarkTests', markedTests)
       })
-      .then(() => commit("setLoading", false))
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Test Restore All", error.message, {
-          payload,
-          docData
-        });
-      });
+
+      commit('setSuccess', 'Quizzes successfully restored!')
+    } catch (error) {
+      const errorModel = showErrorMessage('connection', '', error.message)
+      commit('setError', { message: errorModel })
+      createErrorLog('Test Restore All', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Changes a test's delete status to false (confirmed deletion).
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.id - The test id.
-   * @param {boolean} payload.isSearching - Whether the application is using filtered tests or not.
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.id The test id.
+   * @param {boolean} payload.isSearching Whether the application is using filtered tests or not.
    */
-  changeDeleteStatusTests({ commit, dispatch }, payload) {
-    commit("setLoading", true);
-    const { id, isSearching } = payload;
+  async changeDeleteStatusTests({ commit }, payload) {
+    commit('setLoading', true)
 
-    db.collection("tests")
-      .where("id", "==", id)
-      .get()
-      .then(async snapshot => {
-        const doc = snapshot.docs[0];
-        const toDelete = {
-          status: false
-        };
+    const { id, isSearching } = payload
 
-        doc.ref.update({ ...doc.data(), toDelete: { status: false } });
-
-        const user = await dispatch("getUserById", {
-          id: doc.data().userId
-        });
-
-        commit("updateCurrentTestsPage", {
-          ...doc.data(),
-          toDelete,
-          user
-        });
-        commit("updateTest", { ...doc.data(), toDelete, user });
-        commit("updateDeleteMarkTest", {
-          ...doc.data(),
-          toDelete,
-          user
-        });
-        if (isSearching)
-          commit("updateFilteredTest", {
-            ...doc.data(),
-            toDelete,
-            user
-          });
-
-        commit("setLoading", false);
-        commit("setSuccess", "Quizzes successfully deleted!");
+    try {
+      const test = await controller.updateOne({
+        id,
+        toDelete: {
+          status: false,
+        },
       })
-      .catch(error => {
-        const errorModel = showErrorMessage(
-          "exclusion",
-          "Quizzes",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Test Confirm Delete", error.message, {
-          payload
-        });
-      });
+
+      if (isSearching) {
+        commit('updateFilteredTest', test)
+      }
+
+      commit('updateTest', test)
+      commit('updateCurrentTestsPage', test)
+      commit('updateDeleteMarkTest', test)
+
+      commit('setSuccess', 'Quizzes successfully deleted!')
+    } catch (error) {
+      const errorModel = showErrorMessage('exclusion', 'Quizzes', error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Test Confirm Delete', error.message, {
+        payload,
+      })
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Deletes all tests that are marked to be deleted (toDelete.status = false).
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<TestsState>} store The vuex store.
    */
-  deleteTests({ commit, dispatch }) {
-    const data = [];
+  async deleteTests({ commit, dispatch }) {
+    try {
+      const { tests, testsAmount } = await controller.deleteMarked()
 
-    db.collection("tests")
-      .where("toDelete.status", "==", false)
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          doc.ref.delete();
-          data.push(doc.data());
-        });
+      if (!testsAmount) {
+        return
+      }
 
-        db.collection("data-size")
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
-            const size = document.data().tests;
-
-            document.ref.update({
-              tests: size - snapshot.docs.length
-            });
-            commit("addRemoveSize", {
-              key: "tests",
-              data: size - snapshot.docs.length
-            });
-          })
-          .catch(error => {
-            console.error(error);
-          });
+      commit('addRemoveSize', {
+        key: 'tests',
+        data: testsAmount,
       })
-      .then(() => {
-        if (data.length > 0) dispatch("removeTestsByWeek", { tests: data });
-      })
-      .catch(error => {
-        console.error("Error removing test: ", error);
-        createErrorLog("Test DB Delete", error.message, { data });
-      });
+
+      dispatch('removeTestsByWeek', { tests })
+    } catch (error) {
+      console.error('Error removing test: ', error)
+
+      createErrorLog('Test DB Delete', error.message)
+    }
   },
   /**
    * Creates a new test.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {TestCreation} payload.testData - The test to be created.
-   * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
+   * @param {Store<TestsState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {Partial<TestEntity>} payload.testData The test to be created.
    */
   async createTest({ commit, dispatch }, payload) {
-    commit("setLoading", true);
-
-    const createdDate = getNowISOString();
-    const { testData, userInfo } = payload;
-
-    /**
-     * @type {Test}
-     */
-    const test = {
-      id: uuid(),
-      ...testData,
-      created: createdDate,
-      updated: createdDate
-    };
-
-    const testAmount = this.getters.getDataSize.tests;
-    const pageAmount = Math.ceil(testAmount / 10);
-    const amount = testAmount % 10;
+    commit('setLoading', true)
 
     try {
-      await db.collection("tests").add(test);
+      const { dataSize } = await controller.createOne(payload.testData)
 
-      analytics.logEvent("create_quiz", {
-        type: test.type,
-        questions: test.questionsAmount,
-        level: test.level.index
-      });
+      commit('addRemoveSize', {
+        key: 'tests',
+        data: dataSize.tests,
+      })
 
-      commit("createTest", {
-        page: amount === 0 ? pageAmount + 1 : pageAmount,
-        data: { ...test, user: { ...userInfo } },
-        amount: testAmount
-      });
+      dispatch('addTestsByWeek')
 
-      const sizeSnap = await db.collection("data-size").get();
-
-      const document = sizeSnap.docs[0];
-      const size = document.data().tests;
-
-      await document.ref.update({ tests: size + 1 });
-
-      commit("addRemoveSize", {
-        key: "tests",
-        data: size + 1
-      });
-
-      dispatch("addTestsByWeek");
-
-      commit("setSuccess", "Quiz successfully created!");
+      commit('setSuccess', 'Quiz successfully created!')
     } catch (error) {
-      const errorModel = showErrorMessage("creation", "Quiz", error.message);
+      const errorModel = showErrorMessage('creation', 'Quiz', error.message)
 
-      commit("setError", { message: errorModel });
-      createErrorLog("Test DB Insert", error.message, { test });
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Test DB Insert', error.message, payload)
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
   },
   /**
    * Updates a test based on it's id.
    *
-   * @param {Store} store the vuex store.
+   * @param {Store<TestsState>} store the vuex store.
    * @param {Object} payload the action payload.
-   * @param {Test} payload.testData the test to be updated.
+   * @param {Partial<TestEntity>} payload.testData the test to be updated.
    * @param {boolean} payload.noMessage whether the success message will appear.
    * @param {boolean} payload.isSearching whether the filtered tests is being used.
    */
-  async updateTest({ commit, dispatch }, payload) {
-    const { testData, isSearching } = payload;
+  async updateTest({ commit }, payload) {
+    commit('setLoading', true)
 
-    const test = { ...testData, updated: getNowISOString() };
-
-    delete test.user;
+    const { testData, isSearching } = payload
 
     try {
-      const snapshot = await db
-        .collection("tests")
-        .where("id", "==", test.id)
-        .get();
-
-      snapshot.docs[0].ref.update(test);
-
-      const user = await dispatch("getUserById", {
-        id: test.userId
-      });
-      test["user"] = user;
-
-      commit("updateTest", test);
-      commit("updateCurrentTestsPage", test);
+      const test = await controller.updateOne(testData)
 
       if (isSearching) {
-        commit("updateFilteredTest", test);
+        commit('updateFilteredTest', test)
       }
 
-      if (!payload.noMessage) {
-        commit("setSuccess", "Quiz successfully edited!");
+      commit('updateTest', test)
+      commit('updateCurrentTestsPage', test)
+
+      if (payload.noMessage) {
+        return
       }
+
+      commit('setSuccess', 'Quiz successfully edited!')
     } catch (error) {
-      const errorModel = showErrorMessage("edition", "Quiz", error.message);
+      const errorModel = showErrorMessage('edition', 'Quiz', error.message)
 
-      commit("setError", { message: errorModel });
-      createErrorLog("Test DB Update", error.message, { payload });
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Test DB Update', error.message, payload)
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
-  },
-  /**
-   * Gets all the questions names from a subject.
-   *
-   * @param {Store} store The vuex store.
-   * @param {string} payload The subject name.
-   * @returns {Promise<string[]>} An array of names.
-   */
-  async getSubjectQuestions({ commit }, payload) {
-    const subject = payload;
-
-    return new Promise((resolve, reject) => {
-      try {
-        db.collection("subjects")
-          .where("name", "==", subject)
-          .get()
-          .then(snapshot => {
-            const questions = snapshot.docs[0].data().questions;
-            resolve(questions);
-          })
-          .catch(error => {
-            const errorModel = showErrorMessage("load", "IDs" + error.message);
-            commit("setError", { message: errorModel });
-            createErrorLog("Test Subject Names", error.message, {
-              payload
-            });
-          });
-      } catch (error) {
-        reject("getSubjectQuestions");
-      }
-    });
   },
   /**
    * Loads the most recent tests.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<TestsState>} store - The vuex store.
    */
-  loadLastTests({ commit, dispatch }, payload) {
-    commit("setLoading", true);
+  async loadLastTests({ commit, dispatch }, payload) {
+    commit('setLoading', true)
 
-    const { limit } = payload;
+    try {
+      const tests = await controller.getLast(payload.limit)
 
-    const data = [];
+      commit('setLastTests', tests)
+    } catch (error) {
+      const errorModel = showErrorMessage('load', 'Quizzes', error.message)
 
-    db.collection("tests")
-      .orderBy("updated", "desc")
-      .limit(limit || 5)
-      .get()
-      .then(async snapshot => {
-        const promises = snapshot.docs.map(async doc => {
-          const userData = await dispatch("getUserById", {
-            id: doc.data().userId
-          });
-          data.push({ ...doc.data(), user: userData });
-          return userData;
-        });
+      commit('setError', { message: errorModel })
 
-        await Promise.all(promises);
-      })
-      .then(() => {
-        commit("setLastTests", data);
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("load", "Quizzes", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Last Tests Loading", error.message, {
-          payload
-        });
-      });
+      createErrorLog('Last Tests Loading', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Adds a question name to all automatic quizzes according
@@ -1211,47 +883,56 @@ const actions = {
    * @param {Store<TestsState>} store the vuex store.
    * @param {Object} payload the action payload.
    * @param {string} payload.subject the subject to be searched.
-   * @param {Question} payload.question the question data to be checked.
-   * @returns {Test[]} an array that contains all quizzes found.
+   * @param {Partial<QuestionEntity>} payload.question the question data to be checked.
    */
   async addQuestionQuizzesBySubject({ commit }, payload) {
-    commit("setLoading", true);
+    commit('setLoading', true)
+
+    const { question, subject } = payload
 
     try {
-      const snapshot = await db
-        .collection("tests")
-        .where("type", "==", "auto")
-        .where("subjects", "array-contains", payload.subject)
-        .get();
+      const tests = await controller.query({
+        where: [
+          {
+            field: 'type',
+            operator: '==',
+            value: 'auto',
+          },
+          {
+            field: 'subjects',
+            operator: 'array-contains',
+            value: subject,
+          },
+        ],
+      })
 
-      const promises = snapshot.docs.map(async doc => {
-        /**
-         * @type {Test}
-         */
-        const data = doc.data();
-
+      for (const test of tests) {
         if (
-          data.questionsNames.includes(payload.question.name) ||
-          payload.question.level.index > data.level.index
+          test.questionsNames.includes(question.name) ||
+          question.level.index > test.level.index
         ) {
-          return;
+          continue
         }
 
-        data.questionsNames.push(payload.question.name);
+        test.questionsNames.push(question.name)
 
-        return await doc.ref.update({ questionsNames: data.questionsNames });
-      });
-
-      await Promise.all(promises);
+        await controller.updateOne({
+          id: test.id,
+          questionsNames: test.questionsNames,
+        })
+      }
     } catch (error) {
-      const errorModel = showErrorMessage("edition", "Quiz", error.message);
+      const errorModel = showErrorMessage('edition', 'Quiz', error.message)
 
-      commit("setError", { message: errorModel });
-      createErrorLog("Add Question Auto Quiz by Subject", error.message, {
-        payload
-      });
+      commit('setError', { message: errorModel })
+
+      createErrorLog(
+        'Add Question Auto Quiz by Subject',
+        error.message,
+        payload,
+      )
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
   },
   /**
@@ -1259,156 +940,163 @@ const actions = {
    *
    * @param {Store<TestsState>} store the vuex store.
    * @param {string} payload the quiz id.
-   * @returns {Test} an object that represents the quiz data.
+   * @returns an object that represents the quiz data.
    */
   async getTestById({ commit, getters }, payload) {
-    commit("setLoading", true);
+    commit('setLoading', true)
 
-    const stateTest = getters.findTestById(payload);
+    /**
+     * @type {TestEntity}
+     */
+    const stateTest = getters.findTestById(payload)
 
     if (stateTest) {
-      return stateTest;
+      return stateTest
     }
 
     try {
-      const snapshot = await db
-        .collection("tests")
-        .where("id", "==", payload)
-        .get();
+      return controller.getOne(payload)
 
-      return snapshot.docs[0].data();
+      // const snapshot = await db
+      //   .collection('tests')
+      //   .where('id', '==', payload)
+      //   .get()
+
+      // return snapshot.docs[0].data()
     } catch (e) {
-      const errorModel = showErrorMessage("load", "Quiz", error.message);
+      const errorModel = showErrorMessage('load', 'Quiz', error.message)
 
-      commit("setError", { message: errorModel });
-      createErrorLog("Load Test By ID", error.message, {
-        stateTest
-      });
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Load Test By ID', error.message, {
+        stateTest,
+        id: payload,
+      })
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
   },
   /**
    * Resets the tests state to it's initial state.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<TestsState>} store The vuex store.
    */
   resetTests({ commit }) {
-    commit("RESETTests");
-  }
-};
+    commit('RESETTests')
+  },
+}
 
 const getters = {
   /**
    * Gets an object with all loaded pages and it's tests.
    *
-   * @param {TestsState} state - The tests state.
-   * @returns {Object.<string, Test[]>} The tests pages object.
+   * @param {TestsState} state The tests state.
+   * @returns {Record<string, TestEntity[]>} The tests pages object.
    */
   getTests(state) {
-    return state.tests;
+    return state.tests
   },
   /**
    * Gets the most recent tests.
    *
-   * @param {TestsState} state - The tests state.
-   * @returns {Test[]} An array of tests.
+   * @param {TestsState} state The tests state.
+   * @returns {TestEntity[]} An array of tests.
    */
   getLastTests(state) {
     return [...state.lastTests].sort((t1, t2) =>
-      t1.updated > t2.updated ? -1 : 1
-    );
+      t1.updated > t2.updated ? -1 : 1,
+    )
   },
   /**
    * Gets an array of tests that are marked to be deleted.
    *
-   * @param {TestsState} state - The tests state.
-   * @returns {Test[]} An array of tests that are marked to be deleted.
+   * @param {TestsState} state The tests state.
+   * @returns {TestEntity[]} An array of tests that are marked to be deleted.
    */
   getDeleteMarkTests(state) {
-    return state.deleteMarkTests;
+    return state.deleteMarkTests
   },
   /**
    * Gets an array of tests of the given page.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {number} page - The page number.
-   * @returns {Test[]} An array of tests.
+   * @param {TestsState} state The tests state.
+   * @param {number} page The page number.
+   * @returns {TestEntity[]} An array of tests.
    */
   getTestsByPage: state => page => {
-    return state.tests["p" + page];
+    return state.tests['p' + page]
   },
   /**
    * Gets an array of the current page tests.
    *
-   * @param {TestsState} state - The tests state.
-   * @returns {Test[]} An array of tests.
+   * @param {TestsState} state The tests state.
+   * @returns {TestEntity[]} An array of tests.
    */
   getCurrentTestsPage(state) {
-    return state.currentTestsPage;
+    return state.currentTestsPage
   },
   /**
    * Gets an array of filtered tests.
    *
-   * @param {TestsState} state - The tests state.
-   * @returns {Test[]} An array of tests.
+   * @param {TestsState} state The tests state.
+   * @returns {TestEntity[]} An array of tests.
    */
   getFilteredTests(state) {
-    return state.filteredTests;
+    return state.filteredTests
   },
   /**
    * Gets an array of questions from a specific test.
    *
-   * @param {TestsState} state - The tests state.
-   * @returns {Question[]} An array of questions.
+   * @param {TestsState} state The tests state.
+   * @returns {QuestionEntity[]} An array of questions.
    */
   getTestQuestions(state) {
-    return state.testQuestions;
+    return state.testQuestions
   },
   /**
    * Gets the number of questions of the given subject.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {string} subject - The subject name.
-   * @param {Question[]} questions - An array of questions.
-   * @returns {(subject: string, questions: Question[]) => number} The number of questions of the subject.
+   * @param {TestsState} state The tests state.
+   * @param {string} subject The subject name.
+   * @param {QuestionEntity[]} questions An array of questions.
+   * @returns {(subject: string, questions: QuestionEntity[]) => number} The number of questions of the subject.
    */
   getNumberOfQuestionBySubjectOnTest(state) {
     return (subject, questions) => {
-      let counter = 0;
+      let counter = 0
       questions.forEach(question => {
-        if (question.subject === subject) counter++;
-      });
-      return counter;
-    };
+        if (question.subject === subject) counter++
+      })
+      return counter
+    }
   },
   /**
    * Gets a test from the test state based on it's id.
    *
-   * @param {TestsState} state - The tests state.
-   * @param {string} id - The test id.
-   * @returns {(id: string) => Test|null} The test or null if not found.
+   * @param {TestsState} state The tests state.
+   * @param {string} id The test id.
+   * @returns {(id: string) => TestEntity|null} The test or null if not found.
    */
   findTestById(state) {
     return id => {
-      let test = null;
+      let test = null
 
-      test = state.lastTests.find(t => t.id == id);
+      test = state.lastTests.find(t => t.id == id)
 
       if (!test) {
         for (let key in state.tests) {
-          test = state.tests[key].find(t => t.id == id);
+          test = state.tests[key].find(t => t.id == id)
         }
       }
 
-      return test;
-    };
-  }
-};
+      return test
+    }
+  },
+}
 
 export default {
   state,
   mutations,
   actions,
-  getters
-};
+  getters,
+}
