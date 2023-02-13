@@ -1,17 +1,14 @@
 import { Store } from 'vuex'
 
-import { DataSizeController } from '../../controllers/data-size.controller'
 import { QuestionController } from '../../controllers/question.controller'
 import { SubjectController } from '../../controllers/subject.controller'
+import { TestController } from '../../controllers/test.controller'
 
 import { QuestionEntity } from '../../entities/question.entity'
+import { TestEntity } from '../../entities/test.entity'
 
 import { db } from '../../main'
 import { createErrorLog, showErrorMessage } from '../../utils/errors'
-
-/**
- * @typedef {import('./tests.store.js').Test} Test
- */
 
 /**
  * @typedef {import('./tests.store.js').Level} Level
@@ -46,14 +43,14 @@ import { createErrorLog, showErrorMessage } from '../../utils/errors'
 const controller = new QuestionController()
 
 /**
- * Defines the subject controller.
+ * Defines the test controller.
  */
-const subjectController = new SubjectController()
+const testController = new TestController()
 
 /**
  * Defines the subject controller.
  */
-const dataSizeController = new DataSizeController()
+const subjectController = new SubjectController()
 
 /**
  * Gets the initial questions state.
@@ -127,7 +124,7 @@ const mutations = {
 
     questions.forEach((item, index) => {
       if (item.id === data.id) {
-        questions[index] = data
+        questions[index] = data.clone()
       }
     })
 
@@ -166,7 +163,7 @@ const mutations = {
    * @param {DeleteStatus} data.toDelete The question deletion status.
    */
   setDeleteMarkQuestion(state, data) {
-    const questions = state.questions
+    const questions = { ...state.questions }
 
     for (let key in questions) {
       if (!questions[key]) {
@@ -175,13 +172,12 @@ const mutations = {
 
       questions[key].forEach((item, index) => {
         if (item.id === data.id) {
-          state.questions[key][index] = {
-            ...item,
-            toDelete: data.toDelete,
-          }
+          questions[key][index].toDelete = data.toDelete
         }
       })
     }
+
+    state.questions = questions
   },
   /**
    * Sets a question as marked to be deleted into the filtered questions array.
@@ -196,7 +192,7 @@ const mutations = {
 
     questions.forEach((item, index) => {
       if (item.id === data.id) {
-        questions[index] = { ...item, toDelete: data.toDelete }
+        questions[index].toDelete = data.toDelete
       }
     })
 
@@ -451,24 +447,11 @@ const actions = {
    *
    * @param {Object} payload The action payload.
    * @param {string} payload.name The question name.
-   * @returns {Promise<Test[]>} An array of tests.
+   * @returns {Promise<TestEntity[]>} An array of tests.
    */
   async checkQuestionInTests(_, payload) {
-    const { name } = payload
-
     try {
-      const tests = []
-
-      const snapshot = await db
-        .collection('tests')
-        .where('questionsNames', 'array-contains', name)
-        .get()
-
-      snapshot.forEach(doc => {
-        tests.push(doc.data())
-      })
-
-      return tests
+      return testController.getByQuestion(payload.name)
     } catch (error) {
       console.error(error)
     }
@@ -691,8 +674,8 @@ const actions = {
           commit('updateFilteredQuestion', question)
         }
 
-        commit('updateCurrentQuestionsPage', question)
         commit('updateQuestion', question)
+        commit('updateCurrentQuestionsPage', question)
         commit('updateDeleteMarkQuestion', question)
 
         const {
@@ -737,10 +720,6 @@ const actions = {
       if (!questionsSize) {
         return
       }
-
-      await dataSizeController.updateOne({
-        questions: questionsSize,
-      })
 
       commit('addRemoveSize', {
         key: 'questions',
@@ -832,7 +811,7 @@ const actions = {
 
       // TODO: Refactor this.
       /**
-       * @type {Test[]}
+       * @type {TestEntity[]}
        */
       const tests = await dispatch('checkQuestionInTests', {
         name: questionData.name,
