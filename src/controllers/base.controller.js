@@ -104,22 +104,7 @@ export class Controller {
    * @returns {Promise<T[]>} the found entities.
    */
   async _query(collection, entityType, query = {}) {
-    let q = db.collection(collection)
-
-    const { orderBy = [], where = [], limit } = query
-
-    orderBy.forEach(({ field, mode = 'asc' }) => {
-      q = q.orderBy(field, mode)
-    })
-
-    where.forEach(({ field, operator, value }) => {
-      q = q.where(field, operator, value)
-    })
-
-    if (limit) {
-      q = q.limit(limit)
-    }
-
+    const q = this._buildQueryRef(collection, query)
     const snap = await q.get()
 
     return snap.docs.map(doc =>
@@ -136,14 +121,20 @@ export class Controller {
    * @param {string} collection the collection name.
    * @param {Type<T>} entityType the entity type to be used.
    * @param {PaginationQuery} query an object that contains the pagination data.
+   * @param {Where[]} constraints an array of constraints to be applied. Defaults to `[]`.
    * @returns {Promise<PaginationQueryResponse<T>>} an object containing the gotten entities and other data.
    */
   async _list(
     collection,
     entityType,
     { orderBy, lastDoc = null, itemsPerPage = 8, direction = 'forward' },
+    constraints = [],
   ) {
     let query = db.collection(collection).orderBy(orderBy)
+
+    constraints.forEach(({ field, operator, value }) => {
+      query = query.where(field, operator, value)
+    })
 
     let start = lastDoc ? lastDoc[0] : null
     let end = lastDoc ? lastDoc[1] : null
@@ -521,5 +512,34 @@ export class Controller {
       .put(file)
 
     return result.ref.getDownloadURL()
+  }
+
+  /**
+   * Builds a query based on the given parameters.
+   *
+   * @private
+   *
+   * @param {string} collection the collection name.
+   * @param {Query} query the query to be set.
+   * @returns a built Firebase query.
+   */
+  _buildQueryRef(collection, query) {
+    let q = db.collection(collection)
+
+    const { orderBy = [], where = [], limit } = query
+
+    orderBy.forEach(({ field, mode = 'asc' }) => {
+      q = q.orderBy(field, mode)
+    })
+
+    where.forEach(({ field, operator, value }) => {
+      q = q.where(field, operator, value)
+    })
+
+    if (limit) {
+      q = q.limit(limit)
+    }
+
+    return q
   }
 }
