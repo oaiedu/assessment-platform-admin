@@ -70,7 +70,7 @@ export class QuestionController extends Controller {
    * Creates a question into the database.
    *
    * @param {Partial<QuestionEntity>} data the question to be created.
-   * @returns an object containing the question, th new data size and the subject.
+   * @returns an object containing the question, the new data size and the subject.
    */
   async createOne(data) {
     const question = await super._createOne(
@@ -361,6 +361,10 @@ export class QuestionController extends Controller {
 
     questions.forEach(q => {
       questionsSize.subject[q.subject]--
+    })
+
+    await dataSizeController.updateOne({
+      questions: questionsSize,
     })
 
     return { questions, questionsSize }
