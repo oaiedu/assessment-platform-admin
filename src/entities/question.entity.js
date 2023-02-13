@@ -81,7 +81,7 @@ export class QuestionEntity extends Entity {
      *
      * @type {string}
      */
-    this.name = partial.name
+    this.name = partial.name.toUpperCase()
 
     /**
      * Defines the question statement.
