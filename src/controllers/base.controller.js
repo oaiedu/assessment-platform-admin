@@ -185,11 +185,13 @@ export class Controller {
    * @returns {Promise<T>} the created entity with its id.
    */
   async _createOne(collection, entityType, data) {
+    const clone = { ...data }
+
     if (data.id) {
-      delete data.id
+      delete clone.id
     }
 
-    const entity = new entityType(data)
+    const entity = new entityType(clone)
 
     const doc = await db.collection(collection).add(entity.toMap())
 
@@ -211,31 +213,33 @@ export class Controller {
    * @returns {Promise<T>} the updated entity.
    */
   async _updateOne(collection, entityType, data) {
+    const clone = { ...data }
+
     if (!data.id) {
       throw new Error('bad-request/id-not-provided')
     }
 
-    data.updated = getNowISOString()
+    clone.updated = getNowISOString()
 
     const id = data.id
-    delete data.id
+    delete clone.id
 
     const doc = await db
       .collection(collection)
       .doc(id)
       .get()
 
-    await doc.ref.update(data)
+    await doc.ref.update(clone)
 
-    for (const key in data) {
+    for (const key in clone) {
       if (typeof key === firebase.firestore.FieldValue) {
-        delete data[key]
+        delete clone[key]
       }
     }
 
     return entityType.fromMap({
       ...doc.data(),
-      ...data,
+      ...clone,
       id: doc.id,
     })
   }
@@ -309,15 +313,17 @@ export class Controller {
    * @returns {Promise<T>} the set entity.
    */
   async _setOne(collection, entityType, data) {
+    const clone = { ...data }
+
     const id = data.id
 
     if (id) {
-      delete data.id
+      delete clone.id
     }
 
     const doc = db.collection(collection).doc(id)
 
-    const entity = new entityType(data)
+    const entity = new entityType(clone)
 
     await doc.set(entity.toMap())
 
@@ -433,20 +439,34 @@ export class Controller {
    *
    * @param {string} collection the collection name.
    * @param {Type<T>} entityType the entity type to be used.
+   * @param {string?} userEmail the user email.
    * @returns the restored entities.
    */
-  async _restoreAll(collection, entityType) {
+  async _restoreAll(collection, entityType, userEmail) {
+    /**
+     * @type {Where[]}
+     */
+    const where = [
+      {
+        field: 'toDelete.status',
+        operator: '==',
+        value: true,
+      },
+    ]
+
+    if (userEmail) {
+      where.push({
+        field: 'toDelete.userEmail',
+        operator: '==',
+        value: userEmail,
+      })
+    }
+
     return this._updateQuery(
       collection,
       entityType,
       {
-        where: [
-          {
-            field: 'toDelete.status',
-            operator: '==',
-            value: true,
-          },
-        ],
+        where,
       },
       {
         toDelete: null,
