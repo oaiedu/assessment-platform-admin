@@ -1,5 +1,8 @@
+import uuid from 'uuid-random'
+
 import { Entity } from './base.entity'
 import { QuestionEntity } from './question.entity'
+import { UserEntity } from './user.entity'
 
 /**
  * @typedef {import('./question.entity').Level} Level
@@ -44,7 +47,7 @@ import { QuestionEntity } from './question.entity'
  */
 export class TestEntity extends Entity {
   /**
-   * @param {Partial<TestEntity>} partial
+   * @param {Omit<Partial<TestEntity>, 'query'>} partial
    */
   constructor(partial) {
     super(partial)
@@ -54,28 +57,35 @@ export class TestEntity extends Entity {
      *
      * @type {string}
      */
-    this.userId = partial.userId
+    this.userId = partial.userId ?? ''
+
+    /**
+     * Defines the user that is linked to the quiz.
+     *
+     * @type {UserEntity}
+     */
+    this.user = partial.user ?? null
 
     /**
      * Defines the quiz title.
      *
      * @type {string}
      */
-    this.title = partial.title
+    this.title = partial.title ?? ''
 
     /**
      * Defines the quiz instructions.
      *
      * @type {string}
      */
-    this.instructions = partial.instructions
+    this.instructions = partial.instructions ?? ''
 
     /**
      * Defines how many questions the quiz have.
      *
      * @type {number}
      */
-    this.questionsAmount = partial.questionsAmount
+    this.questionsAmount = partial.questionsAmount ?? 0
 
     /**
      * Defines the percentage of the quiz questions that the user must
@@ -83,14 +93,14 @@ export class TestEntity extends Entity {
      *
      * @type {number}
      */
-    this.approvalPercentage = partial.approvalPercentage
+    this.approvalPercentage = partial.approvalPercentage ?? 0
 
     /**
      * Defines whether the quiz has unlimited time.
      *
      * @type {boolean}
      */
-    this.unlimitedTime = partial.unlimitedTime
+    this.unlimitedTime = partial.unlimitedTime ?? false
 
     /**
      * Defines the quiz timer.
@@ -118,21 +128,44 @@ export class TestEntity extends Entity {
      *
      * @type {Partial<QuestionEntity>[]}
      */
-    this.questions = partial.questions
+    this.questions = partial.questions ?? []
+
+    /**
+     * Defines a list with the subjects names.
+     *
+     * @type {string[]}
+     */
+    this.subjects = partial.subjects ?? []
 
     /**
      * Defines an array that contains all questions names added to the quiz.
      *
      * @type {string[]}
      */
-    this.questionsNames = partial.questionsNames
+    this.questionsNames = partial.questionsNames ?? []
 
     /**
      * Defines an object containing all user attempts (id and number of attempts).
      *
      * @type {Record<string, number>}
      */
-    this.userAttempts = partial.userAttempts
+    this.userAttempts = partial.userAttempts ?? null
+
+    /**
+     * Defines an identifier to be used for tests ordering and filtering.
+     *
+     * @type {string}
+     */
+    this.uuid = partial.uuid ?? uuid()
+
+    /**
+     * Defines and identifier to be used for tests searching.
+     *
+     * @readonly
+     *
+     * @type {string}
+     */
+    this.query = (partial.title ?? '').toUpperCase()
   }
 
   /**
