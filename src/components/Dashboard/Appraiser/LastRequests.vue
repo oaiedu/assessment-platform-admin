@@ -16,9 +16,14 @@
         class="last-requests-sub-container"
         :style="getFlexStyle"
       >
-        <div v-for="item in requests" :key="item.id" class="request-row">
+        <div
+          v-for="item in requests"
+          :key="item.id"
+          class="request-row"
+          @click="$router.push(`/inbox/${item.id}`)"
+        >
           <div class="details-container">
-            <div class="name">{{ item.name }}</div>
+            <div class="name">{{ item.name.substring(0, 7) }}</div>
             <div class="subject">{{ item.subject }}</div>
           </div>
           <div
@@ -150,6 +155,16 @@ export default {
   gap: 10px;
 
   width: 100%;
+
+  cursor: pointer;
+  border-radius: 5px;
+
+  transition: all 0.3s;
+}
+
+.request-row:hover {
+  background-color: #d4d4d433;
+  transform: translateY(-2px);
 }
 
 .details-container {

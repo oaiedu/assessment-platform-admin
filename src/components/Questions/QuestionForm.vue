@@ -105,6 +105,11 @@
                             id="name"
                             name="name"
                             label="ID"
+                            :rules="[
+                              v => !!v || $t('QUESTIONS.FORM.required'),
+                              v =>
+                                v.length < 8 || $t('QUESTIONS.FORM.max-length'),
+                            ]"
                           ></v-text-field>
                         </v-col>
                       </v-row>
@@ -405,8 +410,11 @@ export default {
   },
   computed: {
     formIsValid() {
+      const name = (this.name ?? '').trim()
+
       return (
-        !!this.name &&
+        !!name &&
+        name.length < 8 &&
         !!this.subject &&
         (this.multipleAnswers ? !!this.selectedAnswers.length : !!this.radios)
       )
@@ -438,6 +446,9 @@ export default {
       }
 
       this.setSingleAnswer()
+    },
+    name(value) {
+      this.name = value.trim().replace(/\s/g, '')
     },
   },
   methods: {
