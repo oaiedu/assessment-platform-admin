@@ -2,7 +2,7 @@
   <v-card outlined width="100%" height="100%" class="last-data">
     <div class="last-data-container">
       <h1 class="last-data-title">
-        {{ $t("DASHBOARD.LAST_DATA.latest_records") }}
+        {{ $t('DASHBOARD.LAST_DATA.latest_records') }}
 
         <v-hover v-slot="{ hover }">
           <v-btn
@@ -12,7 +12,7 @@
             :ripple="false"
             :color="hover ? '#2196f3' : '#888888'"
           >
-            {{ $t("DASHBOARD.LAST_DATA.see_more") }}
+            {{ $t('DASHBOARD.LAST_DATA.see_more') }}
           </v-btn>
         </v-hover>
       </h1>
@@ -34,7 +34,7 @@
               }}</span>
             </span>
             <span class="backup-id info-id" v-else>{{
-              $t("DASHBOARD.LAST_DATA.no_backup")
+              $t('DASHBOARD.LAST_DATA.no_backup')
             }}</span>
           </div>
           <div class="creation-date" v-if="lastBackup">
@@ -51,14 +51,14 @@
           </div>
           <div class="data-info">
             <span class="info-title">{{
-              $t("DASHBOARD.LAST_DATA.error_log")
+              $t('DASHBOARD.LAST_DATA.error_log')
             }}</span>
             <span class="log-type info-id" v-if="lastLog">
               {{ lastLog.type }}
               <span class="creation-date">{{ formatDate(lastLog.date) }}</span>
             </span>
             <span class="log-type info-id" v-else>{{
-              $t("DASHBOARD.LAST_DATA.no_error")
+              $t('DASHBOARD.LAST_DATA.no_error')
             }}</span>
           </div>
           <div class="creation-date" v-if="lastLog">
@@ -75,7 +75,7 @@
           </div>
           <div class="data-info">
             <span class="info-title">{{
-              $t("DASHBOARD.LAST_DATA.user_created")
+              $t('DASHBOARD.LAST_DATA.user_created')
             }}</span>
             <span class="user-name info-id" v-if="lastUser">
               {{ lastUser.name }}
@@ -84,7 +84,7 @@
               }}</span>
             </span>
             <span class="user-name info-id" v-else>{{
-              $t("DASHBOARD.LAST_DATA.no_user")
+              $t('DASHBOARD.LAST_DATA.no_user')
             }}</span>
           </div>
           <div class="creation-date" v-if="lastUser">
@@ -97,74 +97,74 @@
 </template>
 
 <script>
-import { mdiAccount, mdiCloud, mdiFileAlertOutline } from "@mdi/js";
+import { mdiAccount, mdiCloud, mdiFileAlertOutline } from '@mdi/js'
 
 export default {
-  name: "LastData",
+  name: 'LastData',
   data() {
     return {
       mdiAccount,
       mdiCloud,
-      mdiFileAlertOutline
-    };
+      mdiFileAlertOutline,
+    }
   },
   computed: {
     lastBackup() {
-      return this.$store.getters.getLastBackup;
+      return this.$store.getters.getLastBackup
     },
     lastLog() {
-      return this.$store.getters.getLastLog;
+      return this.$store.getters.getLastLog
     },
     lastUser() {
-      return this.$store.getters.getLastUser;
+      return this.$store.getters.getLastUser
     },
     months() {
-      return this.$store.getters.getMonths;
+      return this.$store.getters.getMonths
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
-    }
+      return this.$store.getters.getUserClaims
+    },
   },
   methods: {
     formatDate(date) {
-      const year = date.substr(0, 4);
-      const month = date.substr(5, 2);
-      const day = date.substr(8, 2);
+      const year = date.substr(0, 4)
+      const month = date.substr(5, 2)
+      const day = date.substr(8, 2)
 
-      const today = new Date();
-      const backupDate = new Date(`${month}/${day}/${year}`);
+      const today = new Date()
+      const backupDate = new Date(`${month}/${day}/${year}`)
 
       const diffDays = Math.floor(
-        Math.abs(today - backupDate) / (1000 * 60 * 60 * 24)
-      );
+        Math.abs(today - backupDate) / (1000 * 60 * 60 * 24),
+      )
 
       const backupTime = date
-        .split("T")[1]
-        .split(".")[0]
-        .substr(0, 5);
+        .split('T')[1]
+        .split('.')[0]
+        .substr(0, 5)
 
       if (diffDays === 0) {
-        return `${this.$t("SHARED.DATE.today_at")} ${backupTime}`;
+        return `${this.$t('SHARED.DATE.today_at')} ${backupTime}`
       } else if (diffDays === 1) {
-        return `${this.$t("SHARED.DATE.yesterday_at")} ${backupTime}`;
+        return `${this.$t('SHARED.DATE.yesterday_at')} ${backupTime}`
       } else {
         return `${this.$t(
-          "SHARED.DATE.MONTH." + this.months[parseInt(month)]
-        ).substr(0, 3)} ${day} ${year}`;
+          'SHARED.DATE.MONTH.' + this.months[parseInt(month)],
+        ).substr(0, 3)} ${day} ${year}`
       }
     },
     pushUrl(param) {
-      this.$router.push("/admin?tab=" + param);
-    }
+      this.$router.push('/admin?tab=' + param)
+    },
   },
   mounted() {
-    if (this.userClaims && this.userClaims["admin"]) {
-      this.$store.dispatch("loadLastBackup");
-      this.$store.dispatch("loadLastLog");
-      this.$store.dispatch("loadLastUser");
+    if (this.userClaims && this.userClaims['admin']) {
+      this.$store.dispatch('loadLastBackup')
+      this.$store.dispatch('loadLastLog')
+      this.$store.dispatch('loadLastUser')
     }
-  }
-};
+  },
+}
 </script>
 
 <style scoped>
@@ -286,6 +286,7 @@ export default {
 .creation-date {
   color: #555;
   font-size: 0.95rem;
+  text-align: end;
 }
 
 .see-more-button {
