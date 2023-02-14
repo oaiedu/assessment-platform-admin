@@ -5,21 +5,21 @@
     style="max-width: unset; min-height: 100%; background: #efefef"
   >
     <v-row class="pa-4 ma-0">
-      <a @click="exitQuiz('/')">{{ $t("TEST.QUIZ.home") }}</a>
+      <a @click="exitQuiz('/')">{{ $t('TEST.QUIZ.home') }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a @click="exitQuiz('/quizzes')">{{ $t("TEST.QUIZ.quizzes") }}</a>
+      <a @click="exitQuiz('/quizzes')">{{ $t('TEST.QUIZ.quizzes') }}</a>
 
       <span class="mx-3 slash">/</span>
 
       <a @click="exitQuiz('/quizzes/' + test.id)">{{
-        $t("TEST.QUIZ.quiz_info")
+        $t('TEST.QUIZ.quiz_info')
       }}</a>
 
       <span class="mx-3 slash">/</span>
 
-      <a>{{ test ? test.title : $t("TEST.QUIZ.quiz_t") }}</a>
+      <a>{{ test ? test.title : $t('TEST.QUIZ.quiz_t') }}</a>
     </v-row>
 
     <v-progress-circular
@@ -39,7 +39,7 @@
     >
       <v-toolbar flat class="">
         <span class="quiz__current-question">
-          {{ $t("TEST.QUIZ.question") }} {{ current }} {{ $t("TEST.QUIZ.of") }}
+          {{ $t('TEST.QUIZ.question') }} {{ current }} {{ $t('TEST.QUIZ.of') }}
           {{ examQuestions.length }}
         </span>
 
@@ -53,8 +53,8 @@
           :time="review ? attempt.timeTaken : test.time"
           :paused="review || finished"
           @timeUp="
-            timesUp = !review;
-            finished = true;
+            timesUp = !review
+            finished = true
           "
         />
 
@@ -63,9 +63,9 @@
           color="error"
           @click="exitQuiz(review ? '/quizzes/' + test.id : '/quizzes')"
         >
-          {{ $t("TEST.QUIZ.exit") }}
+          {{ $t('TEST.QUIZ.exit') }}
           {{
-            !review && windowWidth > 540 ? $t("TEST.QUIZ.from_quiz") : ""
+            !review && windowWidth > 540 ? $t('TEST.QUIZ.from_quiz') : ''
           }}</v-btn
         >
       </v-toolbar>
@@ -82,13 +82,13 @@
             :time="review ? attempt.timeTaken : test.time"
             :paused="review || finished"
             @timeUp="
-              timesUp = !review;
-              finished = true;
+              timesUp = !review
+              finished = true
             "
           />
 
           <span class="quiz__subject px-4">
-            <strong>{{ $t("TEST.QUIZ.subject") }}</strong>
+            <strong>{{ $t('TEST.QUIZ.subject') }}</strong>
             {{ examQuestions[current - 1].subject }}
           </span>
 
@@ -109,7 +109,7 @@
             class="pa-0 px-4 ma-0"
             :class="{
               'mt-5': i === 0,
-              'mb-5': i === examQuestions[current - 1].answers.length - 1
+              'mb-5': i === examQuestions[current - 1].answers.length - 1,
             }"
             :key="answer.ansId"
           >
@@ -168,19 +168,19 @@
             <v-icon class="mr-2">{{
               showAnswer ? mdiEyeOffOutline : mdiEyeOutline
             }}</v-icon>
-            {{ $t("TEST.QUIZ." + (showAnswer ? "hide" : "show")) }}
-            {{ $t("TEST.QUIZ.answer") }}
+            {{ $t('TEST.QUIZ.' + (showAnswer ? 'hide' : 'show')) }}
+            {{ $t('TEST.QUIZ.answer') }}
           </v-btn>
 
           <v-divider></v-divider>
 
           <div v-if="review || (practice && showAnswer)">
             <h2 class="ma-4 mt-5 quiz__answer-description-title">
-              {{ $t("TEST.QUIZ.explanation") }}
+              {{ $t('TEST.QUIZ.explanation') }}
             </h2>
 
             <span class="mx-4 quiz__answer-description">
-              {{ $t("TEST.QUIZ.correct_answer") }}
+              {{ $t('TEST.QUIZ.correct_answer') }}
               {{ correctAnswerOption }}
             </span>
 
@@ -196,7 +196,7 @@
               :class="{
                 'mb-6':
                   i === examQuestions[current - 1].answers.length - 1 &&
-                  !!examQuestions[current - 1].answerJustificationSource
+                  !!examQuestions[current - 1].answerJustificationSource,
               }"
               :key="answer.ansId + '-desc'"
             >
@@ -219,13 +219,13 @@
                 target="blank"
                 :href="
                   justificationSourceUrl(
-                    examQuestions[current - 1].answerJustificationSource
+                    examQuestions[current - 1].answerJustificationSource,
                   )
                 "
                 :class="{
                   link: checkUrl(
-                    examQuestions[current - 1].answerJustificationSource
-                  )
+                    examQuestions[current - 1].answerJustificationSource,
+                  ),
                 }"
               >
                 {{ examQuestions[current - 1].answerJustificationSource }}
@@ -265,7 +265,7 @@
               @click="current - 1 < 1 ? current : current--"
             >
               <v-icon>{{ mdiChevronLeft }}</v-icon>
-              {{ $t("TEST.QUIZ.before") }}
+              {{ $t('TEST.QUIZ.before') }}
             </v-btn>
 
             <v-checkbox
@@ -288,7 +288,7 @@
               class="pr-2"
               @click="current + 1 > examQuestions.length ? current : current++"
             >
-              {{ $t("TEST.QUIZ.next") }}
+              {{ $t('TEST.QUIZ.next') }}
               <v-icon>{{ mdiChevronRight }}</v-icon>
             </v-btn>
 
@@ -302,7 +302,7 @@
               :loading="loadingFinish"
               @click="finishQuiz()"
             >
-              {{ $t("TEST.QUIZ.send") }}
+              {{ $t('TEST.QUIZ.send') }}
             </v-btn>
           </v-row>
         </div>
@@ -317,41 +317,41 @@
             v-if="timesUp"
             class="quiz__missing-questions orange--text font-weight-medium"
           >
-            {{ $t("TEST.QUIZ.time_up") }}
+            {{ $t('TEST.QUIZ.time_up') }}
           </span>
 
           <span
             v-else-if="review && answeredAmount < examQuestions.length"
             class="quiz__missing-questions"
           >
-            {{ answeredAmount }} {{ $t("TEST.QUIZ.answered_questions") }}
+            {{ answeredAmount }} {{ $t('TEST.QUIZ.answered_questions') }}
           </span>
 
           <span
             v-else-if="answeredAmount < examQuestions.length"
             class="quiz__missing-questions"
           >
-            {{ $t("TEST.QUIZ.left") }}
+            {{ $t('TEST.QUIZ.left') }}
             {{ examQuestions.length - answeredAmount }}
-            {{ $t("TEST.QUIZ.question_to_answer") }}
+            {{ $t('TEST.QUIZ.question_to_answer') }}
           </span>
 
           <span
             v-else-if="markedForReview.length > 0"
             class="quiz__missing-questions"
           >
-            {{ $t("TEST.QUIZ.have") }} {{ markedForReview.length }}
-            {{ $t("TEST.QUIZ.question_to_review") }}
+            {{ $t('TEST.QUIZ.have') }} {{ markedForReview.length }}
+            {{ $t('TEST.QUIZ.question_to_review') }}
           </span>
 
           <span v-else class="quiz__missing-questions">
-            {{ $t("TEST.QUIZ.question_to_answer") }}
+            {{ $t('TEST.QUIZ.question_to_answer') }}
           </span>
 
           <div
             class="quiz__question-matrix"
             :style="{
-              'grid-template-columns': `repeat(${matrixColumns}, 1fr)`
+              'grid-template-columns': `repeat(${matrixColumns}, 1fr)`,
             }"
           >
             <v-btn
@@ -379,7 +379,7 @@
                   review &&
                   !!getAnswerByQuestionName(q.name) &&
                   getAnswerByQuestionName(q.name).correct > 0 &&
-                  getAnswerByQuestionName(q.name).correct < 1
+                  getAnswerByQuestionName(q.name).correct < 1,
               }"
               @click="current = i + 1"
             >
@@ -393,24 +393,24 @@
     <v-dialog v-model="dialogEndQuiz" width="300">
       <v-card class="pa-4">
         <v-card-title class="pa-0 mb-2">{{
-          $t("TEST.QUIZ.wait")
+          $t('TEST.QUIZ.wait')
         }}</v-card-title>
 
         <span v-if="!review">
-          {{ $t("TEST.QUIZ.exit_warning") }}
+          {{ $t('TEST.QUIZ.exit_warning') }}
         </span>
 
-        <span v-else>{{ $t("TEST.QUIZ.confirm_exit") }}</span>
+        <span v-else>{{ $t('TEST.QUIZ.confirm_exit') }}</span>
 
         <v-card-actions class="pa-0 mt-4">
           <v-btn text color="grey darken-2" @click="dialogEndQuiz = false">
-            {{ $t("TEST.QUIZ.cancel") }}
+            {{ $t('TEST.QUIZ.cancel') }}
           </v-btn>
 
           <v-spacer></v-spacer>
 
           <v-btn text color="red" @click="$router.push(exitTo)">{{
-            $t("TEST.QUIZ.exit")
+            $t('TEST.QUIZ.exit')
           }}</v-btn>
         </v-card-actions>
       </v-card>
@@ -424,18 +424,18 @@ import {
   mdiChevronRight,
   mdiEyeOutline,
   mdiEyeOffOutline,
-  mdiFileChart
-} from "@mdi/js";
+  mdiFileChart,
+} from '@mdi/js'
 
-import QuestionImage from "../Questions/QuestionImage.vue";
-import Counter from "../Shared/Counter.vue";
-import { analytics } from "../../main";
+import QuestionImage from '../Questions/QuestionImage.vue'
+import Counter from '../Shared/Counter.vue'
+import { analytics } from '../../main'
 
 export default {
-  name: "Exam",
+  name: 'Exam',
   components: {
     QuestionImage,
-    Counter
+    Counter,
   },
   data() {
     return {
@@ -448,7 +448,7 @@ export default {
       loadingQuiz: false,
       showAnswer: false,
       dialogEndQuiz: false,
-      exitTo: "/quizzes",
+      exitTo: '/quizzes',
       practice: false,
       test: null,
       examQuestions: [],
@@ -461,537 +461,536 @@ export default {
       currentAnswer: null,
       currentMultiAnswer: [],
       answers: [],
-      answersOptions: ["A", "B", "C", "D"],
+      answersOptions: ['A', 'B', 'C', 'D'],
       markedForReview: [],
       review: false,
-      attempt: null
-    };
+      attempt: null,
+    }
   },
   computed: {
     userInfo() {
-      return this.$store.getters.userInfo;
+      return this.$store.getters.userInfo
     },
     correctAnswerOption() {
-      const correctOptions = [];
+      const correctOptions = []
 
       for (const index in this.examQuestions[this.current - 1].answers) {
-        const answer = this.examQuestions[this.current - 1].answers[index];
+        const answer = this.examQuestions[this.current - 1].answers[index]
 
         if (answer.value) {
-          correctOptions.push(this.answersOptions[index]);
+          correctOptions.push(this.answersOptions[index])
         }
       }
 
-      return correctOptions.join(" - ");
+      return correctOptions.join(' - ')
     },
     answeredAmount() {
       if (this.review) {
-        return this.attempt.answers.length;
+        return this.attempt.answers.length
       }
 
       return this.answers.reduce(
         (prev, curr) => (!!curr.value ? prev + 1 : prev),
-        0
-      );
+        0,
+      )
     },
     countdown() {
       return (
-        (!this.practice || this.$route.params.id === "generated") &&
+        (!this.practice || this.$route.params.id === 'generated') &&
         !this.test.unlimitedTime
-      );
+      )
     },
     matrixColumns() {
-      const w = this.windowWidth;
-      const full = w <= 700;
+      const w = this.windowWidth
+      const full = w <= 700
 
       if (!full) {
-        return 7;
+        return 7
       }
 
       if (w > 580) {
-        return 10;
+        return 10
       } else if (w > 480) {
-        return 8;
+        return 8
       } else if (w > 360) {
-        return 7;
+        return 7
       }
 
-      return 5;
+      return 5
     },
     loading() {
-      return this.$store.getters.loading;
-    }
+      return this.$store.getters.loading
+    },
   },
   methods: {
     onResize() {
-      this.windowWidth = window.innerWidth;
+      this.windowWidth = window.innerWidth
     },
     checkUrl(url) {
-      const noHttp = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+      const noHttp = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
 
-      return noHttp.test(url);
+      return noHttp.test(url)
     },
     justificationSourceUrl(url) {
-      if (!url.startsWith("http")) {
-        return `https://${url}`;
+      if (!url.startsWith('http')) {
+        return `https://${url}`
       }
 
-      return url;
+      return url
     },
     getAnswerCustomData(answer) {
       if (!this.review) {
-        return { class: "", color: "" };
+        return { class: '', color: '' }
       }
 
       return answer.value
-        ? { class: "correct", color: "#42d662" }
+        ? { class: 'correct', color: '#42d662' }
         : !answer.value &&
           (this.examQuestions[this.current - 1].multipleAnswers
             ? this.currentMultiAnswer.includes(answer.ansId)
             : answer.ansId === this.currentAnswer)
-        ? { class: "incorrect", color: "#ff4141" }
-        : { class: "", color: "" };
+        ? { class: 'incorrect', color: '#ff4141' }
+        : { class: '', color: '' }
     },
     getDateSentence(isoString) {
-      const date = new Date(isoString);
-      return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+      const date = new Date(isoString)
+      return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
     },
     getAnswerByQuestionName(questionName) {
       if (this.review) {
         const answer = this.attempt.answers.find(
-          a => a.questionName === questionName
-        );
+          a => a.questionName === questionName,
+        )
 
-        return answer;
+        return answer
       }
 
-      const answer = this.answers.find(a => a.questionName === questionName);
+      const answer = this.answers.find(a => a.questionName === questionName)
 
-      return answer ? answer.value : null;
+      return answer ? answer.value : null
     },
     checkAnswer(answer) {
       const question = this.examQuestions.find(
-        q => q.name === answer.questionName
-      );
+        q => q.name === answer.questionName,
+      )
 
       if (!question) {
-        return { correctAnswered: 0, wrongAnswered: 0, totalCorrectAnswers: 0 };
+        return { correctAnswered: 0, wrongAnswered: 0, totalCorrectAnswers: 0 }
       }
 
       if (question.multipleAnswers) {
         const answered = question.answers.filter(a =>
-          answer.value.includes(a.ansId)
-        );
+          answer.value.includes(a.ansId),
+        )
 
-        const wrongAnswered = answered.filter(a => !a.value).length;
-        const correctAnswered = answered.length - wrongAnswered;
+        const wrongAnswered = answered.filter(a => !a.value).length
+        const correctAnswered = answered.length - wrongAnswered
 
         return {
           correctAnswered,
           wrongAnswered,
-          totalCorrectAnswers: question.answers.filter(a => a.value).length
-        };
+          totalCorrectAnswers: question.answers.filter(a => a.value).length,
+        }
       }
 
-      const answered = question.answers.find(a => a.ansId === answer.value);
+      const answered = question.answers.find(a => a.ansId === answer.value)
 
       return {
         correctAnswered: answered && answered.value ? 1 : 0,
         wrongAnswered: answered && !answered.value ? 1 : 0,
-        totalCorrectAnswers: 1
-      };
+        totalCorrectAnswers: 1,
+      }
     },
     toggleReview(question) {
-      const index = this.markedForReview.indexOf(question.name);
+      const index = this.markedForReview.indexOf(question.name)
 
       if (index === -1) {
-        this.markedForReview.push(question.name);
+        this.markedForReview.push(question.name)
       } else {
-        this.markedForReview.splice(index, 1);
+        this.markedForReview.splice(index, 1)
       }
     },
     async finishQuiz() {
-      this.finished = true;
+      this.finished = true
 
-      this.loadingFinish = true;
+      this.loadingFinish = true
 
       if (!this.finishedAt) {
-        this.finishedAt = new Date();
+        this.finishedAt = new Date()
       }
 
-      const answers = [];
+      const answers = []
 
-      let correct = 0;
+      let correct = 0
       this.answers.forEach(a => {
-        const answerRelation = this.checkAnswer(a);
+        const answerRelation = this.checkAnswer(a)
 
         const result =
           answerRelation.correctAnswered /
-          (answerRelation.wrongAnswered + answerRelation.totalCorrectAnswers);
+          (answerRelation.wrongAnswered + answerRelation.totalCorrectAnswers)
 
-        correct += result;
+        correct += result
 
         answers.push({
           questionName: a.questionName,
           answer:
-            typeof a.value === "object"
-              ? a.value.map(a => +a.split("-")[1])
-              : +a.value.split("-")[1],
-          correct: result
-        });
-      });
+            typeof a.value === 'object'
+              ? a.value.map(a => +a.split('-')[1])
+              : +a.value.split('-')[1],
+          correct: result,
+        })
+      })
 
-      const score = (100 * correct) / this.test.questionsAmount;
+      const score = (100 * correct) / this.test.questionsAmount
 
       const diff =
         this.finishedAt.getTime() -
         this.startedAt.getTime() -
-        (this.countdown ? 1000 : 0);
+        (this.countdown ? 1000 : 0)
 
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor(diff / (1000 * 60));
-      const seconds = Math.floor(diff / 1000);
+      const hours = Math.floor(diff / (1000 * 60 * 60))
+      const minutes = Math.floor(diff / (1000 * 60))
+      const seconds = Math.floor(diff / 1000)
 
       const timeTaken = {
         hours,
         minutes: hours > 0 ? minutes - hours * 60 : minutes,
-        seconds: minutes > 0 ? seconds - minutes * 60 : seconds
-      };
+        seconds: minutes > 0 ? seconds - minutes * 60 : seconds,
+      }
 
-      const subjects = [];
+      const subjects = []
 
       for (const question of this.examQuestions) {
-        const subIndex = subjects.findIndex(
-          s => s.subject === question.subject
-        );
+        const subIndex = subjects.findIndex(s => s.subject === question.subject)
 
         if (subIndex === -1) {
           subjects.push({
             subject: question.subject,
-            questions: [question.name]
-          });
+            questions: [question.name],
+          })
 
-          continue;
+          continue
         }
 
-        subjects[subIndex].questions.push(question.name);
+        subjects[subIndex].questions.push(question.name)
       }
 
-      analytics.logEvent("quiz_complete", {
+      analytics.logEvent('quiz_complete', {
         timeTaken: `${timeTaken.hours}h ${timeTaken.minutes}m ${timeTaken.seconds}s`,
         score,
-        correct
-      });
+        correct,
+      })
 
-      if (this.$route.params.id === "generated") {
+      if (this.$route.params.id === 'generated') {
         this.$router.push({
-          name: "quiz.details",
+          name: 'quiz.details',
           params: {
-            id: "generated",
+            id: 'generated',
             results: {
               timeTaken,
-              score
+              score,
             },
-            test: this.test
-          }
-        });
+            test: this.test,
+          },
+        })
 
-        return;
+        return
       }
 
       const attempt = {
         approved: score >= this.test.approvalPercentage,
         answers,
         date: new Date(this.finishedAt).toISOString(),
-        mode: this.practice ? "practice" : "exam",
+        mode: this.practice ? 'practice' : 'exam',
         questions: this.examQuestions.map(q => q.name),
         subjects,
         quizId: this.test.id,
         score,
         timeTaken,
-        userId: this.userInfo.id
-      };
+        userId: this.userInfo.id,
+      }
 
       if (!this.test.userAttempts) {
-        this.test.userAttempts = {};
+        this.test.userAttempts = {}
       }
 
-      const userAttempt = this.test.userAttempts[attempt.userId];
+      const userAttempt = this.test.userAttempts[attempt.userId]
 
       if (!userAttempt) {
-        this.test.userAttempts[attempt.userId] = 0;
+        this.test.userAttempts[attempt.userId] = 0
       }
 
-      this.test.userAttempts[attempt.userId] += 1;
+      this.test.userAttempts[attempt.userId] += 1
 
-      await this.$store.dispatch("updateUser", {
+      await this.$store.dispatch('updateUser', {
         attempts: [attempt, ...(this.userInfo.attempts || [])],
-        noMessage: true
-      });
+        noMessage: true,
+      })
 
-      await this.$store.dispatch("updateTest", {
+      await this.$store.dispatch('updateTest', {
         testData: this.test,
-        noMessage: true
-      });
+        noMessage: true,
+      })
 
-      this.loadingFinish = false;
+      this.loadingFinish = false
 
-      this.$router.push("/quizzes/" + this.test.id);
+      console.log('finish')
+      console.log(this.test)
+
+      this.$router.push('/quizzes/' + this.test.id)
     },
     exitQuiz(to) {
-      this.exitTo = to;
-      this.dialogEndQuiz = true;
+      this.exitTo = to
+      this.dialogEndQuiz = true
     },
     async selectQuestions() {
-      this.$store.commit("setLoading", true);
+      this.$store.commit('setLoading', true)
 
-      const questions = [];
-      const temp = [];
+      const questions = []
+      const temp = []
 
-      const selectedData = [];
+      const selectedData = []
 
       for (const subject of this.test.subjects) {
         const subQuestions = await this.$store.dispatch(
-          "getSubjectQuestions",
-          subject
-        );
+          'getSubjectQuestions',
+          subject,
+        )
 
         subQuestions.forEach(q => {
           if (!this.test.questionsNames.includes(q.name)) {
-            return;
+            return
           }
 
           questions.push({
             name: q.name,
             level: q.level,
-            subject
-          });
-        });
+            subject,
+          })
+        })
       }
 
       while (temp.length < questions.length) {
-        const index = Math.floor(Math.random() * questions.length);
+        const index = Math.floor(Math.random() * questions.length)
 
         if (!temp.includes(questions[index].name)) {
-          temp.push(questions[index].name);
+          temp.push(questions[index].name)
         }
       }
 
       const randomQuestions = temp.map(questionName =>
-        questions.find(q => q.name === questionName)
-      );
+        questions.find(q => q.name === questionName),
+      )
 
-      let loop = 0;
+      let loop = 0
 
       while (
         selectedData.length < this.test.questionsAmount &&
         selectedData.length < randomQuestions.length &&
         loop < randomQuestions.length
       ) {
-        const question = randomQuestions[loop];
+        const question = randomQuestions[loop]
 
         const questionData = await this.$store.dispatch(
-          "getQuestionByName",
-          question.name
-        );
+          'getQuestionByName',
+          question.name,
+        )
 
         if (randomQuestions[loop].level <= questionData.level.index) {
-          selectedData.push(questionData);
+          selectedData.push(questionData)
         }
 
-        loop++;
+        loop++
       }
 
-      this.randomizeQuestions(selectedData);
+      this.randomizeQuestions(selectedData)
 
-      this.$store.commit("setLoading", false);
+      this.$store.commit('setLoading', false)
     },
     async selectReviewQuestions() {
-      const questions = [];
+      const questions = []
 
       for (const q of this.attempt.questions) {
-        const question = await this.$store.dispatch("getQuestionByName", q);
-        questions.push(question);
+        const question = await this.$store.dispatch('getQuestionByName', q)
+        questions.push(question)
       }
 
-      this.examQuestions = questions;
+      this.examQuestions = questions
 
-      this.setCurrentAnswer();
+      this.setCurrentAnswer()
     },
     setCurrentAnswer() {
-      const questionName = this.examQuestions[0].name;
+      const questionName = this.examQuestions[0].name
 
       const answer = this.attempt.answers.find(
-        a => a.questionName === questionName
-      );
+        a => a.questionName === questionName,
+      )
 
       if (!answer) {
-        this.currentMultiAnswer = [];
-        this.currentAnswer = null;
+        this.currentMultiAnswer = []
+        this.currentAnswer = null
 
-        return;
+        return
       }
 
       if (this.examQuestions[this.current - 1].multipleAnswers) {
-        this.currentMultiAnswer = answer.answer.map(a => `radio-${a}`);
-        this.currentAnswer = null;
+        this.currentMultiAnswer = answer.answer.map(a => `radio-${a}`)
+        this.currentAnswer = null
 
-        return;
+        return
       }
 
-      this.currentAnswer = "radio-" + answer.answer;
-      this.currentMultiAnswer = [];
+      this.currentAnswer = 'radio-' + answer.answer
+      this.currentMultiAnswer = []
     },
     randomizeQuestions(questions) {
-      const randomQuestions = [];
+      const randomQuestions = []
 
-      let i = 0;
+      let i = 0
 
       while (i < questions.length) {
-        const rand = Math.floor(Math.random() * questions.length);
+        const rand = Math.floor(Math.random() * questions.length)
 
         if (!randomQuestions.find(q => q.name === questions[rand].name)) {
-          randomQuestions.push(questions[rand]);
-          i++;
+          randomQuestions.push(questions[rand])
+          i++
         }
       }
 
-      this.examQuestions = randomQuestions;
+      this.examQuestions = randomQuestions
 
       if (this.review) {
-        this.setCurrentAnswer();
+        this.setCurrentAnswer()
       }
     },
     setCurrentAnswerVar(value) {
-      const questionName = this.examQuestions[this.current - 1].name;
-      const index = this.answers.findIndex(
-        a => a.questionName === questionName
-      );
+      const questionName = this.examQuestions[this.current - 1].name
+      const index = this.answers.findIndex(a => a.questionName === questionName)
 
       if (index === -1) {
         this.answers.push({
           questionName: this.examQuestions[this.current - 1].name,
-          value
-        });
+          value,
+        })
       } else {
         this.answers[index] = {
           questionName: this.examQuestions[this.current - 1].name,
-          value
-        };
+          value,
+        }
       }
-    }
+    },
   },
   async mounted() {
-    this.onResize();
-    window.addEventListener("resize", this.onResize, { passive: true });
+    this.onResize()
+    window.addEventListener('resize', this.onResize, { passive: true })
 
-    this.loadingQuiz = true;
+    this.loadingQuiz = true
 
-    const id = this.$route.params.id;
-    const mode = this.$route.params.mode;
+    const id = this.$route.params.id
+    const mode = this.$route.params.mode
 
-    this.review = !!this.$route.params.review;
-    this.attempt = this.$route.params.attempt;
+    this.review = !!this.$route.params.review
+    this.attempt = this.$route.params.attempt
 
     if (!mode) {
-      this.$router.push("/quizzes/" + id);
+      this.$router.push('/quizzes/' + id)
     }
 
-    this.practice = mode === "practice";
+    this.practice = mode === 'practice'
 
-    if (id === "generated") {
-      this.test = this.$route.params.test;
+    if (id === 'generated') {
+      this.test = this.$route.params.test
     } else {
-      this.test = await this.$store.dispatch("getTestById", id);
+      this.test = await this.$store.dispatch('getTestById', id)
     }
 
-    if (id !== "generated" && this.review) {
-      await this.selectReviewQuestions();
+    if (id !== 'generated' && this.review) {
+      await this.selectReviewQuestions()
 
-      this.loadingQuiz = false;
-      return;
+      this.loadingQuiz = false
+      return
     }
 
-    if (id !== "generated" && this.test.type === "auto") {
-      await this.selectQuestions();
+    if (id !== 'generated' && this.test.type === 'auto') {
+      await this.selectQuestions()
 
-      this.loadingQuiz = false;
-      return;
+      this.loadingQuiz = false
+      return
     }
 
-    this.randomizeQuestions([...this.test.questions]);
+    this.randomizeQuestions([...this.test.questions])
 
-    this.loadingQuiz = false;
+    this.loadingQuiz = false
   },
   watch: {
     finished(value) {
       if (value) {
-        this.finishedAt = new Date();
+        this.finishedAt = new Date()
       }
     },
     current(value) {
-      const questionName = this.examQuestions[value - 1].name;
+      const questionName = this.examQuestions[value - 1].name
 
       if (this.review && this.attempt) {
         const answer = this.attempt.answers.find(
-          a => a.questionName === questionName
-        );
+          a => a.questionName === questionName,
+        )
 
         if (!answer) {
-          this.currentMultiAnswer = [];
-          this.currentAnswer = null;
+          this.currentMultiAnswer = []
+          this.currentAnswer = null
 
-          return;
+          return
         }
 
         if (this.examQuestions[this.current - 1].multipleAnswers) {
-          this.currentMultiAnswer = answer.answer.map(a => `radio-${a}`);
-          this.currentAnswer = null;
+          this.currentMultiAnswer = answer.answer.map(a => `radio-${a}`)
+          this.currentAnswer = null
 
-          return;
+          return
         }
 
-        this.currentMultiAnswer = [];
-        this.currentAnswer = "radio-" + answer.answer;
+        this.currentMultiAnswer = []
+        this.currentAnswer = 'radio-' + answer.answer
 
-        return;
+        return
       }
 
-      const answer = this.answers.find(a => a.questionName === questionName);
+      const answer = this.answers.find(a => a.questionName === questionName)
 
       if (this.examQuestions[this.current - 1].multipleAnswers) {
-        this.currentMultiAnswer = answer ? answer.value : [];
-        this.currentAnswer = null;
+        this.currentMultiAnswer = answer ? answer.value : []
+        this.currentAnswer = null
 
-        return;
+        return
       }
 
-      this.currentMultiAnswer = [];
-      this.currentAnswer = answer ? answer.value : null;
+      this.currentMultiAnswer = []
+      this.currentAnswer = answer ? answer.value : null
     },
     currentAnswer(value) {
       if (!value) {
-        return;
+        return
       }
 
-      this.setCurrentAnswerVar(value);
+      this.setCurrentAnswerVar(value)
     },
     currentMultiAnswer(value) {
       if (!value || !value.length) {
-        return;
+        return
       }
 
-      this.setCurrentAnswerVar(value);
-    }
+      this.setCurrentAnswerVar(value)
+    },
   },
   beforeDestroy() {
     if (!window) {
-      return;
+      return
     }
 
-    window.removeEventListener("resize", this.onResize, { passive: true });
-  }
-};
+    window.removeEventListener('resize', this.onResize, { passive: true })
+  },
+}
 </script>
 
 <style scoped>

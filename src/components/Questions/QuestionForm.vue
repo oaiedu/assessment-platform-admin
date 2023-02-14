@@ -11,7 +11,7 @@
       <v-btn icon dark @click="close()" class="mr-2">
         <v-icon>{{ mdiClose }}</v-icon>
       </v-btn>
-      <h2>{{ $t("FAB.CREATE.new_question") }}</h2>
+      <h2>{{ $t('FAB.CREATE.new_question') }}</h2>
       <v-spacer></v-spacer>
     </v-toolbar>
 
@@ -30,7 +30,7 @@
           <v-icon color="blue">{{ mdiArrowLeft }}</v-icon>
         </v-btn>
       </template>
-      <span>{{ $t("QUESTIONS.EDIT.back") }}</span>
+      <span>{{ $t('QUESTIONS.EDIT.back') }}</span>
     </v-tooltip>
 
     <v-tooltip left v-if="e1 < 2">
@@ -49,7 +49,7 @@
           <v-icon color="white">{{ mdiArrowRight }}</v-icon>
         </v-btn>
       </template>
-      <span>{{ $t("USERNAME_MODAL.TEXT.continue") }}</span>
+      <span>{{ $t('USERNAME_MODAL.TEXT.continue') }}</span>
     </v-tooltip>
 
     <v-tooltip left v-else>
@@ -70,7 +70,7 @@
           <v-icon color="white">{{ mdiContentSave }}</v-icon>
         </v-btn>
       </template>
-      <span>{{ $t("TEST.TEST_FORM.save") }}</span>
+      <span>{{ $t('TEST.TEST_FORM.save') }}</span>
     </v-tooltip>
 
     <v-container fluid>
@@ -81,13 +81,13 @@
               <v-stepper alt-labels v-model="e1">
                 <v-stepper-header>
                   <v-stepper-step editable :complete="e1 > 1" step="1">
-                    {{ $t("TEST.QUIZ.info") }}
+                    {{ $t('TEST.QUIZ.info') }}
                   </v-stepper-step>
 
                   <v-divider class="mx-2" style="margin-top: 50px"></v-divider>
 
                   <v-stepper-step editable step="2">
-                    {{ $t("TEST.QUIZ.answers") }}
+                    {{ $t('TEST.QUIZ.answers') }}
                   </v-stepper-step>
                 </v-stepper-header>
 
@@ -139,7 +139,7 @@
                             :items="
                               levels.map(l => ({
                                 ...l,
-                                label: $t('TEST.LEVEL.' + l.value.name)
+                                label: $t('TEST.LEVEL.' + l.value.name),
                               }))
                             "
                           ></v-select>
@@ -298,9 +298,9 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          {{ $t("QUESTIONS.FORM.id_in_use") }}
+          {{ $t('QUESTIONS.FORM.id_in_use') }}
           <br />
-          {{ $t("QUESTIONS.FORM.change_id") }}
+          {{ $t('QUESTIONS.FORM.change_id') }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -310,7 +310,7 @@
             v-bind="attrs"
             @click="createErrorSnackBar = false"
           >
-            {{ $t("FAB.TEXT.close") }}
+            {{ $t('FAB.TEXT.close') }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -325,19 +325,19 @@ import {
   mdiMinus,
   mdiArrowLeft,
   mdiArrowRight,
-  mdiContentSave
-} from "@mdi/js";
+  mdiContentSave,
+} from '@mdi/js'
 
-import Preview from "./Preview";
-import VueTextEditor from "../Shared/VueTextEditor.vue";
+import Preview from './Preview'
+import VueTextEditor from '../Shared/VueTextEditor.vue'
 
 export default {
-  name: "QuestionForm",
+  name: 'QuestionForm',
   components: {
     Preview,
-    VueTextEditor
+    VueTextEditor,
   },
-  props: ["questionRequest", "page"],
+  props: ['questionRequest', 'page'],
   data() {
     return {
       mdiClose,
@@ -348,60 +348,60 @@ export default {
       mdiContentSave,
       createErrorSnackBar: false,
       createLoading: false,
-      imagePreview: "",
+      imagePreview: '',
       image: null,
-      imagesAsURL: "",
-      imageSize: "1x",
-      questionDescription: "",
+      imagesAsURL: '',
+      imageSize: '1x',
+      questionDescription: '',
       e1: 1,
       test: null,
-      radios: "",
+      radios: '',
       chips: [],
       items: [],
-      letters: ["A", "B", "C", "D"],
+      letters: ['A', 'B', 'C', 'D'],
       selectedAnswers: [],
       multipleAnswers: false,
       answers: [
-        { text: "", description: "", ansId: "radio-1", value: false },
-        { text: "", description: "", ansId: "radio-2", value: false },
-        { text: "", description: "", ansId: "radio-3", value: false },
-        { text: "", description: "", ansId: "radio-4", value: false }
+        { text: '', description: '', ansId: 'radio-1', value: false },
+        { text: '', description: '', ansId: 'radio-2', value: false },
+        { text: '', description: '', ansId: 'radio-3', value: false },
+        { text: '', description: '', ansId: 'radio-4', value: false },
       ],
-      answerJustification: "",
-      answerJustificationSource: "",
-      name: "",
-      subject: "",
+      answerJustification: '',
+      answerJustificationSource: '',
+      name: '',
+      subject: '',
       level: {
         index: 0,
-        name: "beginner"
+        name: 'beginner',
       },
       levels: [
         {
           value: {
             index: 0,
-            name: "beginner"
-          }
+            name: 'beginner',
+          },
         },
         {
           value: {
             index: 1,
-            name: "intermediary"
-          }
+            name: 'intermediary',
+          },
         },
         {
           value: {
             index: 2,
-            name: "advanced"
-          }
+            name: 'advanced',
+          },
         },
         {
           value: {
             index: 3,
-            name: "expert"
-          }
-        }
-      ]
-    };
+            name: 'expert',
+          },
+        },
+      ],
+    }
   },
   computed: {
     formIsValid() {
@@ -409,69 +409,69 @@ export default {
         !!this.name &&
         !!this.subject &&
         (this.multipleAnswers ? !!this.selectedAnswers.length : !!this.radios)
-      );
+      )
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
+      return this.$store.getters.getUserClaims
     },
     userInfo() {
-      return this.$store.getters.userInfo;
+      return this.$store.getters.userInfo
     },
     subjectItems() {
-      return this.$store.state.Subject.subjects;
+      return this.$store.state.Subject.subjects
     },
     loading() {
-      return this.$store.getters.loading;
-    }
+      return this.$store.getters.loading
+    },
   },
   watch: {
     radios() {
-      this.setSingleAnswer();
+      this.setSingleAnswer()
     },
     selectedAnswers() {
-      this.setMultipleAnswers();
+      this.setMultipleAnswers()
     },
     multipleAnswers(value) {
       if (value) {
-        this.setMultipleAnswers();
-        return;
+        this.setMultipleAnswers()
+        return
       }
 
-      this.setSingleAnswer();
-    }
+      this.setSingleAnswer()
+    },
   },
   methods: {
     updateData(variable) {
-      this.questionDescription = variable;
+      this.questionDescription = variable
     },
     setMultipleAnswers() {
       this.answers.forEach(element => {
-        element.value = this.selectedAnswers.includes(element.ansId);
-      });
+        element.value = this.selectedAnswers.includes(element.ansId)
+      })
     },
     setSingleAnswer() {
       this.answers.forEach(element => {
-        element.value = element.ansId === this.radios;
-      });
+        element.value = element.ansId === this.radios
+      })
     },
     async onCreateQuestion() {
-      this.createLoading = true;
+      this.createLoading = true
 
-      const exist = await this.$store.dispatch("questionExists", this.name);
+      const exist = await this.$store.dispatch('questionExists', this.name)
 
       if (exist) {
-        this.createLoading = false;
-        this.createErrorSnackBar = true;
-        return;
+        this.createLoading = false
+        this.createErrorSnackBar = true
+        return
       }
 
-      let url = "";
+      let url = ''
 
       if (this.image) {
-        const imageToUpload = { name: this.name, image: this.image };
-        url = await this.$store.dispatch("uploadImageQuestion", imageToUpload);
+        const imageToUpload = { name: this.name, image: this.image }
+        url = await this.$store.dispatch('uploadImageQuestion', imageToUpload)
 
-        this.imagesAsURL = url;
+        this.imagesAsURL = url
       }
 
       const questionData = {
@@ -484,89 +484,92 @@ export default {
         answerJustification: this.answerJustification,
         answerJustificationSource: this.answerJustificationSource,
         image: url,
-        imageSize: this.imageSize
-      };
+        imageSize: this.imageSize,
+      }
 
-      if (this.userClaims && this.userClaims["admin"]) {
-        await this.$store.dispatch("createQuestion", {
+      if (this.userClaims && this.userClaims['admin']) {
+        await this.$store.dispatch('createQuestion', {
           question: questionData,
-          page: this.page
-        });
+          page: this.page,
+        })
       } else {
-        await this.$store.dispatch("createQuestionRequest", {
+        await this.$store.dispatch('createQuestionRequest', {
           request: {
             ...questionData,
             userId: this.userInfo.id,
-            status: "pendant"
+            status: 'pendant',
           },
-          user: this.userInfo
-        });
+        })
+
+        await this.$store.dispatch('refetchRequests')
       }
 
-      this.createLoading = false;
+      this.$emit('questionCreated')
 
-      this.setInitialData();
-      this.close();
+      this.createLoading = false
+
+      this.setInitialData()
+      this.close()
     },
     setInitialData() {
-      this.confirmTitle = false;
-      this.questionDescription = "";
-      this.imageSize = "1x";
-      this.e1 = 1;
-      this.test = null;
+      this.confirmTitle = false
+      this.questionDescription = ''
+      this.imageSize = '1x'
+      this.e1 = 1
+      this.test = null
       this.level = {
         index: 0,
-        name: "beginner"
-      };
-      this.radios = "";
-      this.chips = [];
-      this.items = [];
-      this.selectedAnswers = [];
-      this.multipleAnswers = false;
+        name: 'beginner',
+      }
+      this.radios = ''
+      this.chips = []
+      this.items = []
+      this.selectedAnswers = []
+      this.multipleAnswers = false
       this.answers = [
-        { text: "", ansId: "radio-1", value: false },
-        { text: "", ansId: "radio-2", value: false },
-        { text: "", ansId: "radio-3", value: false },
-        { text: "", ansId: "radio-4", value: false }
-      ];
-      this.answerJustification = "";
-      this.answerJustificationSource = "";
-      this.name = "";
-      this.subject = "";
-      this.image = null;
-      this.imagesAsBase64 = "";
+        { text: '', ansId: 'radio-1', value: false },
+        { text: '', ansId: 'radio-2', value: false },
+        { text: '', ansId: 'radio-3', value: false },
+        { text: '', ansId: 'radio-4', value: false },
+      ]
+      this.answerJustification = ''
+      this.answerJustificationSource = ''
+      this.name = ''
+      this.subject = ''
+      this.image = null
+      this.imagesAsBase64 = ''
     },
     checkImageType(file) {
       if (file && file.type) {
         if (!file.type.match(/image.*/)) {
-          this.$store.commit("setError", {
-            message: "O arquivo inserido NÃO é uma imagem!"
-          });
-          this.image = null;
+          this.$store.commit('setError', {
+            message: 'O arquivo inserido NÃO é uma imagem!',
+          })
+          this.image = null
         } else if (file.size > 2000000) {
-          this.$store.commit("setError", {
-            message: "O tamanho da imagem deve ser no MÁXIMO 2 MB!"
-          });
-          this.image = null;
+          this.$store.commit('setError', {
+            message: 'O tamanho da imagem deve ser no MÁXIMO 2 MB!',
+          })
+          this.image = null
         } else {
-          const reader = new FileReader();
+          const reader = new FileReader()
 
           reader.onload = readerEvent => {
-            this.imagePreview = readerEvent.target.result;
-          };
+            this.imagePreview = readerEvent.target.result
+          }
 
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(file)
         }
       } else if (this.imagePreview) {
-        this.imagePreview = "";
+        this.imagePreview = ''
       }
     },
     close() {
-      this.setInitialData();
-      this.$emit("closeDialogNew");
-    }
-  }
-};
+      this.setInitialData()
+      this.$emit('closeDialogNew')
+    },
+  },
+}
 </script>
 
 <style>

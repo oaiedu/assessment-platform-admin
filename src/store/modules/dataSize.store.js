@@ -1,25 +1,17 @@
-import { Store } from "vuex";
+import { Store } from 'vuex'
 
-import { db } from "../../main";
-import { createErrorLog, showErrorMessage } from "../../utils/errors";
-import { getWeekInterval } from "../../utils/date";
-
-/**
- * @typedef {Object} DataSize
- * @property {Object} question-requests - The question requests amount object.
- * @property {number} question-requests.general - The question requests total amount.
- * @property {Object.<string, number>} question-requests.users - The question requests amount by user.
- * @property {Object} questions - The questions amount object.
- * @property {number} questions.general - The questions total amount.
- * @property {Object.<string, number>} questions.subject - The questions amount by subject.
- * @property {number} tests - The amount of tests.
- * @property {Object.<string, number>} testsByWeek - The tests amount by week (5 weeks).
- * @property {number} users - The amount of users.
- */
+import { createErrorLog, showErrorMessage } from '../../utils/errors'
+import { getWeekInterval, isoToDate, sortWeekIntervals } from '../../utils/date'
+import { DataSizeController } from '../../controllers/data-size.controller'
+import { DataSizeEntity } from '../../entities/data-size.entity'
 
 /**
  * @typedef {Object} DataSizeState
- * @property {DataSize|null} dataSize - The data size object.
+ * @property {DataSizeEntity|null} dataSize - The data size object.
+ */
+
+/**
+ * @typedef {import("../../entities/data-size.entity").Amount} Amount
  */
 
 /**
@@ -27,200 +19,169 @@ import { getWeekInterval } from "../../utils/date";
  */
 
 /**
+ * Defines the data size controller.
+ */
+const controller = new DataSizeController()
+
+/**
  * Gets the initial state for data size store.
  *
  * @returns {DataSizeState} The initial data size state object.
  */
 const initialState = () => ({
-  dataSize: null
-});
+  dataSize: null,
+})
 
-const state = initialState();
+const state = initialState()
 
 const mutations = {
   /**
    * Sets the data size object.
    *
-   * @param {DataSizeState} state - The data size state.
-   * @param {DataSize} data - The data size object.
+   * @param {DataSizeState} state The data size state.
+   * @param {DataSizeEntity?} data The data size object.
    */
   setDataSize(state, data) {
-    state.dataSize = data;
+    state.dataSize = data ? data.clone() : null
   },
   /**
    * Sets a data to a determined key in data size.
    *
-   * @param {DataSizeState} state - The data size state.
-   * @param {Object} data - Object with the data size key and data to be set.
-   * @param {string} data.key - The data size key.
-   * @param {number|Object} data.data - The data to be setted.
+   * @param {DataSizeState} state The data size state.
+   * @param {{ key: keyof DataSizeEntity, data: Amount|number }} data Object with the data size key and data to be set.
    */
   addRemoveSize(state, data) {
-    state.dataSize[data.key] = data.data;
+    state.dataSize[data.key] = data.data
   },
   /**
    * Resets tha data size state to it's initial state.
    *
-   * @param {DataSizeState} state - The data size state.
+   * @param {DataSizeState} state The data size state.
    */
   RESETDataSize(state) {
-    const newState = initialState();
+    const newState = initialState()
     Object.keys(newState).forEach(key => {
-      state[key] = newState[key];
-    });
-  }
-};
+      state[key] = newState[key]
+    })
+  },
+}
 
 const actions = {
   /**
    * Loads the data size from Firebase.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<DataSizeState>} store - The vuex store.
    */
-  loadDataSize({ commit }) {
-    commit("setLoading", true);
+  async loadDataSize({ commit }) {
+    commit('setLoading', true)
 
-    const data = {};
+    /**
+     * @type {DataSizeEntity}
+     */
+    let data
 
-    db.collection("data-size")
-      .get()
-      .then(snapshot => {
-        const doc = snapshot.docs[0];
+    try {
+      data = await controller.getOne()
+      commit('setDataSize', data)
+    } catch (error) {
+      createErrorLog('Data Size Load', error.message, { data })
 
-        for (let key in doc.data()) {
-          data[key] = doc.data()[key];
-        }
-      })
-      .then(() => {
-        commit("setDataSize", data);
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("load", "Data Size", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Data Size Load", error.message, { data });
-      });
+      const errorModel = showErrorMessage('load', 'Data Size', error.message)
+      commit('setError', { message: errorModel })
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Adds one to data size tests by week key into the current week.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<DataSizeState>} store - The vuex store.
    */
   addTestsByWeek({ commit, state }) {
-    const thisWeek = getWeekInterval(new Date())[0];
+    const currentWeek = getWeekInterval()[0]
 
-    let data = { ...state.dataSize.testsByWeek };
+    /**
+     * @type {Record<string, number>}
+     */
+    let data = { ...state.dataSize.testsByWeek }
 
-    const lastWeeks = Object.keys(data);
+    const lastWeeks = Object.keys(data)
 
-    if (lastWeeks.includes(thisWeek)) {
-      data[thisWeek] += 1;
+    if (lastWeeks.includes(currentWeek)) {
+      data[currentWeek] += 1
     } else {
-      const numberOfWeeks = 5;
-      const today = new Date();
+      const newData = {}
 
-      let newData = {};
+      for (let i = 5 - 1; i > 0; i--) {
+        const weekDate = new Date()
+        weekDate.setDate(weekDate.getDate() - i * 7)
 
-      for (let i = numberOfWeeks - 1; i > 0; i--) {
-        const week = new Date(today);
-        week.setDate(week.getDate() - i * 7);
-        const currentWeek = getWeekInterval(week)[0];
-
-        if (lastWeeks.includes(currentWeek)) {
-          newData[currentWeek] = data[currentWeek];
-        } else {
-          newData[currentWeek] = 0;
-        }
+        const week = getWeekInterval(weekDate)[0]
+        newData[week] = data[week] ?? 0
       }
 
-      data = { ...newData, [thisWeek]: 1 };
+      data = { ...newData, [currentWeek]: 1 }
     }
 
-    db.collection("data-size")
-      .get()
-      .then(snapshot => {
-        const doc = snapshot.docs[0];
-        if (doc) {
-          doc.ref.update({ testsByWeek: data });
-        }
-      })
-      .then(() => {
-        commit("addRemoveSize", { key: "testsByWeek", data });
-      })
-      .catch(error => {
-        const errorModel = showErrorMessage(
-          "edition",
-          "Data Size",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Data Size Update", error.message, { data });
-      });
+    try {
+      controller.updateOne({ testsByWeek: data })
+
+      commit('addRemoveSize', { key: 'testsByWeek', data })
+    } catch (error) {
+      createErrorLog('Data Size Update', error.message, { data })
+
+      const errorModel = showErrorMessage('edition', 'Data Size', error.message)
+
+      commit('setError', { message: errorModel })
+    }
   },
   /**
    * Removes of data size tests by week key according to the tests into the given payload.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The payload of the action.
-   * @param {Test[]} payload.tests - The tests that will be removed.
+   * @param {Store<DataSizeState>} store The vuex store.
+   * @param {Object} payload The payload of the action.
+   * @param {Test[]} payload.tests The tests that will be removed.
    */
   async removeTestsByWeek({ commit, state }, payload) {
-    const { tests } = payload;
+    const { tests: quizzes } = payload
 
-    let data = { ...state.dataSize.testsByWeek };
+    /**
+     * @type {Record<string, number>}
+     */
+    const data = { ...state.dataSize.testsByWeek }
 
-    const lastWeeks = Object.keys(data);
+    const lastWeeks = Object.keys(data)
 
-    const promises = tests.map(test => {
-      const date = test.created;
-      const year = date.substr(0, 4);
-      const month = date.substr(5, 2);
-      const day = date.substr(8, 2);
+    quizzes.forEach(test => {
+      const date = isoToDate(test.created)
+      const week = getWeekInterval(date)[0]
 
-      const removeWeek = getWeekInterval(new Date(`${year}/${month}/${day}`))[
-        [0]
-      ];
-
-      if (lastWeeks.includes(removeWeek)) {
-        data[removeWeek] -= data[removeWeek] - 1 < 0 ? 0 : 1;
+      if (lastWeeks.includes(week)) {
+        data[week] -= data[week] - 1 < 0 ? 0 : 1
       }
+    })
 
-      return removeWeek;
-    });
+    try {
+      controller.updateOne({ testsByWeek: data })
 
-    await Promise.all(promises);
+      commit('addRemoveSize', { key: 'testsByWeek', data })
+    } catch (error) {
+      createErrorLog('Data Size Update', error.message, { data })
 
-    db.collection("data-size")
-      .get()
-      .then(snapshot => {
-        const doc = snapshot.docs[0];
-        if (doc) {
-          doc.ref.update({ testsByWeek: data });
-        }
-      })
-      .then(() => {
-        commit("addRemoveSize", { key: "testsByWeek", data });
-      })
-      .catch(error => {
-        const errorModel = showErrorMessage(
-          "edition",
-          "Data Size",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Data Size Update", error.message, { data });
-      });
+      const errorModel = showErrorMessage('edition', 'Data Size', error.message)
+
+      commit('setError', { message: errorModel })
+    }
   },
   /**
    * Resets the data size state.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<DataSizeState>} store - The vuex store.
    */
   resetDataSize({ commit }) {
-    commit("RESETDataSize");
-  }
-};
+    commit('RESETDataSize')
+  },
+}
 
 const getters = {
   /**
@@ -230,7 +191,7 @@ const getters = {
    * @returns {DataSize} The data size object.
    */
   getDataSize(state) {
-    return state.dataSize;
+    return state.dataSize
   },
   /**
    * Gets the number of questions of a specific subject.
@@ -241,7 +202,7 @@ const getters = {
    * @returns {(subjectName: string) => number} The number of questions of the given subject.
    */
   getNumberOfQuestionBySubject(state) {
-    return subjectName => state.dataSize.questions.subject[subjectName] || 0;
+    return subjectName => state.dataSize.questions.subject[subjectName] || 0
   },
   /**
    * Gets a sorted object of data size tests by week key.
@@ -250,11 +211,7 @@ const getters = {
    * @returns {Object.<string, number>} The sorted data size tests by week key.
    */
   getTestsByWeek(state) {
-    return Object.fromEntries(
-      Object.entries(state.dataSize.testsByWeek).sort((a, b) =>
-        a[0] < b[0] ? -1 : 1
-      )
-    );
+    return sortWeekIntervals(state.dataSize.testsByWeek)
   },
   /**
    * Gets the interval of all weeks in data size tests by week key.
@@ -263,32 +220,33 @@ const getters = {
    * @returns {string[]} The interval of all weeks in data size tests by week key.
    */
   getTestsByWeekInterval(state) {
-    const intervals = [];
-    Object.entries(state.dataSize.testsByWeek)
-      .sort((a, b) => (a[0] < b[0] ? -1 : 1))
-      .forEach(week => {
-        const interval = getWeekInterval(
-          new Date(
-            `${week[0].substr(5, 2)}/${week[0].substr(8, 2)}/${week[0].substr(
-              0,
-              4
-            )}`
-          )
-        );
-        intervals.push(
-          `${interval[0].substr(8, 2)}/${interval[0].substr(
-            5,
-            2
-          )} - ${interval[1].substr(8, 2)}/${interval[1].substr(5, 2)}`
-        );
-      });
-    return intervals;
-  }
-};
+    /**
+     * @type {string[]}
+     */
+    const intervalsList = []
+
+    const intervals = sortWeekIntervals(state.dataSize.testsByWeek)
+
+    for (const week in intervals) {
+      const date = isoToDate(week)
+      const weekInterval = getWeekInterval(date)
+
+      const startDay = weekInterval[0].substring(8, 10)
+      const startMonth = weekInterval[0].substring(5, 7)
+
+      const endDay = weekInterval[1].substring(8, 10)
+      const endMonth = weekInterval[1].substring(5, 7)
+
+      intervalsList.push(`${startDay}/${startMonth} - ${endDay}/${endMonth}`)
+    }
+
+    return intervalsList
+  },
+}
 
 export default {
   state,
   mutations,
   actions,
-  getters
-};
+  getters,
+}

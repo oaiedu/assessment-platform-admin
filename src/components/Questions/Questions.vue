@@ -37,14 +37,14 @@
             color="red"
             dark
             @click="
-              deleteConfirmed = true;
-              deleteQuestions();
+              deleteConfirmed = true
+              deleteQuestions()
             "
           >
-            {{ $t("AUTH.SUBJECT.confirm") }}
+            {{ $t('AUTH.SUBJECT.confirm') }}
           </v-btn>
           <v-btn class="ml-3" color="grey darken-1" dark @click="restoreAll()">
-            {{ $t("TEST.TESTS.restore") }}
+            {{ $t('TEST.TESTS.restore') }}
           </v-btn>
         </v-row>
       </v-container>
@@ -55,16 +55,16 @@
         :itemsPerPage="itemsPerPage"
         :isActionsAvailable="true"
         @pdfClick="
-          dialogPDF = true;
-          selectedEdit = $event;
+          dialogPDF = true
+          selectedEdit = $event
         "
         @editClick="
-          dialogEditQuestion = true;
-          selectedEdit = $event;
+          dialogEditQuestion = true
+          selectedEdit = $event
         "
         @deleteClick="
-          deleteQuestionSnackBar = true;
-          deleteSelect = $event;
+          deleteQuestionSnackBar = true
+          deleteSelect = $event
         "
         @restoreClick="restoreQuestion($event)"
       />
@@ -87,7 +87,7 @@
             <v-icon>{{ plusIcon }}</v-icon>
           </v-btn>
         </template>
-        <span>{{ $t("FAB.CREATE.new_question") }}</span>
+        <span>{{ $t('FAB.CREATE.new_question') }}</span>
       </v-tooltip>
 
       <v-dialog
@@ -99,6 +99,7 @@
         <QuestionForm
           v-if="dialogNewQuestion"
           :page="page"
+          @questionCreated="refetch()"
           @closeDialogNew="dialogNewQuestion = false"
         />
       </v-dialog>
@@ -116,8 +117,8 @@
           :userInfo="userInfo"
           :isSearching="isSearching"
           @closeDialogEdit="
-            dialogEditQuestion = false;
-            selectedEdit = {};
+            dialogEditQuestion = false
+            selectedEdit = {}
           "
         />
       </v-dialog>
@@ -137,6 +138,7 @@
 
       <div class="text-center pt-2">
         <Paginator
+          :disabled="loading"
           :page="!isSearching ? page : searchPage"
           :length="
             !isSearching
@@ -144,8 +146,8 @@
               : Math.ceil(filteredQuestions.length / itemsPerPage)
           "
           @pageChange="
-            !isSearching ? (page = $event.page) : (searchPage = $event.page);
-            onPageChange($event);
+            !isSearching ? (page = $event.page) : (searchPage = $event.page)
+            onPageChange($event)
           "
         />
       </div>
@@ -154,8 +156,8 @@
         :label="$t('QUESTIONS.delete_confirm')"
         :state="deleteQuestionSnackBar"
         @confirm="
-          deleteQuestion(deleteSelect.name);
-          deleteQuestionSnackBar = false;
+          deleteQuestion(deleteSelect.name, deleteSelect.id)
+          deleteQuestionSnackBar = false
         "
         @cancel="deleteQuestionSnackBar = false"
       />
@@ -170,11 +172,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          {{ $t("QUESTIONS.QUESTIONS.info_1") }}
+          {{ $t('QUESTIONS.QUESTIONS.info_1') }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          {{ $t("QUESTIONS.QUESTIONS.info_2") }}
+          {{ $t('QUESTIONS.QUESTIONS.info_2') }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -184,7 +186,7 @@
             v-bind="attrs"
             @click="deleteErrorAutoSnackBar = false"
           >
-            {{ $t("QUESTIONS.ANSWERS.justifications") }}
+            {{ $t('QUESTIONS.ANSWERS.justifications') }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -199,11 +201,11 @@
         :timeout="15000"
       >
         <span style="color: white; font-size: 1rem">
-          {{ $t("QUESTIONS.QUESTIONS.test_1") }}
+          {{ $t('QUESTIONS.QUESTIONS.test_1') }}
           <br />
           {{ getQuestionTests }}
           <br /><br />
-          {{ $t("QUESTIONS.QUESTIONS.test_2") }}
+          {{ $t('QUESTIONS.QUESTIONS.test_2') }}
         </span>
         <template v-slot:action="{ attrs }">
           <v-btn
@@ -213,7 +215,7 @@
             v-bind="attrs"
             @click="deleteErrorSnackBar = false"
           >
-            {{ $t("FAB.TEXT.close") }}
+            {{ $t('FAB.TEXT.close') }}
           </v-btn>
         </template>
       </v-snackbar>
@@ -222,19 +224,19 @@
 </template>
 
 <script>
-import Paginator from "../Paginator";
-import QuestionsTable from "./QuestionsTable";
-import DeleteWarning from "../Shared/DeleteWarning";
-import DeleteAlert from "./DeleteAlertQuestions";
-import SearchBox from "../Shared/SearchBox";
-import QuestionForm from "./QuestionForm";
-import EditQuestion from "./EditQuestion";
-import PrintQuestion from "./PrintQuestion";
-import { mdiPlus } from "@mdi/js";
-import { analytics } from "../../main";
+import Paginator from '../Paginator'
+import QuestionsTable from './QuestionsTable'
+import DeleteWarning from '../Shared/DeleteWarning'
+import DeleteAlert from './DeleteAlertQuestions'
+import SearchBox from '../Shared/SearchBox'
+import QuestionForm from './QuestionForm'
+import EditQuestion from './EditQuestion'
+import PrintQuestion from './PrintQuestion'
+import { mdiPlus } from '@mdi/js'
+import { analytics } from '../../main'
 
 export default {
-  name: "Questions",
+  name: 'Questions',
   components: {
     Paginator,
     QuestionsTable,
@@ -243,13 +245,13 @@ export default {
     SearchBox,
     QuestionForm,
     EditQuestion,
-    PrintQuestion
+    PrintQuestion,
   },
   data() {
     return {
       plusIcon: mdiPlus,
       loadedPages: [1],
-      deleteSelect: "",
+      deleteSelect: '',
       selectedEdit: {},
       questionTests: [],
       deleteConfirmed: false,
@@ -261,258 +263,254 @@ export default {
       dialogEditQuestion: false,
       dialogPDF: false,
       showedQuestions: [],
-      search: "",
+      search: '',
       isSearching: false,
       page: 1,
       searchPage: 1,
       itemsPerPage: 8,
-      selectedSubject: null
-    };
+      selectedSubject: null,
+    }
   },
   computed: {
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     subjects() {
-      return this.$store.state.Subject.subjects;
+      return this.$store.state.Subject.subjects
     },
     questions() {
-      return this.$store.getters.getCurrentQuestionsPage;
+      return this.$store.getters.getCurrentQuestionsPage
     },
     deleteMarkQuestions() {
-      return this.$store.getters.getDeleteMarkQuestions;
+      return this.$store.getters.getDeleteMarkQuestions
     },
     markedQuestionsByUser() {
-      const isAdmin = this.userClaims && this.userClaims["admin"];
+      const isAdmin = this.userClaims && this.userClaims['admin']
       const questions = isAdmin
         ? this.deleteMarkQuestions
         : this.deleteMarkQuestions.filter(
-            q => q.toDelete.userEmail === this.userInfo.email
-          );
+            q => q.toDelete.userEmail === this.userInfo.email,
+          )
 
-      const names = [];
+      const names = []
 
       if (isAdmin) {
-        names.push(...questions.filter(q => q.toDelete && q.toDelete.status));
+        names.push(...questions.filter(q => q.toDelete && q.toDelete.status))
       }
 
-      return names.map(q => `${q.name} (${q.toDelete.userEmail})`).join(", ");
+      return names.map(q => `${q.name} (${q.toDelete.userEmail})`).join(', ')
     },
     hasDeleteMarkQuestions() {
-      return this.deleteMarkQuestions && this.deleteMarkQuestions.length > 0;
+      return this.deleteMarkQuestions && this.deleteMarkQuestions.length > 0
     },
     hasTrueMarkStatus() {
-      const questions = this.deleteMarkQuestions.map(q => q.toDelete.status);
-      return questions.includes(true);
+      const questions = this.deleteMarkQuestions.map(q => q.toDelete.status)
+      return questions.includes(true)
     },
     filteredQuestions() {
-      return this.$store.getters.getFilteredQuestions;
+      return this.$store.getters.getFilteredQuestions
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
+      return this.$store.getters.getUserClaims
     },
     userInfo() {
-      return this.$store.getters.userInfo;
+      return this.$store.getters.userInfo
     },
     pageAmount() {
-      const questionAmount = this.$store.getters.getDataSize.questions.general;
-      return Math.ceil(questionAmount / this.itemsPerPage) || 1;
+      const questionAmount = this.$store.getters.getDataSize.questions.general
+      return Math.ceil(questionAmount / this.itemsPerPage) || 1
     },
     getQuestionTests() {
-      const titles = this.questionTests.map(t => "'" + t.title + "'");
-      titles.sort((t1, t2) => (t1 > t2 ? 1 : -1));
-      return titles.join(", ");
-    }
+      const titles = this.questionTests.map(t => "'" + t.title + "'")
+      titles.sort((t1, t2) => (t1 > t2 ? 1 : -1))
+      return titles.join(', ')
+    },
   },
   watch: {
     selected(val) {
       this.questions.forEach(element => {
         for (let i = 0; i < this.selected.length; i++) {
           if (element.data.DISCIPLINA == this.selected[i]) {
-            let aux = true;
+            let aux = true
             for (let k = 0; k < this.showedQuestions.length; k++) {
-              if (element === this.showedQuestions[k]) aux = false;
+              if (element === this.showedQuestions[k]) aux = false
             }
-            if (aux == true) this.showedQuestions.push(element);
+            if (aux == true) this.showedQuestions.push(element)
           }
         }
-      });
+      })
     },
     selectedSubject() {
-      this.searchQuery(this.search);
-    }
+      this.searchQuery(this.search)
+    },
   },
   methods: {
+    async refetch() {
+      this.page = 1
+      await this.$store.dispatch('refetchQuestions')
+
+      this.deleteConfirmed = false
+    },
     editQuestions(val) {
-      this.selectedEdit = val;
-      this.dialogEditQuestion = true;
+      this.selectedEdit = val
+      this.dialogEditQuestion = true
     },
     generatePDF(val) {
-      this.selectedEdit = val;
-      this.dialogPDF = true;
+      this.selectedEdit = val
+      this.dialogPDF = true
     },
-    async deleteQuestion(name) {
-      this.deleteQuestionSnackBar = false;
-      this.questionTests = [];
+    async deleteQuestion(name, id) {
+      this.deleteQuestionSnackBar = false
+      this.questionTests = []
 
-      const tests = await this.$store.dispatch("checkQuestionInTests", {
-        name
-      });
+      const tests = await this.$store.dispatch('checkQuestionInTests', {
+        name,
+      })
 
       const allAuto = tests.reduce(
-        (prev, curr) => curr.type === "auto" && prev,
-        true
-      );
+        (prev, curr) => curr.type === 'auto' && prev,
+        true,
+      )
 
-      let error = false;
+      let error = false
 
       if (allAuto) {
         for (const t of tests) {
-          const questionsNames = [...t.questionsNames];
+          const questionsNames = [...t.questionsNames]
 
-          const index = questionsNames.indexOf(name);
+          const index = questionsNames.indexOf(name)
 
           if (index === -1) {
-            return;
+            return
           }
 
-          questionsNames.splice(index, 1);
+          questionsNames.splice(index, 1)
 
           if (questionsNames.length < t.questionsAmount) {
-            this.questionTests.push(t);
-            error = true;
-            continue;
+            this.questionTests.push(t)
+            error = true
+            continue
           }
 
-          await this.$store.dispatch("updateTest", {
+          await this.$store.dispatch('updateTest', {
             testData: { ...t, questionsNames },
-            noMessage: true
-          });
+            noMessage: true,
+          })
         }
       }
 
       if (error) {
-        this.deleteErrorAutoSnackBar = true;
-        return;
+        this.deleteErrorAutoSnackBar = true
+        return
       }
 
       if (!tests.length || allAuto) {
-        this.$store.dispatch("deleteMarkQuestion", {
-          name,
+        this.$store.dispatch('deleteMarkQuestion', {
+          id,
           isSearching: this.isSearching,
-          userEmail: this.userInfo.email
-        });
+          userEmail: this.userInfo.email,
+        })
 
-        return;
+        return
       }
 
-      this.questionTests = [...tests];
-      this.deleteErrorSnackBar = true;
+      this.questionTests = [...tests]
+      this.deleteErrorSnackBar = true
     },
-    deleteQuestions() {
-      const questions = this.deleteMarkQuestions;
-      questions.forEach(question => {
-        if (question.toDelete.status) {
-          this.$store.dispatch("changeDeleteStatusQuestions", {
-            name: question.name,
-            isSearching: this.isSearching
-          });
-        }
-      });
-      this.$store.commit("setSuccess", "Question successfully deleted!");
+    async deleteQuestions() {
+      await this.$store.dispatch('changeDeleteStatusQuestions', {
+        names: this.deleteMarkQuestions
+          .filter(q => q.toDelete.status)
+          .map(q => q.name),
+        isSearching: this.isSearching,
+      })
+
+      this.$store.commit('setSuccess', 'Question successfully deleted!')
     },
     onPageChange(event) {
-      const payload = {
-        page: this.page,
-        itemsPerPage: this.itemsPerPage
-      };
-
-      if (!this.isSearching) {
-        if (!event.mode) {
-          this.$store.dispatch("loadQuestionPage", {
-            ...payload,
-            type: event.type
-          });
-        } else {
-          this.$store.dispatch("loadFOLQuestionPage", {
-            ...payload,
-            mode: event.mode
-          });
-        }
+      if (this.isSearching) {
+        return
       }
+
+      this.$store.dispatch('loadQuestionPage', {
+        page: this.page,
+        itemsPerPage: this.itemsPerPage,
+        mode: event.mode,
+        direction: event.direction,
+      })
     },
     searchTextChange(text) {
-      this.search = text;
+      this.search = text
 
       if (!text && !this.selectedSubject && this.isSearching) {
-        this.isSearching = false;
-        this.searchPage = 1;
-        this.$store.commit("resetFilteredQuestions");
+        this.isSearching = false
+        this.searchPage = 1
+        this.$store.commit('resetFilteredQuestions')
       } else if (!text && this.selectedSubject) {
-        this.searchQuery(text);
+        this.searchQuery(text)
       }
     },
     searchQuery(text) {
-      this.searchPage = 1;
-      this.$store.commit("resetFilteredQuestions");
+      this.searchPage = 1
+      this.$store.commit('resetFilteredQuestions')
 
       if (text || this.selectedSubject) {
-        this.isSearching = true;
-        this.$store.dispatch("searchQuestions", {
+        this.isSearching = true
+        this.$store.dispatch('searchQuestions', {
           query: text,
-          subject: this.selectedSubject
-        });
+          subject: this.selectedSubject,
+        })
 
-        analytics.logEvent("search", {
+        analytics.logEvent('search', {
           search_term: text,
-          subject: this.selectedSubject
-        });
+          subject: this.selectedSubject,
+        })
       } else {
-        this.isSearching = false;
+        this.isSearching = false
       }
     },
     itemRowStyle(item) {
       return item.toDelete
         ? item.toDelete.status
-          ? "item-to-delete"
-          : "item-deleted"
-        : "";
+          ? 'item-to-delete'
+          : 'item-deleted'
+        : ''
     },
     restoreQuestion(item) {
-      this.$store.dispatch("restoreMarkedQuestion", {
-        name: item.name,
-        isSearching: this.isSearching
-      });
+      this.$store.dispatch('restoreMarkedQuestion', {
+        id: item.id,
+        isSearching: this.isSearching,
+      })
     },
     restoreAll() {
-      this.$store.dispatch("restoreAllMarkedQuestions", {
-        isSearching: this.isSearching
-      });
-    }
+      this.$store.dispatch('restoreAllMarkedQuestions', {
+        isSearching: this.isSearching,
+      })
+    },
   },
   mounted() {
-    this.deleteConfirmed = false;
-    this.$store.dispatch("checkDeleteMarkQuestions");
-    this.$store.dispatch("loadFOLQuestionPage", {
+    this.deleteConfirmed = false
+    this.$store.dispatch('checkDeleteMarkQuestions')
+    this.$store.dispatch('loadQuestionPage', {
       page: 1,
       itemsPerPage: this.itemsPerPage,
-      mode: "first"
-    });
+      mode: 'first',
+    })
   },
   beforeDestroy() {
-    this.search = "";
-    this.isSearching = false;
-    this.page = 1;
-    this.$store.commit("resetFilteredQuestions");
-    this.$store.commit("resetCurrentQuestionsPage");
+    this.search = ''
+    this.isSearching = false
+    this.page = 1
+    this.$store.commit('resetFilteredQuestions')
+    this.$store.commit('resetCurrentQuestionsPage')
 
     if (this.deleteConfirmed) {
-      this.$store.dispatch("deleteQuestions");
-      this.$store.dispatch("resetQuestions");
-      this.$store.dispatch("loadDataSize");
+      this.$store.dispatch('deleteQuestions')
+      this.$store.dispatch('resetQuestions')
+      this.$store.dispatch('loadDataSize')
     }
-  }
-};
+  },
+}
 </script>
 
 <style>

@@ -6,7 +6,7 @@
           <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
         <h2>
-          {{ !test ? $t("FAB.CREATE.new_quiz") : $t("TEST.edit") }}
+          {{ !test ? $t('FAB.CREATE.new_quiz') : $t('TEST.edit') }}
         </h2>
         <v-spacer></v-spacer>
       </v-toolbar>
@@ -45,7 +45,7 @@
             <v-icon color="white">{{ mdiContentSave }}</v-icon>
           </v-btn>
         </template>
-        <span>{{ $t("TEST.TEST_FORM.save") }}</span>
+        <span>{{ $t('TEST.TEST_FORM.save') }}</span>
       </v-tooltip>
 
       <v-container fluid class="pa-15 pt-10">
@@ -89,7 +89,7 @@
                   :items="
                     types.map(t => ({
                       ...t,
-                      label: $t('TEST.TYPE.' + t.label)
+                      label: $t('TEST.TYPE.' + t.label),
                     }))
                   "
                   :label="$t('TEST.TEST_FORM.type')"
@@ -140,7 +140,7 @@
                     </v-list-item-action>
                     <v-list-item-content>
                       <v-list-item-title>
-                        {{ $t("TEST.GENERATE_CARD.select_all") }}
+                        {{ $t('TEST.GENERATE_CARD.select_all') }}
                       </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
@@ -162,7 +162,7 @@
                 :items="
                   levels.map(l => ({
                     ...l,
-                    label: $t('TEST.LEVEL.' + l.label)
+                    label: $t('TEST.LEVEL.' + l.label),
                   }))
                 "
               ></v-select>
@@ -190,12 +190,12 @@
                 "
                 @click="selectRandom()"
               >
-                {{ $t("TEST.TEST_FORM.start_selection") }}
+                {{ $t('TEST.TEST_FORM.start_selection') }}
               </v-btn>
             </v-row>
 
             <v-row class="ma-0 pa-0" style="color: #5d5d5d">
-              {{ $t("TEST.TEST_FORM.approval_percentage") }}
+              {{ $t('TEST.TEST_FORM.approval_percentage') }}
             </v-row>
 
             <v-row class="ma-0 pa-0">
@@ -235,7 +235,7 @@
                 style="width: 100px; flex: none"
                 :label="$t('TEST.TEST_FORM.minutes')"
                 :rules="[
-                  v => (v >= 0 && v < 60) || $t('TEST.TEST_FORM.RULES.invalid')
+                  v => (v >= 0 && v < 60) || $t('TEST.TEST_FORM.RULES.invalid'),
                 ]"
                 :disabled="unlimitedTime"
               ></v-text-field>
@@ -244,7 +244,7 @@
 
           <v-col v-if="testType === 'auto'" class="pt-10">
             <p class="orange--text text-center pt-10">
-              {{ $t("TEST.TEST_FORM.info_test") }}
+              {{ $t('TEST.TEST_FORM.info_test') }}
             </p>
           </v-col>
 
@@ -263,7 +263,7 @@
                   :headers="
                     randomHeaders.map(h => ({
                       ...h,
-                      text: $t('QUESTIONS.FORM.' + h.text)
+                      text: $t('QUESTIONS.FORM.' + h.text),
                     }))
                   "
                   :items-per-page="itemsPerPage"
@@ -326,7 +326,7 @@
                   :headers="
                     headers.map(h => ({
                       ...h,
-                      text: $t('QUESTIONS.FORM.' + h.text)
+                      text: $t('QUESTIONS.FORM.' + h.text),
                     }))
                   "
                   :items="isSearching ? filteredQuestions : questions"
@@ -340,7 +340,7 @@
                     v-slot:[`item.data-table-select`]="{
                       item,
                       isSelected,
-                      select
+                      select,
                     }"
                   >
                     <v-simple-checkbox
@@ -353,7 +353,7 @@
                   </template>
 
                   <template v-slot:[`item.level`]="{ item }">
-                    {{ $t("TEST.LEVEL." + levels[item.level.index].label) }}
+                    {{ $t('TEST.LEVEL.' + levels[item.level.index].label) }}
                   </template>
                 </v-data-table>
               </v-card>
@@ -370,8 +370,8 @@
                 @pageChange="
                   !isSearching
                     ? (page = $event.page)
-                    : (searchPage = $event.page);
-                  onPageChange($event);
+                    : (searchPage = $event.page)
+                  onPageChange($event)
                 "
               />
             </div>
@@ -390,9 +390,9 @@
       :timeout="15000"
     >
       <span style="color: white; font-size: 1rem">
-        {{ $t("TEST.TEST_FORM.title_already_in_use") }}
+        {{ $t('TEST.TEST_FORM.title_already_in_use') }}
         <br />
-        {{ $t("TEST.TEST_FORM.change_title") }}
+        {{ $t('TEST.TEST_FORM.change_title') }}
       </span>
       <template v-slot:action="{ attrs }">
         <v-btn
@@ -402,7 +402,7 @@
           v-bind="attrs"
           @click="createErrorSnackBar = false"
         >
-          {{ $t("FAB.TEXT.close") }}
+          {{ $t('FAB.TEXT.close') }}
         </v-btn>
       </template>
     </v-snackbar>
@@ -416,13 +416,14 @@ import {
   mdiMagnify,
   mdiCloseBox,
   mdiMinusBox,
-  mdiCheckboxBlankOutline
-} from "@mdi/js";
-import Ripple from "vuetify/lib/directives/ripple";
+  mdiCheckboxBlankOutline,
+} from '@mdi/js'
+import Ripple from 'vuetify/lib/directives/ripple'
 
-import Paginator from "../Paginator";
-import VueTextEditor from "../Shared/VueTextEditor.vue";
-import { analytics } from "../../main";
+import Paginator from '../Paginator'
+import VueTextEditor from '../Shared/VueTextEditor.vue'
+import { analytics } from '../../main'
+import { Entity } from '../../entities/base.entity'
 
 export default {
   directives: { Ripple },
@@ -431,13 +432,13 @@ export default {
     test: {
       type: Object,
       required: false,
-      default: null
+      default: null,
     },
     searching: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -445,7 +446,7 @@ export default {
       mdiContentSave,
       mdiMagnify,
       ready: false,
-      testType: "selected",
+      testType: 'selected',
       randomizedPage: 1,
       randomQuestionsNumber: 1,
       createErrorSnackBar: false,
@@ -454,327 +455,334 @@ export default {
       selectedRandomQuestions: [],
       selectedQuestions: [],
       testItems: [],
-      title: "",
-      instructions: "",
+      title: '',
+      instructions: '',
       approvalPercentage: 50,
       unlimitedTime: true,
       time: {
         hours: 0,
         minutes: 0,
-        seconds: 0
+        seconds: 0,
       },
       level: {
         index: 0,
-        name: "beginner"
+        name: 'beginner',
       },
       levels: [
         {
           value: {
             index: 0,
-            name: "beginner"
+            name: 'beginner',
           },
-          label: "beginner"
+          label: 'beginner',
         },
         {
           value: {
             index: 1,
-            name: "intermediary"
+            name: 'intermediary',
           },
-          label: "intermediary"
+          label: 'intermediary',
         },
         {
           value: {
             index: 2,
-            name: "advanced"
+            name: 'advanced',
           },
-          label: "advanced"
+          label: 'advanced',
         },
         {
           value: {
             index: 3,
-            name: "expert"
+            name: 'expert',
           },
-          label: "expert"
-        }
+          label: 'expert',
+        },
       ],
       testSubjects: [],
       types: [
         {
-          value: "selected",
-          label: "selected"
+          value: 'selected',
+          label: 'selected',
         },
         {
-          value: "random",
-          label: "random"
+          value: 'random',
+          label: 'random',
         },
         {
-          value: "auto",
-          label: "auto"
-        }
+          value: 'auto',
+          label: 'auto',
+        },
       ],
       showedQuestions: [],
-      search: "",
+      search: '',
       isSearching: false,
       page: 1,
       searchPage: 1,
       pageCount: 15,
       itemsPerPage: 8,
       headers: [
-        { text: "id", align: "left", sortable: false, value: "name" },
+        { text: 'id', align: 'left', sortable: false, value: 'name' },
         {
-          text: "subject",
-          align: "center",
+          text: 'subject',
+          align: 'center',
           sortable: false,
-          value: "subject"
+          value: 'subject',
         },
-        { text: "level", align: "center", value: "level" }
+        { text: 'level', align: 'center', value: 'level' },
       ],
       randomHeaders: [
-        { text: "id", align: "center", value: "name" },
-        { text: "subject", align: "center", value: "subject" },
-        { text: "level", align: "center", value: "level" }
-      ]
-    };
+        { text: 'id', align: 'center', value: 'name' },
+        { text: 'subject', align: 'center', value: 'subject' },
+        { text: 'level', align: 'center', value: 'level' },
+      ],
+    }
   },
   computed: {
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     subjects() {
-      return this.$store.state.Subject.subjects;
+      return this.$store.state.Subject.subjects
     },
     questions() {
-      return this.$store.getters.getCurrentQuestionsPage;
+      return this.$store.getters.getCurrentQuestionsPage
     },
     disabledCount() {
-      return this.questions.filter(q => !!q.toDelete).length;
+      return this.questions.filter(q => !!q.toDelete).length
     },
     filteredQuestions() {
-      return this.$store.getters.getFilteredQuestions;
+      return this.$store.getters.getFilteredQuestions
     },
     checkNumber() {
-      const subjects = this.testSubjects;
-      let amount = 0;
+      const subjects = this.testSubjects
+      let amount = 0
 
       subjects.forEach(sub => {
         amount += this.$store.getters.getNumberOfQuestionBySubjectAndLevel(
           sub,
-          this.level.index
-        );
-      });
+          this.level.index,
+        )
+      })
 
-      return amount;
+      return amount
     },
     pageAmount() {
-      const questionAmount = this.$store.getters.getDataSize.questions.general;
-      return Math.ceil(questionAmount / this.itemsPerPage) || 1;
+      const questionAmount = this.$store.getters.getDataSize.questions.general
+      return Math.ceil(questionAmount / this.itemsPerPage) || 1
     },
     selectedAllSubjects() {
-      return this.testSubjects.length === this.subjects.length;
+      return this.testSubjects.length === this.subjects.length
     },
     selectedSomeSubject() {
-      return this.testSubjects.length > 0 && !this.selectedAllSubjects;
+      return this.testSubjects.length > 0 && !this.selectedAllSubjects
     },
     selectIcon() {
-      if (this.selectedAllSubjects) return mdiCloseBox;
-      if (this.selectedSomeSubject) return mdiMinusBox;
-      return mdiCheckboxBlankOutline;
-    }
+      if (this.selectedAllSubjects) return mdiCloseBox
+      if (this.selectedSomeSubject) return mdiMinusBox
+      return mdiCheckboxBlankOutline
+    },
   },
   watch: {
+    testType(value) {
+      if (value !== 'selected') {
+        return
+      }
+
+      this.selectedSubjects = []
+    },
     selectedSubjects() {
       this.questions.forEach(element => {
         for (let i = 0; i < this.selectedSubjects.length; i++) {
           if (element.subject === this.selectedSubjects[i]) {
-            let aux = true;
+            let aux = true
 
             for (let k = 0; k < this.showedQuestions.length; k++) {
-              if (element === this.showedQuestions[k]) aux = false;
+              if (element === this.showedQuestions[k]) aux = false
             }
 
-            if (aux === true) this.showedQuestions.push(element);
+            if (aux === true) this.showedQuestions.push(element)
           }
         }
-      });
+      })
     },
     search(text) {
       if ((text === null || text.length === 0) && this.isSearching) {
-        this.isSearching = false;
-        this.searchPage = 1;
-        this.$store.commit("resetFilteredQuestions");
+        this.isSearching = false
+        this.searchPage = 1
+        this.$store.commit('resetFilteredQuestions')
       }
-    }
+    },
   },
   methods: {
     textRule() {
-      return [v => !!v || this.$t("TEST.TEST_FORM.RULES.required")];
+      return [v => !!v || this.$t('TEST.TEST_FORM.RULES.required')]
     },
     rule() {
       return [
-        v => v >= 1 || this.$t("TEST.TEST_FORM.RULES.positive"),
+        v => v >= 1 || this.$t('TEST.TEST_FORM.RULES.positive'),
         v =>
           v <= this.checkNumber ||
-          this.$t("TEST.TEST_FORM.RULES.not_enough_questions")
-      ];
+          this.$t('TEST.TEST_FORM.RULES.not_enough_questions'),
+      ]
     },
     onPageChange(event) {
       const payload = {
         page: this.page,
-        itemsPerPage: this.itemsPerPage
-      };
+        itemsPerPage: this.itemsPerPage,
+      }
 
       if (!this.isSearching) {
         if (!event.mode) {
-          this.$store.dispatch("loadQuestionPage", {
+          this.$store.dispatch('loadQuestionPage', {
             ...payload,
-            type: event.type
-          });
+            direction: event.direction,
+          })
         } else {
-          this.$store.dispatch("loadFOLQuestionPage", {
+          this.$store.dispatch('loadQuestionPage', {
             ...payload,
-            mode: event.mode
-          });
+            mode: event.mode,
+          })
         }
       }
     },
     toggle() {
       this.$nextTick(() => {
         if (this.selectedAllSubjects) {
-          this.testSubjects = [];
+          this.testSubjects = []
         } else {
-          this.testSubjects = this.subjects.slice();
+          this.testSubjects = this.subjects.slice()
         }
-      });
+      })
     },
     searchQuery(event) {
-      if (event.key === "Enter") {
-        document.getElementById("searchFieldNew").blur();
+      if (event.key === 'Enter') {
+        document.getElementById('searchFieldNew').blur()
 
-        this.searchPage = 1;
-        this.$store.commit("resetFilteredQuestions");
+        this.searchPage = 1
+        this.$store.commit('resetFilteredQuestions')
 
         if (this.search.length > 0) {
-          this.isSearching = true;
-          this.$store.dispatch("searchQuestions", this.search);
+          this.isSearching = true
+          this.$store.dispatch('searchQuestions', this.search)
 
-          analytics.logEvent("search", {
-            search_term: text
-          });
+          analytics.logEvent('search', {
+            search_term: text,
+          })
         } else {
-          this.isSearching = false;
+          this.isSearching = false
         }
       }
     },
     close() {
-      this.setInitialData();
-      this.$emit("closeDialogNew");
+      this.setInitialData()
+      this.$emit('closeDialogNew')
     },
     setInitialData() {
-      this.ready = false;
-      this.testType = "selected";
-      this.randomQuestionsNumber = null;
-      this.selectedSubjects = [];
-      this.selectedRandom = [];
-      this.selectedRandomQuestions = [];
-      this.selectedQuestions = [];
-      this.testItems = [];
-      this.title = "";
-      this.instructions = "";
-      this.approvalPercentage = 50;
+      this.ready = false
+      this.testType = 'selected'
+      this.randomQuestionsNumber = null
+      this.selectedSubjects = []
+      this.selectedRandom = []
+      this.selectedRandomQuestions = []
+      this.selectedQuestions = []
+      this.testItems = []
+      this.title = ''
+      this.instructions = ''
+      this.approvalPercentage = 50
       this.time = {
         hours: 0,
         minutes: 0,
-        seconds: 0
-      };
+        seconds: 0,
+      }
       this.level = {
         index: 0,
-        name: "beginner"
-      };
-      this.showedQuestions = [];
-      this.search = "";
+        name: 'beginner',
+      }
+      this.showedQuestions = []
+      this.search = ''
     },
     async selectRandom() {
       const amount =
         this.randomQuestionsNumber > this.checkNumber
           ? this.checkNumber
-          : this.randomQuestionsNumber;
+          : this.randomQuestionsNumber
 
-      const subjects = this.testSubjects;
-      const selected = [];
-      const allQuestions = [];
+      const subjects = this.testSubjects
+      const selected = []
+      const allQuestions = []
 
-      this.selectedRandomQuestions = [];
+      this.selectedRandomQuestions = []
 
-      this.$store.commit("setLoading", true);
+      this.$store.commit('setLoading', true)
 
       const promises = subjects.map(subject => {
         return this.$store
-          .dispatch("getSubjectQuestions", subject)
+          .dispatch('getSubjectQuestions', subject)
           .then(questions => {
             questions.forEach(question => {
               if (question.level <= this.level.index) {
                 allQuestions.push({
                   name: question.name,
                   level: question.level,
-                  subject
-                });
+                  subject,
+                })
               }
-            });
-          });
-      });
+            })
+          })
+      })
 
-      await Promise.all(promises);
+      await Promise.all(promises)
 
       while (
         selected.length < amount &&
         selected.length < allQuestions.length
       ) {
-        const index = Math.floor(Math.random() * allQuestions.length);
+        const index = Math.floor(Math.random() * allQuestions.length)
         if (!selected.includes(allQuestions[index].name)) {
-          const question = allQuestions[index];
-          selected.push(question.name);
+          const question = allQuestions[index]
+          selected.push(question.name)
           this.selectedRandomQuestions.push({
             name: question.name,
             level: question.level,
-            subject: question.subject
-          });
+            subject: question.subject,
+          })
         }
       }
-      this.selectedRandom = [...this.selectedRandomQuestions];
-      this.$store.commit("setLoading", false);
+      this.selectedRandom = [...this.selectedRandomQuestions]
+      this.$store.commit('setLoading', false)
     },
     async createTest() {
       if (!this.$refs.formRef.validate()) {
-        return;
+        return
       }
 
-      this.$store.commit("setLoading", true);
+      this.$store.commit('setLoading', true)
 
-      const exist = await this.$store.dispatch("testExists", this.title);
+      const exist = await this.$store.dispatch('testExists', this.title)
 
-      if (exist > 0) {
-        this.createErrorSnackBar = true;
-        return;
+      if (exist) {
+        this.createErrorSnackBar = true
+        return
       }
 
-      if (this.testType === "random") {
-        this.selectedQuestions = [];
+      if (this.testType === 'random') {
+        this.selectedQuestions = []
 
         const promises = this.selectedRandom.map(question => {
           return this.$store
-            .dispatch("getQuestionByName", question.name)
+            .dispatch('getQuestionByName', question.name)
             .then(q => {
-              this.selectedQuestions.push(q);
-            });
-        });
+              this.selectedQuestions.push(q)
+            })
+        })
 
-        await Promise.all(promises);
+        await Promise.all(promises)
       }
 
-      if (this.testType !== "auto") {
+      if (this.testType !== 'auto') {
         this.selectedQuestions.forEach(element => {
-          this.testItems.push(element);
-        });
+          this.testItems.push(element)
+        })
       }
 
       const testData = {
@@ -790,55 +798,71 @@ export default {
         time: {
           hours: +this.time.hours,
           minutes: +this.time.minutes,
-          seconds: +this.time.seconds
+          seconds: +this.time.seconds,
         },
-        userId: this.$store.getters.user.id
-      };
+        userId: this.$store.getters.user.id,
+      }
 
-      if (this.testType === "auto") {
-        testData.subjects = [...this.testSubjects];
+      if (this.testType === 'auto') {
+        testData.subjects = [...this.testSubjects]
 
         testData.questionsNames = this.subjects
           .filter(s => this.testSubjects.includes(s.name))
           .map(s => s.questions)
           .flat()
           .filter(q => q.level <= this.level.index)
-          .map(q => q.name);
+          .map(q => q.name)
       }
 
       if (!this.time.hours && !this.time.minutes) {
-        testData.unlimitedTime = true;
+        testData.unlimitedTime = true
       }
 
-      await this.$store.dispatch("createTest", {
+      await this.$store.dispatch('createTest', {
         testData,
-        userInfo: this.$store.getters.userInfo
-      });
+      })
 
-      this.$store.commit("setLoading", false);
+      this.$store.commit('setLoading', false)
 
-      this.close();
+      this.$emit('testCreated')
+
+      this.close()
     },
     async editTest() {
       if (!this.$refs.formRef.validate()) {
-        return;
+        return
       }
 
-      const amount = await this.$store.dispatch("testExists", this.title);
+      const amount = await this.$store.dispatch('testExists', this.title)
 
       if (
-        (this.test.title !== this.title && amount > 0) ||
+        (this.test.title !== this.title && amount) ||
         (this.test.title === this.title && amount > 1)
       ) {
-        this.createErrorSnackBar = true;
-        return;
+        this.createErrorSnackBar = true
+        return
+      }
+
+      if (this.testType === 'random') {
+        this.selectedQuestions = []
+
+        for (const question of this.selectedRandom) {
+          const q = await this.$store.dispatch(
+            'getQuestionByName',
+            question.name,
+          )
+          this.selectedQuestions.push(q.toMap())
+        }
       }
 
       this.selectedQuestions.forEach(element => {
-        this.testItems.push(element);
-      });
+        this.testItems.push(
+          element instanceof Entity ? element.toMap() : element,
+        )
+      })
 
       const testData = {
+        id: this.test.id,
         title: this.title,
         instructions: this.instructions,
         approvalPercentage: this.approvalPercentage,
@@ -851,113 +875,113 @@ export default {
         time: {
           hours: +this.time.hours,
           minutes: +this.time.minutes,
-          seconds: 0
+          seconds: 0,
         },
         userId: this.test.userId,
         created: this.test.created,
-        id: this.test.id
-      };
+        uuid: this.test.uuid,
+      }
 
-      if (this.testType === "auto") {
-        testData.subjects = [...this.testSubjects];
+      if (this.testType === 'auto') {
+        testData.subjects = [...this.testSubjects]
 
         testData.questionsNames = this.subjects
           .filter(s => this.testSubjects.includes(s.name))
           .map(s => s.questions)
           .flat()
           .filter(q => q.level <= this.level.index)
-          .map(q => q.name);
+          .map(q => q.name)
       }
 
-      await this.$store.dispatch("updateTest", {
+      await this.$store.dispatch('updateTest', {
         testData,
-        isSearching: this.searching
-      });
+        isSearching: this.searching,
+      })
 
-      this.close();
+      this.close()
     },
     itemRowStyle(item) {
       return item.toDelete
         ? item.toDelete.status
-          ? "item-to-delete"
-          : "item-deleted"
-        : "";
+          ? 'item-to-delete'
+          : 'item-deleted'
+        : ''
     },
     selectAllToggle(props) {
       if (
         this.selectedQuestions.length !=
         this.questions.length - this.disabledCount
       ) {
-        this.selectedQuestions = [];
+        this.selectedQuestions = []
 
         props.items.forEach(item => {
           if (!item.toDelete) {
-            this.selectedQuestions.push(item);
+            this.selectedQuestions.push(item)
           }
-        });
+        })
       } else {
-        this.selectedQuestions = [];
+        this.selectedQuestions = []
       }
     },
     setTest() {
       if (!this.test) {
-        return;
+        return
       }
 
-      this.title = this.test.title;
-      this.instructions = this.test.instructions;
-      this.approvalPercentage = this.test.approvalPercentage;
-      this.testType = this.test.type;
-      this.level = this.test.level;
-      this.unlimitedTime = this.test.unlimitedTime;
-      this.time = this.test.time;
+      this.title = this.test.title
+      this.instructions = this.test.instructions
+      this.approvalPercentage = this.test.approvalPercentage
+      this.testType = this.test.type
+      this.level = this.test.level
+      this.unlimitedTime = this.test.unlimitedTime
+      this.time = this.test.time
 
-      if (this.test.type !== "selected") {
-        this.randomQuestionsNumber = this.test.questionsAmount;
+      if (this.test.type !== 'selected') {
+        this.randomQuestionsNumber = this.test.questionsAmount
       }
 
       if (this.test.questions) {
         this.test.questions.forEach(element => {
-          this.selectedQuestions.push(element);
-          this.selectedRandom.push(element);
-          this.selectedRandomQuestions.push(element);
+          this.selectedQuestions.push(element)
+          this.selectedRandom.push(element)
+          this.selectedRandomQuestions.push(element)
 
           if (
-            this.test.type !== "selected" &&
+            this.test.type !== 'selected' &&
             !this.testSubjects.includes(element.subject)
           ) {
-            this.testSubjects.push(element.subject);
-            this.selectedSubjects.push(element.subject);
+            this.testSubjects.push(element.subject)
+            this.selectedSubjects.push(element.subject)
           }
-        });
+        })
       }
 
       if (this.test.subjects) {
-        this.testSubjects = [...this.test.subjects];
-        this.selectedSubjects = [...this.test.subjects];
+        this.testSubjects = [...this.test.subjects]
+        this.selectedSubjects = [...this.test.subjects]
       }
-    }
+    },
   },
   mounted() {
-    this.$store.dispatch("loadFOLQuestionPage", {
+    this.$store.dispatch('loadQuestionPage', {
       page: 1,
       itemsPerPage: this.itemsPerPage,
-      mode: "first"
-    });
+      mode: 'first',
+    })
 
-    this.testSubjects = this.subjects.length > 0 ? [this.subjects[0].name] : [];
-    this.setTest();
+    this.testSubjects = this.subjects.length > 0 ? [this.subjects[0].name] : []
+    this.setTest()
 
-    this.ready = true;
+    this.ready = true
   },
   beforeDestroy() {
-    this.search = "";
-    this.isSearching = false;
-    this.page = 1;
-    this.$store.commit("resetFilteredQuestions");
-    this.$store.commit("resetCurrentQuestionsPage");
-  }
-};
+    this.search = ''
+    this.isSearching = false
+    this.page = 1
+    this.$store.commit('resetFilteredQuestions')
+    this.$store.commit('resetCurrentQuestionsPage')
+  },
+}
 </script>
 
 <style>

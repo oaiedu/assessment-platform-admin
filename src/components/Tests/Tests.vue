@@ -15,7 +15,7 @@
             ((userClaims && userClaims['admin']) ||
               (markedTestsByUser && markedTestsByUser.length > 0) ||
               deleteMarkTests.filter(
-                t => userInfo && t.toDelete.userEmail === userInfo.email
+                t => userInfo && t.toDelete.userEmail === userInfo.email,
               ).length > 0)
         "
       >
@@ -49,12 +49,12 @@
               userClaims && userClaims['admin'] && markedTestsAdmin.length === 0
             "
             @click="
-              deleteConfirmed = true;
-              deleteTests(false);
+              deleteConfirmed = true
+              deleteTests(false)
             "
           >
             {{
-              userClaims && userClaims["admin"] ? "Confirmar Meus" : "Confirmar"
+              userClaims && userClaims['admin'] ? 'Confirmar Meus' : 'Confirmar'
             }}
           </v-btn>
           <v-btn
@@ -63,11 +63,11 @@
             color="red"
             dark
             @click="
-              deleteConfirmed = true;
-              deleteTests(true);
+              deleteConfirmed = true
+              deleteTests(true)
             "
           >
-            {{ $t("AUTH.SUBJECT.confirm_all") }}
+            {{ $t('AUTH.SUBJECT.confirm_all') }}
           </v-btn>
           <v-btn
             class="ml-3"
@@ -85,7 +85,7 @@
             @click="restoreAll(false)"
           >
             {{
-              userClaims && userClaims["admin"] ? "Restaurar Meus" : "Restaurar"
+              userClaims && userClaims['admin'] ? 'Restaurar Meus' : 'Restaurar'
             }}
           </v-btn>
           <v-btn
@@ -95,7 +95,7 @@
             dark
             @click="restoreAll(true)"
           >
-            {{ $t("TEST.TESTS.restore_all") }}
+            {{ $t('TEST.TESTS.restore_all') }}
           </v-btn>
         </v-row>
       </v-container>
@@ -105,16 +105,16 @@
         :page="isSearching ? searchPage : page"
         :itemsPerPage="itemsPerPage"
         @doExam="
-          generatedTest = $event;
-          dialogExam = true;
+          generatedTest = $event
+          dialogExam = true
         "
         @editClick="
-          dialogEditTest = true;
-          selectedTest = $event;
+          dialogEditTest = true
+          selectedTest = $event
         "
         @deleteClick="
-          deleteTestSnackBar = true;
-          deleteSelect = $event;
+          deleteTestSnackBar = true
+          deleteSelect = $event
         "
         @restoreClick="restoreTest($event)"
       />
@@ -136,14 +136,14 @@
             "
           >
             <v-icon>{{
-              userClaims && !userClaims["student"] ? mdiPlus : mdiTextBoxPlus
+              userClaims && !userClaims['student'] ? mdiPlus : mdiTextBoxPlus
             }}</v-icon>
           </v-btn>
         </template>
         <span>{{
-          userClaims && !userClaims["student"]
-            ? $t("FAB.CREATE.new_quiz")
-            : $t("TEST.GENERATE_CARD.generate_new")
+          userClaims && !userClaims['student']
+            ? $t('FAB.CREATE.new_quiz')
+            : $t('TEST.GENERATE_CARD.generate_new')
         }}</span>
       </v-tooltip>
 
@@ -162,6 +162,7 @@
       >
         <TestForm
           v-if="dialogTestForm"
+          @testCreated="refetch()"
           @closeDialogNew="dialogTestForm = false"
         ></TestForm>
       </v-dialog>
@@ -190,8 +191,8 @@
               : Math.ceil(filteredTests.length / itemsPerPage)
           "
           @pageChange="
-            !isSearching ? (page = $event.page) : (searchPage = $event.page);
-            onPageChange($event);
+            !isSearching ? (page = $event.page) : (searchPage = $event.page)
+            onPageChange($event)
           "
         />
       </div>
@@ -200,8 +201,8 @@
         :label="$t('TEST.delete_confirm')"
         :state="deleteTestSnackBar"
         @confirm="
-          deleteTest(deleteSelect.id);
-          deleteTestSnackBar = false;
+          deleteTest(deleteSelect.id)
+          deleteTestSnackBar = false
         "
         @cancel="deleteTestSnackBar = false"
       />
@@ -210,19 +211,24 @@
 </template>
 
 <script>
-import { mdiPlus, mdiTextBoxPlus } from "@mdi/js";
-import GenerateCard from "./GenerateCard";
-import TestForm from "./TestForm";
-import Paginator from "../Paginator";
-import TestsTable from "./TestsTable";
-import DeleteWarning from "../Shared/DeleteWarning";
-import DeleteAlert from "./DeleteAlertTests";
-import SearchBox from "../Shared/SearchBox";
-import { getNowISOString } from "../../utils/date";
-import { analytics } from "../../main";
+import { mdiPlus, mdiTextBoxPlus } from '@mdi/js'
+
+import GenerateCard from './GenerateCard'
+import TestForm from './TestForm'
+import Paginator from '../Paginator'
+import TestsTable from './TestsTable'
+import DeleteWarning from '../Shared/DeleteWarning'
+import DeleteAlert from './DeleteAlertTests'
+import SearchBox from '../Shared/SearchBox'
+
+import { TestEntity } from '../../entities/test.entity'
+
+import { getNowISOString } from '../../utils/date'
+
+import { analytics } from '../../main'
 
 export default {
-  name: "Tests",
+  name: 'Tests',
   components: {
     GenerateCard,
     TestForm,
@@ -230,7 +236,7 @@ export default {
     TestsTable,
     DeleteWarning,
     DeleteAlert,
-    SearchBox
+    SearchBox,
   },
   data() {
     return {
@@ -246,201 +252,207 @@ export default {
       searchPage: 1,
       itemsPerPage: 10,
       selectedTest: null,
-      generatedTest: null
-    };
+      generatedTest: null,
+    }
   },
   computed: {
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     tests() {
-      return this.$store.getters.getCurrentTestsPage;
+      return this.$store.getters.getCurrentTestsPage
     },
     deleteMarkTests() {
-      return this.$store.getters.getDeleteMarkTests;
+      return this.$store.getters.getDeleteMarkTests
     },
     markedTestsAdmin() {
       const tests = this.deleteMarkTests.filter(
-        t => this.userInfo && t.toDelete.userEmail === this.userInfo.email
-      );
-      const titles = tests.filter(t => t.toDelete && t.toDelete.status);
-      return titles.map(t => t.title).join(", ");
+        t => this.userInfo && t.toDelete.userEmail === this.userInfo.email,
+      )
+      const titles = tests.filter(t => t.toDelete && t.toDelete.status)
+      return titles.map(t => t.title).join(', ')
     },
     markedTestsByUser() {
-      const isAdmin = this.userClaims && this.userClaims["admin"];
+      const isAdmin = this.userClaims && this.userClaims['admin']
       const tests = isAdmin
         ? this.deleteMarkTests
         : this.deleteMarkTests.filter(
-            t => this.userInfo && t.toDelete.userEmail === this.userInfo.email
-          );
+            t => this.userInfo && t.toDelete.userEmail === this.userInfo.email,
+          )
 
-      const titles = [];
+      const titles = []
 
-      titles.push(...tests.filter(t => t.toDelete && t.toDelete.status));
+      titles.push(...tests.filter(t => t.toDelete && t.toDelete.status))
 
       return titles
         .map(t => (isAdmin ? `${t.title} (${t.toDelete.userEmail})` : t.title))
-        .join(", ");
+        .join(', ')
     },
     hasDeleteMarkTests() {
-      return this.deleteMarkTests && this.deleteMarkTests.length > 0;
+      return this.deleteMarkTests && this.deleteMarkTests.length > 0
     },
     hasTrueMarkStatus() {
-      const tests = this.deleteMarkTests.map(t => t.toDelete.status);
-      return tests.includes(true);
+      const tests = this.deleteMarkTests.map(t => t.toDelete.status)
+      return tests.includes(true)
     },
     filteredTests() {
-      return this.$store.getters.getFilteredTests;
+      return this.$store.getters.getFilteredTests
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
+      return this.$store.getters.getUserClaims
     },
     userInfo() {
-      return this.$store.getters.userInfo;
+      return this.$store.getters.userInfo
     },
     pageAmount() {
-      const testsAmount = this.$store.getters.getDataSize.tests;
-      return Math.ceil(testsAmount / this.itemsPerPage) || 1;
-    }
+      const testsAmount = this.$store.getters.getDataSize.tests
+      return Math.ceil(testsAmount / this.itemsPerPage) || 1
+    },
   },
   methods: {
+    async refetch() {
+      this.page = 1
+      await this.$store.dispatch('refetchTests')
+
+      this.deleteConfirmed = false
+    },
     generateExam(data) {
-      const test = {
-        id: "generated",
-        title: "Questionário de treino",
-        type: "auto",
+      const test = new TestEntity({
+        id: 'generated',
+        title: 'Questionário de treino',
+        type: 'auto',
         level: data.level,
         instructions:
-          "Esse questionário é apenas para <b>treino</b> e <b>não</b> ficará em seu histórico de tentativas.",
+          'Esse questionário é apenas para <b>treino</b> e <b>não</b> ficará em seu histórico de tentativas.',
         questions: data.questions,
         questionsAmount: data.questions.length,
         questionsNames: data.questions.map(q => q.name),
-        created: getNowISOString(),
-        updated: getNowISOString(),
         approvalPercentage: 50,
         unlimitedTime: data.unlimitedTime,
         time: data.time,
         userId: this.userInfo.id,
-        userAttempts: []
-      };
+        userAttempts: [],
+      })
 
       this.$router.push({
-        name: "quiz.details",
+        name: 'quiz.details',
         params: {
-          id: "generated",
+          id: 'generated',
           test,
-          mode: "practice"
-        }
-      });
+          mode: 'practice',
+        },
+      })
     },
     deleteTest(id) {
-      this.deleteTestSnackBar = false;
-      this.$store.dispatch("deleteMarkTest", {
+      this.deleteTestSnackBar = false
+      this.$store.dispatch('deleteMarkTest', {
         id,
         isSearching: this.isSearching,
-        userEmail: this.userInfo.email
-      });
+        userEmail: this.userInfo.email,
+      })
     },
     deleteTests(all) {
-      const tests = this.deleteMarkTests;
+      const tests = this.deleteMarkTests
       tests.forEach(test => {
         if (
           test.toDelete.status &&
           (this.userInfo.email === test.toDelete.userEmail || all)
         ) {
-          this.$store.dispatch("changeDeleteStatusTests", {
+          this.$store.dispatch('changeDeleteStatusTests', {
             id: test.id,
-            isSearching: this.isSearching
-          });
+            isSearching: this.isSearching,
+          })
         }
-      });
+      })
     },
     onPageChange(event) {
       const payload = {
         page: this.page,
-        itemsPerPage: this.itemsPerPage
-      };
-
-      if (!this.isSearching) {
-        if (!event.mode) {
-          this.$store.dispatch("loadTestPage", {
-            ...payload,
-            type: event.type
-          });
-        } else {
-          this.$store.dispatch("loadFOLTestPage", {
-            ...payload,
-            mode: event.mode
-          });
-        }
+        itemsPerPage: this.itemsPerPage,
       }
+
+      if (this.isSearching) {
+        return
+      }
+
+      if (!event.mode) {
+        return void this.$store.dispatch('loadTestPage', {
+          ...payload,
+          direction: event.direction,
+        })
+      }
+
+      this.$store.dispatch('loadTestPage', {
+        ...payload,
+        mode: event.mode,
+      })
     },
     searchTextChange(text) {
       if ((text === null || text.length === 0) && this.isSearching) {
-        this.isSearching = false;
-        this.searchPage = 1;
-        this.$store.commit("resetFilteredTests");
+        this.isSearching = false
+        this.searchPage = 1
+        this.$store.commit('resetFilteredTests')
       }
     },
     searchQuery(text) {
-      this.searchPage = 1;
-      this.$store.commit("resetFilteredTests");
+      this.searchPage = 1
+      this.$store.commit('resetFilteredTests')
 
       if (text && text.length > 0) {
-        this.isSearching = true;
-        this.$store.dispatch("searchTests", text);
+        this.isSearching = true
+        this.$store.dispatch('searchTests', text)
 
-        analytics.logEvent("search", {
-          search_term: text
-        });
+        analytics.logEvent('search', {
+          search_term: text,
+        })
       } else {
-        this.isSearching = false;
+        this.isSearching = false
       }
     },
     itemRowStyle(item) {
       return item.toDelete
         ? item.toDelete.status
-          ? "item-to-delete"
-          : "item-deleted"
-        : "";
+          ? 'item-to-delete'
+          : 'item-deleted'
+        : ''
     },
     restoreTest(item) {
-      this.$store.dispatch("restoreMarkedTest", {
+      this.$store.dispatch('restoreMarkedTest', {
         id: item.id,
-        isSearching: this.isSearching
-      });
+        isSearching: this.isSearching,
+      })
     },
     restoreAll(all) {
-      this.$store.dispatch("restoreAllMarkedTests", {
+      this.$store.dispatch('restoreAllMarkedTests', {
         all,
         user: this.userInfo,
-        isSearching: this.isSearching
-      });
-    }
+        isSearching: this.isSearching,
+      })
+    },
   },
   mounted() {
-    this.deleteConfirmed = false;
-    this.$store.dispatch("checkDeleteMarkTests");
-    this.$store.dispatch("loadFOLTestPage", {
+    this.deleteConfirmed = false
+    this.$store.dispatch('checkDeleteMarkTests')
+    this.$store.dispatch('loadTestPage', {
       page: 1,
       itemsPerPage: this.itemsPerPage,
-      mode: "first"
-    });
+      mode: 'first',
+    })
   },
   beforeDestroy() {
-    this.search = "";
-    this.isSearching = false;
-    this.page = 1;
-    this.$store.commit("resetFilteredTests");
-    this.$store.commit("resetCurrentTestsPage");
+    this.search = ''
+    this.isSearching = false
+    this.page = 1
+    this.$store.commit('resetFilteredTests')
+    this.$store.commit('resetCurrentTestsPage')
 
     if (this.deleteConfirmed) {
-      this.$store.dispatch("deleteTests");
-      this.$store.dispatch("resetTests");
-      this.$store.dispatch("loadDataSize");
+      this.$store.dispatch('deleteTests')
+      this.$store.dispatch('resetTests')
+      this.$store.dispatch('loadDataSize')
     }
-  }
-};
+  },
+}
 </script>
 
 <style>

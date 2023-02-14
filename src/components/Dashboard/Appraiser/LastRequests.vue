@@ -2,21 +2,21 @@
   <v-card width="100%" height="100%" class="last-requests">
     <div class="last-requests-container">
       <h1 class="last-requests-title">
-        {{ $t("DASHBOARD.LAST_REQUESTS.requests") }}
+        {{ $t('DASHBOARD.LAST_REQUESTS.requests') }}
       </h1>
       <span
         class="see-all"
         v-if="requests && requests.length >= 4"
         @click="pushUrl"
       >
-        {{ $t("DASHBOARD.LAST_REQUESTS.see_all") }}
+        {{ $t('DASHBOARD.LAST_REQUESTS.see_all') }}
       </span>
       <div
         v-if="requests && requests.length > 0"
         class="last-requests-sub-container"
         :style="getFlexStyle"
       >
-        <div v-for="item in requests" :key="item.name" class="request-row">
+        <div v-for="item in requests" :key="item.id" class="request-row">
           <div class="details-container">
             <div class="name">{{ item.name }}</div>
             <div class="subject">{{ item.subject }}</div>
@@ -25,15 +25,15 @@
             class="status"
             :style="{
               color: getColor(item.status),
-              backgroundColor: getColor(item.status) + '33'
+              backgroundColor: getColor(item.status) + '33',
             }"
           >
-            {{ $t("REQUESTS.STATUS." + item.status) }}
+            {{ $t('REQUESTS.STATUS.' + item.status) }}
           </div>
         </div>
       </div>
       <div v-else class="no-content">
-        {{ $t("DASHBOARD.LAST_REQUESTS.no_requests") }}
+        {{ $t('DASHBOARD.LAST_REQUESTS.no_requests') }}
       </div>
     </div>
   </v-card>
@@ -41,51 +41,51 @@
 
 <script>
 export default {
-  name: "LastRequests",
+  name: 'LastRequests',
   computed: {
     requests() {
-      return this.$store.getters.getCurrentUserRequests;
+      return this.$store.getters.getCurrentUserRequests
     },
     getFlexStyle() {
       if (this.requests.length <= 3) {
-        return { justifyContent: "flex-start", gap: "10px" };
+        return { justifyContent: 'flex-start', gap: '10px' }
       } else if (this.requests.length === 3) {
-        return { justifyContent: "space-between" };
+        return { justifyContent: 'space-between' }
       } else {
-        return { justifyContent: "space-between" };
+        return { justifyContent: 'space-between' }
       }
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
+      return this.$store.getters.getUserClaims
     },
     userInfo() {
-      return this.$store.getters.userInfo;
-    }
+      return this.$store.getters.userInfo
+    },
   },
   methods: {
     getColor(status) {
-      if (status === "pendant") {
-        return "#ffaa00";
-      } else if (status === "approved") {
-        return "#00cc44";
+      if (status === 'pendant') {
+        return '#ffaa00'
+      } else if (status === 'approved') {
+        return '#00cc44'
       } else {
-        return "#ff2233";
+        return '#ff2233'
       }
     },
     pushUrl() {
-      this.$router.push("/inbox");
-    }
+      this.$router.push('/inbox')
+    },
   },
   mounted() {
-    if (this.userClaims && this.userClaims["appraiser"]) {
-      this.$store.dispatch("loadUserRequests", {
+    if (this.userClaims && this.userClaims['appraiser']) {
+      this.$store.dispatch('loadUserRequests', {
         userId: this.userInfo.id,
-        mode: "current",
-        limit: 4
-      });
+        mode: 'current',
+        limit: 4,
+      })
     }
-  }
-};
+  },
+}
 </script>
 
 <style scoped>
