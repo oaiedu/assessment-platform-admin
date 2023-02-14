@@ -499,8 +499,9 @@ export default {
             userId: this.userInfo.id,
             status: 'pendant',
           },
-          user: this.userInfo,
         })
+
+        await this.$store.dispatch('refetchRequests')
       }
 
       this.$emit('questionCreated')

@@ -428,25 +428,15 @@ export default {
       this.$store.commit('setSuccess', 'Question successfully deleted!')
     },
     onPageChange(event) {
-      const payload = {
-        page: this.page,
-        itemsPerPage: this.itemsPerPage,
-      }
-
       if (this.isSearching) {
         return
       }
 
-      if (!event.mode) {
-        return void this.$store.dispatch('loadQuestionPage', {
-          ...payload,
-          direction: event.direction,
-        })
-      }
-
       this.$store.dispatch('loadQuestionPage', {
-        ...payload,
+        page: this.page,
+        itemsPerPage: this.itemsPerPage,
         mode: event.mode,
+        direction: event.direction,
       })
     },
     searchTextChange(text) {

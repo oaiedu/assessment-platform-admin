@@ -506,7 +506,6 @@ export default {
         await this.$store.dispatch('updateQuestionRequest', {
           mode: 'reqUpdate',
           request,
-          user: this.userInfo,
           isSearching: this.isSearching,
         })
       }

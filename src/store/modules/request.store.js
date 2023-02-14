@@ -1,8 +1,15 @@
-import { Store } from "vuex";
+import { Store } from 'vuex'
 
-import { analytics, db, storage } from "../../main";
-import { createErrorLog, showErrorMessage } from "../../utils/errors";
-import { getNowISOString } from "../../utils/date";
+import { analytics, db, storage } from '../../main'
+import { createErrorLog, showErrorMessage } from '../../utils/errors'
+import { getNowISOString } from '../../utils/date'
+import { RequestEntity } from '../../entities/request.entity'
+import { UserEntity } from '../../entities/user.entity'
+import { RequestController } from '../../controllers/request.controller'
+
+/**
+ * @typedef {import('../../controllers/base.controller').OrderBy} OrderBy
+ */
 
 /**
  * @typedef {import('./questions.store.js').DeleteStatus} DeleteStatus
@@ -12,51 +19,21 @@ import { getNowISOString } from "../../utils/date";
  */
 
 /**
- * @typedef {Object} RequestCreation
- * @property {string} name The request name.
- * @property {string} userId The user that created the request.
- * @property {string} subject The request subject.
- * @property {string} question The request description.
- * @property {Level} level The request level.
- * @property {string} image The request image url.
- * @property {string} imageSize The size of the image.
- * @property {boolean} multipleAnswers Whether the request has multiple correct answers.
- * @property {Answer[]} answers The request answers.
- * @property {string} answerJustification The request answer general justification.
- * @property {string} answerJustificationSource The request answer justifications sources.
- * @property {RequestStatus} status The request status.
- */
-
-/**
- * @typedef {Object} Request
- * @property {string} name The request name.
- * @property {string} userId The user that created the request.
- * @property {string} subject The request subject.
- * @property {string} question The request description.
- * @property {Level} level The request level.
- * @property {string} image The request image url.
- * @property {string} imageSize The size of the image.
- * @property {string|undefined} created The request creation date.
- * @property {string|undefined} updated The request edition date.
- * @property {boolean} multipleAnswers Whether the request has multiple correct answers.
- * @property {Answer[]} answers The request answers.
- * @property {string} answerJustification The request answer general justification.
- * @property {string} answerJustificationSource The request answer justifications sources.
- * @property {RequestStatus} status The request status.
- * @property {DeleteStatus|undefined} toDelete The request deletion status.
- */
-
-/**
  * @typedef {Object} RequestState
- * @property {Object.<string, Request[]} requests - The pages with it's requests list.
- * @property {Request[]} filteredRequests - An array of requests filtered by name.
- * @property {Request[]} currentRequestsPage - An array of requests of the current page.
- * @property {[string, string]|null} lastRequestDocument - An array with the first and last test name from the last request.
- * @property {Request[]} deleteMarkRequests - An array of requests that were marked to be deleted.
- * @property {Request[]} lastPendentTests - An array of the most recent pending tests.
- * @property {Request[]} currentUserRequests - An array of the current user last pending requests.
- * @property {Request[]} otherUserRequests - An array of other users last pending requests.
+ * @property {Record<string, RequestEntity[]} requests - The pages with it's requests list.
+ * @property {RequestEntity[]} filteredRequests - An array of requests filtered by name.
+ * @property {RequestEntity[]} currentRequestsPage - An array of requests of the current page.
+ * @property {[string, string]?} lastRequestDocument - An array with the first and last test name from the last request.
+ * @property {RequestEntity[]} deleteMarkRequests - An array of requests that were marked to be deleted.
+ * @property {RequestEntity[]} lastPendentRequests - An array of the most recent pending tests.
+ * @property {RequestEntity[]} currentUserRequests - An array of the current user last pending requests.
+ * @property {RequestEntity[]} otherUserRequests - An array of other users last pending requests.
  */
+
+/**
+ * Defines the request controller.
+ */
+const controller = new RequestController()
 
 /**
  * Gets the initial state of the request state.
@@ -71,1296 +48,980 @@ const initialState = () => ({
   deleteMarkQuestions: [],
   lastPendentRequests: [],
   currentUserRequests: [],
-  otherUserRequests: []
-});
+  otherUserRequests: [],
+})
 
-const state = initialState();
+const state = initialState()
 
 const mutations = {
   /**
    * Sets a page of requests according to the given data.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Object} data - The data containing the page number and it's data.
-   * @param {string} data.page - The page number.
-   * @param {Request[]} data.data - An array of requests.
+   * @param {RequestState} state The request state.
+   * @param {Object} data The data containing the page number and it's data.
+   * @param {string} data.page The page number.
+   * @param {RequestEntity[]} data.data An array of requests.
    */
   setRequestPage(state, data) {
-    state.requests[data.page] = data.data;
+    const { page, data: requests } = data
+    state.requests[page] = requests.map(r => r.clone())
   },
   /**
    * Sets the filtered requests.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request[]} data - An array of filtered requests.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity[]} data An array of filtered requests.
    */
   setFilteredRequests(state, data) {
-    state.filteredRequests = data;
+    state.filteredRequests = data.map(r => r.clone())
   },
   /**
    * Cleans the filtered requests array.
    *
-   * @param {RequestState} state - The request state.
+   * @param {RequestState} state The request state.
    */
   resetFilteredRequests(state) {
-    state.filteredRequests = [];
+    state.filteredRequests = []
   },
   /**
    * Cleans the current requests page array.
    *
-   * @param {RequestState} state - The request state.
+   * @param {RequestState} state The request state.
    */
   resetCurrentRequestsPage(state) {
-    state.currentRequestsPage = [];
+    state.currentRequestsPage = []
   },
   /**
    * Sets the current requests page array.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request[]} data - An array of requests.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity[]} data An array of requests.
    */
   setCurrentRequestsPage(state, data) {
-    state.currentRequestsPage = data;
+    state.currentRequestsPage = data.map(r => r.clone())
   },
   /**
    * Sets the most recent pending requests.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request[]} data - An array of requests.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity[]} data An array of requests.
    */
   setLastPendentRequests(state, data) {
-    state.lastPendentRequests = data;
+    state.lastPendentRequests = data.map(r => r.clone())
   },
   /**
    * Sets the most recent pending requests from the current user.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request[]} data - An array of requests.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity[]} data An array of requests.
    */
   setCurrentUserRequests(state, data) {
-    state.currentUserRequests = data;
+    state.currentUserRequests = data.map(r => r.clone())
   },
   /**
    * Sets the most recent pending requests from other users.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request[]} data - An array of requests.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity[]} data An array of requests.
    */
   setOtherUserRequests(state, data) {
-    state.otherUserRequests = data;
+    state.otherUserRequests = data.map(r => r.clone())
   },
   /**
    * Adds a request to the array of requests marked to be deleted.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request} data - The request to be added.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity} data The request to be added.
    */
   addDeleteMarkRequest(state, data) {
-    state.deleteMarkRequests.push(data);
+    state.deleteMarkRequests.push(data.clone())
   },
   /**
    * Updates a request that's into the array of requests marked to be deleted.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request} data - The request to be updated.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity} data The request to be updated.
    */
   updateDeleteMarkRequest(state, data) {
-    const requests = [...state.deleteMarkRequests];
-    requests.forEach((item, index) => {
+    const requests = [...state.deleteMarkRequests]
+
+    requests.every((item, index) => {
       if (item.name === data.name) {
-        requests[index] = data;
+        requests[index] = data.clone()
+        return
       }
-    });
-    state.deleteMarkRequests = requests;
+
+      return true
+    })
+
+    state.deleteMarkRequests = requests
   },
   /**
    * Removes a request from the array of requests marked to be deleted.
    *
-   * @param {RequestState} state - The request state.
-   * @param {string} data - The name of the request to be removed.
+   * @param {RequestState} state The request state.
+   * @param {string} data The name of the request to be removed.
    */
   removeDeleteMarkRequest(state, data) {
-    const requests = [...state.deleteMarkRequests];
-    requests.forEach((item, index) => {
+    const requests = [...state.deleteMarkRequests]
+
+    requests.every((item, index) => {
       if (item.name === data) {
-        state.deleteMarkRequests.splice(index, 1);
+        requests.splice(index, 1)
+        return
       }
-    });
+
+      return true
+    })
+
+    state.deleteMarkRequests = requests
   },
   /**
    * Sets the array of requests marked to be deleted.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request[]} data - An array of requests.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity[]} data An array of requests.
    */
   setDeleteMarkRequests(state, data) {
-    state.deleteMarkRequests = data;
+    state.deleteMarkRequests = data.map(r => r.clone())
   },
   /**
    * Sets a request as marked to be deleted.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Object} data - The data containing the request name and it's deletion status.
-   * @param {string} data.name - The request name.
-   * @param {DeleteStatus} data.toDelete - The request deletion status.
+   * @param {RequestState} state The request state.
+   * @param {Object} data The data containing the request name and it's deletion status.
+   * @param {string} data.name The request name.
+   * @param {DeleteStatus} data.toDelete The request deletion status.
    */
   setDeleteMarkRequest(state, data) {
-    const requests = state.requests;
-    for (let key in requests) {
-      if (requests[key]) {
-        requests[key].forEach((item, index) => {
-          if (item.name === data.name) {
-            state.requests[key][index] = {
-              ...item,
-              toDelete: data.toDelete
-            };
-          }
-        });
+    const requests = { ...state.requests }
+
+    for (const key in requests) {
+      if (!requests[key]) {
+        continue
       }
+
+      requests[key].every((item, index) => {
+        if (item.name === data.name) {
+          requests[key][index] = new RequestEntity({
+            ...item,
+            toDelete: data.toDelete,
+          })
+
+          return
+        }
+
+        return true
+      })
     }
+
+    state.requests = requests
   },
   /**
    * Sets a filtered request as marked to be deleted.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Object} data - The data containing the request name and it's deletion status.
-   * @param {string} data.name - The request name.
-   * @param {DeleteStatus} data.toDelete - The request deletion status.
+   * @param {RequestState} state The request state.
+   * @param {Object} data The data containing the request name and it's deletion status.
+   * @param {string} data.name The request name.
+   * @param {DeleteStatus} data.toDelete The request deletion status.
    */
   setDeleteMarkFilteredRequest(state, data) {
-    const requests = [...state.filteredRequests];
-    requests.forEach((item, index) => {
+    const requests = [...state.filteredRequests]
+
+    requests.every((item, index) => {
       if (item.name === data.name) {
-        requests[index] = { ...item, toDelete: data.toDelete };
+        requests[index] = new RequestEntity({
+          ...item,
+          toDelete: data.toDelete,
+        })
+
+        return
       }
-    });
-    state.filteredRequests = requests;
-  },
-  /**
-   * Adds a request into the requests object, according to the given data.
-   *
-   * @param {RequestState} state - The request state.
-   * @param {Object} data - The data containing the page number, requests amount and the data to be added.
-   * @param {number} data.page - The page number.
-   * @param {number} data.amount - The total amount of requests.
-   * @param {Request} data.data - The request to be added.
-   */
-  addRequest(state, data) {
-    const page = data.page;
-    const requests = state.requests["p" + page] || [];
-    const amount = data.amount;
-    const oneBefore = state.requests["p" + (page - 1)] || [];
-    if (requests.length > 0 || oneBefore.length === 8 || amount === 0) {
-      requests.push(data.data);
-      state.requests["p" + page] = [...requests];
-      if (amount === 0 || state.currentRequestsPage.length < 8) {
-        state.currentRequestsPage = [...state.currentRequestsPage, data.data];
-      }
-    }
+
+      return true
+    })
+
+    state.filteredRequests = requests
   },
   /**
    * Updates a request.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request} data - The request to be updated.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity} data The request to be updated.
    */
   updateRequest(state, data) {
-    const requests = { ...state.requests };
-    for (let key in requests) {
-      if (requests[key]) {
-        requests[key].forEach((item, index) => {
-          if (item.name === data.name) {
-            requests[key][index] = { ...data, user: item.user };
-          }
-        });
+    const requests = { ...state.requests }
+
+    for (const key in requests) {
+      if (!requests[key]) {
+        continue
       }
+
+      requests[key].every((item, index) => {
+        if (item.name === data.name) {
+          requests[key][index] = new RequestEntity({
+            ...data.clone(),
+            user: item.user,
+          })
+
+          return
+        }
+
+        return true
+      })
     }
-    state.requests = requests;
+
+    state.requests = requests
   },
   /**
    * Updates a request that's in the filtered requests array.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request} data - The request to be updated.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity} data The request to be updated.
    */
   updateFilteredRequest(state, data) {
-    const requests = [...state.filteredRequests];
-    requests.forEach((item, index) => {
+    const requests = [...state.filteredRequests]
+
+    requests.every((item, index) => {
       if (item.name === data.name) {
-        requests[index] = data;
+        requests[index] = data.clone()
+
+        return
       }
-    });
-    state.filteredRequests = requests;
+
+      return true
+    })
+
+    state.filteredRequests = requests
   },
   /**
    * Updates a request that's in the current requests page array.
    *
-   * @param {RequestState} state - The request state.
-   * @param {Request} data - The request to be updated.
+   * @param {RequestState} state The request state.
+   * @param {RequestEntity} data The request to be updated.
    */
   updateCurrentRequestsPage(state, data) {
-    const requests = [...state.currentRequestsPage];
-    requests.forEach((item, index) => {
+    const requests = [...state.currentRequestsPage]
+
+    requests.every((item, index) => {
       if (item.name === data.name) {
-        requests[index] = data;
+        requests[index] = data.clone()
+
+        return
       }
-    });
-    state.currentRequestsPage = requests;
+
+      return true
+    })
+
+    state.currentRequestsPage = requests
   },
   /**
    * Removes a request from the requests object.
    *
-   * @param {RequestState} state - The request state.
-   * @param {string} data - The name of the request to be removed.
+   * @param {RequestState} state The request state.
+   * @param {string} data The id of the request to be removed.
    */
   removeRequest(state, data) {
-    const requests = state.requests;
-    for (let key in requests) {
-      if (requests[key]) {
-        requests[key].forEach((item, index) => {
-          if (item.name === data) {
-            state.requests[key].splice(index, 1);
-          }
-        });
+    const requests = { ...state.requests }
+
+    for (const key in requests) {
+      if (!requests[key]) {
+        continue
       }
+
+      requests[key].every((item, index) => {
+        if (item.id === data) {
+          requests[key].splice(index, 1)
+
+          return
+        }
+
+        return true
+      })
     }
+
+    state.requests = requests
   },
   /**
    * Removes a request from the filtered requests array.
    *
-   * @param {RequestState} state - The request state.
+   * @param {RequestState} state The request state.
    * @param {string} data The name of the request to be removed.
    */
   removeFilteredRequest(state, data) {
-    const request = state.filteredRequests;
-    request.forEach((item, index) => {
+    const requests = [...state.filteredRequests]
+
+    requests.every((item, index) => {
       if (item.name === data) {
-        state.filteredRequests.splice(index, 1);
+        requests.splice(index, 1)
+
+        return
       }
-    });
+
+      return true
+    })
+
+    state.filteredRequests = requests
   },
   /**
    * Sets the last requests request ids.
    *
-   * @param {RequestState} state - The request state.
-   * @param {[string, string]} data An array of strings containing the first and last names from the last request.
+   * @param {RequestState} state The request state.
+   * @param {[string, string]?} data An array of strings containing the first and last names from the last request.
    */
   setLastRequestDocument(state, data) {
-    state.lastRequestDocument = data;
+    state.lastRequestDocument = data
   },
   /**
    * Resets the request state to it's initial state.
    *
-   * @param {RequestState} state - The request state.
+   * @param {RequestState} state The request state.
    */
   RESETRequests(state) {
-    const newState = initialState();
+    const newState = initialState()
     Object.keys(newState).forEach(key => {
-      state[key] = newState[key];
-    });
-  }
-};
+      state[key] = newState[key]
+    })
+  },
+}
 
 const actions = {
   /**
    * Creates a new request.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {RequestCreation} payload.request - The request to be created.
-   * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {Partial<RequestEntity>} payload.request The request to be created.
    */
   async createQuestionRequest({ commit }, payload) {
-    commit("setLoading", true);
+    commit('setLoading', true)
 
-    const { user } = payload;
-
-    const createdDate = getNowISOString();
-
-    const request = {
-      ...payload.request,
-      created: createdDate,
-      updated: createdDate
-    };
-
-    const requestAmount = this.getters.getDataSize["question-requests"].users[
-      user.id
-    ];
-
-    const pageAmount = Math.ceil(requestAmount / 8);
-    const amount = requestAmount % 8;
+    const { request } = payload
 
     try {
-      await db.collection("question-requests").add(request);
+      const { dataSize } = await controller.createOne(request)
 
-      analytics.logEvent("create_request", {
-        subject: request.subject,
-        level: request.level.index,
-        user: request.userId
-      });
+      commit('addRemoveSize', {
+        key: 'question-requests',
+        data: dataSize['question-requests'],
+      })
 
-      commit("addRequest", {
-        page: amount === 0 ? pageAmount + 1 : pageAmount,
-        data: { ...request, user: user },
-        amount: requestAmount
-      });
-
-      commit("setLoading", false);
-
-      const sizeSnap = await db.collection("data-size").get();
-
-      const document = sizeSnap.docs[0];
-      const general = document.data()["question-requests"].general;
-      const subSize = document.data()["question-requests"].users[user.id] || 0;
-
-      const questionRequests = {
-        general: general + 1,
-        users: {
-          ...document.data()["question-requests"].users,
-          [user.id]: subSize + 1
-        }
-      };
-
-      await document.ref.update({ ["question-requests"]: questionRequests });
-
-      commit("addRemoveSize", {
-        key: "question-requests",
-        data: questionRequests
-      });
-
-      commit("setSuccess", "Request successfully created!");
+      commit('setSuccess', 'Request successfully created!')
     } catch (error) {
-      const errorModel = showErrorMessage("creation", "Request", error.message);
+      const errorModel = showErrorMessage('creation', 'Request', error.message)
 
-      commit("setError", { message: errorModel });
-      createErrorLog("Request DB Insert", error.message, {
-        payload,
-        requestAmount
-      });
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Request DB Insert', error.message, payload)
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
   },
   /**
    * Updates a request based on it's name.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {Request} payload.request - The request to be updated.
-   * @param {RequestStatus|undefined} payload.status - The request new status.
-   * @param {"reqUpdate"|"sttUpdate"} payload.mode - If reqUpdate, update all the request data. Otherwise, update only it's status.
-   * @param {import('./user.store.js').UserInfo} payload.user - The request to be updated.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {Partial<RequestEntity>} payload.request The request to be updated.
+   * @param {RequestStatus?} payload.status The request new status.
+   * @param {"reqUpdate"|"sttUpdate"} payload.mode If reqUpdate, update all the request data. Otherwise, update only it's status.
    */
   async updateQuestionRequest({ commit }, payload) {
-    commit("setLoading", true);
-    const { mode, request, user, isSearching } = payload;
-
-    const toUpdate = {
-      ...request,
-      updated: getNowISOString()
-    };
+    commit('setLoading', true)
+    const { mode, request: requestData, isSearching, status } = payload
 
     try {
-      const snapshot = await db
-        .collection("question-requests")
-        .where("name", "==", request.name)
-        .get();
-
-      if (mode === "sttUpdate") {
-        await snapshot.docs[0].ref.update({
-          status: payload.status,
-          updated: toUpdate.updated
-        });
-
-        toUpdate.status = payload.status;
-      } else {
-        await snapshot.docs[0].ref.update(toUpdate);
-      }
-
-      commit("updateRequest", { ...toUpdate, user });
-      commit("updateCurrentRequestsPage", {
-        ...toUpdate,
-        user
-      });
+      const request = await controller.updateOne({
+        ...requestData,
+        status: mode === 'sttUpdate' ? status : requestData.status ?? null,
+      })
 
       if (isSearching) {
-        commit("updateFilteredRequest", {
-          ...toUpdate,
-          user
-        });
+        commit('updateFilteredRequest', request)
       }
 
-      if (mode !== "sttUpdate") {
-        commit("setSuccess", "Request successfully edited!");
+      commit('updateRequest', request)
+      commit('updateCurrentRequestsPage', request)
+
+      if (mode === 'sttUpdate') {
+        return
       }
+
+      commit('setSuccess', 'Request successfully edited!')
     } catch (error) {
-      const errorModel = showErrorMessage("edition", "Request", error.message);
+      const errorModel = showErrorMessage('edition', 'Request', error.message)
 
-      commit("setError", { message: errorModel });
-      createErrorLog("Request DB Update", error.message, { payload });
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Request DB Update', error.message, { payload })
     } finally {
-      commit("setLoading", false);
+      commit('setLoading', false)
     }
+  },
+  /**
+   * Reloads the requests page.
+   *
+   * @param {Store<RequestState>} store The vuex store.
+   */
+  async refetchRequests({ dispatch, state }) {
+    state.requests = {}
+
+    await dispatch('checkDeleteMarkRequests')
+
+    await dispatch('loadRequestPage', {
+      page: 1,
+      itemsPerPage: 8,
+      mode: 'first',
+    })
   },
   /**
    * Loads a page of requests according to the payload data.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {number} payload.page - The page number.
-   * @param {number} payload.itemsPerPage - The amount of items per page.
-   * @param {"next"|"previous"} payload.type - The data request type.
-   * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
-   * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {number} payload.page The page number.
+   * @param {number} payload.itemsPerPage The amount of items per page.
+   * @param {"next"|"previous"|null} payload.direction The data request direction.
+   * @param {"first"|"last"|null} payload.mode The data request mode.
+   * @param {Partial<UserEntity>} payload.userInfo The current user info.
+   * @param {import('./user.store.js').UserClaims} payload.claims The current user claims.
    */
-  loadRequestPage({ commit, dispatch, state }, payload) {
-    commit("setLoading", true);
+  async loadRequestPage({ commit, dispatch, state }, payload) {
+    commit('setLoading', true)
 
-    const { claims, page, itemsPerPage, type, userInfo } = payload;
-    const data = [];
-    const pages = Object.keys(state.requests);
+    const { claims, page, itemsPerPage, direction, mode, userInfo } = payload
+    const pages = Object.keys(state.requests)
 
-    if (!pages.includes("p" + page)) {
-      let request = null;
-      let ref = null;
+    const dir = direction ?? (mode === 'first' ? 'forward' : 'backward')
 
-      if (claims && claims["admin"]) {
-        ref = db.collection("question-requests").orderBy("name");
-      } else {
-        ref = db
-          .collection("question-requests")
-          .orderBy("name")
-          .where("userId", "==", userInfo.id);
-      }
+    let perPage = itemsPerPage
 
-      if (type === "next") {
-        request = ref
-          .startAfter(state.lastRequestDocument[1])
-          .limit(itemsPerPage)
-          .get();
-      } else {
-        request = ref
-          .endBefore(state.lastRequestDocument[0])
-          .limitToLast(itemsPerPage)
-          .get();
-      }
-
-      let first = null,
-        last = null;
-
-      request
-        .then(async snapshot => {
-          if (snapshot.docs.length > 0) {
-            first = snapshot.docs[0].data().name;
-            last = snapshot.docs[snapshot.docs.length - 1].data().name;
-
-            const promises = snapshot.docs.map(async doc => {
-              const userData = await dispatch("getUserById", {
-                id: doc.data().userId
-              });
-              data.push({ ...doc.data(), user: userData });
-              return userData;
-            });
-
-            await Promise.all(promises);
-          }
-        })
-        .then(() => {
-          commit("setCurrentRequestsPage", data);
-          commit("setRequestPage", { page: "p" + page, data });
-          commit("setLastRequestDocument", [first, last]);
-          commit("setLoading", false);
-        })
-        .catch(error => {
-          commit("setLoading", false);
-          const errorModel = showErrorMessage(
-            "load",
-            "Requests",
-            error.message
-          );
-          commit("setError", { message: errorModel });
-          createErrorLog("Request Page Load", error.message, {
-            payload,
-            data
-          });
-        });
-    } else {
-      const pageContent = state.requests["p" + page];
-      const first = pageContent[0].name;
-      const last = pageContent[pageContent.length - 1].name;
-
-      commit("setCurrentRequestsPage", pageContent);
-      commit("setLastRequestDocument", [first, last]);
-      commit("setLoading", false);
+    if (mode === 'last') {
+      perPage =
+        this.getters.getDataSize['question-requests'].general % itemsPerPage ||
+        0
     }
-  },
-  /**
-   * Loads the first or last page according to the payload data.
-   *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {number} payload.page - The page number.
-   * @param {number} payload.itemsPerPage - The amount of items per page.
-   * @param {"first"|"last"} payload.mode - The data request mode.
-   * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
-   * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
-   */
-  loadFOLRequestPage({ commit, dispatch, state }, payload) {
-    commit("setLoading", true);
 
-    const { claims, page, itemsPerPage, mode, userInfo } = payload;
-    const data = [];
-    const pages = Object.keys(state.requests);
+    try {
+      dispatch('deleteRequests')
 
-    const requestAmount = this.getters.getDataSize["question-requests"].users[
-      userInfo.id
-    ];
-    const amount = requestAmount % 8;
+      if (pages.includes(`p${page}`)) {
+        const pageContent = state.requests['p' + page]
 
-    if (!pages.includes("p" + page)) {
-      let request = null;
-      let ref = null;
+        if (pageContent && pageContent.length) {
+          const startDoc = pageContent[0].name
+          const endDoc = pageContent[pageContent.length - 1].name
 
-      if (claims && claims["admin"]) {
-        ref = db.collection("question-requests").orderBy("name");
-      } else {
-        ref = db
-          .collection("question-requests")
-          .orderBy("name")
-          .where("userId", "==", userInfo.id);
+          commit('setLastRequestDocument', [startDoc, endDoc])
+        }
+
+        return void commit('setCurrentRequestsPage', pageContent)
       }
 
-      if (mode === "first") {
-        request = ref.limit(itemsPerPage).get();
-      } else {
-        request = ref.limitToLast(amount || 8).get();
+      const userId = claims && claims['admin'] ? null : userInfo.id
+
+      const { data, startDoc, endDoc } = await controller.list(
+        {
+          direction: dir,
+          itemsPerPage: perPage,
+          lastDoc: mode ? null : state.lastRequestDocument,
+          orderBy: 'name',
+        },
+        userId,
+      )
+
+      commit('setCurrentRequestsPage', data)
+      commit('setRequestPage', { page: 'p' + page, data })
+
+      if (startDoc) {
+        commit('setLastRequestDocument', [startDoc, endDoc])
       }
 
-      let first = null,
-        last = null;
+      commit('setLastRequestDocument', null)
+    } catch (error) {
+      const errorModel = showErrorMessage('load', 'Requests', error.message)
 
-      request
-        .then(async snapshot => {
-          if (snapshot.docs.length > 0) {
-            first =
-              snapshot.docs.length > 0 ? snapshot.docs[0].data().name : "";
-            last =
-              snapshot.docs.length > 0
-                ? snapshot.docs[snapshot.docs.length - 1].data().name
-                : "";
+      commit('setError', { message: errorModel })
 
-            const promises = snapshot.docs.map(async doc => {
-              const userData = await dispatch("getUserById", {
-                id: doc.data().userId
-              });
-              data.push({ ...doc.data(), user: userData });
-              return userData;
-            });
-
-            await Promise.all(promises);
-
-            commit("setCurrentRequestsPage", data);
-            commit("setRequestPage", { page: "p" + page, data });
-            commit("setLastRequestDocument", [first, last]);
-          }
-          commit("setLoading", false);
-        })
-        .catch(error => {
-          commit("setLoading", false);
-          const errorModel = showErrorMessage(
-            "load",
-            "Requests",
-            error.message
-          );
-          commit("setError", { message: errorModel });
-          createErrorLog("Request FOL Page Load", error.message, {
-            payload,
-            data,
-            requestAmount
-          });
-        });
-    } else {
-      const pageContent = state.requests["p" + page];
-
-      if (pageContent && pageContent[0]) {
-        const first = pageContent[0].name;
-        const last = pageContent[pageContent.length - 1].name;
-        commit("setCurrentRequestsPage", pageContent);
-        commit("setLastRequestDocument", [first, last]);
-      }
-
-      commit("setLoading", false);
+      createErrorLog('Request Page Load', error.message, payload)
+    } finally {
+      commit('setLoading', false)
     }
   },
   /**
    * Searches for requests based on their name.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.key - The string to be searched.
-   * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
-   * @param {import('./user.store.js').UserClaims} payload.claims - The current user claims.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.key The string to be searched.
+   * @param {Partial<UserEntity>} payload.userInfo The current user info.
+   * @param {import('./user.store.js').UserClaims} payload.claims The current user claims.
    */
-  searchRequests({ commit, dispatch }, payload) {
-    commit("setLoading", true);
+  async searchRequests({ commit, dispatch }, payload) {
+    commit('setLoading', true)
 
-    const { claims, key, userInfo } = payload;
-    const data = [];
+    const { claims, key, userInfo } = payload
 
-    let req = db
-      .collection("question-requests")
-      .orderBy("name")
-      .where("name", ">=", key.toUpperCase())
-      .where("name", "<=", key.toUpperCase() + "~");
+    try {
+      const requests = await controller.search(
+        key,
+        claims && claims['admin'] ? null : userInfo.id,
+      )
 
-    if (claims && !claims["admin"]) {
-      req = req.where("userId", "==", userInfo.id);
+      commit('setFilteredRequests', requests)
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        'load',
+        'Requests',
+        'Searching error - ' + error.message,
+      )
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Request Searching', error.message, payload)
+    } finally {
+      commit('setLoading', false)
     }
-
-    req
-      .get()
-      .then(async snapshot => {
-        const promises = snapshot.docs.map(async doc => {
-          const userData = await dispatch("getUserById", {
-            id: doc.data().userId
-          });
-          data.push({ ...doc.data(), user: userData });
-          return userData;
-        });
-
-        await Promise.all(promises);
-      })
-      .then(() => {
-        commit("setFilteredRequests", data);
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "load",
-          "Requests",
-          "Searching error - " + error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Request Searching", error.message, {
-          payload,
-          data
-        });
-      });
   },
   /**
    * Loads all requests that are marked to be deleted.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<RequestState>} store The vuex store.
    */
-  checkDeleteMarkRequests({ commit, dispatch }) {
-    const data = [];
-
-    db.collection("question-requests")
-      .where("toDelete.status", "==", true)
-      .get()
-      .then(async snapshot => {
-        const promises = snapshot.docs.map(async doc => {
-          const userData = await dispatch("getUserById", {
-            id: doc.data().userId
-          });
-          data.push({ ...doc.data(), user: userData });
-          return userData;
-        });
-
-        await Promise.all(promises);
+  async checkDeleteMarkRequests({ commit, dispatch }) {
+    try {
+      const requests = await controller.query({
+        where: [{ field: 'toDelete.status', operator: '==', value: true }],
       })
-      .then(() => {
-        commit("setDeleteMarkRequests", data);
-      })
-      .catch(error => {
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Request Mark Check", error.message, { data });
-      });
+
+      commit('setDeleteMarkRequests', requests)
+    } catch (error) {
+      const errorModel = showErrorMessage('connection', '', error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Request Mark Check', error.message)
+    }
   },
   /**
    * Marks a request to be deleted.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.name - The request name.
-   * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
-   * @param {string} payload.userId - The current user id.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.name The request name.
+   * @param {boolean} payload.isSearching Whether the application is using filtered requests or not.
+   * @param {string} payload.userEmail The current user email.
    */
-  deleteMarkRequest({ commit, dispatch }, payload) {
-    commit("setLoading", true);
+  async deleteMarkRequest({ commit }, payload) {
+    commit('setLoading', true)
 
-    const { name, isSearching, userId } = payload;
+    const { id, isSearching, userEmail } = payload
 
-    db.collection("question-requests")
-      .where("name", "==", name)
-      .get()
-      .then(async snapshot => {
-        const doc = snapshot.docs[0];
+    try {
+      const request = await controller.softDeleteOne(id, userEmail)
 
-        const toDelete = {
-          status: true,
-          userId
-        };
+      const deleteMark = {
+        name: request.name,
+        toDelete: request.toDelete,
+        user: request.user,
+      }
 
-        doc.ref.update({ toDelete });
+      if (isSearching) {
+        commit('setDeleteMarkFilteredRequest', deleteMark)
+      }
 
-        const user = await dispatch("getUserById", {
-          id: doc.data().userId
-        });
+      commit('setDeleteMarkRequest', deleteMark)
 
-        commit("setDeleteMarkRequest", { name, toDelete, user });
+      commit('updateCurrentRequestsPage', request)
+      commit('addDeleteMarkRequest', request)
+    } catch (error) {
+      commit('setLoading', false)
+      const errorModel = showErrorMessage('connection', '', error.message)
 
-        if (isSearching) {
-          commit("setDeleteMarkFilteredRequest", {
-            name,
-            toDelete,
-            user
-          });
-        }
+      commit('setError', { message: errorModel })
 
-        commit("updateCurrentRequestsPage", {
-          ...doc.data(),
-          toDelete,
-          user
-        });
-        commit("addDeleteMarkRequest", {
-          ...doc.data(),
-          toDelete,
-          user
-        });
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Request Delete Mark", error.message, {
-          payload
-        });
-      });
+      createErrorLog('Request Delete Mark', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Restores a request from being marked to be deleted.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.name - The request name.
-   * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string} payload.id The request id.
+   * @param {boolean} payload.isSearching Whether the application is using filtered requests or not.
    */
-  restoreMarkedRequest({ commit, dispatch }, payload) {
-    commit("setLoading", true);
+  async restoreMarkedRequest({ commit, dispatch }, payload) {
+    commit('setLoading', true)
 
-    const { name, isSearching } = payload;
-    let docData = null;
+    const { id, isSearching } = payload
 
-    db.collection("question-requests")
-      .where("name", "==", name)
-      .get()
-      .then(async snapshot => {
-        const doc = snapshot.docs[0];
-        const data = doc.data();
-        docData = data;
+    try {
+      const request = await controller.restoreOne(id)
 
-        /**
-         * @type {Request}
-         */
-        const request = {
-          created: data.created,
-          image: data.image,
-          imageSize: data.imageSize,
-          name: data.name,
-          question: data.question,
-          level: data.level,
-          multipleAnswers: data.multipleAnswers,
-          answers: data.answers,
-          answerJustification: data.answerJustification,
-          answerJustificationSource: data.answerJustificationSource,
-          status: data.status,
-          subject: data.subject,
-          updated: data.updated,
-          userId: data.userId
-        };
+      if (isSearching) {
+        commit('updateFilteredRequest', request)
+      }
 
-        const user = await dispatch("getUserById", {
-          id: doc.data().userId
-        });
+      commit('updateRequest', request)
 
-        doc.ref.set(request);
-        commit("updateRequest", { ...request, user });
+      commit('removeDeleteMarkRequest', request.name)
+      commit('updateCurrentRequestsPage', request)
 
-        if (isSearching) {
-          commit("updateFilteredRequest", { ...request, user });
-        }
+      commit('setSuccess', 'Request successfully restored!')
+    } catch (error) {
+      const errorModel = showErrorMessage('connection', '', error.message)
 
-        commit("removeDeleteMarkRequest", name);
-        commit("updateCurrentRequestsPage", { ...request, user });
-        commit("setLoading", false);
-        commit("setSuccess", "Request successfully restored!");
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Request Restore", error.message, {
-          payload,
-          docData
-        });
-      });
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Request Restore', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Restores all requests that are marked to be deleted.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
-   * @param {import('./user.store.js').UserInfo} payload.user - The current user info.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {boolean} payload.isSearching Whether the application is using filtered requests or not.
+   * @param {Partial<UserEntity>} payload.user The current user info.
    */
-  restoreAllMarkedRequests({ commit, state }, payload) {
-    commit("setLoading", true);
+  async restoreAllMarkedRequests({ commit, state }, payload) {
+    commit('setLoading', true)
 
-    const { isSearching, user } = payload;
-    let docData = null;
+    const { isSearching, user } = payload
 
-    db.collection("question-requests")
-      .where("toDelete.status", "==", true)
-      .where("toDelete.userId", "==", user.id)
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          docData = data;
+    try {
+      const requests = await controller.restoreAll(user.email)
 
-          /**
-           * @type {Request}
-           */
-          const request = {
-            created: data.created,
-            image: data.image,
-            imageSize: data.imageSize,
-            name: data.name,
-            question: data.question,
-            level: data.level,
-            multipleAnswers: data.multipleAnswers,
-            answers: data.answers,
-            answerJustification: data.answerJustification,
-            answerJustificationSource: data.answerJustificationSource,
-            status: data.status,
-            subject: data.subject,
-            updated: data.updated,
-            userId: data.userId
-          };
+      const falseMarkedRequests = state.deleteMarkRequests.filter(
+        q => !q.toDelete.status,
+      )
 
-          doc.ref.set(request);
-          const falseMarkedRequests = state.deleteMarkRequests.filter(
-            q => !q.toDelete.status
-          );
-          commit("setDeleteMarkRequests", falseMarkedRequests);
-          commit("updateRequest", { ...request, user });
-          commit("updateCurrentRequestsPage", { ...request, user });
-          if (isSearching)
-            commit("updateFilteredRequest", { ...request, user });
-          commit("setSuccess", "Requests successfully restored!");
-        });
-      })
-      .then(() => commit("setLoading", false))
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage("connection", "", error.message);
-        commit("setError", { message: errorModel });
-        createErrorLog("Request Restore All", error.message, {
-          payload,
-          docData
-        });
-      });
+      commit('setDeleteMarkRequests', falseMarkedRequests)
+
+      for (const request of requests) {
+        if (isSearching) {
+          commit('updateFilteredRequest', request)
+        }
+
+        commit('updateRequest', request)
+        commit('updateCurrentRequestsPage', request)
+      }
+
+      commit('setSuccess', 'Requests successfully restored!')
+    } catch (error) {
+      const errorModel = showErrorMessage('connection', '', error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Request Restore All', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Changes a request's delete status to false (confirmed deletion).
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {string} payload.name - The request name.
-   * @param {boolean} payload.isSearching - Whether the application is using filtered requests or not.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {string[]} payload.names The requests names.
+   * @param {boolean} payload.isSearching Whether the application is using filtered requests or not.
    */
-  changeDeleteStatusRequests({ commit, dispatch }, payload) {
-    commit("setLoading", true);
-    const { name, isSearching } = payload;
+  async changeDeleteStatusRequests({ commit, dispatch }, payload) {
+    commit('setLoading', true)
 
-    db.collection("question-requests")
-      .where("name", "==", name)
-      .get()
-      .then(async snapshot => {
-        const doc = snapshot.docs[0];
-        const toDelete = {
-          status: false
-        };
+    const { names, isSearching } = payload
 
-        doc.ref.update({ ...doc.data(), toDelete: { status: false } });
+    try {
+      const requests = await controller.updateQuery(
+        {
+          where: [
+            {
+              field: 'name',
+              operator: '==',
+              value: names,
+            },
+          ],
+        },
+        {
+          toDelete: {
+            status: false,
+          },
+        },
+      )
 
-        const user = await dispatch("getUserById", {
-          id: doc.data().userId
-        });
+      requests.forEach(request => {
+        if (isSearching) {
+          commit('updateFilteredRequest', request)
+        }
 
-        commit("updateCurrentRequestsPage", {
-          ...doc.data(),
-          toDelete,
-          user
-        });
-        commit("updateRequest", { ...doc.data(), toDelete, user });
-        commit("updateDeleteMarkRequest", {
-          ...doc.data(),
-          toDelete,
-          user
-        });
-        if (isSearching)
-          commit("updateFilteredRequest", {
-            ...doc.data(),
-            toDelete,
-            user
-          });
-
-        commit("setLoading", false);
-        commit("setSuccess", "Request successfully deleted!");
+        commit('updateRequest', request)
+        commit('updateCurrentRequestsPage', request)
+        commit('updateDeleteMarkRequest', request)
       })
-      .catch(error => {
-        const errorModel = showErrorMessage(
-          "exclusion",
-          "Request",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Request Confirm Delete", error.message, {
-          payload
-        });
-      });
+
+      commit('setSuccess', 'Request successfully deleted!')
+    } catch (error) {
+      const errorModel = showErrorMessage('exclusion', 'Request', error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Request Confirm Delete', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Deletes all requests that are marked to be deleted (toDelete.status = false).
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<RequestState>} store - The vuex store.
    */
-  deleteRequests({ commit }) {
-    const data = [];
+  async deleteRequests({ commit }) {
+    try {
+      const { requestsSize } = await controller.deleteMarked()
 
-    db.collection("question-requests")
-      .where("toDelete.status", "==", false)
-      .get()
-      .then(snapshot => {
-        const users = {};
-        snapshot.forEach(doc => {
-          doc.ref.delete();
-          data.push(doc.data());
-          if (doc.data().image && doc.data().image.length > 0) {
-            const image = doc.data().image;
-            const childImage = image.split("?alt=media")[0].split("/o/")[1];
-            const child = decodeURIComponent(childImage);
-            storage
-              .ref()
-              .child(child)
-              .delete();
-          }
-          if (users[doc.data().userId]) {
-            users[doc.data().userId] += 1;
-          } else {
-            users[doc.data().userId] = 1;
-          }
-        });
+      if (!requestsSize) {
+        return
+      }
 
-        db.collection("data-size")
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
-            const general = document.data()["question-requests"].general;
-
-            const questionRequests = {
-              general: general - snapshot.docs.length,
-              users: {
-                ...document.data()["question-requests"].users
-              }
-            };
-
-            for (let key in users) {
-              questionRequests.users[key] -= users[key];
-            }
-
-            document.ref
-              .update({ ["question-requests"]: questionRequests })
-              .then(() => {
-                commit("addRemoveSize", {
-                  key: "question-requests",
-                  data: questionRequests
-                });
-              })
-              .catch(error => {
-                console.error(error);
-              });
-          })
-          .catch(error => {
-            console.error(error);
-          });
+      commit('addRemoveSize', {
+        key: 'question-requests',
+        data: requestsSize,
       })
-      .catch(error => {
-        console.error("Error removing request: ", error);
-        createErrorLog("Request DB Delete", error.message, { data });
-      });
+    } catch (error) {
+      console.error('Error removing requests:', error)
+
+      createErrorLog('Requests DB Delete', error.message)
+    }
   },
   /**
    * Deletes all approved request from a user.
    *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {import('./user.store.js').UserInfo} payload.userInfo - The current user info.
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {Partial<UserEntity>} payload.userInfo The current user info.
    */
-  deleteApprovedRequests({ commit }, payload) {
-    const { userInfo } = payload;
+  async deleteApprovedRequests({ commit }, payload) {
+    const { userInfo } = payload
 
-    db.collection("question-requests")
-      .where("userId", "==", userInfo.id)
-      .where("status", "==", "approved")
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          doc.ref.delete();
-          commit("removeRequest", doc.data().name);
-        });
+    try {
+      const { requests, requestsSize } = await controller.deleteApproved(
+        userInfo.id,
+      )
 
-        db.collection("data-size")
-          .get()
-          .then(snap => {
-            const document = snap.docs[0];
-            const general = document.data()["question-requests"].general;
-            const userId = userInfo.id;
-            const subSize = document.data()["question-requests"].users[userId];
-
-            const questionRequests = {
-              general: general - snapshot.docs.length,
-              users: {
-                ...document.data()["question-requests"].users,
-                [userId]: subSize - snapshot.docs.length
-              }
-            };
-
-            document.ref
-              .update({ ["question-requests"]: questionRequests })
-              .then(() => {
-                commit("addRemoveSize", {
-                  key: "question-requests",
-                  data: questionRequests
-                });
-              })
-              .catch(error => {
-                console.error(error);
-              });
-          })
-          .catch(error => {
-            console.error(error);
-          });
+      requests.forEach(r => {
+        commit('removeRequest', r.id)
       })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "connection",
-          "",
-          "Requests auto delete error - " + error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Request Approved Delete", error.message, {
-          payload
-        });
-      });
-  },
-  /**
-   * Loads the most recent pending requests.
-   *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {number} payload.limit - The limit of requests on the response.
-   */
-  loadLastPendentRequests({ commit, dispatch }, payload) {
-    commit("setLoading", true);
 
-    const data = [];
+      if (!requestsSize) {
+        return
+      }
 
-    db.collection("question-requests")
-      .orderBy("updated", "desc")
-      .where("status", "==", "Pendente")
-      .limit(payload ? payload.limit : 5)
-      .get()
-      .then(async snapshot => {
-        const promises = snapshot.docs.map(async doc => {
-          const userData = await dispatch("getUserById", {
-            id: doc.data().userId
-          });
-          data.push({ ...doc.data(), user: userData });
-          return userData;
-        });
-
-        await Promise.all(promises);
+      commit('addRemoveSize', {
+        key: 'question-requests',
+        data: requestsSize,
       })
-      .then(() => {
-        commit("setLastPendentRequests", data);
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "load",
-          "Pendent Requests",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Pendent Requests Loading", error.message, {
-          payload
-        });
-      });
-  },
-  /**
-   * Loads the most recent pending requests.
-   *
-   * @param {Store} store - The vuex store.
-   * @param {Object} payload - The action payload.
-   * @param {number} payload.limit - The limit of requests on the response.
-   * @param {string} payload.userId - The current user id.
-   * @param {"current"|"other"} payload.mode - The data request mode.
-   */
-  loadUserRequests({ commit, dispatch }, payload) {
-    commit("setLoading", true);
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        'connection',
+        '',
+        'Requests auto delete error - ' + error.message,
+      )
 
-    const { userId, mode, limit } = payload;
+      commit('setError', { message: errorModel })
 
-    const data = [];
-
-    const reference = db.collection("question-requests");
-
-    let request = null;
-
-    if (mode === "other") {
-      request = reference
-        .orderBy("userId")
-        .orderBy("updated", "desc")
-        .where("userId", "!=", userId);
-    } else {
-      request = reference
-        .orderBy("updated", "desc")
-        .where("userId", "==", userId);
+      createErrorLog('Request Approved Delete', error.message, payload)
     }
+  },
+  /**
+   * Loads the most recent pending requests.
+   *
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {number} payload.limit The limit of requests on the response.
+   */
+  async loadLastPendentRequests({ commit, dispatch }, payload) {
+    commit('setLoading', true)
 
-    request
-      .limit(limit || 5)
-      .get()
-      .then(async snapshot => {
-        const promises = snapshot.docs.map(async doc => {
-          const userData = await dispatch("getUserById", {
-            id: doc.data().userId
-          });
-          data.push({ ...doc.data(), user: userData });
-          return userData;
-        });
+    try {
+      const requests = await controller.query({
+        where: [
+          {
+            field: 'status',
+            operator: '==',
+            value: 'pendant',
+          },
+        ],
+        orderBy: [
+          {
+            field: 'updated',
+            mode: 'desc',
+          },
+        ],
+        limit: payload ? payload.limit : 5,
+      })
 
-        await Promise.all(promises);
+      commit('setLastPendentRequests', requests)
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        'load',
+        'Pendent Requests',
+        error.message,
+      )
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Pendent Requests Loading', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
+  },
+  /**
+   * Loads the most recent pending requests.
+   *
+   * @param {Store<RequestState>} store The vuex store.
+   * @param {Object} payload The action payload.
+   * @param {number} payload.limit The limit of requests on the response.
+   * @param {string} payload.userId The current user id.
+   * @param {"current"|"other"} payload.mode The data request mode.
+   */
+  async loadUserRequests({ commit, dispatch }, payload) {
+    commit('setLoading', true)
+
+    const { userId, mode, limit } = payload
+
+    try {
+      /**
+       * @type {OrderBy}
+       */
+      const orderBy = [
+        {
+          field: 'updated',
+          mode: 'desc',
+        },
+      ]
+
+      if (mode === 'other') {
+        orderBy.push({
+          field: 'userId',
+        })
+      }
+
+      const requests = await controller.query({
+        where: [
+          {
+            field: 'userId',
+            operator: mode === 'other' ? '!=' : '==',
+            value: userId,
+          },
+        ],
+        orderBy,
+        limit: limit || 5,
       })
-      .then(() => {
-        if (mode === "other") {
-          commit("setOtherUserRequests", data);
-        } else {
-          commit("setCurrentUserRequests", data);
-        }
-        commit("setLoading", false);
-      })
-      .catch(error => {
-        commit("setLoading", false);
-        const errorModel = showErrorMessage(
-          "load",
-          mode === "other" ? "Pendent Requests" : "User Requests",
-          error.message
-        );
-        commit("setError", { message: errorModel });
-        createErrorLog("Pendent User Requests Load", error.message, {
-          payload
-        });
-      });
+
+      if (mode === 'other') {
+        return void commit('setOtherUserRequests', requests)
+      }
+
+      commit('setCurrentUserRequests', requests)
+    } catch (error) {
+      const errorModel = showErrorMessage(
+        'load',
+        mode === 'other' ? 'Pendent Requests' : 'User Requests',
+        error.message,
+      )
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Pendent User Requests Load', error.message, payload)
+    } finally {
+      commit('setLoading', false)
+    }
   },
   /**
    * Resets the request state to it's initial state.
    *
-   * @param {Store} store - The vuex store.
+   * @param {Store<RequestState>} store The vuex store.
    */
   resetRequests({ commit }) {
-    commit("RESETRequests");
-  }
-};
+    commit('RESETRequests')
+  },
+}
 
 const getters = {
   /**
    * Gets an array of requests that were marked to be deleted.
    *
-   * @param {RequestState} state - The requests state.
-   * @returns {Request[]} An array of requests.
+   * @param {RequestState} state The requests state.
+   * @returns {RequestEntity[]} An array of requests.
    */
   getDeleteMarkRequests(state) {
-    return state.deleteMarkRequests;
+    return state.deleteMarkRequests
   },
   /**
    * Gets an array of requests of the given page.
    *
-   * @param {RequestState} state - The request state.
-   * @param {number} page - The page number.
-   * @returns {(page: number) => Request[]} An array of requests.
+   * @param {RequestState} state The request state.
+   * @param {number} page The page number.
+   * @returns {(page: number) => RequestEntity[]} An array of requests.
    */
   getRequestsByPage(state) {
-    return page => state.requests["p" + page];
+    return page => state.requests['p' + page]
   },
   /**
    * Gets an array of the current page requests.
    *
-   * @param {RequestState} state - The request state.
-   * @returns {Request[]} An array of requests.
+   * @param {RequestState} state The request state.
+   * @returns {RequestEntity[]} An array of requests.
    */
   getCurrentRequestsPage(state) {
-    return state.currentRequestsPage;
+    return state.currentRequestsPage
   },
   /**
    * Gets an array of the filtered requests.
    *
-   * @param {RequestState} state - The request state.
-   * @returns {Request[]} An array of requests.
+   * @param {RequestState} state The request state.
+   * @returns {RequestEntity[]} An array of requests.
    */
   getFilteredRequests(state) {
-    return state.filteredRequests;
+    return state.filteredRequests
   },
   /**
    * Gets the most recent pending requests.
    *
-   * @param {RequestState} state - The request state.
-   * @returns {Request[]} An array of requests.
+   * @param {RequestState} state The request state.
+   * @returns {RequestEntity[]} An array of requests.
    */
   getLastPendentRequests(state) {
-    return state.lastPendentRequests;
+    return state.lastPendentRequests
   },
   /**
    * Gets the most recent pending requests from the current user.
    *
-   * @param {RequestState} state - The request state.
-   * @returns {Request[]} An array of requests.
+   * @param {RequestState} state The request state.
+   * @returns {RequestEntity[]} An array of requests.
    */
   getCurrentUserRequests(state) {
-    return state.currentUserRequests;
+    return state.currentUserRequests
   },
   /**
    * Gets the most recent pending requests from other users.
    *
-   * @param {RequestState} state - The request state.
-   * @returns {Request[]} An array of requests.
+   * @param {RequestState} state The request state.
+   * @returns {RequestEntity[]} An array of requests.
    */
   getOtherUserRequests(state) {
-    return state.otherUserRequests;
-  }
-};
+    return state.otherUserRequests
+  },
+}
 
 export default {
   state,
   mutations,
   actions,
-  getters
-};
+  getters,
+}

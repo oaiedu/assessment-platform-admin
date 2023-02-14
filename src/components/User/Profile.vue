@@ -5,7 +5,7 @@
       style="height: 100px; background-color: #2196f3"
       :class="{
         'px-12': $vuetify.breakpoint.width >= 940,
-        'px-4': $vuetify.breakpoint.width < 940
+        'px-4': $vuetify.breakpoint.width < 940,
       }"
     >
       <v-file-input
@@ -69,7 +69,7 @@
           </span>
 
           <span class="profile__email">{{ user.email }}</span>
-          <span class="profile__role">{{ $t("USER.ROLE." + user.role) }}</span>
+          <span class="profile__role">{{ $t('USER.ROLE.' + user.role) }}</span>
         </div>
       </div>
     </v-row>
@@ -78,7 +78,7 @@
       class="pa-0 ma-0 profile__data-row"
       :class="{
         'px-12': $vuetify.breakpoint.width >= 940,
-        'px-4': $vuetify.breakpoint.width < 940
+        'px-4': $vuetify.breakpoint.width < 940,
       }"
     >
       <div
@@ -86,7 +86,7 @@
         style="flex: 1"
         :class="{
           'mr-8': $vuetify.breakpoint.width >= 800,
-          'mr-0': $vuetify.breakpoint.width < 800
+          'mr-0': $vuetify.breakpoint.width < 800,
         }"
       >
         <v-card
@@ -97,13 +97,13 @@
           style="border-radius: 26px"
         >
           <v-card-title class="profile__subjects-title pa-0 ma-0">
-            {{ $t("PROFILE.SUBJECTS.title") }}
+            {{ $t('PROFILE.SUBJECTS.title') }}
           </v-card-title>
 
           <v-row
             v-for="(subject, index) in subjects"
             class="profile__subject-container pa-0 ma-0 my-3"
-            :key="subject.name"
+            :key="subject.id"
           >
             <span class="profile__subject-name">{{ subject.name }}</span>
 
@@ -125,7 +125,7 @@
                   class="profile__subject-progress-bar"
                   :style="{
                     backgroundColor: subjectColors[index],
-                    width: `${subject.percentage}%`
+                    width: `${subject.percentage}%`,
                   }"
                 />
               </div>
@@ -150,7 +150,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  {{ $t("PROFILE.DATA_INFO.ended_quizzes") }}
+                  {{ $t('PROFILE.DATA_INFO.ended_quizzes') }}
                 </span>
 
                 <span
@@ -171,7 +171,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">{{
-                  $t("PROFILE.DATA_INFO.approved")
+                  $t('PROFILE.DATA_INFO.approved')
                 }}</span>
 
                 <span
@@ -192,7 +192,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  {{ $t("PROFILE.DATA_INFO.correct_answers") }}
+                  {{ $t('PROFILE.DATA_INFO.correct_answers') }}
                 </span>
 
                 <span
@@ -213,7 +213,7 @@
 
               <div class="profile__amount-info">
                 <span class="profile__amount-item-title">
-                  {{ $t("PROFILE.DATA_INFO.time_per_quiz") }}
+                  {{ $t('PROFILE.DATA_INFO.time_per_quiz') }}
                 </span>
 
                 <span
@@ -234,7 +234,7 @@
       class="pa-0 ma-0 mt-8"
       :class="{
         'px-12': $vuetify.breakpoint.width >= 940,
-        'px-4': $vuetify.breakpoint.width < 940
+        'px-4': $vuetify.breakpoint.width < 940,
       }"
     >
       <v-card
@@ -246,7 +246,7 @@
         style="border-radius: 26px; overflow: hidden"
       >
         <v-card-title class="profile__attempts-title pa-0 ma-0 mx-8 mb-1">
-          {{ $t("PROFILE.DATA_INFO.quizzes_done") }}
+          {{ $t('PROFILE.DATA_INFO.quizzes_done') }}
         </v-card-title>
 
         <AttemptsTable
@@ -266,13 +266,13 @@ import {
   mdiMedal,
   mdiPencil,
   mdiClockOutline,
-  mdiContentSave
-} from "@mdi/js";
+  mdiContentSave,
+} from '@mdi/js'
 
-import AttemptsTable from "../Tests/AttemptsTable.vue";
+import AttemptsTable from '../Tests/AttemptsTable.vue'
 
 export default {
-  name: "Profile",
+  name: 'Profile',
   components: { AttemptsTable },
   data: () => ({
     mdiFileChart,
@@ -282,195 +282,195 @@ export default {
     mdiClockOutline,
     mdiContentSave,
     avatarImage: [],
-    nickName: "",
-    imagesAsURL: "",
+    nickName: '',
+    imagesAsURL: '',
     editingName: false,
     loadingImage: false,
     loadingName: false,
-    subjectColors: ["#219653", "#2196f3", "#ff9900", "#922fdf", "#ff5533"],
+    subjectColors: ['#219653', '#2196f3', '#ff9900', '#922fdf', '#ff5533'],
     subjects: [],
     subjectsTotal: 0,
-    totalCorrect: 0
+    totalCorrect: 0,
   }),
   computed: {
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     user() {
-      return this.$store.getters.userInfo;
-    }
+      return this.$store.getters.userInfo
+    },
   },
   methods: {
     cancel() {
-      this.$store.commit("setLoading", false);
-      this.$router.back();
+      this.$store.commit('setLoading', false)
+      this.$router.back()
     },
     addImage() {
-      document.getElementById("fileUpload").click();
+      document.getElementById('fileUpload').click()
     },
     reviewAttempt(item) {
       this.$router.push({
-        name: "quiz.exam",
+        name: 'quiz.exam',
         params: {
           id: item.quizId,
-          mode: "practice",
+          mode: 'practice',
           attempt: item,
-          review: true
-        }
-      });
+          review: true,
+        },
+      })
     },
     getAverageTime() {
       const avg = {
         hours: 0,
         minutes: 0,
-        seconds: 0
-      };
-
-      if (!this.user) {
-        return avg;
+        seconds: 0,
       }
 
-      const times = this.user.attempts.map(a => a.timeTaken);
+      if (!this.user) {
+        return avg
+      }
+
+      const times = this.user.attempts.map(a => a.timeTaken)
 
       const totalSeconds = times.reduce(
         (prev, curr) =>
           prev + (curr.hours * 3600 + curr.minutes * 60 + curr.seconds),
-        0
-      );
+        0,
+      )
 
       const seconds = Math.floor(
-        totalSeconds / (this.user.attempts.length || 1)
-      );
+        totalSeconds / (this.user.attempts.length || 1),
+      )
 
-      const hours = Math.floor(seconds / (60 * 60));
-      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(seconds / (60 * 60))
+      const minutes = Math.floor(seconds / 60)
 
-      avg.hours = hours;
-      avg.minutes = hours > 0 ? minutes - hours * 60 : minutes;
-      avg.seconds = minutes > 0 ? seconds - minutes * 60 : seconds;
+      avg.hours = hours
+      avg.minutes = hours > 0 ? minutes - hours * 60 : minutes
+      avg.seconds = minutes > 0 ? seconds - minutes * 60 : seconds
 
-      return avg;
+      return avg
     },
     setSubjectsPercentage() {
       if (!this.subjects || !this.subjects[0]) {
-        return 0;
+        return 0
       }
 
       const maxValue =
-        this.subjects[0].value + (10 - (this.subjects[0].value % 10 || 10));
+        this.subjects[0].value + (10 - (this.subjects[0].value % 10 || 10))
 
       this.subjects.forEach(subject => {
-        subject.percentage = (subject.value * 100) / maxValue;
-      });
+        subject.percentage = (subject.value * 100) / maxValue
+      })
     },
     readUrl(imageFile) {
       if (imageFile) {
-        this.loadingImage = true;
+        this.loadingImage = true
 
         if (!imageFile.type.match(/image.*/)) {
-          alert("The file is not an image!");
-          return;
+          alert('The file is not an image!')
+          return
         } else if (imageFile.size > 2000000) {
-          alert("O tamanho da imagem deve ser no MÁXIMO 2 MB!");
-          return;
+          alert('O tamanho da imagem deve ser no MÁXIMO 2 MB!')
+          return
         }
 
-        const reader = new FileReader();
+        const reader = new FileReader()
         reader.onload = async e => {
-          this.changedImage = true;
-          this.imagesAsURL = e.target.result;
+          this.changedImage = true
+          this.imagesAsURL = e.target.result
 
-          await this.uploadImage(imageFile);
+          await this.uploadImage(imageFile)
 
-          this.loadingImage = false;
-        };
-        reader.readAsDataURL(imageFile);
+          this.loadingImage = false
+        }
+        reader.readAsDataURL(imageFile)
       }
     },
     async uploadImage(file) {
       if (!file) {
-        return;
+        return
       }
 
-      const url = await this.$store.dispatch("uploadAvatar", { image: file });
-      this.imagesAsURL = url;
+      const url = await this.$store.dispatch('uploadAvatar', { image: file })
+      this.imagesAsURL = url
 
-      await this.$store.dispatch("updateUser", { profileImages: url });
+      await this.$store.dispatch('updateUser', { profileImages: url })
     },
     async updateName() {
-      this.loadingName = true;
+      this.loadingName = true
 
-      await this.$store.dispatch("updateUser", { name: this.nickName });
+      await this.$store.dispatch('updateUser', { name: this.nickName })
 
-      this.editingName = false;
-      this.loadingName = false;
-    }
+      this.editingName = false
+      this.loadingName = false
+    },
   },
   mounted() {
     if (!this.user) {
-      return;
+      return
     }
 
-    this.nickName = this.user.name;
-    this.imagesAsURL = this.user.profileImages;
+    this.nickName = this.user.name
+    this.imagesAsURL = this.user.profileImages
 
     this.subjects = [...this.$store.state.Subject.subjects].map(s => ({
       name: s.name,
       value: 0,
       total: 0,
-      percentage: 0
-    }));
+      percentage: 0,
+    }))
 
-    let questionsAmount = 0;
+    let questionsAmount = 0
 
     this.user.attempts.forEach(a => {
       a.subjects.forEach(s => {
-        const index = this.subjects.findIndex(sub => sub.name === s.subject);
+        const index = this.subjects.findIndex(sub => sub.name === s.subject)
 
-        questionsAmount += s.questions.length;
+        questionsAmount += s.questions.length
 
         const value = s.questions.reduce((prev, curr) => {
-          const answer = a.answers.find(ans => ans.questionName === curr);
+          const answer = a.answers.find(ans => ans.questionName === curr)
 
           if (!answer) {
-            return prev + 0;
+            return prev + 0
           }
 
-          return prev + answer.correct;
-        }, 0);
+          return prev + answer.correct
+        }, 0)
 
         if (index === -1) {
           this.subjects.push({
             name: s.subject,
             value,
             total: s.questions.length,
-            percentage: 0
-          });
+            percentage: 0,
+          })
 
-          return;
+          return
         }
 
-        this.subjects[index].value += value;
-        this.subjects[index].total += s.questions.length;
-      });
-    });
+        this.subjects[index].value += value
+        this.subjects[index].total += s.questions.length
+      })
+    })
 
-    this.subjects.sort((s1, s2) => s2.value - s1.value);
+    this.subjects.sort((s1, s2) => s2.value - s1.value)
 
-    this.subjects = this.subjects.slice(0, 5);
+    this.subjects = this.subjects.slice(0, 5)
 
     this.subjectsTotal = this.subjects.reduce(
       (prev, curr) => prev + curr.value,
-      0
-    );
+      0,
+    )
 
-    this.totalCorrect = (this.subjectsTotal * 100) / (questionsAmount || 1);
+    this.totalCorrect = (this.subjectsTotal * 100) / (questionsAmount || 1)
 
     setTimeout(() => {
-      this.setSubjectsPercentage();
-    }, 150);
-  }
-};
+      this.setSubjectsPercentage()
+    }, 150)
+  },
+}
 </script>
 
 <style scoped>

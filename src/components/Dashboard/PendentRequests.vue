@@ -12,7 +12,7 @@
             :ripple="false"
             :color="hover ? '#2196f3' : '#888888'"
           >
-            {{ $t("DASHBOARD.LAST_DATA.see_more") }}
+            {{ $t('DASHBOARD.LAST_DATA.see_more') }}
           </v-btn>
         </v-hover>
       </h2>
@@ -22,7 +22,7 @@
         class="requests"
         :style="getFlexStyle"
       >
-        <div v-for="item in requests" :key="item.name" class="request-row">
+        <div v-for="item in requests" :key="item.id" class="request-row">
           <div class="name-container">{{ item.name }}</div>
           <div class="details-container">
             <div class="request-subject">{{ item.subject }}</div>
@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="no-content" v-else>
-        {{ $t("DASHBOARD.LAST_REQUESTS.no_requests") }}
+        {{ $t('DASHBOARD.LAST_REQUESTS.no_requests') }}
       </div>
     </div>
   </v-card>
@@ -42,9 +42,9 @@
 
 <script>
 export default {
-  name: "PendentRequests",
+  name: 'PendentRequests',
   props: {
-    windowWidth: Number
+    windowWidth: Number,
   },
   computed: {
     limit() {
@@ -53,59 +53,59 @@ export default {
         : this.windowWidth > 960 ||
           (this.windowWidth <= 900 && this.windowWidth > 760)
         ? 6
-        : 4;
+        : 4
     },
     requests() {
-      return this.userClaims && this.userClaims["appraiser"]
+      return this.userClaims && this.userClaims['appraiser']
         ? this.$store.getters.getOtherUserRequests
-        : this.$store.getters.getLastPendentRequests;
+        : this.$store.getters.getLastPendentRequests
     },
     getFlexStyle() {
       if (
         (this.windowWidth <= 1000 && this.windowWidth > 960) ||
         (this.windowWidth <= 900 && this.windowWidth > 760)
       ) {
-        return {};
+        return {}
       }
 
       if (
         this.requests &&
         (this.requests.length === 2 || this.requests.length === 3)
       ) {
-        return { justifyContent: "flex-start", gap: "18px" };
+        return { justifyContent: 'flex-start', gap: '18px' }
       } else {
-        return { justifyContent: "space-between" };
+        return { justifyContent: 'space-between' }
       }
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
+      return this.$store.getters.getUserClaims
     },
     userInfo() {
-      return this.$store.getters.userInfo;
+      return this.$store.getters.userInfo
     },
     cardTitle() {
       if (
         this.userClaims &&
-        (this.userClaims["admin"] || this.userClaims["appraiser"])
+        (this.userClaims['admin'] || this.userClaims['appraiser'])
       ) {
-        return this.$t("DASHBOARD.LAST_REQUESTS.latest_requests");
+        return this.$t('DASHBOARD.LAST_REQUESTS.latest_requests')
       } else {
-        return this.$t("DASHBOARD.LAST_REQUESTS.latest_questions");
+        return this.$t('DASHBOARD.LAST_REQUESTS.latest_questions')
       }
-    }
+    },
   },
   created() {
-    if (this.userClaims && this.userClaims["appraiser"]) {
-      this.$store.dispatch("loadUserRequests", {
+    if (this.userClaims && this.userClaims['appraiser']) {
+      this.$store.dispatch('loadUserRequests', {
         userId: this.userInfo.id,
-        mode: "other",
-        limit: this.limit
-      });
+        mode: 'other',
+        limit: this.limit,
+      })
     } else {
-      this.$store.dispatch("loadLastPendentRequests", { limit: this.limit });
+      this.$store.dispatch('loadLastPendentRequests', { limit: this.limit })
     }
-  }
-};
+  },
+}
 </script>
 
 <style scoped>

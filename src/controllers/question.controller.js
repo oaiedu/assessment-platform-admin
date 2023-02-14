@@ -222,7 +222,7 @@ export class QuestionController extends Controller {
       where.push({ field: 'subject', operator: '==', value: subject })
     }
 
-    return super._query(QUESTION_COLLECTION, QuestionEntity, {
+    return this.query({
       orderBy: [
         {
           field,

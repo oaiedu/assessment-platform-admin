@@ -1,4 +1,5 @@
 import { Entity } from './base.entity'
+import { UserEntity } from './user.entity'
 
 /**
  * @typedef {import('./question.entity').Answer} Answer
@@ -92,9 +93,9 @@ export class RequestEntity extends Entity {
     /**
      * Defines the request current status.
      *
-     * @type {RequestStatus}
+     * @type {RequestStatus?}
      */
-    this.status = partial.status
+    this.status = partial.status ?? null
 
     /**
      * Defines the id of the user that created the request.
@@ -102,6 +103,13 @@ export class RequestEntity extends Entity {
      * @type {string}
      */
     this.userId = partial.userId
+
+    /**
+     * Defines the user that is linked to the request.
+     *
+     * @type {UserEntity}
+     */
+    this.user = partial.user ?? null
   }
 
   /**

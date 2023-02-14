@@ -1,6 +1,7 @@
 import { Store } from 'vuex'
 
 import { QuestionController } from '../../controllers/question.controller'
+import { RequestController } from '../../controllers/request.controller'
 import { SubjectController } from '../../controllers/subject.controller'
 import { TestController } from '../../controllers/test.controller'
 
@@ -51,6 +52,11 @@ const testController = new TestController()
  * Defines the subject controller.
  */
 const subjectController = new SubjectController()
+
+/**
+ * Defines the request controller.
+ */
+const requestController = new RequestController()
 
 /**
  * Gets the initial questions state.
@@ -809,58 +815,55 @@ const actions = {
         })
       }
 
-      // TODO: Refactor this.
       /**
        * @type {TestEntity[]}
        */
-      const tests = await dispatch('checkQuestionInTests', {
-        name: questionData.name,
-      })
+      const tests = await testController.getByQuestion(question.name)
 
       await dispatch('addQuestionQuizzesBySubject', {
         subject: questionData.subject,
         question: questionData,
       })
 
-      const testPromises = tests.map(async t => {
-        if (t.type === 'auto') {
-          const subject = questionData.subject
-
-          if (
-            t.subjects &&
-            t.subjects.includes(subject) &&
-            questionData.level.index <= t.level.index
-          ) {
-            return
-          }
-
-          const index = t.questionsNames.indexOf(questionData.name)
-
-          if (index === -1) {
-            return
-          }
-
-          t.questionsNames.splice(index, 1)
-
-          if (t.questionsNames.length < t.questionsAmount) {
-            t.questionsAmount = t.questionsNames.length
-          }
-        } else {
+      for (const t of tests) {
+        if (t.type !== 'auto') {
           const index = t.questions.findIndex(q => q.name === questionData.name)
 
           if (index === -1) {
-            return
+            continue
           }
 
           t.questions[index] = questionData
+
+          await dispatch('updateTest', { testData: t })
+
+          continue
+        }
+
+        const subject = questionData.subject
+
+        if (
+          t.subjects &&
+          t.subjects.includes(subject) &&
+          questionData.level.index <= t.level.index
+        ) {
+          continue
+        }
+
+        const index = t.questionsNames.indexOf(questionData.name)
+
+        if (index === -1) {
+          continue
+        }
+
+        t.questionsNames.splice(index, 1)
+
+        if (t.questionsNames.length < t.questionsAmount) {
+          t.questionsAmount = t.questionsNames.length
         }
 
         await dispatch('updateTest', { testData: t })
-
-        return t
-      })
-
-      await Promise.all(testPromises)
+      }
 
       commit('setSuccess', 'Question successfully edited!')
     } catch (error) {
@@ -890,13 +893,9 @@ const actions = {
         return true
       }
 
-      // TODO: Refactor this.
-      const request = await db
-        .collection('question-requests')
-        .where('name', '==', payload)
-        .get()
+      const request = await requestController.getByName(payload)
 
-      return !request.empty
+      return !!request
     } catch (error) {
       createErrorLog('Question Exist Test', error.message, payload)
 

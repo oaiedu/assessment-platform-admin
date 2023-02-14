@@ -473,7 +473,7 @@ const actions = {
     let perPage = itemsPerPage
 
     if (mode === 'last') {
-      perPage = this.getters.getDataSize.questions.general % itemsPerPage || 0
+      perPage = this.getters.getDataSize.tests % itemsPerPage || 0
     }
 
     try {

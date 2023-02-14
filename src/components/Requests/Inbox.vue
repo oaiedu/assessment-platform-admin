@@ -23,7 +23,9 @@
             userClaims &&
             userClaims['appraiser'] &&
             (markedRequestsByUser ||
-              deleteMarkRequests.filter(r => r.toDelete.userId === userInfo.id))
+              deleteMarkRequests.filter(
+                r => r.toDelete.userEmail === userInfo.email,
+              ))
         "
       >
         <DeleteAlert
@@ -211,7 +213,7 @@ export default {
     markedRequestsByUser() {
       if (this.hasDeleteMarkRequests) {
         const requests = this.deleteMarkRequests.filter(
-          r => r.toDelete.userId === this.userInfo.id,
+          r => r.toDelete.userEmail === this.userInfo.email,
         )
 
         const names = requests.filter(r => r.toDelete && r.toDelete.status)
@@ -248,10 +250,12 @@ export default {
     },
     pageAmount() {
       const requestAmount = this.$store.getters.getDataSize['question-requests']
+
       const amount =
         this.userClaims && this.userClaims['admin']
           ? requestAmount.general
           : requestAmount.users[this.userInfo.id]
+
       return Math.ceil(amount / this.itemsPerPage) || 1
     },
     getQuestionTests() {
@@ -275,23 +279,22 @@ export default {
       this.deleteRequestSnackBar = false
       this.deleteItem = null
       this.$store.dispatch('deleteMarkRequest', {
-        name: request.name,
+        id: request.id,
         isSearching: this.isSearching,
-        userId: this.userInfo.id,
+        userEmail: this.userInfo.email,
       })
     },
     deleteRequests() {
       const requests = this.deleteMarkRequests
-      requests.forEach(request => {
-        if (
-          request.toDelete.status &&
-          request.toDelete.userId === this.userInfo.id
-        ) {
-          this.$store.dispatch('changeDeleteStatusRequests', {
-            name: request.name,
-            isSearching: this.isSearching,
-          })
-        }
+
+      this.$store.dispatch('changeDeleteStatusRequests', {
+        names: requests
+          .filter(
+            r =>
+              r.toDelete.status && r.toDelete.userEmail === this.userInfo.email,
+          )
+          .map(r => r.name),
+        isSearching: this.isSearching,
       })
     },
     checkRequest(request) {
@@ -317,7 +320,6 @@ export default {
                   mode: 'sttUpdate',
                   status: 'approved',
                   request,
-                  user: request.user,
                   isSearching: this.isSearching,
                 })
                 this.$store.commit(
@@ -336,7 +338,6 @@ export default {
                   mode: 'sttUpdate',
                   status: 'approved',
                   request,
-                  user: request.user,
                   isSearching: this.isSearching,
                 })
                 this.$store.commit(
@@ -413,7 +414,6 @@ export default {
           mode: 'sttUpdate',
           status: 'rejected',
           request,
-          user: request.user,
           isSearching: this.isSearching,
         })
 
@@ -428,28 +428,20 @@ export default {
       this.rejectErrorSnackBar = true
     },
     onPageChange(event) {
+      if (this.isSearching) {
+        return
+      }
+
       const payload = {
         page: this.page,
         itemsPerPage: this.itemsPerPage,
+        mode: event.mode,
+        direction: event.direction,
+        claims: this.userClaims,
+        userInfo: this.userInfo,
       }
 
-      if (!this.isSearching) {
-        if (!event.mode) {
-          this.$store.dispatch('loadRequestPage', {
-            ...payload,
-            type: event.type,
-            claims: this.userClaims,
-            userInfo: this.userInfo,
-          })
-        } else {
-          this.$store.dispatch('loadFOLRequestPage', {
-            ...payload,
-            mode: event.mode,
-            claims: this.userClaims,
-            userInfo: this.userInfo,
-          })
-        }
-      }
+      this.$store.dispatch('loadRequestPage', payload)
     },
     searchTextChange(text) {
       if ((text === null || text.length === 0) && this.isSearching) {
@@ -486,7 +478,7 @@ export default {
     },
     restoreRequest(item) {
       this.$store.dispatch('restoreMarkedRequest', {
-        name: item.name,
+        id: item.id,
         isSearching: this.isSearching,
       })
     },
@@ -509,12 +501,12 @@ export default {
   mounted() {
     this.deleteConfirmed = false
     this.$store.dispatch('checkDeleteMarkRequests')
-    this.$store.dispatch('loadFOLRequestPage', {
-      claims: this.userClaims,
-      userInfo: this.userInfo,
+    this.$store.dispatch('loadRequestPage', {
       page: 1,
       itemsPerPage: this.itemsPerPage,
       mode: 'first',
+      claims: this.userClaims,
+      userInfo: this.userInfo,
     })
   },
   beforeDestroy() {
