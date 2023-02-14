@@ -331,7 +331,9 @@
       "multi_answers": "Respuestas múltiples",
       "justification": "Justificación",
       "general_justification": "Justificación general",
-      "justification_source": "Fuente de justificación (URL)"
+      "justification_source": "Fuente de justificación (URL)",
+      "max-length": "El nombre debe tener un máximo de 7 caracteres",
+      "required": "¡Este campo es obligatorio!"
     },
     "QUESTIONS": {
       "info_1": "Esta pregunta esta siendo utilizada en algunos cuestionarios con generacion automatica:",

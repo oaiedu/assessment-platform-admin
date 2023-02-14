@@ -331,7 +331,9 @@
       "multi_answers": "Multiple answers",
       "justification": "Justification",
       "general_justification": "General justification",
-      "justification_source": "Justification source (URL)"
+      "justification_source": "Justification source (URL)",
+      "max-length": "The name must have a maximum of 7 characters",
+      "required": "This field is required!"
     },
     "QUESTIONS": {
       "info_1": "This question is being used in some quizzes with automatic generation:",
