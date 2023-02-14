@@ -1,10 +1,11 @@
-import { QuestionEntity } from '../entities/question.entity'
-import { TestEntity } from '../entities/test.entity'
-import { analytics } from '../main'
+import { analytics } from '../api/firebase'
 
 import { Controller } from './base.controller'
 import { DataSizeController } from './data-size.controller'
 import { UserController } from './user.controller'
+
+import { QuestionEntity } from '../entities/question.entity'
+import { TestEntity } from '../entities/test.entity'
 
 /**
  * @typedef {import('./base.controller').Where} Where

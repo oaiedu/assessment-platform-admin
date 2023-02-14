@@ -8,7 +8,7 @@
         :headers="
           headers.map(h => ({
             ...h,
-            text: h.text ? $t('TEST.TESTS_TABLE.HEADERS.' + h.text) : ''
+            text: h.text ? $t('TEST.TESTS_TABLE.HEADERS.' + h.text) : '',
           }))
         "
         :items="items"
@@ -69,7 +69,7 @@
               color="indigo lighten-2"
               @click="doExam(item)"
             >
-              {{ $t("TEST.TESTS_TABLE.view") }}
+              {{ $t('TEST.TESTS_TABLE.view') }}
             </v-btn>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -84,7 +84,7 @@
                   {{ mdiFileCompare }}
                 </v-icon>
               </template>
-              <span>{{ $t("TEST.TESTS_TABLE.view_quiz") }}</span>
+              <span>{{ $t('TEST.TESTS_TABLE.view_quiz') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -99,7 +99,7 @@
                   {{ mdiPencil }}
                 </v-icon>
               </template>
-              <span>{{ $t("REQUESTS.TABLE.edit") }}</span>
+              <span>{{ $t('REQUESTS.TABLE.edit') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && !userClaims['student']">
@@ -114,7 +114,7 @@
                   {{ mdiDelete }}
                 </v-icon>
               </template>
-              <span>{{ $t("TEST.TESTS_TABLE.delete") }}</span>
+              <span>{{ $t('TEST.TESTS_TABLE.delete') }}</span>
             </v-tooltip>
           </v-row>
 
@@ -135,10 +135,10 @@
             >
               {{
                 $t(
-                  "TEST." +
+                  'TEST.' +
                     (userClaims && item.toDelete.userEmail !== userInfo.email
-                      ? "unavailable"
-                      : "restore")
+                      ? 'unavailable'
+                      : 'restore'),
                 )
               }}
             </v-btn>
@@ -155,7 +155,7 @@
               disabled
               text
             >
-              {{ $t("TEST.TESTS_TABLE.deleted") }}
+              {{ $t('TEST.TESTS_TABLE.deleted') }}
             </v-btn>
           </v-row>
         </template>
@@ -174,14 +174,14 @@ import {
   mdiCancel,
   mdiClockOutline,
   mdiClipboardText,
-  mdiDumbbell
-} from "@mdi/js";
+  mdiDumbbell,
+} from '@mdi/js'
 
-import { analytics } from "../../main";
+import { analytics } from '../../api/firebase'
 
 export default {
-  name: "TestsTable",
-  props: ["items", "itemsPerPage", "page"],
+  name: 'TestsTable',
+  props: ['items', 'itemsPerPage', 'page'],
   data() {
     return {
       mdiFileCompare,
@@ -194,132 +194,132 @@ export default {
       mdiClipboardText,
       mdiDumbbell,
       headers: [
-        { text: "title", align: "start", value: "title" },
+        { text: 'title', align: 'start', value: 'title' },
         {
-          text: "",
-          align: "right",
-          value: "info",
-          sortable: false
+          text: '',
+          align: 'right',
+          value: 'info',
+          sortable: false,
         },
         {
-          text: "actions",
-          align: "center",
-          value: "actions",
+          text: 'actions',
+          align: 'center',
+          value: 'actions',
           sortable: false,
-          class: "test-actions"
-        }
-      ]
-    };
+          class: 'test-actions',
+        },
+      ],
+    }
   },
   computed: {
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
+      return this.$store.getters.getUserClaims
     },
     userInfo() {
-      return this.$store.getters.userInfo;
-    }
+      return this.$store.getters.userInfo
+    },
   },
   methods: {
     getAttemptData(item) {
-      const attempts = this.getUserAttempts(item);
+      const attempts = this.getUserAttempts(item)
 
       if (!attempts) {
         return {
-          color: "grey",
-          icon: this.mdiCancel
-        };
+          color: 'grey',
+          icon: this.mdiCancel,
+        }
       }
 
       if (this.hasApprovedAttempt(item)) {
         return {
-          color: "green",
-          icon: this.mdiCheckCircle
-        };
+          color: 'green',
+          icon: this.mdiCheckCircle,
+        }
       }
 
       return {
-        color: "red",
-        icon: this.mdiCloseCircle
-      };
+        color: 'red',
+        icon: this.mdiCloseCircle,
+      }
     },
     getAttemptSentence(item) {
-      const attempts = this.getUserAttempts(item);
+      const attempts = this.getUserAttempts(item)
 
       if (!attempts) {
-        return this.$t("TEST.TESTS_TABLE.no_attempts");
+        return this.$t('TEST.TESTS_TABLE.no_attempts')
       }
 
       return (
         attempts +
-        " " +
-        this.$t("TEST.TESTS_TABLE.attempt") +
-        (attempts !== 1 ? "S" : "")
-      );
+        ' ' +
+        this.$t('TEST.TESTS_TABLE.attempt') +
+        (attempts !== 1 ? 'S' : '')
+      )
     },
     getUserAttempts(item) {
-      let attempts = 0;
+      let attempts = 0
 
       if (this.userInfo && this.userInfo.attempts) {
         this.userInfo.attempts.forEach(a => {
           if (a.quizId === item.id) {
-            attempts++;
+            attempts++
           }
-        });
+        })
       }
 
-      return attempts;
+      return attempts
     },
     hasApprovedAttempt(item) {
-      let has = false;
+      let has = false
 
       if (!this.userInfo || !this.userInfo.attempts) {
-        return false;
+        return false
       }
 
       for (const attempt of this.userInfo.attempts) {
         if (attempt.quizId === item.id && attempt.approved) {
-          has = true;
-          break;
+          has = true
+          break
         }
       }
 
-      return has;
+      return has
     },
     getTime(item) {
       return item.unlimitedTime
-        ? this.$t("TEST.QUIZ.unlimited")
-        : `${item.time.hours}h ${item.time.minutes}m ${item.time.seconds}s`;
+        ? this.$t('TEST.QUIZ.unlimited')
+        : `${item.time.hours}h ${item.time.minutes}m ${item.time.seconds}s`
     },
     itemRowStyle(item) {
       return item.toDelete
         ? item.toDelete.status
-          ? "item-to-delete"
-          : "item-deleted"
-        : "";
+          ? 'item-to-delete'
+          : 'item-deleted'
+        : ''
     },
     onEditClick(item) {
-      this.$emit("editClick", item);
+      this.$emit('editClick', item)
     },
     onDeleteClick(item) {
-      this.$emit("deleteClick", item);
+      this.$emit('deleteClick', item)
     },
     onRestoreClick(item) {
-      this.$emit("restoreClick", item);
+      this.$emit('restoreClick', item)
     },
     doExam(item) {
-      analytics.logEvent("select_item", {
+      analytics.logEvent('select_item', {
         item_list_name: item.title,
         item_list_id: item.id,
-        items: [item]
-      });
+        items: [item],
+      })
 
-      this.$router.push("/quizzes/" + item.id);
-    }
-  }
-};
+      this.$router.push('/quizzes/' + item.id)
+    },
+  },
+}
 </script>
 
 <style>

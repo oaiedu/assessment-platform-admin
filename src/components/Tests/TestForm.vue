@@ -420,9 +420,10 @@ import {
 } from '@mdi/js'
 import Ripple from 'vuetify/lib/directives/ripple'
 
+import { analytics } from '../../api/firebase'
+
 import Paginator from '../Paginator'
 import VueTextEditor from '../Shared/VueTextEditor.vue'
-import { analytics } from '../../main'
 import { Entity } from '../../entities/base.entity'
 
 export default {

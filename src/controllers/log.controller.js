@@ -1,5 +1,6 @@
-import { LogEntity } from '../entities/log.entity'
 import { Controller } from './base.controller'
+
+import { LogEntity } from '../entities/log.entity'
 
 const LOG_COLLECTION = 'logs'
 

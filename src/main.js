@@ -1,32 +1,18 @@
-import Vue from "vue";
-import firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/firestore";
-import "firebase/storage";
-import "firebase/analytics";
+import Vue from 'vue'
 
-import App from "./App.vue";
+import App from './App.vue'
 
-import vuetify from "./plugins/vuetify";
-import router from "./router";
-import store from "./store";
+import vuetify from './plugins/vuetify'
+import router from './router'
+import store from './store'
 
-import { getConfig } from "./api/firebase";
+import i18n from './i18n'
 
-import i18n from "./i18n";
-import { showErrorMessage } from "./utils/errors";
+import { auth } from './api/firebase'
 
-Vue.config.productionTip = false;
+import { showErrorMessage } from './utils/errors'
 
-firebase.initializeApp(getConfig());
-
-export const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-export const auth = firebase.auth();
-export const db = firebase.firestore();
-export const storage = firebase.storage();
-
-export const analytics = firebase.analytics();
+Vue.config.productionTip = false
 
 new Vue({
   router,
@@ -37,33 +23,33 @@ new Vue({
   async created() {
     if (!navigator.onLine) {
       const errorModel = showErrorMessage(
-        "connection",
-        "",
-        "Please try again later."
-      );
+        'connection',
+        '',
+        'Please try again later.',
+      )
 
-      store.commit("setError", { message: errorModel });
-      return;
+      store.commit('setError', { message: errorModel })
+      return
     }
 
-    await this.$store.dispatch("loadSubjects");
-    await this.$store.dispatch("loadDataSize");
+    await this.$store.dispatch('loadSubjects')
+    await this.$store.dispatch('loadDataSize')
 
     auth.onAuthStateChanged(user => {
       if (user) {
-        this.$store.dispatch("autoSignIn", user);
-        this.$store.dispatch("deleteQuestions");
-        this.$store.dispatch("deleteRequests");
-        this.$store.dispatch("deleteTests");
+        this.$store.dispatch('autoSignIn', user)
+        this.$store.dispatch('deleteQuestions')
+        this.$store.dispatch('deleteRequests')
+        this.$store.dispatch('deleteTests')
       }
-    });
+    })
 
-    this.$store.dispatch("resetLayout");
-    this.$store.dispatch("resetQuestions");
-    this.$store.dispatch("resetRequests");
-    this.$store.dispatch("resetTests");
+    this.$store.dispatch('resetLayout')
+    this.$store.dispatch('resetQuestions')
+    this.$store.dispatch('resetRequests')
+    this.$store.dispatch('resetTests')
 
-    this.$store.dispatch("clearSuccess");
-    this.$store.dispatch("clearError");
-  }
-}).$mount("#app");
+    this.$store.dispatch('clearSuccess')
+    this.$store.dispatch('clearError')
+  },
+}).$mount('#app')

@@ -224,6 +224,8 @@
 </template>
 
 <script>
+import { mdiPlus } from '@mdi/js'
+
 import Paginator from '../Paginator'
 import QuestionsTable from './QuestionsTable'
 import DeleteWarning from '../Shared/DeleteWarning'
@@ -232,8 +234,8 @@ import SearchBox from '../Shared/SearchBox'
 import QuestionForm from './QuestionForm'
 import EditQuestion from './EditQuestion'
 import PrintQuestion from './PrintQuestion'
-import { mdiPlus } from '@mdi/js'
-import { analytics } from '../../main'
+
+import { analytics } from '../../api/firebase'
 
 export default {
   name: 'Questions',

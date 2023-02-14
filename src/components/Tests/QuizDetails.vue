@@ -344,7 +344,7 @@ import {
   mdiThumbUpOutline,
 } from '@mdi/js'
 
-import { analytics } from '../../main'
+import { analytics } from '../../api/firebase'
 
 import AttemptsTable from './AttemptsTable.vue'
 

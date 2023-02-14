@@ -1,7 +1,7 @@
 import firebase from 'firebase/app'
-import { Entity } from '../entities/base.entity'
 
-import { db, storage } from '../main'
+import { db, storage } from '../api/firebase'
+
 import { getNowISOString } from '../utils/date'
 
 /**

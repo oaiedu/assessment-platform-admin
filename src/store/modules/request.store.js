@@ -1,8 +1,6 @@
 import { Store } from 'vuex'
 
-import { analytics, db, storage } from '../../main'
 import { createErrorLog, showErrorMessage } from '../../utils/errors'
-import { getNowISOString } from '../../utils/date'
 import { RequestEntity } from '../../entities/request.entity'
 import { UserEntity } from '../../entities/user.entity'
 import { RequestController } from '../../controllers/request.controller'
@@ -475,6 +473,25 @@ const actions = {
     })
   },
   /**
+   * Gets a requests according to the given id.
+   *
+   * @param {Store<RequestState>} _ The vuex store.
+   * @param {string} payload The request id.
+   */
+  async getRequestById(_, payload) {
+    try {
+      return controller.getOne(payload)
+    } catch (error) {
+      const errorModel = showErrorMessage('load', 'Request', error.message)
+
+      commit('setError', { message: errorModel })
+
+      createErrorLog('Load Request By ID', error.message, {
+        id: payload,
+      })
+    }
+  },
+  /**
    * Loads a page of requests according to the payload data.
    *
    * @param {Store<RequestState>} store The vuex store.
@@ -588,7 +605,7 @@ const actions = {
    *
    * @param {Store<RequestState>} store The vuex store.
    */
-  async checkDeleteMarkRequests({ commit, dispatch }) {
+  async checkDeleteMarkRequests({ commit }) {
     try {
       const requests = await controller.query({
         where: [{ field: 'toDelete.status', operator: '==', value: true }],

@@ -169,7 +169,7 @@ import DeleteWarning from '../Shared/DeleteWarning'
 import DeleteAlert from './DeleteAlertRequests'
 import SearchBox from '../Shared/SearchBox'
 
-import { analytics } from '../../main'
+import { analytics } from '../../api/firebase'
 
 export default {
   components: {
@@ -498,16 +498,36 @@ export default {
       }
     },
   },
-  mounted() {
+  async mounted() {
     this.deleteConfirmed = false
+
     this.$store.dispatch('checkDeleteMarkRequests')
-    this.$store.dispatch('loadRequestPage', {
+
+    await this.$store.dispatch('loadRequestPage', {
       page: 1,
       itemsPerPage: this.itemsPerPage,
       mode: 'first',
       claims: this.userClaims,
       userInfo: this.userInfo,
     })
+
+    const id = this.$route.params.id
+
+    if (!id) {
+      return
+    }
+
+    const request = await this.$store.dispatch('getRequestById', id)
+
+    if (!request) {
+      return
+    }
+
+    if (this.userClaims['admin']) {
+      return this.printRequest(request)
+    }
+
+    this.editRequest(request)
   },
   beforeDestroy() {
     if (

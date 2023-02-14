@@ -1,28 +1,23 @@
-/**
- * Gets the Firebase config according to the app mode.
- *
- * @returns An object that keeps all of the firebase configuration.
- */
-export const getConfig = () => {
-  const prodConfig = {
-    apiKey: "AIzaSyAXJ3DvXmuoxq4BREOl8pymt6t8NJnX6TA",
-    authDomain: "cloud-quiz-generator.firebaseapp.com",
-    projectId: "cloud-quiz-generator",
-    storageBucket: "cloud-quiz-generator.appspot.com",
-    messagingSenderId: "684103556095",
-    appId: "1:684103556095:web:30fcc211c80a15af86e5ca",
-    measurementId: "G-E4CRZVV3K9"
-  };
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import 'firebase/firestore'
+import 'firebase/storage'
+import 'firebase/analytics'
 
-  const devConfig = {
-    apiKey: "AIzaSyBBulAjoVwdI1CaK1GFCr1gh0F5JBniZoM",
-    authDomain: "develop-lg-quiz-generator.firebaseapp.com",
-    projectId: "develop-lg-quiz-generator",
-    storageBucket: "develop-lg-quiz-generator.appspot.com",
-    messagingSenderId: "149140593266",
-    appId: "1:149140593266:web:a16dec7371623437dac0eb",
-    measurementId: "G-18JVW1N909"
-  };
+firebase.initializeApp({
+  apiKey: process.env.VUE_APP_API_KEY,
+  authDomain: process.env.VUE_APP_AUTH_DOMAIN,
+  projectId: process.env.VUE_APP_PROJECT_ID,
+  storageBucket: process.env.VUE_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.VUE_APP_MESSAGING_SENDER_ID,
+  appId: process.env.VUE_APP_APP_ID,
+  measurementId: process.env.VUE_APP_MEASUREMENT_ID,
+})
 
-  return process.env.NODE_ENV === "production" ? prodConfig : devConfig;
-};
+export const googleProvider = new firebase.auth.GoogleAuthProvider()
+
+export const auth = firebase.auth()
+export const db = firebase.firestore()
+export const storage = firebase.storage()
+
+export const analytics = firebase.analytics()

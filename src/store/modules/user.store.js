@@ -1,10 +1,13 @@
 import { Store } from 'vuex'
 // import axios from 'axios'
 
-import { analytics, auth } from '../../main'
-import { createErrorLog, showErrorMessage } from '../../utils/errors'
+import { analytics, auth } from '../../api/firebase'
+
 import { UserController } from '../../controllers/user.controller'
+
 import { UserEntity } from '../../entities/user.entity'
+
+import { createErrorLog, showErrorMessage } from '../../utils/errors'
 
 /**
  * @typedef {import('./tests.store.js').Attempt} Attempt

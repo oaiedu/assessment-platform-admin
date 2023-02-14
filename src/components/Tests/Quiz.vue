@@ -429,7 +429,7 @@ import {
 
 import QuestionImage from '../Questions/QuestionImage.vue'
 import Counter from '../Shared/Counter.vue'
-import { analytics } from '../../main'
+import { analytics } from '../../api/firebase'
 
 export default {
   name: 'Exam',

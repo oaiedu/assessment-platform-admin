@@ -1,94 +1,103 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
-import Auth from "@/views/Auth.vue";
-import Profile from "@/components/User/Profile.vue";
-import Questions from "@/components/Questions/Questions.vue";
-import Tests from "@/components/Tests/Tests.vue";
-import Quiz from "@/components/Tests/Quiz.vue";
-import QuizDetails from "@/components/Tests/QuizDetails.vue";
-import Inbox from "@/components/Requests/Inbox.vue";
-import Home from "@/views/Home.vue";
-import Management from "@/components/Admin/Management.vue";
-import AuthGuard from "./auth-guard";
-import { analytics } from "../main";
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 
-Vue.use(VueRouter);
+import Auth from '@/views/Auth.vue'
+import Profile from '@/components/User/Profile.vue'
+import Questions from '@/components/Questions/Questions.vue'
+import Tests from '@/components/Tests/Tests.vue'
+import Quiz from '@/components/Tests/Quiz.vue'
+import QuizDetails from '@/components/Tests/QuizDetails.vue'
+import Inbox from '@/components/Requests/Inbox.vue'
+import Home from '@/views/Home.vue'
+import Management from '@/components/Admin/Management.vue'
+
+import AuthGuard from './auth-guard'
+
+import { analytics } from '../api/firebase'
+
+Vue.use(VueRouter)
 
 const routes = [
   {
-    path: "/",
+    path: '/',
     component: Home,
-    name: "home",
-    beforeEnter: AuthGuard
+    name: 'home',
+    beforeEnter: AuthGuard,
   },
   {
-    path: "/admin",
+    path: '/admin',
     component: Management,
-    name: "management",
-    beforeEnter: AuthGuard
+    name: 'management',
+    beforeEnter: AuthGuard,
   },
   {
-    path: "/inbox",
+    path: '/inbox',
     component: Inbox,
-    name: "inbox",
-    beforeEnter: AuthGuard
+    name: 'inbox',
+    beforeEnter: AuthGuard,
   },
   {
-    path: "/auth",
+    path: '/inbox/:id',
+    component: Inbox,
+    name: 'inbox.details',
+    beforeEnter: AuthGuard,
+  },
+  {
+    path: '/auth',
     component: Auth,
-    name: "auth"
+    name: 'auth',
   },
   {
-    path: "/profile",
+    path: '/profile',
     component: Profile,
-    name: "profile",
-    beforeEnter: AuthGuard
+    name: 'profile',
+    beforeEnter: AuthGuard,
   },
   {
-    path: "/quizzes",
+    path: '/quizzes',
     component: Tests,
-    name: "quizzes",
-    beforeEnter: AuthGuard
+    name: 'quizzes',
+    beforeEnter: AuthGuard,
   },
   {
-    path: "/quizzes/:id",
+    path: '/quizzes/:id',
     component: QuizDetails,
-    name: "quiz.details",
-    beforeEnter: AuthGuard
+    name: 'quiz.details',
+    beforeEnter: AuthGuard,
   },
   {
-    path: "/quiz/:id",
+    path: '/quiz/:id',
     component: Quiz,
-    name: "quiz.exam",
-    beforeEnter: AuthGuard
+    name: 'quiz.exam',
+    beforeEnter: AuthGuard,
   },
   {
-    path: "/questions",
+    path: '/questions',
     component: Questions,
-    name: "questions",
-    beforeEnter: AuthGuard
-  }
-];
+    name: 'questions',
+    beforeEnter: AuthGuard,
+  },
+]
 
 const router = new VueRouter({
-  mode: "history",
+  mode: 'history',
   routes,
-  base: "/"
-});
+  base: '/',
+})
 
 router.afterEach((to, from) => {
-  const authNeededTo = to.params.to;
+  const authNeededTo = to.params.to
 
-  analytics.setCurrentScreen(to.name);
-  analytics.logEvent("screen_view", {
-    firebase_screen_name: to.name
-  });
+  analytics.setCurrentScreen(to.name)
+  analytics.logEvent('screen_view', {
+    firebase_screen_name: to.name,
+  })
 
-  analytics.logEvent("navigation", {
+  analytics.logEvent('navigation', {
     page_name: to.name,
     access_denied: authNeededTo,
-    from: from.name
-  });
-});
+    from: from.name,
+  })
+})
 
-export default router;
+export default router

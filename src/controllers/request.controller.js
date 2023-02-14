@@ -1,9 +1,8 @@
 import { Controller } from './base.controller'
 import { DataSizeController } from './data-size.controller'
-import { SubjectController } from './subject.controller'
+import { UserController } from './user.controller'
 
 import { RequestEntity } from '../entities/request.entity'
-import { UserController } from './user.controller'
 
 /**
  * @typedef {import('./base.controller').Where} Where
@@ -18,11 +17,6 @@ import { UserController } from './user.controller'
  */
 
 const REQUEST_COLLECTION = 'question-requests'
-
-/**
- * Defines the subject controller.
- */
-const subjectController = new SubjectController()
 
 /**
  * Defines the data size controller.

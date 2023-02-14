@@ -1,9 +1,9 @@
-import { analytics, auth, googleProvider } from '../main'
+import { analytics, auth, googleProvider } from '../api/firebase'
+
+import { UserEntity } from '../entities/user.entity'
 
 import { Controller } from './base.controller'
 import { DataSizeController } from './data-size.controller'
-
-import { UserEntity } from '../entities/user.entity'
 
 const USER_COLLECTION = 'users'
 

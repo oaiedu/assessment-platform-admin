@@ -223,9 +223,7 @@ import SearchBox from '../Shared/SearchBox'
 
 import { TestEntity } from '../../entities/test.entity'
 
-import { getNowISOString } from '../../utils/date'
-
-import { analytics } from '../../main'
+import { analytics } from '../../api/firebase'
 
 export default {
   name: 'Tests',

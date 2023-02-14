@@ -10,7 +10,7 @@
       :headers="
         headers.map(h => ({
           ...h,
-          text: $t('DASHBOARD.TESTS_TABLE.HEADERS.' + h.text)
+          text: $t('DASHBOARD.TESTS_TABLE.HEADERS.' + h.text),
         }))
       "
       :items="tests"
@@ -21,7 +21,7 @@
       <template v-slot:top>
         <v-toolbar dense flat color="white" class="mt-1">
           <h1 class="table-title">
-            {{ $t("DASHBOARD.TESTS_TABLE.recent_quizzes") }}
+            {{ $t('DASHBOARD.TESTS_TABLE.recent_quizzes') }}
           </h1>
         </v-toolbar>
 
@@ -55,7 +55,7 @@
           </div>
 
           <span class="type-text">
-            {{ $t("TEST.TYPE." + item.type) }}
+            {{ $t('TEST.TYPE.' + item.type) }}
           </span>
         </div>
       </template>
@@ -69,7 +69,7 @@
             mdiDumbbell
           }}</v-icon>
 
-          {{ $t("TEST.LEVEL." + getLevel(item).label) }}
+          {{ $t('TEST.LEVEL.' + getLevel(item).label) }}
         </span>
       </template>
 
@@ -85,150 +85,150 @@ import {
   mdiCheckboxMultipleMarked,
   mdiShuffleVariant,
   mdiArrowDecisionAutoOutline,
-  mdiDumbbell
-} from "@mdi/js";
+  mdiDumbbell,
+} from '@mdi/js'
 
-import { analytics } from "../../main";
+import { analytics } from '../../api/firebase'
 
 export default {
-  name: "TestsTable",
+  name: 'TestsTable',
   data() {
     return {
       headers: [
-        { text: "title", sortable: false, value: "title", align: "center" },
-        { text: "type", sortable: false, value: "type", align: "center" },
+        { text: 'title', sortable: false, value: 'title', align: 'center' },
+        { text: 'type', sortable: false, value: 'type', align: 'center' },
         {
-          text: "questions_amount",
+          text: 'questions_amount',
           sortable: false,
-          value: "questionsAmount",
-          align: "center"
+          value: 'questionsAmount',
+          align: 'center',
         },
-        { text: "level", sortable: false, value: "level", align: "center" },
+        { text: 'level', sortable: false, value: 'level', align: 'center' },
         {
-          text: "last_update",
+          text: 'last_update',
           sortable: false,
-          value: "updated",
-          align: "center"
-        }
+          value: 'updated',
+          align: 'center',
+        },
       ],
       mdiCheckboxMultipleMarked,
       mdiShuffleVariant,
       mdiArrowDecisionAutoOutline,
-      mdiDumbbell
-    };
+      mdiDumbbell,
+    }
   },
   computed: {
     tests() {
-      return this.$store.getters.getLastTests;
+      return this.$store.getters.getLastTests
     },
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     months() {
-      return this.$store.getters.getMonths;
+      return this.$store.getters.getMonths
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
+      return this.$store.getters.getUserClaims
     },
     className() {
       return this.userClaims
         ? Object.entries(this.userClaims).filter(role => role[1])[0][0]
-        : "";
-    }
+        : ''
+    },
   },
   methods: {
     getLevel(item) {
-      const level = item.level.index;
+      const level = item.level.index
 
       switch (level) {
         case 0:
           return {
-            label: "beginner",
-            color: "green"
-          };
+            label: 'beginner',
+            color: 'green',
+          }
         case 1:
           return {
-            label: "intermediary",
-            color: "blue"
-          };
+            label: 'intermediary',
+            color: 'blue',
+          }
         case 2:
           return {
-            label: "advanced",
-            color: "orange"
-          };
+            label: 'advanced',
+            color: 'orange',
+          }
         case 3:
           return {
-            label: "expert",
-            color: "red"
-          };
+            label: 'expert',
+            color: 'red',
+          }
       }
     },
     getItemIconColor(item) {
       if (item.toDelete) {
         if (item.toDelete.status) {
-          return "#ff0000";
+          return '#ff0000'
         } else {
-          return "#c4c4c4";
+          return '#c4c4c4'
         }
       }
-      return item.type === "random" ? "#2196F3" : "#6755FA";
+      return item.type === 'random' ? '#2196F3' : '#6755FA'
     },
     itemRowStyle(item) {
       return item.toDelete
         ? item.toDelete.status
-          ? "item-to-delete"
-          : "item-deleted"
-        : "item-active " + this.className;
+          ? 'item-to-delete'
+          : 'item-deleted'
+        : 'item-active ' + this.className
     },
     formatDate(date) {
-      const year = date.substr(0, 4);
-      const month = date.substr(5, 2);
-      const day = date.substr(8, 2);
+      const year = date.substr(0, 4)
+      const month = date.substr(5, 2)
+      const day = date.substr(8, 2)
 
-      const today = new Date();
-      const testDate = new Date(`${month}/${day}/${year}`);
+      const today = new Date()
+      const testDate = new Date(`${month}/${day}/${year}`)
 
       const diffDays = Math.floor(
-        Math.abs(today - testDate) / (1000 * 60 * 60 * 24)
-      );
+        Math.abs(today - testDate) / (1000 * 60 * 60 * 24),
+      )
 
       const testTime = date
-        .split("T")[1]
-        .split(".")[0]
-        .substr(0, 5);
+        .split('T')[1]
+        .split('.')[0]
+        .substr(0, 5)
 
       if (diffDays === 0) {
-        return `${this.$t("SHARED.DATE.today_at")} ${testTime}`;
+        return `${this.$t('SHARED.DATE.today_at')} ${testTime}`
       } else if (diffDays === 1) {
-        return `${this.$t("SHARED.DATE.yesterday_at")} ${testTime}`;
+        return `${this.$t('SHARED.DATE.yesterday_at')} ${testTime}`
       } else {
         return `${this.$t(
-          "SHARED.DATE.MONTH." + this.months[parseInt(month)]
-        ).substr(0, 3)} ${day} ${year}`;
+          'SHARED.DATE.MONTH.' + this.months[parseInt(month)],
+        ).substr(0, 3)} ${day} ${year}`
       }
     },
     onRowClick(item) {
-      if (this.userClaims["appraiser"]) {
-        return;
+      if (this.userClaims['appraiser']) {
+        return
       }
 
-      analytics.logEvent("select_item", {
+      analytics.logEvent('select_item', {
         item_list_name: item.title,
         item_list_id: item.id,
-        items: [item]
-      });
+        items: [item],
+      })
 
-      this.$router.push("/quizzes/" + item.id);
-    }
+      this.$router.push('/quizzes/' + item.id)
+    },
   },
   created() {
-    if (this.userClaims && this.userClaims["student"]) {
-      this.$store.dispatch("loadLastTests", 10);
+    if (this.userClaims && this.userClaims['student']) {
+      this.$store.dispatch('loadLastTests', 10)
     } else {
-      this.$store.dispatch("loadLastTests", 5);
+      this.$store.dispatch('loadLastTests', 5)
     }
-  }
-};
+  },
+}
 </script>
 
 <style scoped>

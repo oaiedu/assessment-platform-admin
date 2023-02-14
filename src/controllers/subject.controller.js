@@ -1,7 +1,9 @@
+import { analytics } from '../api/firebase'
+
+import { Controller } from './base.controller'
+
 import { QuestionEntity } from '../entities/question.entity'
 import { SubjectEntity } from '../entities/subject.entity'
-import { analytics } from '../main'
-import { Controller } from './base.controller'
 
 /**
  * @typedef {import('./base.controller').Query} Query
