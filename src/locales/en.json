@@ -14,9 +14,9 @@
     "delete_marked": "The following requests were marked to be deleted:",
     "delete_confirm": "Are you sure you want to delete this request?",
     "STATUS": {
-      "approved": "Approved",
-      "pendant": "Pendant",
-      "rejected": "Rejected"
+      "2-approved": "Approved",
+      "0-pendant": "Pendant",
+      "1-rejected": "Rejected"
     },
     "INBOX": {
       "request": "Approved requests will be automatically deleted when you leave this page!",

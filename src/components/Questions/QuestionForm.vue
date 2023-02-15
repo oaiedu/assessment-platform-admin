@@ -508,7 +508,7 @@ export default {
           request: {
             ...questionData,
             userId: this.userInfo.id,
-            status: 'pendant',
+            status: '0-pendant',
           },
         })
 

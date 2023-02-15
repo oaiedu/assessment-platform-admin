@@ -69,13 +69,15 @@ export default {
   },
   methods: {
     getColor(status) {
-      if (status === 'pendant') {
+      if (status === '0-pendant') {
         return '#ffaa00'
-      } else if (status === 'approved') {
-        return '#00cc44'
-      } else {
-        return '#ff2233'
       }
+
+      if (status === '2-approved') {
+        return '#00cc44'
+      }
+
+      return '#ff2233'
     },
     pushUrl() {
       this.$router.push('/inbox')

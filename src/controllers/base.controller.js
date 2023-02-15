@@ -121,20 +121,31 @@ export class Controller {
    * @param {string} collection the collection name.
    * @param {Type<T>} entityType the entity type to be used.
    * @param {PaginationQuery} query an object that contains the pagination data.
-   * @param {Where[]} constraints an array of constraints to be applied. Defaults to `[]`.
+   * @param {Query?} constraints additional constraints to be applied. Defaults to `[]`.
    * @returns {Promise<PaginationQueryResponse<T>>} an object containing the gotten entities and other data.
    */
   async _list(
     collection,
     entityType,
     { orderBy, lastDoc = null, itemsPerPage = 8, direction = 'forward' },
-    constraints = [],
+    constraints,
   ) {
-    let query = db.collection(collection).orderBy(orderBy)
+    let query = db.collection(collection)
 
-    constraints.forEach(({ field, operator, value }) => {
-      query = query.where(field, operator, value)
-    })
+    if (constraints) {
+      ;(constraints.orderBy ?? []).forEach(({ field, mode }) => {
+        query = query.orderBy(field, mode ?? 'asc')
+      })
+      ;(constraints.where ?? []).forEach(({ field, operator, value }) => {
+        query = query.where(field, operator, value)
+      })
+
+      if (constraints.limit) {
+        query = query.limit(constraints.limit)
+      }
+    }
+
+    query = query.orderBy(orderBy)
 
     let start = lastDoc ? lastDoc[0] : null
     let end = lastDoc ? lastDoc[1] : null

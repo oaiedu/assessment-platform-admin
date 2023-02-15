@@ -499,7 +499,7 @@ export default {
       } else {
         const request = {
           ...questionData,
-          status: 'pendant',
+          status: '0-pendant',
           userId: this.userInfo.id,
         }
 

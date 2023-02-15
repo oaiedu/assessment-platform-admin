@@ -151,19 +151,26 @@ export class RequestController extends Controller {
    */
   async list(query, userId) {
     /**
-     * @type {Where[]}
+     * @type {Query}
      */
-    const where = []
+    const q = {
+      where: [],
+      orderBy: [],
+    }
 
     if (userId) {
-      where.push({ field: 'userId', operator: '==', value: userId })
+      q.where.push({ field: 'userId', operator: '==', value: userId })
     }
+
+    q.orderBy.push({
+      field: 'status',
+    })
 
     const { data, ...rest } = await super._list(
       REQUEST_COLLECTION,
       RequestEntity,
       query,
-      where,
+      q,
     )
 
     const requests = await this._setUsers(data)
@@ -176,28 +183,38 @@ export class RequestController extends Controller {
    *
    * @param {string} query the request name query.
    * @param {string?} userId the request user id.
+   * @param {string?} status the request status.
    * @returns the found requests.
    */
-  async search(query = '', userId) {
+  async search(query = '', userId, status) {
     const field = 'name'
 
     /**
      * @type {Where[]}
      */
-    const where = [
-      {
-        field,
-        operator: '>=',
-        value: query.toUpperCase(),
-      },
-    ]
+    const where = []
+
+    if (status) {
+      where.push({
+        field: 'status',
+        operator: '==',
+        value: status,
+      })
+    }
 
     if (query) {
-      where.push({
-        field,
-        operator: '<=',
-        value: `${query.toUpperCase()}~`,
-      })
+      where.push(
+        {
+          field,
+          operator: '>=',
+          value: query.toUpperCase(),
+        },
+        {
+          field,
+          operator: '<=',
+          value: `${query.toUpperCase()}~`,
+        },
+      )
     }
 
     if (userId) {
@@ -208,13 +225,25 @@ export class RequestController extends Controller {
       })
     }
 
+    /**
+     * @type {import('./base.controller').OrderBy}
+     */
+    const orderBy = []
+
+    if (query) {
+      orderBy.push({
+        field,
+      })
+    }
+
+    if (!status) {
+      orderBy.push({
+        field: 'status',
+      })
+    }
+
     return this.query({
-      orderBy: [
-        {
-          field,
-          mode: 'asc',
-        },
-      ],
+      orderBy,
       where,
     })
   }
@@ -375,7 +404,7 @@ export class RequestController extends Controller {
           {
             field: 'status',
             operator: '==',
-            value: 'approved',
+            value: '2-approved',
           },
         ],
       },
