@@ -1,13 +1,33 @@
 <template>
   <div>
     <v-container>
-      <v-container class="mt-10 mb-5">
+      <v-row class="mt-10 mb-5">
         <SearchBox
+          class="mx-2"
           :label="$t('QUESTIONS.search_id')"
           @enter="searchQuery($event)"
           @textChange="searchTextChange($event)"
         />
-      </v-container>
+
+        <v-col class="ma-0 mx-2 pa-0" cols="12" md="3" lg="3" xl="2">
+          <v-select
+            v-model="selectedStatus"
+            dense
+            rounded
+            outlined
+            clearable
+            label="Filter by status"
+            item-value="value"
+            item-text="label"
+            :items="
+              statuses.map(s => ({
+                value: s,
+                label: $t(`REQUESTS.STATUS.${s}`),
+              }))
+            "
+          ></v-select>
+        </v-col>
+      </v-row>
 
       <v-container
         v-if="hasApprovedRequests && userClaims && userClaims['appraiser']"
@@ -198,6 +218,8 @@ export default {
       itemsPerPage: 8,
       questionTests: [],
       rejectErrorSnackBar: false,
+      statuses: ['0-pendant', '1-rejected', '2-approved'],
+      selectedStatus: null,
     }
   },
   computed: {
@@ -242,7 +264,7 @@ export default {
     hasApprovedRequests() {
       let itHas = false
       this.requests.forEach(request => {
-        if (request.status === 'approved') {
+        if (request.status === '2-approved') {
           itHas = true
         }
       })
@@ -318,7 +340,7 @@ export default {
               .then(() => {
                 this.$store.dispatch('updateQuestionRequest', {
                   mode: 'sttUpdate',
-                  status: 'approved',
+                  status: '2-approved',
                   request,
                   isSearching: this.isSearching,
                 })
@@ -336,7 +358,7 @@ export default {
               .then(async () => {
                 await this.$store.dispatch('updateQuestionRequest', {
                   mode: 'sttUpdate',
-                  status: 'approved',
+                  status: '2-approved',
                   request,
                   isSearching: this.isSearching,
                 })
@@ -412,7 +434,7 @@ export default {
 
         await this.$store.dispatch('updateQuestionRequest', {
           mode: 'sttUpdate',
-          status: 'rejected',
+          status: '1-rejected',
           request,
           isSearching: this.isSearching,
         })
@@ -444,22 +466,27 @@ export default {
       this.$store.dispatch('loadRequestPage', payload)
     },
     searchTextChange(text) {
-      if ((text === null || text.length === 0) && this.isSearching) {
+      this.search = text
+
+      if (!text && !this.selectedStatus && this.isSearching) {
         this.isSearching = false
         this.searchPage = 1
         this.$store.commit('resetFilteredRequests')
+      } else if (!text && this.selectedStatus) {
+        this.searchQuery(text)
       }
     },
     searchQuery(text) {
       this.searchPage = 1
       this.$store.commit('resetFilteredRequests')
 
-      if (text && text.length > 0) {
+      if (text || this.selectedStatus) {
         this.isSearching = true
         this.$store.dispatch('searchRequests', {
           key: text,
           claims: this.userClaims,
           userInfo: this.userInfo,
+          status: this.selectedStatus,
         })
 
         analytics.logEvent('search', {
@@ -490,12 +517,8 @@ export default {
     },
   },
   watch: {
-    search(text) {
-      if ((text === null || text.length === 0) && this.isSearching) {
-        this.isSearching = false
-        this.searchPage = 1
-        this.$store.commit('resetFilteredRequests')
-      }
+    selectedStatus() {
+      this.searchQuery(this.search)
     },
   },
   async mounted() {

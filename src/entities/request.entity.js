@@ -3,7 +3,7 @@ import { UserEntity } from './user.entity'
 
 /**
  * @typedef {import('./question.entity').Answer} Answer
- * @typedef {"rejected"|"pendant"|"approved"} RequestStatus
+ * @typedef {"0-pendant"|"1-rejected"|"2-approved"} RequestStatus
  * @typedef {import('./question.entity').Level} Level
  */
 

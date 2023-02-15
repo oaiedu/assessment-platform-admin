@@ -8,7 +8,7 @@
         :headers="
           headers.map(h => ({
             ...h,
-            text: $t('REQUESTS.TABLE.HEADERS.' + h.text)
+            text: $t('REQUESTS.TABLE.HEADERS.' + h.text),
           }))
         "
         :items="items"
@@ -25,14 +25,14 @@
             class="font-weight-medium"
             :style="{
               color:
-                item.status === 'pendant'
+                item.status === '0-pendant'
                   ? '#ffaa00'
-                  : item.status === 'approved'
+                  : item.status === '2-approved'
                   ? '#00cc66'
-                  : '#ff3333'
+                  : '#ff3333',
             }"
           >
-            {{ $t("REQUESTS.STATUS." + item.status) }}
+            {{ $t('REQUESTS.STATUS.' + item.status) }}
           </span>
         </template>
 
@@ -49,7 +49,7 @@
                   {{ mdiEmail }}
                 </v-icon>
               </template>
-              <span>{{ $t("REQUESTS.TABLE.send_email") }}</span>
+              <span>{{ $t('REQUESTS.TABLE.send_email') }}</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -64,7 +64,7 @@
                   {{ mdiFilePdfBox }}
                 </v-icon>
               </template>
-              <span>{{ $t("REQUESTS.TABLE.view_pdf") }}</span>
+              <span>{{ $t('REQUESTS.TABLE.view_pdf') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['admin']">
@@ -75,14 +75,14 @@
                   class="ml-3"
                   color="green"
                   :disabled="
-                    item.status === 'approved' || loading || rejectLoading
+                    item.status === '2-approved' || loading || rejectLoading
                   "
                   @click="onCheckClick(item)"
                 >
                   {{ mdiCheckBold }}
                 </v-icon>
               </template>
-              <span>{{ $t("REQUESTS.TABLE.approve") }}</span>
+              <span>{{ $t('REQUESTS.TABLE.approve') }}</span>
             </v-tooltip>
 
             <v-tooltip top v-if="userClaims && userClaims['appraiser']">
@@ -93,14 +93,14 @@
                   class="ml-3"
                   color="orange"
                   :disabled="
-                    item.status === 'approved' || loading || rejectLoading
+                    item.status === '2-approved' || loading || rejectLoading
                   "
                   @click="onEditClick(item)"
                 >
                   {{ mdiPencil }}
                 </v-icon>
               </template>
-              <span>{{ $t("REQUESTS.TABLE.edit") }}</span>
+              <span>{{ $t('REQUESTS.TABLE.edit') }}</span>
             </v-tooltip>
 
             <v-tooltip top>
@@ -114,8 +114,8 @@
                     loading ||
                       rejectLoading ||
                       (userClaims && userClaims['admin']
-                        ? item.status === 'rejected'
-                        : item.status === 'approved')
+                        ? item.status === '1-rejected'
+                        : item.status === '2-approved')
                   "
                   @click="
                     userClaims && userClaims['admin']
@@ -123,13 +123,13 @@
                       : onDeleteClick(item)
                   "
                 >
-                  {{ userClaims && userClaims["admin"] ? mdiClose : mdiDelete }}
+                  {{ userClaims && userClaims['admin'] ? mdiClose : mdiDelete }}
                 </v-icon>
               </template>
               <span>{{
                 $t(
-                  "REQUESTS.TABLE." +
-                    (userClaims && userClaims["admin"] ? "reject" : "delete")
+                  'REQUESTS.TABLE.' +
+                    (userClaims && userClaims['admin'] ? 'reject' : 'delete'),
                 )
               }}</span>
             </v-tooltip>
@@ -148,10 +148,10 @@
             >
               {{
                 $t(
-                  "QUESTIONS.TABLE." +
-                    (userClaims && userClaims["appraiser"]
-                      ? "restore"
-                      : "unavailable")
+                  'QUESTIONS.TABLE.' +
+                    (userClaims && userClaims['appraiser']
+                      ? 'restore'
+                      : 'unavailable'),
                 )
               }}
             </v-btn>
@@ -163,7 +163,7 @@
               disabled
               text
             >
-              {{ $t("TEST.TESTS_TABLE.deleted") }}
+              {{ $t('TEST.TESTS_TABLE.deleted') }}
             </v-btn>
           </v-row>
         </template>
@@ -179,12 +179,12 @@ import {
   mdiPencil,
   mdiCheckBold,
   mdiFilePdfBox,
-  mdiEmail
-} from "@mdi/js";
+  mdiEmail,
+} from '@mdi/js'
 
 export default {
-  name: "RequestsTable",
-  props: ["items", "page", "itemsPerPage", "rejectLoading"],
+  name: 'RequestsTable',
+  props: ['items', 'page', 'itemsPerPage', 'rejectLoading'],
   data() {
     return {
       mdiClose,
@@ -192,105 +192,105 @@ export default {
       mdiPencil,
       mdiCheckBold,
       mdiFilePdfBox,
-      mdiEmail
-    };
+      mdiEmail,
+    }
   },
   computed: {
     headers() {
-      return this.userClaims && this.userClaims["admin"]
+      return this.userClaims && this.userClaims['admin']
         ? [
-            { text: "id", sortable: true, value: "name", align: "left" },
+            { text: 'id', sortable: true, value: 'name', align: 'left' },
             {
-              text: "user",
-              value: "user.name",
+              text: 'user',
+              value: 'user.name',
               sortable: true,
-              align: "center"
+              align: 'center',
             },
             {
-              text: "email",
-              value: "user.email",
+              text: 'email',
+              value: 'user.email',
               sortable: true,
-              align: "center"
+              align: 'center',
             },
             {
-              text: "subject",
-              value: "subject",
+              text: 'subject',
+              value: 'subject',
               sortable: true,
-              align: "center"
+              align: 'center',
             },
             {
-              text: "status",
-              value: "status",
+              text: 'status',
+              value: 'status',
               sortable: true,
-              align: "center"
+              align: 'center',
             },
             {
-              text: "actions",
-              value: "actions",
+              text: 'actions',
+              value: 'actions',
               sortable: false,
-              align: "right"
-            }
+              align: 'right',
+            },
           ]
         : [
-            { text: "id", sortable: true, value: "name", align: "left" },
+            { text: 'id', sortable: true, value: 'name', align: 'left' },
             {
-              text: "subject",
-              value: "subject",
+              text: 'subject',
+              value: 'subject',
               sortable: true,
-              align: "center"
+              align: 'center',
             },
             {
-              text: "status",
-              value: "status",
+              text: 'status',
+              value: 'status',
               sortable: true,
-              align: "center"
+              align: 'center',
             },
             {
-              text: "actions",
-              value: "actions",
+              text: 'actions',
+              value: 'actions',
               sortable: false,
-              align: "right"
-            }
-          ];
+              align: 'right',
+            },
+          ]
     },
     loading() {
-      return this.$store.getters.loading;
+      return this.$store.getters.loading
     },
     userClaims() {
-      return this.$store.getters.getUserClaims;
-    }
+      return this.$store.getters.getUserClaims
+    },
   },
   methods: {
     itemRowStyle(item) {
       return item.toDelete
         ? item.toDelete.status
-          ? "item-to-delete"
-          : "item-deleted"
-        : "";
+          ? 'item-to-delete'
+          : 'item-deleted'
+        : ''
     },
     onEmailClick(item) {
-      this.$emit("emailClick", item.user.email);
+      this.$emit('emailClick', item.user.email)
     },
     onPdfClick(item) {
-      this.$emit("pdfClick", item);
+      this.$emit('pdfClick', item)
     },
     onEditClick(item) {
-      this.$emit("editClick", item);
+      this.$emit('editClick', item)
     },
     onCheckClick(item) {
-      this.$emit("checkClick", item);
+      this.$emit('checkClick', item)
     },
     onRejectClick(item) {
-      this.$emit("rejectClick", item);
+      this.$emit('rejectClick', item)
     },
     onDeleteClick(item) {
-      this.$emit("deleteClick", item);
+      this.$emit('deleteClick', item)
     },
     onRestoreClick(item) {
-      this.$emit("restoreClick", item);
-    }
-  }
-};
+      this.$emit('restoreClick', item)
+    },
+  },
+}
 </script>
 
 <style>

@@ -13,7 +13,7 @@ import { RequestController } from '../../controllers/request.controller'
  * @typedef {import('./questions.store.js').DeleteStatus} DeleteStatus
  * @typedef {import('./questions.store.js').Answer} Answer
  * @typedef {import('./questions.store.js').Subject} Subject
- * @typedef {"rejected"|"pendant"|"approved"} RequestStatus
+ * @typedef {"0-pendant"|"1-rejected"|"2-approved"} RequestStatus
  */
 
 /**
@@ -571,18 +571,20 @@ const actions = {
    * @param {Store<RequestState>} store The vuex store.
    * @param {Object} payload The action payload.
    * @param {string} payload.key The string to be searched.
+   * @param {string?} payload.status The status to be searched.
    * @param {Partial<UserEntity>} payload.userInfo The current user info.
    * @param {import('./user.store.js').UserClaims} payload.claims The current user claims.
    */
-  async searchRequests({ commit, dispatch }, payload) {
+  async searchRequests({ commit }, payload) {
     commit('setLoading', true)
 
-    const { claims, key, userInfo } = payload
+    const { claims, key, status, userInfo } = payload
 
     try {
       const requests = await controller.search(
         key,
         claims && claims['admin'] ? null : userInfo.id,
+        status,
       )
 
       commit('setFilteredRequests', requests)
@@ -870,7 +872,7 @@ const actions = {
           {
             field: 'status',
             operator: '==',
-            value: 'pendant',
+            value: '0-pendant',
           },
         ],
         orderBy: [

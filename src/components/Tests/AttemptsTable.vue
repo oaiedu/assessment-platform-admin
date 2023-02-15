@@ -6,7 +6,7 @@
     :headers="
       headersAttempts.map(h => ({
         ...h,
-        text: $t('TEST.ATTEMPTS.HEADERS.' + h.text)
+        text: $t('TEST.ATTEMPTS.HEADERS.' + h.text),
       }))
     "
     :items="attempts"
@@ -28,7 +28,7 @@
         :class="{
           'font-weight-medium': !item.score || item.score === 100,
           'green--text': item.score === 100,
-          'red--text': !item.score
+          'red--text': !item.score,
         }"
       >
         {{ item.score.toFixed(2) }}%
@@ -41,7 +41,7 @@
     </template>
 
     <template v-slot:[`item.mode`]="{ item }">
-      {{ $t("TEST.ATTEMPTS.MODE." + (item.mode || "undefined")) }}
+      {{ $t('TEST.ATTEMPTS.MODE.' + (item.mode || 'undefined')) }}
     </template>
 
     <template v-slot:[`item.result`]="{ item }">
@@ -49,78 +49,78 @@
         class="font-weight-medium"
         :class="{
           'green--text': item.approved,
-          'red--text': !item.approved
+          'red--text': !item.approved,
         }"
       >
-        {{ $t("TEST.ATTEMPTS." + (item.approved ? "approved" : "failed")) }}
+        {{ $t('TEST.ATTEMPTS.' + (item.approved ? 'approved' : 'failed')) }}
       </span>
     </template>
 
     <template v-slot:[`item.review`]="{ item }">
       <v-btn text small color="blue" @click="reviewAttempt(item)">
-        {{ $t("TEST.ATTEMPTS.HEADERS.review") }}
+        {{ $t('TEST.ATTEMPTS.HEADERS.review') }}
       </v-btn>
     </template>
   </v-data-table>
 </template>
 
 <script>
-import { months, weekDays } from "../../utils/date";
+import { months, weekDays } from '../../utils/date'
 
 export default {
-  name: "AttemptsTable",
+  name: 'AttemptsTable',
   props: {
-    attempts: Array
+    attempts: Array,
   },
   data() {
     return {
       headersAttempts: [
-        { text: "#", value: "index", sortable: false, align: "center" },
-        { text: "date", value: "date", sortable: false, align: "center" },
+        { text: '#', value: 'index', sortable: false, align: 'center' },
+        { text: 'date', value: 'date', sortable: false, align: 'center' },
         {
-          text: "answers",
-          value: "answers",
+          text: 'answers',
+          value: 'answers',
           sortable: false,
-          align: "center"
+          align: 'center',
         },
         {
-          text: "score",
-          value: "score",
+          text: 'score',
+          value: 'score',
           sortable: false,
-          align: "center"
+          align: 'center',
         },
         {
-          text: "time_taken",
-          value: "timeTaken",
+          text: 'time_taken',
+          value: 'timeTaken',
           sortable: false,
-          align: "center"
+          align: 'center',
         },
-        { text: "mode", value: "mode", sortable: false, align: "center" },
+        { text: 'mode', value: 'mode', sortable: false, align: 'center' },
         {
-          text: "result",
-          value: "result",
+          text: 'result',
+          value: 'result',
           sortable: false,
-          align: "center"
+          align: 'center',
         },
-        { text: "review", value: "review", sortable: false, align: "center" }
-      ]
-    };
+        { text: 'review', value: 'review', sortable: false, align: 'center' },
+      ],
+    }
   },
   methods: {
     getDateSentence(iso) {
-      const date = new Date(iso);
+      const date = new Date(iso)
 
       return `${this.$t(
-        "SHARED.DATE.WEEKDAY." + weekDays[date.getDay()]
+        'SHARED.DATE.WEEKDAY.' + weekDays[date.getDay()],
       ).substring(0, 3)}, ${date.getDate()} ${this.$t(
-        "SHARED.DATE.MONTH." + months[date.getMonth()]
-      ).substring(0, 3)} ${date.getFullYear()}`;
+        'SHARED.DATE.MONTH.' + months[date.getMonth()],
+      ).substring(0, 3)} ${date.getFullYear()}`
     },
     reviewAttempt(item) {
-      this.$emit("reviewAttempt", item);
-    }
-  }
-};
+      this.$emit('reviewAttempt', item)
+    },
+  },
+}
 </script>
 
 <style scoped>
