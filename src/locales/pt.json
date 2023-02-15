@@ -14,9 +14,9 @@
     "delete_marked": "As seguintes solicitações foram marcadas para exclusão:",
     "delete_confirm": "Tem certeza de que deseja excluir esta solicitação?",
     "STATUS": {
-      "approved": "Aprovado",
-      "pendant": "Pendente",
-      "rejected": "Rejeitado"
+      "2-approved": "Aprovado",
+      "0-pendant": "Pendente",
+      "1-rejected": "Rejeitado"
     },
     "INBOX": {
       "request": "Solicitações aprovadas serão excluídas automaticamente quando sair desta página!",
