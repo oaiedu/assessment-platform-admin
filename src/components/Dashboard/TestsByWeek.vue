@@ -288,7 +288,7 @@ export default {
   display: grid;
   grid-template-rows: 1fr 1fr 1fr;
   grid-auto-flow: column;
-  row-gap: 20px;
+  row-gap: 35px;
   column-gap: 50px;
 
   position: absolute;
@@ -299,6 +299,7 @@ export default {
 .week-details {
   display: none;
   position: relative;
+  min-height: 40px;
 }
 
 .week {
@@ -308,7 +309,7 @@ export default {
 .week-interval {
   position: absolute;
   left: 0;
-  top: 20px;
+  top: 22px;
 
   color: #777;
   font-size: 0.8rem;
@@ -343,6 +344,11 @@ export default {
     display: block;
   }
 
+  .details-container {
+    row-gap: 35px;
+    column-gap: 25px;
+  }
+
   .chart-container {
     position: absolute;
     top: 15%;
@@ -350,17 +356,28 @@ export default {
     right: 20px;
 
     height: 80%;
-    width: 60%;
+    width: 55%;
   }
 }
 
 @media (max-width: 800px) {
+  .details-container {
+    row-gap: 35px;
+    column-gap: 15px;
+    font-size: 0.9rem;
+  }
+
   .chart-container {
     top: 20%;
-    right: 0;
+    right: 10px;
 
     height: 75%;
     width: 50%;
+  }
+
+  .week-interval {
+    font-size: 0.7rem;
+    top: 20px;
   }
 }
 
