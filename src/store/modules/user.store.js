@@ -144,16 +144,26 @@ const actions = {
     commit("setLoading", true);
 
     try {
-      const user = await auth.signInWithPopup(googleProvider);
-
-      if (!user.additionalUserInfo.isNewUser) {
-        analytics.logEvent("login");
-
-        await db
-          .collection("users")
-          .doc(user.user.uid)
-          .update({ provider: "google" });
-      }
+      const result = await auth.signInWithPopup(googleProvider);
+      const user = result.user;
+      analytics.logEvent("login");
+      const now = getNowISOString();
+      await db
+        .collection("users")
+        .doc(user.uid)
+        .set(
+          {
+            name: user.displayName || "",
+            email: user.email,
+            profileImages: user.photoURL || "",
+            role: "student",
+            attempts: [],
+            provider: "google",
+            updated: now,
+            created: now
+          },
+          { merge: true }
+        )
     } catch (error) {
       if (error.code === "auth/popup-closed-by-user") {
         return;
@@ -317,9 +327,11 @@ const actions = {
       await db
         .collection("users")
         .doc(state.user.id)
-        .update({
+        .set({
           ...userInfo
-        });
+        },
+        { merge: true }
+      );
 
       commit("setUserInfo", {
         ...userInfo,
@@ -614,7 +626,10 @@ const actions = {
       const doc = snapshot.docs[0];
       const updated = getNowISOString();
 
-      await doc.ref.update({ role, updated });
+      await doc.ref.set(
+        { role, updated },
+        { merge: true }
+      );
 
       commit("setUserRole", { email, role, updated });
 
