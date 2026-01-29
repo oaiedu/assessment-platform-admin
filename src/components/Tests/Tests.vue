@@ -220,7 +220,6 @@ import DeleteAlert from "./DeleteAlertTests";
 import SearchBox from "../Shared/SearchBox";
 import { getNowISOString } from "../../utils/date";
 import { analytics } from "../../main";
-import { watch } from "@vue/composition-api";
 
 export default {
   name: "Tests",
