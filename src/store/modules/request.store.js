@@ -625,8 +625,14 @@ const actions = {
     const { claims, page, itemsPerPage, mode, userInfo } = payload;
     const data = [];
     const pages = Object.keys(state.requests);
-
-    const requestAmount = this.getters.getDataSize["question-requests"]?.users?.[userInfo.id] || 0;
+    const dataSize = this.getters.getDataSize;
+    const requestAmount =
+      dataSize &&
+      dataSize["question-requests"] &&
+      dataSize["question-requests"].users &&
+      dataSize["question-requests"].users[userInfo.id]
+        ? dataSize["question-requests"].users[userInfo.id]
+        : 0;
     const amount = requestAmount % 8;
 
     if (!pages.includes("p" + page)) {
