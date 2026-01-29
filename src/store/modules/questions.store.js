@@ -378,7 +378,7 @@ const actions = {
 
       request
         .then(snapshot => {
-          if (snapshot.docs.length > 0) {
+          if (!snapshot.empty) {
             first = snapshot.docs[0].data().name;
             last = snapshot.docs[snapshot.docs.length - 1].data().name;
           }
@@ -453,7 +453,7 @@ const actions = {
 
       request
         .then(snapshot => {
-          if (snapshot.docs.length > 0) {
+          if (!snapshot.empty) {
             first = snapshot.docs[0].data().name;
             last = snapshot.docs[snapshot.docs.length - 1].data().name;
           }
@@ -623,6 +623,10 @@ const actions = {
       .where("name", "==", name)
       .get()
       .then(snapshot => {
+        if (snapshot.empty) {
+          commit("setLoading", false);
+          return;
+        }
         const doc = snapshot.docs[0];
 
         const toDelete = {
@@ -648,6 +652,7 @@ const actions = {
           .where("name", "==", doc.data().subject)
           .get()
           .then(snap => {
+            if(snap.empty) return;
             const document = snap.docs[0];
             const questions = document.data().questions;
             const index = questions.findIndex(q => q.name === name);
@@ -700,6 +705,10 @@ const actions = {
         .where("name", "==", name)
         .get();
 
+      if (snapshot.empty) {
+        commit("setLoading", false);
+        return;
+      }
       const doc = snapshot.docs[0];
       const data = doc.data();
 
@@ -743,6 +752,7 @@ const actions = {
         .where("name", "==", question.subject)
         .get();
 
+      if(subSnap.empty) return;
       const document = subSnap.docs[0];
 
       if (!document.data().questions.find(q => q.name === question.name)) {
@@ -984,6 +994,7 @@ const actions = {
             .where("name", "==", doc.data().subject)
             .get()
             .then(snap => {
+              if(snap.empty) return;
               const document = snap.docs[0];
               const questions = document.data().questions;
               const index = questions.findIndex(
@@ -1010,6 +1021,7 @@ const actions = {
         db.collection("data-size")
           .get()
           .then(snap => {
+            if (snap.empty) return;
             const document = snap.docs[0];
             const general = document.data().questions.general;
 
@@ -1127,7 +1139,7 @@ const actions = {
 
       if (oldSubject) {
         const sizeSnap = await db.collection("data-size").get();
-
+        if (sizeSnap.empty) return;
         const document = sizeSnap.docs[0];
         const general = document.data().questions.general;
         const sub = question.subject;
@@ -1293,7 +1305,7 @@ const actions = {
    * @param {string} payload - The question name.
    * @returns {Promise<boolean>} Whether the question exists or not.
    */
-  async questionExists(_, payload) {
+  async questionExists({commit}, payload) {
     return new Promise((resolve, reject) => {
       try {
         db.collection("questions")
@@ -1367,7 +1379,10 @@ const actions = {
       });
 
       const sizeSnap = await db.collection("data-size").get();
-
+      if(sizeSnap.empty){
+        commit("setLoading", false);
+        return;
+      }
       const document = sizeSnap.docs[0];
       const general = document.data().questions.general;
       const sub = question.subject;
@@ -1393,6 +1408,7 @@ const actions = {
         .where("name", "==", question.subject)
         .get();
 
+      if(subSnap.empty) return;
       const doc = subSnap.docs[0];
 
       if (!doc.data().questions.find(q => q.name === question.name)) {
@@ -1440,7 +1456,7 @@ const actions = {
    * @param {string} payload the question name.
    * @returns {Question} an object that represents the question data.
    */
-  async getQuestionByName(_, payload) {
+  async getQuestionByName({ commit }, payload) {
     try {
       const snapshot = await db
         .collection("questions")
