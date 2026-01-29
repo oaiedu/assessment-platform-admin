@@ -402,6 +402,15 @@ const actions = {
   loadTestPage({ commit, dispatch, state }, payload) {
     commit("setLoading", true);
 
+    const dataSize = this.getters.getDataSize;
+    if (
+      (payload.type === "next" || payload.type === "previous") &&
+      (!dataSize || typeof dataSize.tests !== "number")
+    ) {
+      commit("setLoading", false);
+      return;
+    }
+
     const { page, itemsPerPage, type } = payload;
     const data = [];
 
@@ -484,9 +493,9 @@ const actions = {
     const data = [];
 
     const pages = Object.keys(state.tests);
-
-    const testAmount = this.getters.getDataSize.tests;
-    const amount = testAmount % 10;
+    const dataSize = this.getters.getDataSize;
+    const testAmount = dataSize?.tests ?? 0;
+    const amount = testAmount % itemsPerPage;
 
     if (!pages.includes("p" + page)) {
       let request = null;
@@ -1089,6 +1098,11 @@ const actions = {
       });
 
       dispatch("addTestsByWeek");
+      await dispatch("loadFOLTestPage", {
+        page: 1,
+        itemsPerPage: 10,
+        mode: "first"
+      });
 
       commit("setSuccess", "Quiz successfully created!");
     } catch (error) {
