@@ -402,6 +402,15 @@ const actions = {
   loadTestPage({ commit, dispatch, state }, payload) {
     commit("setLoading", true);
 
+    const dataSize = this.getters.getDataSize;
+    if (
+      (payload.type === "next" || payload.type === "previous") &&
+      (!dataSize || typeof dataSize.tests !== "number")
+    ) {
+      commit("setLoading", false);
+      return;
+    }
+
     const { page, itemsPerPage, type } = payload;
     const data = [];
 
@@ -428,7 +437,7 @@ const actions = {
 
       request
         .then(async snapshot => {
-          if (snapshot.docs.length > 0) {
+          if (!snapshot.empty) {
             first = snapshot.docs[0].data().id;
             last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
@@ -484,9 +493,9 @@ const actions = {
     const data = [];
 
     const pages = Object.keys(state.tests);
-
-    const testAmount = this.getters.getDataSize.tests;
-    const amount = testAmount % 10;
+    const dataSize = this.getters.getDataSize;
+    const testAmount = dataSize?.tests ?? 0;
+    const amount = testAmount % itemsPerPage;
 
     if (!pages.includes("p" + page)) {
       let request = null;
@@ -503,7 +512,7 @@ const actions = {
 
       request
         .then(async snapshot => {
-          if (snapshot.docs.length > 0) {
+          if (!snapshot.empty) {
             first = snapshot.docs[0].data().id;
             last = snapshot.docs[snapshot.docs.length - 1].data().id;
 
@@ -554,7 +563,7 @@ const actions = {
    * @param {string} payload - The test title.
    * @returns {Promise<number>} The number of tests that match the given title.
    */
-  async testExists(_, payload) {
+  async testExists({commit}, payload) {
     return new Promise((resolve, reject) => {
       try {
         db.collection("tests")
@@ -716,6 +725,10 @@ const actions = {
       .where("id", "==", id)
       .get()
       .then(async snapshot => {
+        if(snapshot.empty){
+          commit("setLoading", false);
+          return;
+        }
         const doc = snapshot.docs[0];
 
         const toDelete = {
@@ -768,6 +781,10 @@ const actions = {
       .where("id", "==", id)
       .get()
       .then(async snapshot => {
+        if (snapshot.empty) {
+          commit("setLoading", false);
+          return;
+        }
         const doc = snapshot.docs[0];
 
         /**
@@ -930,6 +947,10 @@ const actions = {
       .where("id", "==", id)
       .get()
       .then(async snapshot => {
+        if (snapshot.empty) {
+          commit("setLoading", false);
+          return;
+        }
         const doc = snapshot.docs[0];
         const toDelete = {
           status: false
@@ -994,8 +1015,9 @@ const actions = {
         db.collection("data-size")
           .get()
           .then(snap => {
+            if (snap.empty) return;
             const document = snap.docs[0];
-            const size = document.data().tests;
+            const size = document.data().tests ?? 0;
 
             document.ref.update({
               tests: size - snapshot.docs.length
@@ -1061,7 +1083,10 @@ const actions = {
       });
 
       const sizeSnap = await db.collection("data-size").get();
-
+      if (sizeSnap.empty) {
+        commit("setLoading", false);
+        return;
+      }
       const document = sizeSnap.docs[0];
       const size = document.data().tests;
 
@@ -1073,6 +1098,11 @@ const actions = {
       });
 
       dispatch("addTestsByWeek");
+      await dispatch("loadFOLTestPage", {
+        page: 1,
+        itemsPerPage: 10,
+        mode: "first"
+      });
 
       commit("setSuccess", "Quiz successfully created!");
     } catch (error) {
@@ -1105,8 +1135,13 @@ const actions = {
         .collection("tests")
         .where("id", "==", test.id)
         .get();
+      
+      if(snapshot.empty){
+        commit("setLoading", false);
+        return;
+      }
 
-      snapshot.docs[0].ref.update(test);
+      await snapshot.docs[0].ref.update(test);
 
       const user = await dispatch("getUserById", {
         id: test.userId
@@ -1148,6 +1183,10 @@ const actions = {
           .where("name", "==", subject)
           .get()
           .then(snapshot => {
+            if(snapshot.empty){
+              resolve([]);
+              return;
+            }
             const questions = snapshot.docs[0].data().questions;
             resolve(questions);
           })
@@ -1276,6 +1315,9 @@ const actions = {
         .where("id", "==", payload)
         .get();
 
+      if (snapshot.empty) {
+        return null;
+      }
       return snapshot.docs[0].data();
     } catch (e) {
       const errorModel = showErrorMessage("load", "Quiz", error.message);
