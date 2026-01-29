@@ -220,6 +220,7 @@ import DeleteAlert from "./DeleteAlertTests";
 import SearchBox from "../Shared/SearchBox";
 import { getNowISOString } from "../../utils/date";
 import { analytics } from "../../main";
+import { watch } from "@vue/composition-api";
 
 export default {
   name: "Tests",
@@ -299,8 +300,13 @@ export default {
       return this.$store.getters.userInfo;
     },
     pageAmount() {
-      const testsAmount = this.$store.getters.getDataSize.tests;
-      return Math.ceil(testsAmount / this.itemsPerPage) || 1;
+      const dataSize = this.$store.getters.getDataSize;
+      const testsAmount = dataSize && typeof dataSize.tests === "number" ? dataSize.tests : 0;
+      return Math.max(1, Math.ceil(testsAmount / this.itemsPerPage));
+    },
+    hasDataSize() {
+      const ds = this.$store.getters.getDataSize;
+      return ds && typeof ds.tests === "number";
     }
   },
   methods: {
@@ -416,16 +422,28 @@ export default {
         user: this.userInfo,
         isSearching: this.isSearching
       });
+    },
+    loadFirstPage() {
+      this.$store.dispatch("loadFOLTestPage", {
+        page: 1,
+        itemsPerPage: this.itemsPerPage,
+        mode: "first"
+      });
+    }
+  },
+  watch: {
+    hasDataSize(ready) {
+      if (ready) {
+        this.loadFirstPage();
+      }
     }
   },
   mounted() {
     this.deleteConfirmed = false;
     this.$store.dispatch("checkDeleteMarkTests");
-    this.$store.dispatch("loadFOLTestPage", {
-      page: 1,
-      itemsPerPage: this.itemsPerPage,
-      mode: "first"
-    });
+    if(this.hasDataSize){
+      this.loadFirstPage();
+    }
   },
   beforeDestroy() {
     this.search = "";
