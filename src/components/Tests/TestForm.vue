@@ -23,13 +23,12 @@
             class="mr-4"
             :loading="loading"
             :disabled="
-              randomQuestionsNumber < 1 ||
+              !title ||
+              (testType === 'selected' && !selectedQuestions.length) ||
+              (testType === 'random' &&
+                (randomQuestionsNumber < 1 ||
                 randomQuestionsNumber > checkNumber ||
-                !title ||
-                (testType !== 'auto' &&
-                  (testType === 'selected'
-                    ? !selectedQuestions.length
-                    : !selectedRandom.length))
+                !selectedRandom.length))
             "
             :dark="
               randomQuestionsNumber > 0 &&
@@ -566,7 +565,8 @@ export default {
       return amount;
     },
     pageAmount() {
-      const questionAmount = this.$store.getters.getDataSize.questions.general;
+      const dataSize = this.$store.getters.getDataSize;
+      const questionAmount = dataSize?.questions?.general ?? 0;
       return Math.ceil(questionAmount / this.itemsPerPage) || 1;
     },
     selectedAllSubjects() {
