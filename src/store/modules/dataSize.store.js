@@ -56,6 +56,7 @@ const mutations = {
    * @param {number|Object} data.data - The data to be setted.
    */
   addRemoveSize(state, data) {
+    if(!state.dataSize) return;
     state.dataSize[data.key] = data.data;
   },
   /**
@@ -85,6 +86,11 @@ const actions = {
     db.collection("data-size")
       .get()
       .then(snapshot => {
+        if (snapshot.empty) {
+          commit("setDataSize", null);
+          commit("setLoading", false);
+          return;
+        }
         const doc = snapshot.docs[0];
 
         for (let key in doc.data()) {
@@ -108,8 +114,8 @@ const actions = {
    * @param {Store} store - The vuex store.
    */
   addTestsByWeek({ commit, state }) {
+    if(!state.dataSize || !state.dataSize.testsByWeek) return;
     const thisWeek = getWeekInterval(new Date())[0];
-
     let data = { ...state.dataSize.testsByWeek };
 
     const lastWeeks = Object.keys(data);
@@ -166,6 +172,7 @@ const actions = {
    * @param {Test[]} payload.tests - The tests that will be removed.
    */
   async removeTestsByWeek({ commit, state }, payload) {
+    if (!state.dataSize || !state.dataSize.testsByWeek) return;
     const { tests } = payload;
 
     let data = { ...state.dataSize.testsByWeek };
@@ -241,7 +248,7 @@ const getters = {
    * @returns {(subjectName: string) => number} The number of questions of the given subject.
    */
   getNumberOfQuestionBySubject(state) {
-    return subjectName => state.dataSize.questions.subject[subjectName] || 0;
+    return subjectName => state.dataSize?.questions?.subject?.[subjectName] || 0;
   },
   /**
    * Gets a sorted object of data size tests by week key.
@@ -250,6 +257,7 @@ const getters = {
    * @returns {Object.<string, number>} The sorted data size tests by week key.
    */
   getTestsByWeek(state) {
+    if (!state.dataSize || !state.dataSize.testsByWeek) return {};
     return Object.fromEntries(
       Object.entries(state.dataSize.testsByWeek).sort((a, b) =>
         a[0] < b[0] ? -1 : 1
@@ -263,6 +271,7 @@ const getters = {
    * @returns {string[]} The interval of all weeks in data size tests by week key.
    */
   getTestsByWeekInterval(state) {
+    if (!state.dataSize || !state.dataSize.testsByWeek) return [];
     const intervals = [];
     Object.entries(state.dataSize.testsByWeek)
       .sort((a, b) => (a[0] < b[0] ? -1 : 1))
