@@ -435,7 +435,8 @@ const actions = {
 
     const pages = Object.keys(state.questions);
 
-    const questionAmount = this.getters.getDataSize.questions.general;
+    const dataSize = this.getters.getDataSize;
+    const questionAmount = dataSize?.questions?.general ?? 0;
     const amount = questionAmount % 8;
 
     if (!pages.includes("p" + page)) {
@@ -1023,7 +1024,7 @@ const actions = {
           .then(snap => {
             if (snap.empty) return;
             const document = snap.docs[0];
-            const general = document.data().questions.general;
+            const general = document.data()?.questions?.general ?? 0;
 
             const questions = {
               general: general - snapshot.docs.length,
@@ -1358,8 +1359,8 @@ const actions = {
       ...payload.question
     };
 
-    let questionAmount = this.getters.getDataSize.questions.general;
-    questionAmount = questionAmount <= 0 ? 0 : questionAmount;
+    const dataSize = this.getters.getDataSize;
+    let questionAmount = dataSize?.questions?.general ?? 0;
 
     const pageAmount = Math.ceil(questionAmount / 8);
     const amount = questionAmount % 8;
