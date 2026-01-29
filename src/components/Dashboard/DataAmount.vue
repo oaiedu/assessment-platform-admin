@@ -1,12 +1,12 @@
 <template>
   <v-card outlined width="100%" height="100%" class="data-amount">
-    <div class="data-amount-container" v-if="dataSize">
+    <div class="data-amount-container" v-if="dataSize && dataSize.questions && dataSize.users !== undefined">
       <div class="user-amount details">
         <div class="icon-container">
           <v-icon size="30" color="#2F80ED">{{ mdiAccount }}</v-icon>
         </div>
         <div class="amount-info">
-          <span class="amount">{{ dataSize.users }}</span>
+          <span class="amount">{{ usersAmount }}</span>
           <span class="type">{{ $t('DASHBOARD.DATA_AMOUNT.users') }}</span>
         </div>
       </div>
@@ -17,7 +17,7 @@
           }}</v-icon>
         </div>
         <div class="amount-info">
-          <span class="amount">{{ dataSize.questions.general }}</span>
+          <span class="amount">{{ questionsAmount }}</span>
           <span class="type">{{ $t('TEST.QUIZ.questions') }}</span>
         </div>
       </div>
@@ -37,7 +37,7 @@
           }}</v-icon>
         </div>
         <div class="amount-info">
-          <span class="amount">{{ dataSize.tests }}</span>
+          <span class="amount">{{ testsAmount }}</span>
           <span class="type">{{ $t('TEST.QUIZ.quizzes') }}</span>
         </div>
       </div>
@@ -67,10 +67,35 @@ export default {
     dataSize() {
       return this.$store.getters.getDataSize;
     },
+
+    usersAmount() {
+      return this.dataSize && typeof this.dataSize.users === "number"
+        ? this.dataSize.users
+        : 0;
+    },
+
+    questionsAmount() {
+      return this.dataSize &&
+        this.dataSize.questions &&
+        typeof this.dataSize.questions.general === "number"
+        ? this.dataSize.questions.general
+        : 0;
+    },
+
+    testsAmount() {
+      return this.dataSize && typeof this.dataSize.tests === "number"
+        ? this.dataSize.tests
+        : 0;
+    },
+
     subjectsAmount() {
-      return this.$store.state.Subject.subjects.length;
+      return this.$store.state.Subject &&
+        this.$store.state.Subject.subjects
+        ? this.$store.state.Subject.subjects.length
+        : 0;
     }
   }
+
 };
 </script>
 
