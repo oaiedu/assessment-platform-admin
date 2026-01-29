@@ -408,7 +408,10 @@ const actions = {
       commit("setLoading", false);
 
       const sizeSnap = await db.collection("data-size").get();
-
+      if(sizeSnap.empty){
+        commit("setLoading", false);
+        return;
+      }
       const document = sizeSnap.docs[0];
       const general = document.data()["question-requests"].general;
       const subSize = document.data()["question-requests"].users[user.id] || 0;
@@ -465,7 +468,11 @@ const actions = {
         .collection("question-requests")
         .where("name", "==", request.name)
         .get();
-
+      if (snapshot.empty) {
+        commit("setLoading", false);
+        return;
+      }
+      
       if (mode === "sttUpdate") {
         await snapshot.docs[0].ref.update({
           status: payload.status,
@@ -532,7 +539,10 @@ const actions = {
           .orderBy("name")
           .where("userId", "==", userInfo.id);
       }
-
+      if (!state.lastRequestDocument) {
+        commit("setLoading", false);
+        return;
+      }
       if (type === "next") {
         request = ref
           .startAfter(state.lastRequestDocument[1])
@@ -586,6 +596,10 @@ const actions = {
         });
     } else {
       const pageContent = state.requests["p" + page];
+      if (!pageContent || !pageContent.length) {
+        commit("setLoading", false);
+        return;
+      }
       const first = pageContent[0].name;
       const last = pageContent[pageContent.length - 1].name;
 
@@ -611,10 +625,14 @@ const actions = {
     const { claims, page, itemsPerPage, mode, userInfo } = payload;
     const data = [];
     const pages = Object.keys(state.requests);
-
-    const requestAmount = this.getters.getDataSize["question-requests"].users[
-      userInfo.id
-    ];
+    const dataSize = this.getters.getDataSize;
+    const requestAmount =
+      dataSize &&
+      dataSize["question-requests"] &&
+      dataSize["question-requests"].users &&
+      dataSize["question-requests"].users[userInfo.id]
+        ? dataSize["question-requests"].users[userInfo.id]
+        : 0;
     const amount = requestAmount % 8;
 
     if (!pages.includes("p" + page)) {
@@ -720,6 +738,11 @@ const actions = {
     req
       .get()
       .then(async snapshot => {
+        if(snapshot.empty){
+          commit("setFilteredRequests", []);
+          commit("setLoading", false);
+          return;
+        }
         const promises = snapshot.docs.map(async doc => {
           const userData = await dispatch("getUserById", {
             id: doc.data().userId
@@ -797,6 +820,10 @@ const actions = {
       .where("name", "==", name)
       .get()
       .then(async snapshot => {
+        if(snapshot.empty){
+          commit("setLoading", false);
+          return;
+        }
         const doc = snapshot.docs[0];
 
         const toDelete = {
@@ -859,6 +886,10 @@ const actions = {
       .where("name", "==", name)
       .get()
       .then(async snapshot => {
+        if(snapshot.empty){
+          commit("setLoading", false);
+          return;
+        }
         const doc = snapshot.docs[0];
         const data = doc.data();
         docData = data;
@@ -991,6 +1022,10 @@ const actions = {
       .where("name", "==", name)
       .get()
       .then(async snapshot => {
+        if(snapshot.empty){
+          commit("setLoading", false);
+          return;
+        }
         const doc = snapshot.docs[0];
         const toDelete = {
           status: false
@@ -1070,6 +1105,7 @@ const actions = {
         db.collection("data-size")
           .get()
           .then(snap => {
+            if(snap.empty) return;
             const document = snap.docs[0];
             const general = document.data()["question-requests"].general;
 
@@ -1128,6 +1164,7 @@ const actions = {
         db.collection("data-size")
           .get()
           .then(snap => {
+            if(snap.empty) return;
             const document = snap.docs[0];
             const general = document.data()["question-requests"].general;
             const userId = userInfo.id;
