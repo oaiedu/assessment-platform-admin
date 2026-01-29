@@ -315,13 +315,20 @@ export default {
       return this.$store.getters.userInfo;
     },
     pageAmount() {
-      const questionAmount = this.$store.getters.getDataSize.questions.general;
-      return Math.ceil(questionAmount / this.itemsPerPage) || 1;
+      const dataSize = this.$store.getters.getDataSize;
+      const questionAmount = dataSize && dataSize.questions && typeof dataSize.questions.general === 'number'
+        ? dataSize.questions.general
+        : 0;
+      return Math.max(1, Math.ceil(questionAmount / this.itemsPerPage));
     },
     getQuestionTests() {
       const titles = this.questionTests.map(t => "'" + t.title + "'");
       titles.sort((t1, t2) => (t1 > t2 ? 1 : -1));
       return titles.join(", ");
+    },
+    hasDataSize() {
+      const dataSize = this.$store.getters.getDataSize;
+      return !!(dataSize && dataSize.questions);
     }
   },
   watch: {
@@ -340,6 +347,15 @@ export default {
     },
     selectedSubject() {
       this.searchQuery(this.search);
+    },
+    hasDataSize(val) {
+      if (val) {
+        this.$store.dispatch("loadFOLQuestionPage", {
+          page: 1,
+          itemsPerPage: this.itemsPerPage,
+          mode: "first"
+        });
+      }
     }
   },
   methods: {
@@ -493,11 +509,6 @@ export default {
   mounted() {
     this.deleteConfirmed = false;
     this.$store.dispatch("checkDeleteMarkQuestions");
-    this.$store.dispatch("loadFOLQuestionPage", {
-      page: 1,
-      itemsPerPage: this.itemsPerPage,
-      mode: "first"
-    });
   },
   beforeDestroy() {
     this.search = "";
