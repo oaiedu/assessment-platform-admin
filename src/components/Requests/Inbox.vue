@@ -243,13 +243,17 @@ export default {
       return itHas;
     },
     pageAmount() {
-      const requestAmount = this.$store.getters.getDataSize[
-        "question-requests"
-      ];
+      const dataSize = this.$store.getters.getDataSize;
+      if(!dataSize || !dataSize["question-requests"]){
+        return 1;
+      }
+      const requestAmount = dataSize["question-requests"];
       const amount =
         this.userClaims && this.userClaims["admin"]
-          ? requestAmount.general
-          : requestAmount.users[this.userInfo.id];
+          ? requestAmount.general || 0
+          : (requestAmount.users &&
+              requestAmount.users[this.userInfo?.id]) ||
+            0;
       return Math.ceil(amount / this.itemsPerPage) || 1;
     },
     getQuestionTests() {
