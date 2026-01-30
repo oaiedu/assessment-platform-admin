@@ -259,7 +259,7 @@ export default {
       mdiCloudUpload,
       deleteBackupSnackBar: false,
       deleteItem: null,
-      months: null,
+      months: {},
       headers: [
         {
           text: "id",
@@ -313,22 +313,33 @@ export default {
         : this.currentMonth - 2;
     },
     pastMonths() {
+      const m1 = this.months[this.lastMonth];
+      const m2 = this.months[this.twoMonthsAgo];
       return [
-        this.$t("SHARED.DATE.MONTH." + this.months[this.lastMonth]),
-        this.$t("SHARED.DATE.MONTH." + this.months[this.twoMonthsAgo])
+        m1 ? this.$t("SHARED.DATE.MONTH." + m1) : "",
+        m2 ? this.$t("SHARED.DATE.MONTH." + m2) : ""
       ];
     }
   },
   methods: {
     formatDate(date) {
-      const month = new Date(date).getMonth() + 1;
+      if (!date) {
+        return this.$t("SHARED.DATE.in_progress") || "—";
+      }
+      const d = new Date(date);
+      if (isNaN(d.getTime())) {
+        return "—";
+      }
+      const monthIndex = d.getMonth() + 1;
+      const monthKey = this.months[monthIndex];
 
-      const dateTime = new Date(date).toString();
-      const sub = dateTime.substr(7, 17);
+      if (!monthKey) {
+        return d.toDateString();
+      }
       const monthName = this.$t(
-        "SHARED.DATE.MONTH." + this.months[month]
+        "SHARED.DATE.MONTH." + monthKey
       ).substr(0, 3);
-
+      const sub = d.toString().substr(7, 17);
       return monthName + sub;
     },
     getBackupsByMonth(month) {

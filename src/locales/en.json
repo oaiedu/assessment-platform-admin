@@ -280,6 +280,7 @@
     "DATE": {
       "today_at": "Today at",
       "yesterday_at": "Yesterday at",
+      "in_progress": "In progress",
       "WEEKDAY": {
         "sunday": "Sunday",
         "monday": "Monday",
