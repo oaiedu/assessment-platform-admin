@@ -141,7 +141,7 @@
           :length="
             !isSearching
               ? pageAmount
-              : Math.ceil(filteredQuestions.length / itemsPerPage)
+              : Math.max(1, Math.ceil(filteredQuestions.length / itemsPerPage))
           "
           @pageChange="
             !isSearching ? (page = $event.page) : (searchPage = $event.page);
@@ -315,8 +315,14 @@ export default {
       return this.$store.getters.userInfo;
     },
     pageAmount() {
-      const questionAmount = this.$store.getters.getDataSize.questions.general;
-      return Math.ceil(questionAmount / this.itemsPerPage) || 1;
+      const dataSize = this.$store.getters.getDataSize;
+      const total =
+        dataSize &&
+        dataSize.questions &&
+        typeof dataSize.questions.general === "number"
+          ? dataSize.questions.general
+          : 0;
+      return Math.max(1, Math.ceil(total / this.itemsPerPage));
     },
     getQuestionTests() {
       const titles = this.questionTests.map(t => "'" + t.title + "'");
@@ -492,12 +498,21 @@ export default {
   },
   mounted() {
     this.deleteConfirmed = false;
-    this.$store.dispatch("checkDeleteMarkQuestions");
+
+    this.search = "";
+    this.selectedSubject = null;
+    this.isSearching = false;
+    this.page = 1;
+    this.searchPage = 1;
+    this.$store.commit("resetFilteredQuestions");
+    this.$store.commit("resetCurrentQuestionsPage");
+    this.$store.dispatch("loadDataSize");
     this.$store.dispatch("loadFOLQuestionPage", {
       page: 1,
       itemsPerPage: this.itemsPerPage,
       mode: "first"
     });
+    this.$store.dispatch("checkDeleteMarkQuestions");
   },
   beforeDestroy() {
     this.search = "";
