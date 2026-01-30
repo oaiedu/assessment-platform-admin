@@ -280,6 +280,7 @@
     "DATE": {
       "today_at": "Hoje às",
       "yesterday_at": "Ontem às",
+      "in_progress": "Em andamento",
       "WEEKDAY": {
         "sunday": "Domingo",
         "monday": "Segunda-feira",
