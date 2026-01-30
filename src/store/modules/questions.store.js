@@ -361,7 +361,9 @@ const actions = {
       let request = null;
       const ref = db.collection("questions").orderBy("name");
 
-      if (type === "next") {
+      if (!state.lastQuestionDocument) {
+        request = ref.limit(itemsPerPage).get();
+      } else if (type === "next") {
         request = ref
           .startAfter(state.lastQuestionDocument[1])
           .limit(itemsPerPage)
