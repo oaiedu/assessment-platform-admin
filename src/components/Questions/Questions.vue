@@ -141,7 +141,7 @@
           :length="
             !isSearching
               ? pageAmount
-              : Math.ceil(filteredQuestions.length / itemsPerPage)
+              : Math.max(1, Math.ceil(filteredQuestions.length / itemsPerPage))
           "
           @pageChange="
             !isSearching ? (page = $event.page) : (searchPage = $event.page);
@@ -316,19 +316,18 @@ export default {
     },
     pageAmount() {
       const dataSize = this.$store.getters.getDataSize;
-      const questionAmount = dataSize && dataSize.questions && typeof dataSize.questions.general === 'number'
-        ? dataSize.questions.general
-        : 0;
-      return Math.max(1, Math.ceil(questionAmount / this.itemsPerPage));
+      const total =
+        dataSize &&
+        dataSize.questions &&
+        typeof dataSize.questions.general === "number"
+          ? dataSize.questions.general
+          : 0;
+      return Math.max(1, Math.ceil(total / this.itemsPerPage));
     },
     getQuestionTests() {
       const titles = this.questionTests.map(t => "'" + t.title + "'");
       titles.sort((t1, t2) => (t1 > t2 ? 1 : -1));
       return titles.join(", ");
-    },
-    hasDataSize() {
-      const dataSize = this.$store.getters.getDataSize;
-      return !!(dataSize && dataSize.questions);
     }
   },
   watch: {
@@ -347,15 +346,6 @@ export default {
     },
     selectedSubject() {
       this.searchQuery(this.search);
-    },
-    hasDataSize(val) {
-      if (val) {
-        this.$store.dispatch("loadFOLQuestionPage", {
-          page: 1,
-          itemsPerPage: this.itemsPerPage,
-          mode: "first"
-        });
-      }
     }
   },
   methods: {
@@ -508,6 +498,20 @@ export default {
   },
   mounted() {
     this.deleteConfirmed = false;
+
+    this.search = "";
+    this.selectedSubject = null;
+    this.isSearching = false;
+    this.page = 1;
+    this.searchPage = 1;
+    this.$store.commit("resetFilteredQuestions");
+    this.$store.commit("resetCurrentQuestionsPage");
+    this.$store.dispatch("loadDataSize");
+    this.$store.dispatch("loadFOLQuestionPage", {
+      page: 1,
+      itemsPerPage: this.itemsPerPage,
+      mode: "first"
+    });
     this.$store.dispatch("checkDeleteMarkQuestions");
   },
   beforeDestroy() {
